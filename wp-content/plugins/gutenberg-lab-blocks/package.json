@@ -1,0 +1,16 @@
+{
+  "name": "gutenberg-lab-blocks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "wp-scripts build --webpack-copy-php",
+    "start": "wp-scripts start --webpack-copy-php"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@wordpress/scripts": "^31.6.0"
+  }
+}

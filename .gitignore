@@ -1,0 +1,33 @@
+# Ignore everything by default so the repo only tracks project-owned code.
+/*
+
+# Keep Git metadata and repo docs.
+!.gitignore
+!AGENTS.md
+!.ddev/
+
+# Keep future Composer manifests if the project moves to Composer-managed WordPress.
+!composer.json
+!composer.lock
+
+# Keep custom WordPress code we own.
+!wp-content/
+wp-content/*
+
+!wp-content/plugins/
+wp-content/plugins/*
+!wp-content/plugins/gutenberg-lab-blocks/
+!wp-content/plugins/gutenberg-lab-blocks/**
+wp-content/plugins/gutenberg-lab-blocks/node_modules/
+wp-content/plugins/gutenberg-lab-blocks/wp-content/
+
+!wp-content/themes/
+wp-content/themes/*
+!wp-content/themes/gutenberg-lab-vvm/
+!wp-content/themes/gutenberg-lab-vvm/**
+
+# Never track generated content or local site state.
+wp-content/uploads/
+
+# Optional future dependency dirs.
+vendor/

@@ -1,0 +1,78 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"settings": {
+		"layout": {
+			"contentSize": "720px",
+			"wideSize": "1400px"
+		},
+		"spacing": {
+			"units": [ "px", "rem", "vw", "%" ],
+			"spacingSizes": [
+				{ "slug": "xs", "name": "XS", "size": "0.5rem" },
+				{ "slug": "sm", "name": "SM", "size": "1rem" },
+				{ "slug": "md", "name": "MD", "size": "1.5rem" },
+				{ "slug": "lg", "name": "LG", "size": "3rem" },
+				{ "slug": "xl", "name": "XL", "size": "5rem" }
+			]
+		},
+		"typography": {
+			"fluid": true,
+			"fontFamilies": [
+				{
+					"fontFamily": "\"Nunito\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+					"name": "Nunito",
+					"slug": "nunito"
+				}
+			],
+			"fontSizes": [
+				{ "slug": "sm", "name": "Small", "size": "0.875rem" },
+				{ "slug": "md", "name": "Medium", "size": "1rem" },
+				{ "slug": "lg", "name": "Large", "size": "1.25rem" },
+				{ "slug": "xl", "name": "XL", "size": "2rem" },
+				{ "slug": "xxl", "name": "XXL", "size": "2.5rem" }
+			]
+		},
+		"color": {
+			"palette": [
+				{ "slug": "forest", "name": "Forest", "color": "#013223" },
+				{ "slug": "deep-forest", "name": "Deep Forest", "color": "#0f2d23" },
+				{ "slug": "white", "name": "White", "color": "#ffffff" }
+			]
+		}
+	},
+	"styles": {
+		"color": {
+			"text": "var(--wp--preset--color--deep-forest)"
+		},
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--nunito)",
+			"fontSize": "16px",
+			"fontWeight": "300",
+			"lineHeight": "1.6"
+		},
+		"elements": {
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--nunito)",
+					"fontWeight": "300",
+					"lineHeight": "1.2",
+					"letterSpacing": "0.03em"
+				},
+				"color": {
+					"text": "var(--wp--preset--color--forest)"
+				}
+			},
+			"h1": {
+				"typography": {
+					"fontSize": "2.5rem"
+				}
+			},
+			"h2": {
+				"typography": {
+					"fontSize": "2rem"
+				}
+			}
+		}
+	}
+}
