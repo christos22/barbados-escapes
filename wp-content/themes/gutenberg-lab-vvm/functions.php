@@ -20,6 +20,18 @@ const GUTENBERG_LAB_VVM_BOOTSTRAP_VERSION = '2';
  * Registers the global theme supports used by the header/footer implementation.
  */
 function gutenberg_lab_vvm_setup() {
+	// Let the block editor iframe inherit the theme's front-end stylesheet.
+	// A dedicated editor stylesheet is loaded after the front-end styles so we
+	// can keep the editor representative without forcing it to mimic every
+	// front-end-only interaction or layout trick.
+	add_theme_support( 'editor-styles' );
+	add_editor_style(
+		array(
+			'style.css',
+			'assets/css/editor.css',
+		)
+	);
+
 	add_theme_support(
 		'custom-logo',
 		array(
@@ -335,14 +347,44 @@ function gutenberg_lab_vvm_maybe_bootstrap_native_entities() {
 add_action( 'init', 'gutenberg_lab_vvm_maybe_bootstrap_native_entities', 20 );
 
 /**
- * Enqueues the minimal interaction layer that toggles the sticky header state.
+ * Returns a cache-busting asset version from a theme file path.
+ *
+ * Using `filemtime()` during local development means CSS/JS changes show up
+ * immediately without needing a separate build step for plain theme assets.
+ *
+ * @param string $relative_path Theme-relative asset path.
+ * @return string
+ */
+function gutenberg_lab_vvm_asset_version( $relative_path ) {
+	$absolute_path = get_theme_file_path( $relative_path );
+
+	if ( file_exists( $absolute_path ) ) {
+		return (string) filemtime( $absolute_path );
+	}
+
+	return (string) wp_get_theme()->get( 'Version' );
+}
+
+/**
+ * Enqueues the shared theme stylesheet and the minimal front-end header script.
+ *
+ * The editor does not need to reproduce every front-end behavior, but the
+ * public site can still use small progressive enhancements when they serve
+ * the intended design.
  */
 function gutenberg_lab_vvm_enqueue_assets() {
+	wp_enqueue_style(
+		'gutenberg-lab-vvm-style',
+		get_stylesheet_uri(),
+		array(),
+		gutenberg_lab_vvm_asset_version( 'style.css' )
+	);
+
 	wp_enqueue_script(
 		'gutenberg-lab-vvm-site-header',
 		get_theme_file_uri( 'assets/js/site-header.js' ),
 		array(),
-		wp_get_theme()->get( 'Version' ),
+		gutenberg_lab_vvm_asset_version( 'assets/js/site-header.js' ),
 		array(
 			'in_footer' => true,
 			'strategy'  => 'defer',

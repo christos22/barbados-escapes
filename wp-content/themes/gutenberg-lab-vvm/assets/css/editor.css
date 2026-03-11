@@ -1,0 +1,65 @@
+/*
+ * Editor-only overrides for the VVM block theme.
+ *
+ * The editor should feel representative of the site typography and spacing,
+ * but it should not inherit front-end-only behaviors like overlay headers,
+ * sticky states, or large decorative spacing that makes block editing harder.
+ */
+
+body {
+	background: #ffffff;
+}
+
+.editor-styles-wrapper {
+	background: #ffffff;
+}
+
+.editor-styles-wrapper .wp-site-blocks {
+	--wp--style--block-gap: 0;
+	padding-top: 0;
+}
+
+.editor-styles-wrapper .wp-site-blocks > * {
+	margin-block-start: 0;
+}
+
+.editor-styles-wrapper .vvm-header {
+	position: relative;
+	top: auto;
+	right: auto;
+	left: auto;
+	inset-inline: auto;
+	background: #ffffff;
+	border-bottom: 1px solid rgba(15, 45, 35, 0.08);
+	backdrop-filter: none;
+	box-shadow: none;
+}
+
+.editor-styles-wrapper .vvm-header .custom-logo-link,
+.editor-styles-wrapper .vvm-header .wp-block-site-logo a,
+.editor-styles-wrapper .vvm-header .wp-block-navigation__responsive-container-open,
+.editor-styles-wrapper .vvm-header .wp-block-navigation__responsive-container-close,
+.editor-styles-wrapper .vvm-header .vvm-header__nav .wp-block-navigation-item__content,
+.editor-styles-wrapper .vvm-header .vvm-header__nav .wp-block-navigation-submenu__toggle {
+	color: #0f2d23;
+}
+
+.editor-styles-wrapper .vvm-header .wp-block-navigation__responsive-container-open {
+	border: 1px solid rgba(15, 45, 35, 0.2);
+}
+
+.editor-styles-wrapper .vvm-footer {
+	margin-top: 4rem;
+}
+
+.editor-styles-wrapper .vvm-footer::before {
+	display: none;
+}
+
+.editor-styles-wrapper .vvm-footer__social {
+	margin: 4rem 0 3rem;
+}
+
+.editor-styles-wrapper .vvm-footer__columns {
+	margin-bottom: 3rem;
+}
