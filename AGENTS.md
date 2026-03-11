@@ -177,3 +177,35 @@ PHP → rendering, queries, and caching
 WordPress APIs → data and integrations
 
 This reflects common enterprise WordPress architecture.
+
+---
+
+# Block Theme Guidance
+
+When working in a block theme:
+
+- Treat `theme.json` as the source for design tokens, global styles, and block defaults.
+- Treat `style.css` as the frontend presentation layer for theme-specific layout and polish.
+- Use a dedicated editor stylesheet when frontend-only CSS would make the editor misleading or hard to use.
+- Prefer native `wp_navigation` and `wp_template_part` entities over hardcoded inline content when the content should be editable in the Site Editor.
+- Avoid forcing the editor to exactly match the frontend. The editor should be representative, not a full preview of template parts, JS behavior, or sticky/overlay effects.
+
+---
+
+# Navigation And Template Parts
+
+For site chrome work:
+
+- Header and footer should be implemented as native block template parts.
+- Navigation visible on the frontend should come from real `wp_navigation` entities so the Site Editor reflects the active menus.
+- If template-part files need navigation refs, keep the file markup portable and inject environment-specific IDs at bootstrap time rather than committing local DB IDs.
+
+---
+
+# Editor Parity
+
+When teaching or implementing Gutenberg UX:
+
+- Explain the difference between post-content editing and full template rendering.
+- Do not treat editor/frontend mismatches as bugs unless they affect content authoring or cause misleading structure.
+- Prefer editor-only CSS overrides over adding frontend behavior into the editor.
