@@ -147,6 +147,8 @@
 
 		.wp-block-buttons {
 			margin-top: 0.5rem;
+			width: 100%;
+			justify-content: var(--media-panel-justify-content);
 		}
 	}
 }

@@ -36,8 +36,9 @@
 	}
 
 	.wp-block-buttons {
-		display: inline-flex;
-		width: auto;
+		display: flex;
+		width: 100%;
+		justify-content: var(--media-panel-justify-content);
 	}
 
 	.wp-block-button {
