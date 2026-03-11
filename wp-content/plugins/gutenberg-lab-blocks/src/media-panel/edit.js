@@ -15,6 +15,44 @@ import {
 
 import './editor.scss';
 
+const MEDIA_TYPE_OPTIONS = [
+	{ label: 'Image', value: 'image' },
+	{ label: 'Video', value: 'video' },
+];
+
+const HEIGHT_OPTIONS = [
+	{ label: 'Small', value: 'small' },
+	{ label: 'Medium', value: 'medium' },
+	{ label: 'Large', value: 'large' },
+	{ label: 'Full', value: 'full' },
+];
+
+const POSITION_OPTIONS = [
+	{ label: 'Top Left', value: 'top-left' },
+	{ label: 'Top Center', value: 'top-center' },
+	{ label: 'Top Right', value: 'top-right' },
+	{ label: 'Center Left', value: 'center-left' },
+	{ label: 'Center Center', value: 'center-center' },
+	{ label: 'Center Right', value: 'center-right' },
+	{ label: 'Bottom Left', value: 'bottom-left' },
+	{ label: 'Bottom Center', value: 'bottom-center' },
+	{ label: 'Bottom Right', value: 'bottom-right' },
+];
+
+const CONTENT_WIDTH_OPTIONS = [
+	{ label: 'Small', value: 'sm' },
+	{ label: 'Medium', value: 'md' },
+	{ label: 'Large', value: 'lg' },
+];
+
+const ALLOWED_INNER_BLOCKS = [
+	'core/heading',
+	'core/paragraph',
+	'core/list',
+	'core/buttons',
+	'core/spacer',
+];
+
 export default function Edit({ attributes, setAttributes }) {
 	const {
 		mediaType,
@@ -23,13 +61,25 @@ export default function Edit({ attributes, setAttributes }) {
 		imageAlt,
 		videoId,
 		videoUrl,
+		fallbackImageId,
+		fallbackImageUrl,
+		fallbackImageAlt,
 		darkOverlay,
 		containerHeight,
 		contentPosition,
+		contentWidth,
 	} = attributes;
 
 	const blockProps = useBlockProps({
-		className: `is-height-${containerHeight} is-position-${contentPosition}`,
+		className: [
+			'media-panel',
+			`media-panel--height-${containerHeight}`,
+			`media-panel--position-${contentPosition}`,
+			`media-panel--content-width-${contentWidth}`,
+			darkOverlay ? 'media-panel--dark-overlay' : '',
+		]
+			.filter(Boolean)
+			.join(' '),
 	});
 
 	const innerBlocksTemplate = [
@@ -56,13 +106,7 @@ export default function Edit({ attributes, setAttributes }) {
 		{
 			template: innerBlocksTemplate,
 			templateLock: false,
-			allowedBlocks: [
-				'core/heading',
-				'core/paragraph',
-				'core/list',
-				'core/buttons',
-				'core/spacer',
-			],
+			allowedBlocks: ALLOWED_INNER_BLOCKS,
 		}
 	);
 
@@ -81,6 +125,14 @@ export default function Edit({ attributes, setAttributes }) {
 		});
 	};
 
+	const onSelectFallbackImage = (media) => {
+		setAttributes({
+			fallbackImageId: media.id,
+			fallbackImageUrl: media.url,
+			fallbackImageAlt: media.alt || '',
+		});
+	};
+
 	return (
 		<>
 			<InspectorControls>
@@ -88,14 +140,34 @@ export default function Edit({ attributes, setAttributes }) {
 					<SelectControl
 						label={__('Media Type', 'gutenberg-lab-blocks')}
 						value={mediaType}
-						options={[
-							{ label: 'Image', value: 'image' },
-							{ label: 'Video', value: 'video' },
-						]}
+						options={MEDIA_TYPE_OPTIONS}
 						onChange={(mediaTypeValue) =>
 							setAttributes({ mediaType: mediaTypeValue })
 						}
 					/>
+
+					{mediaType === 'video' && (
+						<MediaUploadCheck>
+							<MediaUpload
+								onSelect={onSelectFallbackImage}
+								allowedTypes={['image']}
+								value={fallbackImageId}
+								render={({ open }) => (
+									<Button variant="secondary" onClick={open}>
+										{fallbackImageUrl
+											? __(
+													'Replace fallback image',
+													'gutenberg-lab-blocks'
+											  )
+											: __(
+													'Select fallback image',
+													'gutenberg-lab-blocks'
+											  )}
+									</Button>
+								)}
+							/>
+						</MediaUploadCheck>
+					)}
 
 					<ToggleControl
 						label={__('Dark Overlay', 'gutenberg-lab-blocks')}
@@ -108,12 +180,7 @@ export default function Edit({ attributes, setAttributes }) {
 					<SelectControl
 						label={__('Container Height', 'gutenberg-lab-blocks')}
 						value={containerHeight}
-						options={[
-							{ label: 'Small', value: 'small' },
-							{ label: 'Medium', value: 'medium' },
-							{ label: 'Large', value: 'large' },
-							{ label: 'Full', value: 'full' },
-						]}
+						options={HEIGHT_OPTIONS}
 						onChange={(containerHeightValue) =>
 							setAttributes({ containerHeight: containerHeightValue })
 						}
@@ -122,43 +189,61 @@ export default function Edit({ attributes, setAttributes }) {
 					<SelectControl
 						label={__('Content Position', 'gutenberg-lab-blocks')}
 						value={contentPosition}
-						options={[
-							{ label: 'Top Left', value: 'top-left' },
-							{ label: 'Top Center', value: 'top-center' },
-							{ label: 'Top Right', value: 'top-right' },
-							{ label: 'Center Left', value: 'center-left' },
-							{ label: 'Center Center', value: 'center-center' },
-							{ label: 'Center Right', value: 'center-right' },
-							{ label: 'Bottom Left', value: 'bottom-left' },
-							{ label: 'Bottom Center', value: 'bottom-center' },
-							{ label: 'Bottom Right', value: 'bottom-right' },
-						]}
+						options={POSITION_OPTIONS}
 						onChange={(contentPositionValue) =>
 							setAttributes({ contentPosition: contentPositionValue })
+						}
+					/>
+
+					<SelectControl
+						label={__('Content Width', 'gutenberg-lab-blocks')}
+						value={contentWidth}
+						options={CONTENT_WIDTH_OPTIONS}
+						onChange={(contentWidthValue) =>
+							setAttributes({ contentWidth: contentWidthValue })
 						}
 					/>
 				</PanelBody>
 			</InspectorControls>
 
 			<div {...blockProps}>
+				<div className="media-panel__editor-actions">
+					{mediaType === 'image' ? (
+						<MediaUploadCheck>
+							<MediaUpload
+								onSelect={onSelectImage}
+								allowedTypes={['image']}
+								value={imageId}
+								render={({ open }) => (
+									<Button variant="secondary" onClick={open}>
+										{imageUrl
+											? __('Replace image', 'gutenberg-lab-blocks')
+											: __('Select image', 'gutenberg-lab-blocks')}
+									</Button>
+								)}
+							/>
+						</MediaUploadCheck>
+					) : (
+						<MediaUploadCheck>
+							<MediaUpload
+								onSelect={onSelectVideo}
+								allowedTypes={['video']}
+								value={videoId}
+								render={({ open }) => (
+									<Button variant="secondary" onClick={open}>
+										{videoUrl
+											? __('Replace video', 'gutenberg-lab-blocks')
+											: __('Select video', 'gutenberg-lab-blocks')}
+									</Button>
+								)}
+							/>
+						</MediaUploadCheck>
+					)}
+				</div>
+
 				<div className="media-panel__media">
 					{mediaType === 'image' ? (
 						<>
-							<MediaUploadCheck>
-								<MediaUpload
-									onSelect={onSelectImage}
-									allowedTypes={['image']}
-									value={imageId}
-									render={({ open }) => (
-										<Button variant="secondary" onClick={open}>
-											{imageUrl
-												? __('Replace image', 'gutenberg-lab-blocks')
-												: __('Select image', 'gutenberg-lab-blocks')}
-										</Button>
-									)}
-								/>
-							</MediaUploadCheck>
-
 							{imageUrl && (
 								<img
 									className="media-panel__image"
@@ -169,21 +254,6 @@ export default function Edit({ attributes, setAttributes }) {
 						</>
 					) : (
 						<>
-							<MediaUploadCheck>
-								<MediaUpload
-									onSelect={onSelectVideo}
-									allowedTypes={['video']}
-									value={videoId}
-									render={({ open }) => (
-										<Button variant="secondary" onClick={open}>
-											{videoUrl
-												? __('Replace video', 'gutenberg-lab-blocks')
-												: __('Select video', 'gutenberg-lab-blocks')}
-										</Button>
-									)}
-								/>
-							</MediaUploadCheck>
-
 							{videoUrl && (
 								<video
 									className="media-panel__video"
@@ -192,6 +262,15 @@ export default function Edit({ attributes, setAttributes }) {
 									muted
 									loop
 									playsInline
+									poster={fallbackImageUrl || undefined}
+								/>
+							)}
+
+							{!videoUrl && fallbackImageUrl && (
+								<img
+									className="media-panel__image"
+									src={fallbackImageUrl}
+									alt={fallbackImageAlt}
 								/>
 							)}
 						</>

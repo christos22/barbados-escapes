@@ -4,9 +4,9 @@
 	"name": "gutenberg-lab-blocks/media-panel",
 	"version": "0.1.0",
 	"title": "Media Panel",
-	"category": "widgets",
-	"icon": "smiley",
-	"description": "Example block scaffolded with Create Block tool.",
+	"category": "design",
+	"icon": "cover-image",
+	"description": "A reusable media panel with overlaid content.",
 	"example": {},
 	"attributes": {
 		"mediaType": {
@@ -42,11 +42,29 @@
 		"contentPosition": {
 			"type": "string",
 			"default": "center-center"
+		},
+		"fallbackImageId": {
+			"type": "number"
+		},
+		"fallbackImageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"fallbackImageAlt": {
+			"type": "string",
+			"default": ""
+		},
+		"contentWidth": {
+			"type": "string",
+			"default": "md"
 		}
 	},
 	"supports": {
 		"html": false,
-		"align": [ "wide", "full" ]
+		"align": [
+			"wide",
+			"full"
+		]
 	},
 	"textdomain": "gutenberg-lab-blocks",
 	"editorScript": "file:./index.js",

@@ -10,6 +10,7 @@
 	--media-panel-align-items: center;
 	--media-panel-justify-content: center;
 	--media-panel-text-align: center;
+	--media-panel-content-width: 36rem;
 
 	&.media-panel--height-small {
 		min-height: 18rem;
@@ -84,6 +85,18 @@
 		--media-panel-justify-content: flex-end;
 		--media-panel-text-align: right;
 	}
+
+	&.media-panel--content-width-sm {
+		--media-panel-content-width: 22rem;
+	}
+
+	&.media-panel--content-width-md {
+		--media-panel-content-width: 36rem;
+	}
+
+	&.media-panel--content-width-lg {
+		--media-panel-content-width: 56rem;
+	}
 }
 
 .media-panel {
@@ -113,7 +126,7 @@
 	&__overlay-content {
 		display: grid;
 		gap: 1.25rem;
-		width: min(100%, 36rem);
+		width: min(100%, var(--media-panel-content-width));
 		margin: 0;
 
 		> * {
@@ -129,7 +142,7 @@
 		p {
 			font-size: clamp(1rem, 1.4vw, 1.25rem);
 			line-height: 1.5;
-			max-width: 32rem;
+			max-width: 100%;
 		}
 
 		.wp-block-buttons {

@@ -1,25 +1,27 @@
-/**
- * The following styles get applied inside the editor only.
- *
- * Replace them with your own styles or remove the file completely.
- */
-
 .wp-block-gutenberg-lab-blocks-media-panel {
+	.media-panel__editor-actions {
+		position: absolute;
+		top: 1rem;
+		left: 1rem;
+		z-index: 4;
+		pointer-events: auto;
+	}
+
+	.media-panel__overlay {
+		pointer-events: none;
+	}
+
 	.media-panel__overlay-content {
 		position: relative;
 		z-index: 2;
-	}
-
-	.block-editor-block-list__layout,
-	.block-editor-block-list__block {
-		width: 100%;
+		pointer-events: auto;
 	}
 
 	.block-editor-inner-blocks,
-	.block-editor-inner-blocks > .block-editor-block-list__layout {
+	.block-editor-inner-blocks>.block-editor-block-list__layout {
 		display: grid;
 		gap: 1.25rem;
-		width: min(100%, 36rem);
+		width: min(100%, var(--media-panel-content-width));
 	}
 
 	.block-editor-button-block-appender,
@@ -32,4 +34,14 @@
 	p {
 		color: inherit;
 	}
+
+	.wp-block-buttons {
+		display: inline-flex;
+		width: auto;
+	}
+
+	.wp-block-button {
+		width: auto;
+	}
+
 }
