@@ -13,5 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/notice-box' );
 	register_block_type( __DIR__ . '/build/media-panel' );
+	register_block_type( __DIR__ . '/build/site-footer-meta' );
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_blocks' );

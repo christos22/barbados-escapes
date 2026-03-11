@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/site-footer-meta",
+	"version": "0.1.0",
+	"title": "Site Footer Meta",
+	"category": "widgets",
+	"icon": "calendar-alt",
+	"description": "Dynamic footer copyright text with the current year.",
+	"attributes": {
+		"copyrightText": {
+			"type": "string",
+			"default": "Verse & Vision Media. All Rights Reserved"
+		}
+	},
+	"supports": {
+		"html": false
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}
