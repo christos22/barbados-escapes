@@ -4,13 +4,18 @@
 	"settings": {
 		"appearanceTools": true,
 		"layout": {
-			"contentSize": "760px",
-			"wideSize": "1320px"
+			"contentSize": "1320px",
+			"wideSize": "1760px"
 		},
 		"useRootPaddingAwareAlignments": true,
 		"custom": {
 			"header": {
 				"height": "88px"
+			},
+			"layout": {
+				"gutterSm": "20px",
+				"gutterLg": "40px",
+				"gutterXl": "80px"
 			}
 		},
 		"spacing": {
@@ -23,7 +28,12 @@
 				{ "slug": "md", "name": "MD", "size": "1.5rem" },
 				{ "slug": "lg", "name": "LG", "size": "2.5rem" },
 				{ "slug": "xl", "name": "XL", "size": "4rem" },
-				{ "slug": "2xl", "name": "2XL", "size": "7rem" }
+				{ "slug": "2xl", "name": "2XL", "size": "7rem" },
+				{ "slug": "section-xs", "name": "Section XS", "size": "clamp(0.75rem, 1.2vw, 1.125rem)" },
+				{ "slug": "section-sm", "name": "Section SM", "size": "clamp(1.5rem, 2vw, 2.25rem)" },
+				{ "slug": "section-md", "name": "Section MD", "size": "clamp(3.125rem, 5vw, 4.375rem)" },
+				{ "slug": "section-lg", "name": "Section LG", "size": "clamp(4.6875rem, 6.5vw, 6.5625rem)" },
+				{ "slug": "section-xl", "name": "Section XL", "size": "clamp(6.25rem, 8vw, 8.75rem)" }
 			]
 		},
 		"typography": {
@@ -59,7 +69,7 @@
 		}
 	},
 	"styles": {
-		"css": ":root { --vvm-site-max-width: 1320px; --vvm-header-height: 88px; }",
+		"css": ":root { --vvm-header-height: 88px; --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-sm); } @media (min-width: 1024px) { :root { --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-lg); } } @media (min-width: 1920px) { :root { --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-xl); } }",
 		"color": {
 			"text": "var(--wp--preset--color--deep-forest)"
 		},
@@ -70,7 +80,11 @@
 			"lineHeight": "1.6"
 		},
 		"spacing": {
-			"blockGap": "1.5rem"
+			"blockGap": "1.5rem",
+			"padding": {
+				"left": "var(--wp--custom--layout--gutter-current)",
+				"right": "var(--wp--custom--layout--gutter-current)"
+			}
 		},
 		"elements": {
 			"link": {
@@ -150,6 +164,11 @@
 						"top": "0",
 						"bottom": "0"
 					}
+				}
+			},
+			"core/post-content": {
+				"spacing": {
+					"blockGap": "0"
 				}
 			}
 		}

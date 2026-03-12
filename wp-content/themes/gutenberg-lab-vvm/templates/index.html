@@ -2,7 +2,9 @@
 
 <!-- wp:group {"tagName":"main","layout":{"type":"default"}} -->
 <main class="wp-block-group">
-	<!-- wp:post-content {"layout":{"type":"default"},"style":{"spacing":{"blockGap":"var:preset|spacing|xl"}}} /-->
+	<!-- Keep the template wrapper unconstrained so alignfull blocks can reach the viewport edge. -->
+	<!-- Individual content blocks still use the global theme.json content and wide widths. -->
+	<!-- wp:post-content /-->
 </main>
 <!-- /wp:group -->
 

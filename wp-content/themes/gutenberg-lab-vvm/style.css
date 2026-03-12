@@ -15,10 +15,6 @@ body {
 	background: #ffffff;
 }
 
-body .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
-	max-width: min(100%, var(--vvm-site-max-width));
-}
-
 .wp-site-blocks {
 	padding-top: 0;
 	--wp--style--block-gap: 0;
@@ -51,7 +47,6 @@ body .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alig
 
 .vvm-header__inner {
 	max-width: none !important;
-	padding: 0 24px;
 }
 
 .vvm-header__inner > .vvm-header__bar {
@@ -211,7 +206,6 @@ body .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alig
 
 .vvm-footer__inner {
 	margin: 0 auto;
-	padding: 0 32px;
 }
 
 .vvm-footer__contact {
@@ -434,10 +428,6 @@ body .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alig
 }
 
 @media (max-width: 781px) {
-	.vvm-header__inner {
-		padding: 0 0.9rem;
-	}
-
 	.vvm-header__bar {
 		grid-template-columns: 72px 1fr;
 		min-height: 88px;
@@ -458,10 +448,6 @@ body .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alig
 	.vvm-footer {
 		margin-top: 140px;
 		min-height: auto !important;
-	}
-
-	.vvm-footer__inner {
-		padding: 0 20px;
 	}
 
 	.vvm-footer__social {
