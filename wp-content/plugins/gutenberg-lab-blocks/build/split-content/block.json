@@ -1,0 +1,85 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "gutenberg-lab-blocks/split-content",
+  "version": "0.1.0",
+  "title": "Split Content",
+  "category": "design",
+  "icon": "columns",
+  "description": "A VVM-inspired split content layout with image, video, or slider media.",
+  "keywords": [
+    "split",
+    "content",
+    "media",
+    "layout"
+  ],
+  "attributes": {
+    "mediaPositionDesktop": {
+      "type": "string",
+      "default": "right"
+    },
+    "mediaPositionMobile": {
+      "type": "string",
+      "default": "top"
+    },
+    "mediaWidth": {
+      "type": "string",
+      "default": "50"
+    },
+    "mediaType": {
+      "type": "string",
+      "default": "image"
+    },
+    "mediaOnEdge": {
+      "type": "boolean",
+      "default": true
+    },
+    "imageId": {
+      "type": "number"
+    },
+    "imageUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "imageAlt": {
+      "type": "string",
+      "default": ""
+    },
+    "videoId": {
+      "type": "number"
+    },
+    "videoUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "galleryImages": {
+      "type": "array",
+      "default": []
+    }
+  },
+  "supports": {
+    "anchor": true,
+    "html": false,
+    "align": [
+      "wide",
+      "full"
+    ],
+    "spacing": {
+      "margin": [
+        "top",
+        "bottom"
+      ],
+      "padding": true,
+      "blockGap": true
+    },
+    "color": {
+      "background": true
+    }
+  },
+  "textdomain": "gutenberg-lab-blocks",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js"
+}

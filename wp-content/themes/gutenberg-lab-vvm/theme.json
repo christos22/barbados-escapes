@@ -170,6 +170,14 @@
 				"spacing": {
 					"blockGap": "0"
 				}
+			},
+			"gutenberg-lab-blocks/split-content": {
+				"spacing": {
+					"margin": {
+						"top": "var(--wp--preset--spacing--section-md)",
+						"bottom": "var(--wp--preset--spacing--section-md)"
+					}
+				}
 			}
 		}
 	}
