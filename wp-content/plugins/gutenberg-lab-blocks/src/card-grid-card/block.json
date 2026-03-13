@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/card-grid-card",
+	"version": "0.1.0",
+	"title": "Card Grid Card",
+	"category": "design",
+	"icon": "format-image",
+	"description": "A single card item used inside the Card Grid block.",
+	"parent": [ "gutenberg-lab-blocks/card-grid" ],
+	"attributes": {
+		"imageId": {
+			"type": "number"
+		},
+		"imageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"imageAlt": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"reusable": false
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js"
+}

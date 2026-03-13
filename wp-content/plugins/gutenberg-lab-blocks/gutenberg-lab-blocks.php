@@ -16,5 +16,7 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/site-footer-meta' );
 	register_block_type( __DIR__ . '/build/basic-content' );
 	register_block_type( __DIR__ . '/build/split-content' );
+	register_block_type( __DIR__ . '/build/card-grid' );
+	register_block_type( __DIR__ . '/build/card-grid-card' );
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_blocks' );

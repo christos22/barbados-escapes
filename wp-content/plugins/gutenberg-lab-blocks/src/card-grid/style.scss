@@ -1,0 +1,97 @@
+.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid {
+	// Provide a block-level default gap so this layout does not inherit the
+	// site root's zero block gap. When editors change "Block spacing" in the
+	// sidebar, WordPress writes an inline --wp--style--block-gap value that
+	// overrides this default automatically.
+	--wp--style--block-gap: var(--wp--preset--spacing--lg);
+	--vvm-card-grid-card-gap: var(--wp--preset--spacing--sm);
+	--vvm-card-grid-card-padding: var(--wp--preset--spacing--md);
+
+	.vvm-card-grid__items {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--wp--style--block-gap, var(--wp--preset--spacing--lg));
+		align-items: stretch;
+	}
+
+	.vvm-card-grid__card {
+		display: flex;
+		flex-direction: column;
+		min-height: 100%;
+		background: var(--wp--preset--color--white, #fff);
+		overflow: hidden;
+	}
+
+	.vvm-card-grid__card-media {
+		position: relative;
+		width: 100%;
+		overflow: hidden;
+		background: var(--wp--preset--color--mist, #dfe5e1);
+	}
+
+	.vvm-card-grid__card-image {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.vvm-card-grid__card-content {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: column;
+		gap: var(--vvm-card-grid-card-gap);
+		padding: var(--vvm-card-grid-card-padding);
+		color: var(--wp--preset--color--deep-forest);
+	}
+
+	.vvm-card-grid__card-content > * {
+		max-width: 100%;
+		margin: 0;
+	}
+
+	.vvm-card-grid__card-content > .wp-block-buttons:last-child {
+		margin-top: auto;
+		padding-top: var(--wp--preset--spacing--sm);
+	}
+
+	.vvm-card-grid__card-content .wp-block-heading {
+		color: var(--wp--preset--color--forest);
+	}
+
+	&.vvm-card-grid--ratio-landscape .vvm-card-grid__card-media {
+		aspect-ratio: 3 / 2;
+	}
+
+	&.vvm-card-grid--ratio-widescreen .vvm-card-grid__card-media {
+		aspect-ratio: 16 / 9;
+	}
+
+	&.vvm-card-grid--ratio-square .vvm-card-grid__card-media {
+		aspect-ratio: 1 / 1;
+	}
+
+	&.vvm-card-grid--ratio-portrait .vvm-card-grid__card-media {
+		aspect-ratio: 2 / 3;
+	}
+
+	&.vvm-card-grid--ratio-portrait-tall .vvm-card-grid__card-media {
+		aspect-ratio: 1 / 2;
+	}
+}
+
+@media (min-width: 782px) {
+	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid {
+		&.vvm-card-grid--columns-2 .vvm-card-grid__items,
+		&.vvm-card-grid--columns-3 .vvm-card-grid__items {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+}
+
+@media (min-width: 1100px) {
+	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--columns-3
+		.vvm-card-grid__items {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
