@@ -9,6 +9,10 @@
 	"description": "A VVM-inspired split content layout with image, video, or slider media.",
 	"keywords": [ "split", "content", "media", "layout" ],
 	"attributes": {
+		"layoutStyle": {
+			"type": "string",
+			"default": "split"
+		},
 		"mediaPositionDesktop": {
 			"type": "string",
 			"default": "right"

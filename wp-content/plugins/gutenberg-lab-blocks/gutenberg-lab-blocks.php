@@ -14,6 +14,7 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/notice-box' );
 	register_block_type( __DIR__ . '/build/media-panel' );
 	register_block_type( __DIR__ . '/build/site-footer-meta' );
+	register_block_type( __DIR__ . '/build/basic-content' );
 	register_block_type( __DIR__ . '/build/split-content' );
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_blocks' );

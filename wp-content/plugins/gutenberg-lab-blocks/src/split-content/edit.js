@@ -20,6 +20,11 @@ const DESKTOP_POSITION_OPTIONS = [
 	{ label: __( 'Right', 'gutenberg-lab-blocks' ), value: 'right' },
 ];
 
+const LAYOUT_STYLE_OPTIONS = [
+	{ label: __( 'Split', 'gutenberg-lab-blocks' ), value: 'split' },
+	{ label: __( 'Overlay', 'gutenberg-lab-blocks' ), value: 'overlay' },
+];
+
 const MOBILE_POSITION_OPTIONS = [
 	{ label: __( 'Top', 'gutenberg-lab-blocks' ), value: 'top' },
 	{ label: __( 'Bottom', 'gutenberg-lab-blocks' ), value: 'bottom' },
@@ -88,6 +93,7 @@ function getMediaPreviewLabel( mediaType ) {
 
 export default function Edit( { attributes, setAttributes } ) {
 	const {
+		layoutStyle,
 		mediaPositionDesktop,
 		mediaPositionMobile,
 		mediaWidth,
@@ -104,6 +110,7 @@ export default function Edit( { attributes, setAttributes } ) {
 	const blockProps = useBlockProps( {
 		className: [
 			'split-content',
+			`split-content--layout-${ layoutStyle }`,
 			`split-content--desktop-${ mediaPositionDesktop }`,
 			`split-content--mobile-${ mediaPositionMobile }`,
 			`split-content--width-${ mediaWidth }`,
@@ -268,6 +275,12 @@ export default function Edit( { attributes, setAttributes } ) {
 					initialOpen={ true }
 				>
 					<SelectControl
+						label={ __( 'Layout Style', 'gutenberg-lab-blocks' ) }
+						value={ layoutStyle }
+						options={ LAYOUT_STYLE_OPTIONS }
+						onChange={ ( value ) => setAttributes( { layoutStyle: value } ) }
+					/>
+					<SelectControl
 						label={ __( 'Media Position - Desktop', 'gutenberg-lab-blocks' ) }
 						value={ mediaPositionDesktop }
 						options={ DESKTOP_POSITION_OPTIONS }
@@ -283,21 +296,37 @@ export default function Edit( { attributes, setAttributes } ) {
 							setAttributes( { mediaPositionMobile: value } )
 						}
 					/>
-					<SelectControl
-						label={ __( 'Media Width', 'gutenberg-lab-blocks' ) }
-						value={ mediaWidth }
-						options={ MEDIA_WIDTH_OPTIONS }
-						onChange={ ( value ) => setAttributes( { mediaWidth: value } ) }
-					/>
-					<ToggleControl
-						label={ __( 'Media On Edge', 'gutenberg-lab-blocks' ) }
-						checked={ mediaOnEdge }
-						onChange={ ( value ) => setAttributes( { mediaOnEdge: value } ) }
-						help={ __(
-							'Let the media break out to the viewport edge while the content stays aligned to the theme gutters.',
-							'gutenberg-lab-blocks'
-						) }
-					/>
+					{ 'split' === layoutStyle && (
+						<>
+							<SelectControl
+								label={ __( 'Media Width', 'gutenberg-lab-blocks' ) }
+								value={ mediaWidth }
+								options={ MEDIA_WIDTH_OPTIONS }
+								onChange={ ( value ) =>
+									setAttributes( { mediaWidth: value } )
+								}
+							/>
+							<ToggleControl
+								label={ __( 'Media On Edge', 'gutenberg-lab-blocks' ) }
+								checked={ mediaOnEdge }
+								onChange={ ( value ) =>
+									setAttributes( { mediaOnEdge: value } )
+								}
+								help={ __(
+									'Let the media break out to the viewport edge while the content stays aligned to the theme gutters.',
+									'gutenberg-lab-blocks'
+								) }
+							/>
+						</>
+					) }
+					{ 'overlay' === layoutStyle && (
+						<p className="split-content__control-help">
+							{ __(
+								'Overlay mode uses full-width media and places a translucent content panel on top. Desktop position controls which side the panel sits on.',
+								'gutenberg-lab-blocks'
+							) }
+						</p>
+					) }
 				</PanelBody>
 				<PanelBody
 					title={ __( 'Media Settings', 'gutenberg-lab-blocks' ) }
@@ -315,14 +344,14 @@ export default function Edit( { attributes, setAttributes } ) {
 
 			<section { ...blockProps }>
 				<div className="split-content__grid">
-					<div className="split-content__content">
-						<div { ...innerBlocksProps } />
-					</div>
 					<div className="split-content__media">
 						<div className="split-content__editor-actions">
 							{ renderMediaUploader() }
 						</div>
 						{ renderMediaPreview() }
+					</div>
+					<div className="split-content__content">
+						<div { ...innerBlocksProps } />
 					</div>
 				</div>
 			</section>

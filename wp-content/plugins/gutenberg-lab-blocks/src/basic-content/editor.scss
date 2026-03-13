@@ -1,0 +1,22 @@
+.wp-block-gutenberg-lab-blocks-basic-content {
+	&.is-hidden-section {
+		opacity: 0.85;
+	}
+
+	.components-notice {
+		margin-bottom: 1rem;
+	}
+
+	.block-editor-inner-blocks {
+		width: 100%;
+	}
+
+	.block-editor-block-list__layout {
+		width: 100%;
+	}
+
+	.vvm-basic-content__main-column,
+	.vvm-basic-content__sidebar-column {
+		min-height: 8rem;
+	}
+}

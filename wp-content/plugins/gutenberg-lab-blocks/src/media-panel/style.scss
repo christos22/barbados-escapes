@@ -11,6 +11,8 @@
 	--media-panel-justify-content: center;
 	--media-panel-text-align: center;
 	--media-panel-content-width: 36rem;
+	--media-panel-flow-gap: clamp(0.75rem, 1.5vw, 1.25rem);
+	--wp--style--block-gap: var(--media-panel-flow-gap);
 
 	&.media-panel--height-small {
 		min-height: 18rem;
@@ -125,11 +127,21 @@
 
 	&__overlay-content {
 		display: grid;
-		gap: 1.25rem;
+		gap: var(--wp--style--block-gap);
 		width: min(100%, var(--media-panel-content-width));
 		margin: 0;
 
 		> * {
+			margin: 0;
+		}
+
+		// This wrapper uses grid gap as its vertical rhythm, so direct child block
+		// margins must stay collapsed to avoid extra heading spacing from global styles.
+		> .wp-block-heading,
+		> p,
+		> ul,
+		> ol,
+		> .wp-block-list {
 			margin: 0;
 		}
 
@@ -140,13 +152,10 @@
 		}
 
 		p {
-			font-size: clamp(1rem, 1.4vw, 1.25rem);
-			line-height: 1.5;
 			max-width: 100%;
 		}
 
 		.wp-block-buttons {
-			margin-top: 0.5rem;
 			width: 100%;
 			justify-content: var(--media-panel-justify-content);
 		}

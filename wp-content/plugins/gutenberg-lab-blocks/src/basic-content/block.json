@@ -1,0 +1,72 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/basic-content",
+	"version": "0.1.0",
+	"title": "Basic Content",
+	"category": "design",
+	"icon": "columns",
+	"description": "A dynamic content section with an optional sidebar and shared section settings.",
+	"keywords": [ "content", "sidebar", "layout" ],
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"spacing": {
+			"blockGap": true
+		}
+	},
+	"attributes": {
+		"withSidebar": {
+			"type": "boolean",
+			"default": false
+		},
+		"contentWidth": {
+			"type": "string",
+			"default": "100_percent"
+		},
+		"contentAlignment": {
+			"type": "string",
+			"default": "left"
+		},
+		"sidebarPosition": {
+			"type": "string",
+			"default": "right"
+		},
+		"spacingTop": {
+			"type": "string",
+			"default": "medium"
+		},
+		"spacingBottom": {
+			"type": "string",
+			"default": "medium"
+		},
+		"backgroundType": {
+			"type": "string",
+			"default": "no_background"
+		},
+		"backgroundColor": {
+			"type": "string",
+			"default": ""
+		},
+		"backgroundImageId": {
+			"type": "number"
+		},
+		"backgroundImageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"hasInitializedTemplate": {
+			"type": "boolean",
+			"default": false
+		},
+		"hideSection": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}

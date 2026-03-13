@@ -52,6 +52,57 @@ function gutenberg_lab_vvm_setup() {
 add_action( 'after_setup_theme', 'gutenberg_lab_vvm_setup' );
 
 /**
+ * Registers VVM-specific button styles for the core Button block.
+ *
+ * The original headless site exposes multiple link/button variants in ACF.
+ * In Gutenberg we express those as block styles so editors can choose them
+ * from the normal block sidebar instead of juggling custom class names.
+ */
+function gutenberg_lab_vvm_register_block_styles() {
+	if ( ! function_exists( 'register_block_style' ) ) {
+		return;
+	}
+
+	register_block_style(
+		'core/button',
+		array(
+			'name'         => 'vvm-primary',
+			'label'        => __( 'Primary', 'gutenberg-lab-vvm' ),
+			'is_default'   => true,
+			'inline_style' => '',
+		)
+	);
+
+	register_block_style(
+		'core/button',
+		array(
+			'name'         => 'vvm-secondary',
+			'label'        => __( 'Secondary', 'gutenberg-lab-vvm' ),
+			'inline_style' => '',
+		)
+	);
+
+	register_block_style(
+		'core/button',
+		array(
+			'name'         => 'vvm-link-primary',
+			'label'        => __( 'Link Primary', 'gutenberg-lab-vvm' ),
+			'inline_style' => '',
+		)
+	);
+
+	register_block_style(
+		'core/button',
+		array(
+			'name'         => 'vvm-link-secondary',
+			'label'        => __( 'Link Secondary', 'gutenberg-lab-vvm' ),
+			'inline_style' => '',
+		)
+	);
+}
+add_action( 'init', 'gutenberg_lab_vvm_register_block_styles' );
+
+/**
  * Builds serialized navigation-link markup from a page slug.
  *
  * @param string $label Human-readable menu label.

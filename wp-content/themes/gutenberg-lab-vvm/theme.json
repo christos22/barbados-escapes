@@ -158,6 +158,21 @@
 					"radius": "3px"
 				}
 			},
+			"core/buttons": {
+				"spacing": {
+					"margin": {
+						"top": "clamp(0.75rem, 1.5vw, 1.25rem)"
+					}
+				}
+			},
+			"core/heading": {
+				"spacing": {
+					"margin": {
+						"top": "0",
+						"bottom": "clamp(0.75rem, 1.5vw, 1.25rem)"
+					}
+				}
+			},
 			"core/site-logo": {
 				"spacing": {
 					"margin": {

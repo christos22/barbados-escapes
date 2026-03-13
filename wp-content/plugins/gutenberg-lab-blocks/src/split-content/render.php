@@ -9,6 +9,7 @@
  * @package GutenbergLabBlocks
  */
 
+$layout_style           = $attributes['layoutStyle'] ?? 'split';
 $media_position_desktop = $attributes['mediaPositionDesktop'] ?? 'right';
 $media_position_mobile  = $attributes['mediaPositionMobile'] ?? 'top';
 $media_width            = $attributes['mediaWidth'] ?? '50';
@@ -21,6 +22,7 @@ $gallery_images         = $attributes['galleryImages'] ?? array();
 
 $classes = array(
 	'split-content',
+	'split-content--layout-' . sanitize_html_class( $layout_style ),
 	'split-content--desktop-' . sanitize_html_class( $media_position_desktop ),
 	'split-content--mobile-' . sanitize_html_class( $media_position_mobile ),
 	'split-content--width-' . sanitize_html_class( $media_width ),
@@ -55,11 +57,6 @@ $gallery_images = array_values(
 
 <section <?php echo $wrapper_attributes; ?>>
 	<div class="split-content__grid">
-		<div class="split-content__content">
-			<div class="split-content__content-flow">
-				<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</div>
-		</div>
 		<div class="split-content__media">
 			<?php if ( 'video' === $media_type && '' !== $video_url ) : ?>
 				<video
@@ -116,6 +113,11 @@ $gallery_images = array_values(
 					<p><?php esc_html_e( 'Select a media item to complete this layout.', 'gutenberg-lab-blocks' ); ?></p>
 				</div>
 			<?php endif; ?>
+		</div>
+		<div class="split-content__content">
+			<div class="split-content__content-flow">
+				<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</div>
 		</div>
 	</div>
 </section>
