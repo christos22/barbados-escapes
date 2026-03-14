@@ -172,7 +172,7 @@ export default function Edit({ attributes, setAttributes }) {
 					)}
 
 					<ToggleControl
-						label={__('Dark Overlay', 'gutenberg-lab-blocks')}
+						label={__('Gradient Overlay', 'gutenberg-lab-blocks')}
 						checked={darkOverlay}
 						onChange={(darkOverlayValue) =>
 							setAttributes({ darkOverlay: darkOverlayValue })
