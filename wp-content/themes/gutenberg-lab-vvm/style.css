@@ -30,14 +30,11 @@ body {
 }
 
 .vvm-header {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	inset-inline: 0;
+	position: relative;
 	z-index: 40;
-	background: transparent;
-	backdrop-filter: none;
+	background: rgba(255, 255, 255, 0.96);
+	backdrop-filter: blur(6px);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	transition:
 		background-color 0.25s ease,
 		backdrop-filter 0.25s ease,
@@ -66,7 +63,7 @@ body {
 .vvm-header .wp-block-site-logo a {
 	display: inline-flex;
 	align-items: center;
-	color: #ffffff;
+	color: #0f2d23;
 }
 
 .vvm-header .wp-block-site-logo img {
@@ -82,12 +79,12 @@ body {
 	flex: 1 1 auto;
 	justify-content: center;
 	margin-inline: auto;
-	color: #ffffff;
+	color: #0f2d23;
 }
 
 .vvm-header__nav .wp-block-navigation-item__content,
 .vvm-header__nav .wp-block-navigation-submenu__toggle {
-	color: #ffffff;
+	color: #0f2d23;
 	font-weight: 600;
 	text-decoration: none;
 	background: transparent;
@@ -97,7 +94,7 @@ body {
 .vvm-header__nav .wp-block-navigation-item__content:focus-visible,
 .vvm-header__nav .wp-block-navigation-submenu__toggle:hover,
 .vvm-header__nav .wp-block-navigation-submenu__toggle:focus-visible {
-	color: rgba(255, 255, 255, 0.8);
+	color: #013223;
 }
 
 .vvm-header__actions {
@@ -260,10 +257,45 @@ body {
 
 .vvm-header .wp-block-navigation__responsive-container-open,
 .vvm-header .wp-block-navigation__responsive-container-close {
+	color: #0f2d23;
+}
+
+body.vvm-has-hero-header .vvm-header {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	inset-inline: 0;
+	background: transparent;
+	backdrop-filter: none;
+	box-shadow: none;
+}
+
+body.vvm-has-hero-header .vvm-header .custom-logo-link,
+body.vvm-has-hero-header .vvm-header .wp-block-site-logo a,
+body.vvm-has-hero-header .vvm-header__nav,
+body.vvm-has-hero-header .vvm-header__nav .wp-block-navigation-item__content,
+body.vvm-has-hero-header .vvm-header__nav .wp-block-navigation-submenu__toggle,
+body.vvm-has-hero-header .vvm-header .wp-block-navigation__responsive-container-open,
+body.vvm-has-hero-header .vvm-header .wp-block-navigation__responsive-container-close {
 	color: #ffffff;
 }
 
+body.vvm-has-hero-header .vvm-header__nav .wp-block-navigation-item__content:hover,
+body.vvm-has-hero-header .vvm-header__nav .wp-block-navigation-item__content:focus-visible,
+body.vvm-has-hero-header .vvm-header__nav .wp-block-navigation-submenu__toggle:hover,
+body.vvm-has-hero-header .vvm-header__nav .wp-block-navigation-submenu__toggle:focus-visible {
+	color: rgba(255, 255, 255, 0.8);
+}
+
 .vvm-header.is-scrolled {
+	position: fixed;
+	background: rgba(255, 255, 255, 0.96);
+	backdrop-filter: blur(6px);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+body.vvm-has-hero-header .vvm-header.is-scrolled {
 	position: fixed;
 	background: rgba(255, 255, 255, 0.96);
 	backdrop-filter: blur(6px);
@@ -572,10 +604,14 @@ body {
 
 	.vvm-header .wp-block-navigation__responsive-container-open {
 		padding: 0;
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		border: 1px solid rgba(15, 45, 35, 0.2);
 		border-radius: 4px;
 		width: 34px;
 		height: 34px;
+	}
+
+	body.vvm-has-hero-header .vvm-header .wp-block-navigation__responsive-container-open {
+		border-color: rgba(255, 255, 255, 0.2);
 	}
 
 	.vvm-header.is-scrolled .wp-block-navigation__responsive-container-open {

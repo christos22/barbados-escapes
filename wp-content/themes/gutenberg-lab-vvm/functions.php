@@ -398,6 +398,109 @@ function gutenberg_lab_vvm_maybe_bootstrap_native_entities() {
 add_action( 'init', 'gutenberg_lab_vvm_maybe_bootstrap_native_entities', 20 );
 
 /**
+ * Returns the first meaningful content block from a parsed block list.
+ *
+ * We skip empty wrappers so the header logic can reason about the first
+ * real visual section, not just structural container blocks.
+ *
+ * @param array $blocks Parsed block array from `parse_blocks()`.
+ * @return array|null
+ */
+function gutenberg_lab_vvm_get_first_meaningful_block( $blocks ) {
+	$wrapper_blocks = array(
+		'core/group',
+		'core/columns',
+		'core/column',
+	);
+
+	foreach ( $blocks as $block ) {
+		$block_name = $block['blockName'] ?? '';
+		$inner_html = trim( wp_strip_all_tags( $block['innerHTML'] ?? '' ) );
+
+		if ( in_array( $block_name, $wrapper_blocks, true ) && ! $inner_html && ! empty( $block['innerBlocks'] ) ) {
+			$nested_block = gutenberg_lab_vvm_get_first_meaningful_block( $block['innerBlocks'] );
+
+			if ( $nested_block ) {
+				return $nested_block;
+			}
+		}
+
+		if ( ! empty( $block_name ) ) {
+			return $block;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			$nested_block = gutenberg_lab_vvm_get_first_meaningful_block( $block['innerBlocks'] );
+
+			if ( $nested_block ) {
+				return $nested_block;
+			}
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Determines whether a parsed block should opt the page into the overlay header.
+ *
+ * The home page uses the media panel hero. We extend that same treatment to
+ * any page whose first real block is a hero-like section.
+ *
+ * @param array $block Parsed block definition.
+ * @return bool
+ */
+function gutenberg_lab_vvm_is_hero_block( $block ) {
+	$block_name = $block['blockName'] ?? '';
+	$attrs      = $block['attrs'] ?? array();
+	$class_name = (string) ( $attrs['className'] ?? '' );
+
+	if ( in_array( $block_name, array( 'core/cover', 'gutenberg-lab-blocks/media-panel' ), true ) ) {
+		return true;
+	}
+
+	return 1 === preg_match( '/(?:^|\s)(hero|page-hero|banner)(?:\s|$)/i', $class_name );
+}
+
+/**
+ * Returns whether the current singular view starts with a hero block.
+ *
+ * @return bool
+ */
+function gutenberg_lab_vvm_current_view_has_hero() {
+	if ( ! is_singular() ) {
+		return false;
+	}
+
+	$post = get_queried_object();
+
+	if ( ! $post instanceof WP_Post || empty( $post->post_content ) ) {
+		return false;
+	}
+
+	$first_block = gutenberg_lab_vvm_get_first_meaningful_block( parse_blocks( $post->post_content ) );
+
+	if ( ! $first_block ) {
+		return false;
+	}
+
+	return gutenberg_lab_vvm_is_hero_block( $first_block );
+}
+
+/**
+ * Adds a body class so the global header can switch between overlay and in-flow modes.
+ *
+ * @param string[] $classes Existing body classes.
+ * @return string[]
+ */
+function gutenberg_lab_vvm_filter_body_class( $classes ) {
+	$classes[] = gutenberg_lab_vvm_current_view_has_hero() ? 'vvm-has-hero-header' : 'vvm-has-static-header';
+
+	return $classes;
+}
+add_filter( 'body_class', 'gutenberg_lab_vvm_filter_body_class' );
+
+/**
  * Returns a cache-busting asset version from a theme file path.
  *
  * Using `filemtime()` during local development means CSS/JS changes show up

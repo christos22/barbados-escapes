@@ -15,12 +15,14 @@ $dark_overlay     = ! empty( $attributes['darkOverlay'] );
 $container_height = $attributes['containerHeight'] ?? 'medium';
 $content_position = $attributes['contentPosition'] ?? 'center-center';
 $content_width    = $attributes['contentWidth'] ?? 'md';
+$align            = $attributes['align'] ?? '';
 
 $classes = array(
 	'media-panel',
 	'media-panel--height-' . sanitize_html_class( $container_height ),
 	'media-panel--position-' . sanitize_html_class( $content_position ),
 	'media-panel--content-width-' . sanitize_html_class( $content_width ),
+	$align ? 'align' . sanitize_html_class( $align ) : 'alignfull',
 );
 
 if ( $dark_overlay ) {

@@ -68,6 +68,7 @@ export default function Edit({ attributes, setAttributes }) {
 		containerHeight,
 		contentPosition,
 		contentWidth,
+		align,
 	} = attributes;
 
 	const blockProps = useBlockProps({
@@ -76,6 +77,7 @@ export default function Edit({ attributes, setAttributes }) {
 			`media-panel--height-${containerHeight}`,
 			`media-panel--position-${contentPosition}`,
 			`media-panel--content-width-${contentWidth}`,
+			align ? '' : 'alignfull',
 			darkOverlay ? 'media-panel--dark-overlay' : '',
 		]
 			.filter(Boolean)
