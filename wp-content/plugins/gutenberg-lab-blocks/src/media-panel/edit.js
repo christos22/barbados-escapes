@@ -27,6 +27,11 @@ const HEIGHT_OPTIONS = [
 	{ label: 'Full', value: 'full' },
 ];
 
+const CONTENT_STYLE_OPTIONS = [
+	{ label: 'Overlay', value: 'overlay' },
+	{ label: 'Boxed', value: 'boxed' },
+];
+
 const POSITION_OPTIONS = [
 	{ label: 'Top Left', value: 'top-left' },
 	{ label: 'Top Center', value: 'top-center' },
@@ -65,6 +70,7 @@ export default function Edit({ attributes, setAttributes }) {
 		fallbackImageUrl,
 		fallbackImageAlt,
 		darkOverlay,
+		contentStyle,
 		containerHeight,
 		contentPosition,
 		contentWidth,
@@ -75,6 +81,7 @@ export default function Edit({ attributes, setAttributes }) {
 		className: [
 			'media-panel',
 			`media-panel--height-${containerHeight}`,
+			`media-panel--content-style-${contentStyle}`,
 			`media-panel--position-${contentPosition}`,
 			`media-panel--content-width-${contentWidth}`,
 			align ? '' : 'alignfull',
@@ -176,6 +183,15 @@ export default function Edit({ attributes, setAttributes }) {
 						checked={darkOverlay}
 						onChange={(darkOverlayValue) =>
 							setAttributes({ darkOverlay: darkOverlayValue })
+						}
+					/>
+
+					<SelectControl
+						label={__('Content Style', 'gutenberg-lab-blocks')}
+						value={contentStyle}
+						options={CONTENT_STYLE_OPTIONS}
+						onChange={(contentStyleValue) =>
+							setAttributes({ contentStyle: contentStyleValue })
 						}
 					/>
 

@@ -35,6 +35,10 @@
       "type": "boolean",
       "default": false
     },
+    "contentStyle": {
+      "type": "string",
+      "default": "overlay"
+    },
     "containerHeight": {
       "type": "string",
       "default": "medium"

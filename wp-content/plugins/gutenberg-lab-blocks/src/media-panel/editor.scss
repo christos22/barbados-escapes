@@ -21,7 +21,7 @@
 	.block-editor-inner-blocks>.block-editor-block-list__layout {
 		display: grid;
 		gap: 1.25rem;
-		width: min(100%, var(--media-panel-content-width));
+		width: min(100%, var(--media-panel-surface-max-width));
 	}
 
 	.block-editor-button-block-appender,
@@ -43,6 +43,22 @@
 
 	.wp-block-button {
 		width: auto;
+	}
+
+	&.media-panel--content-style-boxed {
+		.media-panel__overlay-content {
+			padding: var(--media-panel-surface-padding);
+			background: var(--media-panel-surface-background);
+			color: var(--media-panel-surface-color);
+			box-shadow: var(--media-panel-surface-shadow);
+		}
+
+		// In the editor the boxed surface sets a dark text color, so force the
+		// CTA label back to white to match the frontend button treatment.
+		.wp-block-button .wp-block-button__link,
+		.wp-block-button .wp-element-button {
+			color: var(--wp--preset--color--white, #ffffff) !important;
+		}
 	}
 
 }

@@ -12,6 +12,11 @@
 	--media-panel-text-align: center;
 	--media-panel-content-width: 36rem;
 	--media-panel-flow-gap: clamp(0.75rem, 1.5vw, 1.25rem);
+	--media-panel-surface-background: transparent;
+	--media-panel-surface-color: inherit;
+	--media-panel-surface-padding: 0;
+	--media-panel-surface-shadow: none;
+	--media-panel-surface-max-width: var(--media-panel-content-width);
 	--media-panel-overlay-origin-x: 50%;
 	--media-panel-overlay-origin-y: 50%;
 	--media-panel-overlay-angle: 180deg;
@@ -51,6 +56,14 @@
 		--media-panel-overlay-soft-alpha: 0.54;
 		--media-panel-overlay-mid-alpha: 0.24;
 		--media-panel-overlay-vignette-alpha: 0.14;
+	}
+
+	&.media-panel--content-style-boxed {
+		--media-panel-surface-background: var(--wp--preset--color--sand, #f6f1e8);
+		--media-panel-surface-color: var(--wp--preset--color--deep-forest, #0f2d23);
+		--media-panel-surface-padding: clamp(1.75rem, 3vw, 3rem);
+		--media-panel-surface-shadow: 0 18px 36px rgb(15 45 35 / 0.12);
+		--media-panel-surface-max-width: min(100%, calc(var(--media-panel-content-width) + clamp(2.5rem, 4vw, 4rem)));
 	}
 
 	&.media-panel--position-top-left {
@@ -223,8 +236,12 @@
 		z-index: 1;
 		display: grid;
 		gap: var(--wp--style--block-gap);
-		width: min(100%, var(--media-panel-content-width));
+		width: min(100%, var(--media-panel-surface-max-width));
 		margin: 0;
+		padding: var(--media-panel-surface-padding);
+		background: var(--media-panel-surface-background);
+		color: var(--media-panel-surface-color);
+		box-shadow: var(--media-panel-surface-shadow);
 
 		> * {
 			margin: 0;
