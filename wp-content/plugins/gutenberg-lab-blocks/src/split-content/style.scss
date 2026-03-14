@@ -2,6 +2,7 @@
 	--split-content-content-track: minmax(0, 1fr);
 	--split-content-media-track: minmax(0, 1fr);
 	--split-content-inline-gap: clamp(1.5rem, 4vw, 4rem);
+	--split-content-flow-gap: clamp(0.75rem, 1.5vw, 1.25rem);
 	--split-content-content-block-padding: 0;
 	--split-content-content-inline-start: 0;
 	--split-content-content-inline-end: 0;
@@ -12,6 +13,7 @@
 		rgba(255, 255, 255, 0.9) 0%,
 		rgb(255, 255, 255) 56.25%
 	);
+	--wp--style--block-gap: var(--split-content-flow-gap);
 
 	position: relative;
 
@@ -147,27 +149,12 @@
 	}
 
 	&__slider-controls {
-		position: absolute;
-		right: 1rem;
-		bottom: 1rem;
-		z-index: 2;
-		display: flex;
-		gap: 0.5rem;
+		--vvm-slider-controls-inset: 1rem;
 	}
 
 	&__slider-button {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.75rem;
-		height: 2.75rem;
-		padding: 0;
-		border: 1px solid rgba(255, 255, 255, 0.45);
-		border-radius: 999px;
-		background: rgba(15, 45, 35, 0.66);
-		color: #fff;
-		cursor: pointer;
-		backdrop-filter: blur(8px);
+		// Shared slider button styles come from the plugin's global frontend CSS.
+		// The block-level class remains so layout-specific overrides stay possible.
 	}
 
 	&__slider-preview {

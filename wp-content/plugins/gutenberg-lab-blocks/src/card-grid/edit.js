@@ -5,7 +5,8 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
-import { PanelBody, SelectControl } from '@wordpress/components';
+import { PanelBody, SelectControl, ToggleControl } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 
 import './editor.scss';
 
@@ -59,13 +60,22 @@ function resolveBlockGapPreviewValue( blockGap ) {
 	return blockGap;
 }
 
-export default function Edit( { attributes, setAttributes } ) {
-	const { columns, mediaRatio, style } = attributes;
+export default function Edit( { attributes, clientId, setAttributes } ) {
+	const { columns, enableCarousel, mediaRatio, style } = attributes;
 	const blockGap = resolveBlockGapPreviewValue( style?.spacing?.blockGap );
+	const cardCount = useSelect(
+		( select ) =>
+			select( 'core/block-editor' ).getBlock( clientId )?.innerBlocks?.length ??
+			0,
+		[ clientId ]
+	);
+	const willUseCarousel =
+		enableCarousel && cardCount > Number.parseInt( columns, 10 );
 
 	const blockProps = useBlockProps( {
 		className: [
 			'vvm-card-grid',
+			enableCarousel ? 'vvm-card-grid--carousel-enabled' : '',
 			`vvm-card-grid--columns-${ columns }`,
 			`vvm-card-grid--ratio-${ mediaRatio }`,
 		].join( ' ' ),
@@ -101,6 +111,24 @@ export default function Edit( { attributes, setAttributes } ) {
 						value={ columns }
 						options={ COLUMN_OPTIONS }
 						onChange={ ( value ) => setAttributes( { columns: value } ) }
+					/>
+					<ToggleControl
+						label={ __( 'Enable carousel overflow', 'gutenberg-lab-blocks' ) }
+						checked={ enableCarousel }
+						onChange={ ( value ) =>
+							setAttributes( { enableCarousel: value } )
+						}
+						help={
+							willUseCarousel
+								? __(
+										'The front end will switch to a carousel because the card count is greater than the selected columns.',
+										'gutenberg-lab-blocks'
+								  )
+								: __(
+										'When enabled, the front end stays a grid until the number of cards exceeds the selected columns.',
+										'gutenberg-lab-blocks'
+								  )
+						}
 					/>
 					<SelectControl
 						label={ __( 'Media ratio', 'gutenberg-lab-blocks' ) }

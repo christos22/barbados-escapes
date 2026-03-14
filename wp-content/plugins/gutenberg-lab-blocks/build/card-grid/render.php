@@ -41,6 +41,7 @@ if ( ! function_exists( 'gutenberg_lab_card_grid_resolve_block_gap_value' ) ) {
 }
 
 $columns     = $attributes['columns'] ?? '2';
+$enable_carousel = ! empty( $attributes['enableCarousel'] );
 $media_ratio = $attributes['mediaRatio'] ?? 'landscape';
 $block_gap   = $attributes['style']['spacing']['blockGap'] ?? '';
 
@@ -68,12 +69,23 @@ if ( is_string( $block_gap ) && '' !== $block_gap ) {
 	$styles[] = '--wp--style--block-gap:' . esc_attr( $block_gap );
 }
 
+$card_count = preg_match_all(
+	'/wp-block-gutenberg-lab-blocks-card-grid-card\b/',
+	$content,
+	$matches
+);
+$card_count = false === $card_count ? 0 : $card_count;
+$columns_int   = (int) $columns;
+$use_carousel = $enable_carousel && $columns_int > 0 && $card_count > $columns_int;
+
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
 		'class' => implode(
 			' ',
 			array(
 				'vvm-card-grid',
+				$enable_carousel ? 'vvm-card-grid--carousel-enabled' : '',
+				$use_carousel ? 'vvm-card-grid--display-carousel' : 'vvm-card-grid--display-grid',
 				'vvm-card-grid--columns-' . sanitize_html_class( $columns ),
 				'vvm-card-grid--ratio-' . sanitize_html_class( $media_ratio ),
 				)
@@ -88,7 +100,39 @@ if ( '' === trim( $content ) ) {
 ?>
 
 <section <?php echo $wrapper_attributes; ?>>
-	<div class="vvm-card-grid__items">
-		<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-	</div>
+	<?php if ( $use_carousel ) : ?>
+		<div
+			class="vvm-card-grid__carousel"
+			data-card-grid-carousel
+			data-columns="<?php echo esc_attr( $columns_int ); ?>"
+		>
+			<div class="vvm-card-grid__carousel-controls vvm-slider-controls vvm-slider-controls--media-center">
+				<button
+					type="button"
+					class="vvm-card-grid__carousel-button vvm-slider-button vvm-slider-button--prev"
+					data-card-grid-prev
+					aria-label="<?php esc_attr_e( 'Previous cards', 'gutenberg-lab-blocks' ); ?>"
+				>
+					<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</button>
+				<button
+					type="button"
+					class="vvm-card-grid__carousel-button vvm-slider-button vvm-slider-button--next"
+					data-card-grid-next
+					aria-label="<?php esc_attr_e( 'Next cards', 'gutenberg-lab-blocks' ); ?>"
+				>
+					<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</button>
+			</div>
+			<div class="vvm-card-grid__viewport" data-card-grid-viewport>
+				<div class="vvm-card-grid__items" data-card-grid-track>
+					<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</div>
+			</div>
+		</div>
+	<?php else : ?>
+		<div class="vvm-card-grid__items">
+			<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</div>
+	<?php endif; ?>
 </section>

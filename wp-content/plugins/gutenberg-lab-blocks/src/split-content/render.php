@@ -82,22 +82,22 @@ $gallery_images = array_values(
 						<?php endforeach; ?>
 					</div>
 					<?php if ( count( $gallery_images ) > 1 ) : ?>
-						<div class="split-content__slider-controls">
+						<div class="split-content__slider-controls vvm-slider-controls vvm-slider-controls--bottom-right">
 							<button
 								type="button"
-								class="split-content__slider-button"
+								class="split-content__slider-button vvm-slider-button vvm-slider-button--prev"
 								data-split-content-prev
 								aria-label="<?php esc_attr_e( 'Previous slide', 'gutenberg-lab-blocks' ); ?>"
 							>
-								&larr;
+								<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</button>
 							<button
 								type="button"
-								class="split-content__slider-button"
+								class="split-content__slider-button vvm-slider-button vvm-slider-button--next"
 								data-split-content-next
 								aria-label="<?php esc_attr_e( 'Next slide', 'gutenberg-lab-blocks' ); ?>"
 							>
-								&rarr;
+								<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</button>
 						</div>
 					<?php endif; ?>

@@ -417,6 +417,24 @@ function gutenberg_lab_vvm_asset_version( $relative_path ) {
 }
 
 /**
+ * Enqueue the shared font stack for both the editor and the front end.
+ *
+ * VVM uses `next/font` to inject Nunito plus its CSS variable. In the lab
+ * theme we need to load the family explicitly so the block editor and the
+ * public site render with the same typography.
+ */
+function gutenberg_lab_vvm_enqueue_fonts() {
+	wp_enqueue_style(
+		'gutenberg-lab-vvm-fonts',
+		'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap',
+		array(),
+		null
+	);
+}
+add_action( 'wp_enqueue_scripts', 'gutenberg_lab_vvm_enqueue_fonts' );
+add_action( 'enqueue_block_editor_assets', 'gutenberg_lab_vvm_enqueue_fonts' );
+
+/**
  * Enqueues the shared theme stylesheet and the minimal front-end header script.
  *
  * The editor does not need to reproduce every front-end behavior, but the

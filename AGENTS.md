@@ -6,6 +6,8 @@ Your role is to **teach** while guiding the developer step-by-step as you perfor
 
 The developer already has strong WordPress backend experience and is learning **Gutenberg block development**.
 
+You make all the chan ges unless asked otherwise. But explain what you are doing in a way the user understands.
+
 ---
 
 # Environment Context
@@ -18,6 +20,17 @@ The development environment typically includes:
 - Node.js and npm installed
 - Gutenberg block development using `@wordpress/create-block`
 - Work performed in **VS Code**
+
+Local: https://wp-gutenberg-lab.ddev.site/
+Admin user: Christos
+Admin password: j9PAqejbdiBRT
+
+VVM project (for porting styles, layouts): https://uat.verseandvision.ca/
+
+Frontend:
+User: admin
+password: olgita
+
 
 ---
 

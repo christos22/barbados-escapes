@@ -40,7 +40,7 @@
 			"fluid": true,
 			"fontFamilies": [
 				{
-					"fontFamily": "\"Nunito\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+					"fontFamily": "var(--font-nunito), \"Nunito\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
 					"name": "Nunito",
 					"slug": "nunito"
 				}
@@ -69,7 +69,7 @@
 		}
 	},
 	"styles": {
-		"css": ":root { --vvm-header-height: 88px; --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-sm); } @media (min-width: 1024px) { :root { --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-lg); } } @media (min-width: 1920px) { :root { --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-xl); } }",
+		"css": ":root { --font-nunito: \"Nunito\"; --vvm-header-height: 88px; --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-sm); } @media (min-width: 1024px) { :root { --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-lg); } } @media (min-width: 1920px) { :root { --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-xl); } }",
 		"color": {
 			"text": "var(--wp--preset--color--deep-forest)"
 		},

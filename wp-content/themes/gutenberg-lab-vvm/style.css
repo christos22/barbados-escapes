@@ -1,7 +1,7 @@
 /*
 Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
-Author: Your Name
+Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
 Version: 0.1.0
 Requires at least: 6.6
@@ -322,13 +322,15 @@ body {
 	inset: 0;
 	z-index: 1;
 	background:
+		/* Use continuous stops so the image wash fades instead of creating a hard seam mid-footer. */
 		linear-gradient(
 			to bottom,
-			rgb(255, 255, 255) 0%,
-			rgba(255, 255, 255, 0) 38%,
-			rgba(255, 255, 255, 0) 39%,
-			rgba(255, 255, 255, 0) 51%,
-			rgba(11, 63, 65, 0.44) 52%,
+			rgba(255, 255, 255, 0.96) 0%,
+			rgba(255, 255, 255, 0.76) 22%,
+			rgba(255, 255, 255, 0.34) 40%,
+			rgba(255, 255, 255, 0.08) 54%,
+			rgba(11, 63, 65, 0.24) 68%,
+			rgba(11, 63, 65, 0.62) 84%,
 			rgba(9, 62, 63, 0.91) 100%
 		);
 }
