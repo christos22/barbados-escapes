@@ -13,6 +13,14 @@
 		rgba(255, 255, 255, 0.9) 0%,
 		rgb(255, 255, 255) 56.25%
 	);
+	--split-content-overlap-card-max-width: clamp(24rem, 34vw, 32rem);
+	--split-content-overlap-card-padding-block: clamp(2.5rem, 5vw, 5rem);
+	--split-content-overlap-card-padding-inline: clamp(1.5rem, 3vw, 2.5rem);
+	--split-content-overlap-card-shift: clamp(2rem, 5vw, 4.5rem);
+	--split-content-overlap-card-shadow: 0 24px 60px rgba(15, 45, 35, 0.14);
+	--split-content-overlap-card-background: rgba(255, 255, 255, 0.97);
+	--split-content-overlap-media-aspect-ratio: 4 / 5;
+	--split-content-overlap-mobile-overlap: clamp(1.5rem, 6vw, 3rem);
 	--wp--style--block-gap: var(--split-content-flow-gap);
 
 	position: relative;
@@ -181,6 +189,11 @@
 		--split-content-media-min-height: clamp(28rem, 54vw, 44rem);
 	}
 
+	&.split-content--layout-overlap {
+		--split-content-media-min-height: clamp(20rem, 32vw, 30rem);
+		--split-content-inline-gap: 0;
+	}
+
 	&.split-content--desktop-left .split-content__grid {
 		grid-template-columns:
 			var(--split-content-media-track)
@@ -251,6 +264,56 @@
 		);
 	}
 
+	&.split-content--layout-overlap .split-content__grid {
+		align-items: center;
+	}
+
+	&.split-content--layout-overlap .split-content__media {
+		border-radius: 0;
+		align-self: center;
+		aspect-ratio: var(--split-content-overlap-media-aspect-ratio);
+		min-height: var(--split-content-media-min-height);
+	}
+
+	&.split-content--layout-overlap .split-content__content {
+		z-index: 2;
+		display: flex;
+		align-items: center;
+	}
+
+	&.split-content--layout-overlap .split-content__content-flow {
+		display: grid;
+		gap: var(--wp--style--block-gap, 1.5rem);
+		width: min(100%, var(--split-content-overlap-card-max-width));
+		max-width: var(--split-content-overlap-card-max-width);
+		padding-block: var(--split-content-overlap-card-padding-block);
+		padding-inline: var(--split-content-overlap-card-padding-inline);
+		background: var(--split-content-overlap-card-background);
+		box-shadow: var(--split-content-overlap-card-shadow);
+	}
+
+	// Shift the card toward the media column so it overlaps without changing the
+	// underlying split layout that existing content already uses.
+	&.split-content--layout-overlap.split-content--desktop-right
+		.split-content__content {
+		justify-content: flex-end;
+	}
+
+	&.split-content--layout-overlap.split-content--desktop-right
+		.split-content__content-flow {
+		transform: translateX(var(--split-content-overlap-card-shift));
+	}
+
+	&.split-content--layout-overlap.split-content--desktop-left
+		.split-content__content {
+		justify-content: flex-start;
+	}
+
+	&.split-content--layout-overlap.split-content--desktop-left
+		.split-content__content-flow {
+		transform: translateX(calc(var(--split-content-overlap-card-shift) * -1));
+	}
+
 	&.split-content--layout-overlay .split-content__slider-controls {
 		right: 1.25rem;
 		bottom: 1.25rem;
@@ -311,6 +374,40 @@
 			justify-content: center;
 			padding-block: 1rem;
 			padding-inline: 1rem;
+		}
+
+		&.split-content--layout-overlap .split-content__media {
+			width: min(100%, 24rem);
+			min-height: clamp(18rem, 60vw, 24rem);
+			margin-inline: auto;
+		}
+
+		&.split-content--layout-overlap .split-content__content {
+			position: relative;
+			inset: auto;
+			width: 100%;
+			align-items: center;
+			padding-inline: var(--wp--custom--layout--gutter-current, 1.25rem);
+		}
+
+		&.split-content--layout-overlap .split-content__content-flow {
+			width: min(100%, 32rem);
+			max-width: none;
+			transform: none;
+			padding-block: clamp(1.5rem, 6vw, 2.25rem);
+			padding-inline: clamp(1.25rem, 4vw, 1.75rem);
+		}
+
+		&.split-content--layout-overlap.split-content--mobile-top
+			.split-content__content {
+			margin-top: calc(var(--split-content-overlap-mobile-overlap) * -1);
+			margin-bottom: 0;
+		}
+
+		&.split-content--layout-overlap.split-content--mobile-bottom
+			.split-content__content {
+			margin-top: 0;
+			margin-bottom: calc(var(--split-content-overlap-mobile-overlap) * -1);
 		}
 	}
 }

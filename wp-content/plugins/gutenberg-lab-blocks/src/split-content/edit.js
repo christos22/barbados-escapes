@@ -23,6 +23,7 @@ const DESKTOP_POSITION_OPTIONS = [
 const LAYOUT_STYLE_OPTIONS = [
 	{ label: __( 'Split', 'gutenberg-lab-blocks' ), value: 'split' },
 	{ label: __( 'Overlay', 'gutenberg-lab-blocks' ), value: 'overlay' },
+	{ label: __( 'Overlap Card', 'gutenberg-lab-blocks' ), value: 'overlap' },
 ];
 
 const MOBILE_POSITION_OPTIONS = [
@@ -323,6 +324,14 @@ export default function Edit( { attributes, setAttributes } ) {
 						<p className="split-content__control-help">
 							{ __(
 								'Overlay mode uses full-width media and places a translucent content panel on top. Desktop position controls which side the panel sits on.',
+								'gutenberg-lab-blocks'
+							) }
+						</p>
+					) }
+					{ 'overlap' === layoutStyle && (
+						<p className="split-content__control-help">
+							{ __(
+								'Overlap Card uses a floating white card that overlaps a more portrait media panel. Desktop position controls whether the image sits on the left or right.',
 								'gutenberg-lab-blocks'
 							) }
 						</p>
