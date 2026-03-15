@@ -60,6 +60,25 @@ const BACKGROUND_OPTIONS = [
 	{ label: __( 'Image', 'gutenberg-lab-blocks' ), value: 'image' },
 ];
 
+// Keep the inner columns focused on content-oriented blocks instead of
+// exposing large layout primitives inside an already structured section block.
+const SMALL_ALLOWED_BLOCKS = [
+	'core/heading',
+	'core/post-title',
+	'core/post-excerpt',
+	// Singular templates still need a way to render the main post body.
+	'core/post-content',
+	'core/paragraph',
+	'core/list',
+	'core/buttons',
+	'core/image',
+	'core/quote',
+	'core/group',
+	'core/separator',
+	'core/details',
+	'core/spacer',
+];
+
 // We keep both regions in the block at all times so toggling the sidebar never
 // destroys authored sidebar content.
 const TEMPLATE = [
@@ -77,8 +96,9 @@ const TEMPLATE = [
 				'core/column',
 				{
 					className: 'vvm-basic-content__main-column',
-					// This nested area must stay unlocked so editors can add lists,
-					// buttons, images, and other real content blocks.
+					// Keep the scaffold fixed, but constrain this inserter to small
+					// content blocks so the section stays easy to author.
+					allowedBlocks: SMALL_ALLOWED_BLOCKS,
 					templateLock: false,
 				},
 				[
@@ -104,7 +124,8 @@ const TEMPLATE = [
 				'core/column',
 				{
 					className: 'vvm-basic-content__sidebar-column',
-					// Match the old ACF sidebar WYSIWYG with a normal block canvas.
+					// Match the old ACF sidebar WYSIWYG with a constrained block canvas.
+					allowedBlocks: SMALL_ALLOWED_BLOCKS,
 					templateLock: false,
 				},
 				[
@@ -147,6 +168,15 @@ function getBackgroundStyle( backgroundType, backgroundColor, backgroundImageUrl
 	}
 
 	return {};
+}
+
+function hasMatchingAllowedBlocks( allowedBlocks = [] ) {
+	return (
+		allowedBlocks.length === SMALL_ALLOWED_BLOCKS.length &&
+		allowedBlocks.every(
+			( blockName, index ) => blockName === SMALL_ALLOWED_BLOCKS[ index ]
+		)
+	);
 }
 
 export default function Edit( { attributes, setAttributes, clientId } ) {
@@ -220,10 +250,14 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		columnsBlock.innerBlocks.forEach( ( columnBlock ) => {
 			if (
 				'core/column' === columnBlock.name &&
-				false !== columnBlock.attributes.templateLock
+				(
+					false !== columnBlock.attributes.templateLock ||
+					! hasMatchingAllowedBlocks( columnBlock.attributes.allowedBlocks )
+				)
 			) {
 				updateBlockAttributes( columnBlock.clientId, {
 					templateLock: false,
+					allowedBlocks: SMALL_ALLOWED_BLOCKS,
 				} );
 			}
 		} );

@@ -1,0 +1,81 @@
+.wp-block-gutenberg-lab-blocks-package-meta {
+	margin: 0;
+}
+
+.vvm-package-meta {
+	display: grid;
+	gap: 0.9rem;
+}
+
+.vvm-package-meta__eyebrow {
+	margin: 0;
+	color: rgba(255, 255, 255, 0.9);
+	font-size: 0.9rem;
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+}
+
+.vvm-package-meta__price-wrap {
+	display: grid;
+	gap: 0.25rem;
+}
+
+.vvm-package-meta__price-label {
+	margin: 0;
+	font-size: 0.85rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.vvm-package-meta__price {
+	margin: 0;
+	font-size: clamp(2rem, 4vw, 3.25rem);
+	font-weight: 300;
+	line-height: 1;
+}
+
+.vvm-package-meta__actions {
+	align-items: center;
+	margin-top: 0;
+}
+
+.vvm-package-meta--hero {
+	color: var(--wp--preset--color--white);
+}
+
+.vvm-package-meta--card {
+	gap: 0.75rem;
+	color: var(--wp--preset--color--deep-forest);
+}
+
+.vvm-package-meta--card .vvm-package-meta__eyebrow {
+	color: var(--wp--preset--color--forest);
+	font-size: 0.72rem;
+}
+
+.vvm-package-meta--card .vvm-package-meta__price-label {
+	color: rgba(15, 45, 35, 0.65);
+	font-size: 0.72rem;
+}
+
+.vvm-package-meta--card .vvm-package-meta__price {
+	font-size: 1.5rem;
+}
+
+.vvm-package-meta--card .vvm-package-meta__actions {
+	display: grid;
+	gap: 0.75rem;
+	justify-items: start;
+}
+
+.vvm-package-meta--card .vvm-package-meta__actions .wp-block-button {
+	display: block !important;
+	margin: 0;
+	width: max-content;
+}
+
+.vvm-package-meta--card .vvm-package-meta__actions .wp-block-button + .wp-block-button {
+	margin-top: 0.5rem;
+}

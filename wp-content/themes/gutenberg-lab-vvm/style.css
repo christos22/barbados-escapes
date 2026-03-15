@@ -24,9 +24,183 @@ body {
 	margin-block-start: 0;
 }
 
+/*
+ * theme.json root padding only applies cleanly to direct children of
+ * .wp-site-blocks. Our file/DB templates wrap page content in <main>, so we
+ * recreate that gutter here and let alignfull sections cancel it back out.
+ */
+.wp-site-blocks > main.wp-block-group,
+.wp-site-blocks > .wp-block-group > main.wp-block-group {
+	padding-inline: var(--wp--custom--layout--gutter-current);
+}
+
+.wp-site-blocks > main.wp-block-group > .alignfull,
+.wp-site-blocks > .wp-block-group > main.wp-block-group > .alignfull {
+	margin-inline: calc(var(--wp--custom--layout--gutter-current) * -1);
+}
+
 .wp-site-blocks > .wp-block-template-part,
 .wp-site-blocks > .wp-block-template-part > .vvm-header {
 	margin-block-end: 0;
+}
+
+/*
+ * The package archive uses split-content as a promotional band. The generic
+ * block defaults are intentionally roomy, but this archive needs a tighter
+ * Lake Austin-style overlap where the media only peeks above/below the card.
+ */
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-split-content.split-content--layout-overlap,
+.vvm-packages-archive-promo.wp-block-gutenberg-lab-blocks-split-content.split-content--layout-overlap {
+		max-inline-size: min(100%, var(--wp--style--global--content-size, 1320px));
+		margin-inline: auto;
+		/*
+		 * The overlap card pulls visual weight back into the media column, so the
+		 * whole promo band needs a slight rightward nudge to feel centered.
+		 */
+		--vvm-packages-archive-promo-visual-offset: clamp(1rem, 2vw, 1.75rem);
+		--split-content-overlap-card-max-width: clamp(24rem, 29vw, 28rem);
+		--split-content-overlap-card-padding-block: clamp(1.75rem, 3vw, 2.75rem);
+		--split-content-overlap-card-padding-inline: clamp(1.25rem, 2.4vw, 2rem);
+		--split-content-overlap-card-shift: clamp(0.5rem, 1vw, 1rem);
+		--split-content-overlap-media-aspect-ratio: 30 / 31;
+		--split-content-media-min-height: clamp(22rem, 28vw, 32rem);
+		margin-top: var(--wp--preset--spacing--section-md);
+		margin-bottom: var(--wp--preset--spacing--section-md);
+		transform: translateX(var(--vvm-packages-archive-promo-visual-offset));
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-split-content.split-content--layout-overlap
+	.split-content__grid,
+.vvm-packages-archive-promo.wp-block-gutenberg-lab-blocks-split-content.split-content--layout-overlap
+	.split-content__grid {
+	grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-split-content.split-content--layout-overlap
+	.split-content__content-flow,
+	.vvm-packages-archive-promo.wp-block-gutenberg-lab-blocks-split-content.split-content--layout-overlap
+		.split-content__content-flow {
+		gap: clamp(0.75rem, 1.2vw, 1rem);
+}
+
+@media (max-width: 1023px) {
+	body.post-type-archive-packages
+		.wp-block-gutenberg-lab-blocks-split-content.split-content--layout-overlap,
+	.vvm-packages-archive-promo.wp-block-gutenberg-lab-blocks-split-content.split-content--layout-overlap {
+			transform: none;
+	}
+}
+
+body.post-type-archive-packages .wp-block-gutenberg-lab-blocks-packages-display,
+.vvm-packages-archive-list.wp-block-gutenberg-lab-blocks-packages-display {
+	max-inline-size: min(100%, var(--wp--style--global--content-size, 1320px));
+	margin-inline: auto;
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-packages-display__header,
+.vvm-packages-archive-list.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-packages-display__header {
+		justify-items: center;
+		margin-inline: auto;
+		text-align: center;
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-packages-display__intro,
+.vvm-packages-archive-list.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-packages-display__intro {
+		max-width: 40rem;
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-card__body,
+.vvm-packages-archive-list.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-card__body {
+		gap: 0.75rem;
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card {
+		display: grid;
+		gap: 0.65rem;
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__price-wrap,
+.vvm-packages-archive-list.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__price-wrap {
+		display: grid;
+		gap: 0.15rem;
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__price,
+.vvm-packages-archive-list.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__price {
+		font-size: 1rem;
+		font-weight: 700;
+	}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__actions,
+.vvm-packages-archive-list.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__actions {
+		margin-top: 0.35rem;
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__actions,
+.vvm-packages-archive-list.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__actions {
+		display: block !important;
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__actions
+	.wp-block-button,
+.vvm-packages-archive-list.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__actions
+	.wp-block-button {
+		display: block !important;
+		margin: 0 !important;
+		width: max-content;
+}
+
+body.post-type-archive-packages
+	.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__actions
+	.wp-block-button
+	+ .wp-block-button,
+.vvm-packages-archive-list.wp-block-gutenberg-lab-blocks-packages-display
+	.vvm-package-meta--card
+	.vvm-package-meta__actions
+	.wp-block-button
+	+ .wp-block-button {
+		margin-top: 0.5rem !important;
 }
 
 .vvm-header {

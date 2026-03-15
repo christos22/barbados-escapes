@@ -45,9 +45,17 @@ const MEDIA_TYPE_OPTIONS = [
 
 const ALLOWED_INNER_BLOCKS = [
 	'core/heading',
+	// Keep dynamic singular template content available in the split layout.
+	'core/post-title',
+	'core/post-excerpt',
 	'core/paragraph',
 	'core/list',
 	'core/buttons',
+	'core/image',
+	'core/quote',
+	'core/group',
+	'core/separator',
+	'core/details',
 	'core/spacer',
 ];
 

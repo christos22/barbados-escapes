@@ -10,6 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/includes/packages.php';
+require_once __DIR__ . '/includes/package-rendering.php';
+
 /**
  * Return a stable version string for plugin assets.
  *
@@ -54,6 +57,9 @@ add_action( 'enqueue_block_assets', 'gutenberg_lab_blocks_enqueue_shared_assets'
 function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/notice-box' );
 	register_block_type( __DIR__ . '/build/media-panel' );
+	register_block_type( __DIR__ . '/build/package-meta' );
+	register_block_type( __DIR__ . '/build/packages-display' );
+	register_block_type( __DIR__ . '/build/related-packages' );
 	register_block_type( __DIR__ . '/build/site-footer-meta' );
 	register_block_type( __DIR__ . '/build/basic-content' );
 	register_block_type( __DIR__ . '/build/split-content' );

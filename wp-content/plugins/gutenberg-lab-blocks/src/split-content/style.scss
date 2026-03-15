@@ -19,7 +19,10 @@
 	--split-content-overlap-card-shift: clamp(2rem, 5vw, 4.5rem);
 	--split-content-overlap-card-shadow: 0 24px 60px rgba(15, 45, 35, 0.14);
 	--split-content-overlap-card-background: rgba(255, 255, 255, 0.97);
-	--split-content-overlap-media-aspect-ratio: 4 / 5;
+	// Keep the overlap image only modestly taller than the content card. The
+	// previous 4/5 portrait ratio created a much larger top/bottom overhang than
+	// the Lake Austin reference.
+	--split-content-overlap-media-aspect-ratio: 8 / 9;
 	--split-content-overlap-mobile-overlap: clamp(1.5rem, 6vw, 3rem);
 	--wp--style--block-gap: var(--split-content-flow-gap);
 

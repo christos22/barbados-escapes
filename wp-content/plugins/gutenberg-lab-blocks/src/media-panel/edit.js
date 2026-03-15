@@ -52,9 +52,18 @@ const CONTENT_WIDTH_OPTIONS = [
 
 const ALLOWED_INNER_BLOCKS = [
 	'core/heading',
+	// Allow template authors to pull the current singular item's title.
+	'core/post-title',
+	// The package excerpt is native post data, so this stays dynamic in templates.
+	'core/post-excerpt',
 	'core/paragraph',
 	'core/list',
 	'core/buttons',
+	'core/image',
+	'core/quote',
+	'core/group',
+	'core/separator',
+	'core/details',
 	'core/spacer',
 ];
 

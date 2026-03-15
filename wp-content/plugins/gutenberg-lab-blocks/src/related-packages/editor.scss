@@ -1,0 +1,32 @@
+.vvm-related-packages-placeholder {
+	border: 1px dashed rgba(1, 50, 35, 0.3);
+	padding: 1.5rem;
+	background: rgba(223, 229, 225, 0.25);
+}
+
+.vvm-related-packages-placeholder__heading,
+.vvm-related-packages-placeholder__intro {
+	margin-top: 0;
+}
+
+.vvm-related-packages-placeholder__grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+}
+
+.vvm-related-packages-placeholder--columns-2 .vvm-related-packages-placeholder__grid {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.vvm-related-packages-placeholder__card {
+	min-height: 11rem;
+	border-radius: 3px;
+	background:
+		linear-gradient(
+			180deg,
+			rgba(17, 17, 17, 0.06),
+			rgba(17, 17, 17, 0.14)
+		),
+		#f6f1e8;
+}

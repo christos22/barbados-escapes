@@ -1,0 +1,47 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/related-packages",
+	"version": "0.1.0",
+	"title": "Related Packages",
+	"category": "widgets",
+	"icon": "screenoptions",
+	"description": "Queries and renders package cards for archive or related sections.",
+	"attributes": {
+		"heading": {
+			"type": "string",
+			"default": "More Packages"
+		},
+		"introText": {
+			"type": "string",
+			"default": ""
+		},
+		"count": {
+			"type": "number",
+			"default": 3
+		},
+		"columns": {
+			"type": "string",
+			"default": "3"
+		},
+		"excludeCurrent": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"usesContext": [ "postId", "postType", "queryId" ],
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"anchor": true,
+		"spacing": {
+			"margin": [ "top", "bottom" ],
+			"padding": true
+		}
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}

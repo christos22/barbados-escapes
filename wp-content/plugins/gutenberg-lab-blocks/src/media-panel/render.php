@@ -18,6 +18,40 @@ $content_position = $attributes['contentPosition'] ?? 'center-center';
 $content_width    = $attributes['contentWidth'] ?? 'md';
 $align            = $attributes['align'] ?? '';
 
+// When the block is used in a singular template, let the current post's
+// featured image act as the hero media if the block itself has no media picked.
+//
+// We intentionally avoid a raw get_the_ID() fallback on archives because the
+// global post can point at the first queried item, which would make an archive
+// hero accidentally inherit a package/post image instead of staying editorial.
+$current_post_id = 0;
+
+if ( isset( $block->context['postId'] ) ) {
+	$current_post_id = (int) $block->context['postId'];
+} elseif ( is_singular() ) {
+	$current_post_id = (int) get_queried_object_id();
+}
+
+if ( $current_post_id && ( ! $image_url || ! $fallback_image_url ) && has_post_thumbnail( $current_post_id ) ) {
+	$featured_image_id = (int) get_post_thumbnail_id( $current_post_id );
+	$featured_image_url = get_the_post_thumbnail_url( $current_post_id, 'full' );
+	$featured_image_alt = get_post_meta( $featured_image_id, '_wp_attachment_image_alt', true );
+
+	if ( '' === $featured_image_alt ) {
+		$featured_image_alt = get_the_title( $featured_image_id );
+	}
+
+	if ( ! $image_url && $featured_image_url ) {
+		$image_url = $featured_image_url;
+		$image_alt = $featured_image_alt;
+	}
+
+	if ( ! $fallback_image_url && $featured_image_url ) {
+		$fallback_image_url = $featured_image_url;
+		$fallback_image_alt = $featured_image_alt;
+	}
+}
+
 $classes = array(
 	'media-panel',
 	'media-panel--height-' . sanitize_html_class( $container_height ),

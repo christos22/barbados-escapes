@@ -1,0 +1,64 @@
+function getVisibleColumns( carousel ) {
+	const rootStyles = window.getComputedStyle( carousel );
+	const visibleColumns = Number.parseInt(
+		rootStyles.getPropertyValue( '--vvm-packages-display-visible-columns' ),
+		10
+	);
+
+	return Number.isNaN( visibleColumns ) || visibleColumns < 1
+		? 1
+		: visibleColumns;
+}
+
+function initializePackagesDisplayCarousel( carousel ) {
+	const track = carousel.querySelector( '[data-packages-display-track]' );
+	const cards = Array.from( track?.children ?? [] );
+	const previousButton = carousel.querySelector(
+		'[data-packages-display-prev]'
+	);
+	const nextButton = carousel.querySelector( '[data-packages-display-next]' );
+
+	if ( ! track || cards.length < 2 || ! previousButton || ! nextButton ) {
+		return;
+	}
+
+	let currentIndex = 0;
+
+	const syncCarouselState = () => {
+		const visibleColumns = getVisibleColumns( carousel );
+		const maxIndex = Math.max( 0, cards.length - visibleColumns );
+
+		currentIndex = Math.min( currentIndex, maxIndex );
+		const firstCardOffset = cards[ 0 ]?.offsetLeft ?? 0;
+		const currentCardOffset =
+			cards[ currentIndex ]?.offsetLeft ?? firstCardOffset;
+		track.style.transform = `translateX(-${
+			currentCardOffset - firstCardOffset
+		}px)`;
+
+		previousButton.disabled = currentIndex <= 0;
+		nextButton.disabled = currentIndex >= maxIndex;
+	};
+
+	previousButton.addEventListener( 'click', () => {
+		currentIndex = Math.max( 0, currentIndex - 1 );
+		syncCarouselState();
+	} );
+
+	nextButton.addEventListener( 'click', () => {
+		const visibleColumns = getVisibleColumns( carousel );
+		const maxIndex = Math.max( 0, cards.length - visibleColumns );
+
+		currentIndex = Math.min( maxIndex, currentIndex + 1 );
+		syncCarouselState();
+	} );
+
+	window.addEventListener( 'resize', syncCarouselState, { passive: true } );
+	syncCarouselState();
+}
+
+window.addEventListener( 'DOMContentLoaded', () => {
+	document
+		.querySelectorAll( '[data-packages-display-carousel]' )
+		.forEach( initializePackagesDisplayCarousel );
+} );
