@@ -20,7 +20,7 @@
 	.block-editor-inner-blocks,
 	.block-editor-inner-blocks>.block-editor-block-list__layout {
 		display: grid;
-		gap: 1.25rem;
+		gap: var(--wp--style--block-gap, var(--media-panel-flow-gap));
 		width: min(100%, var(--media-panel-surface-max-width));
 	}
 
@@ -61,4 +61,8 @@
 		}
 	}
 
+}
+
+.media-panel__inspector-upload {
+	margin-bottom: 16px;
 }

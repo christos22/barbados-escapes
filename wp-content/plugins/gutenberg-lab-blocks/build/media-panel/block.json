@@ -66,6 +66,10 @@
   "supports": {
     "html": false,
     "spacing": {
+      "margin": [
+        "top",
+        "bottom"
+      ],
       "blockGap": true
     },
     "align": [

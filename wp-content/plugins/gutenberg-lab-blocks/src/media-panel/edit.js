@@ -69,6 +69,35 @@ const ALLOWED_INNER_BLOCKS = [
 	'core/spacer',
 ];
 
+function normalizeSpacingPresetSlug( spacingSlug ) {
+	if ( typeof spacingSlug !== 'string' || spacingSlug === '' ) {
+		return undefined;
+	}
+
+	return spacingSlug.trim().toLowerCase().replace( /^([0-9]+)([a-z])/, '$1-$2' );
+}
+
+function resolveBlockGapPreviewValue( blockGap ) {
+	if ( typeof blockGap !== 'string' || blockGap === '' ) {
+		return undefined;
+	}
+
+	// Gutenberg stores preset picks as tokens like `var:preset|spacing|2xl`.
+	// The overlay stack reads a CSS custom property, so we resolve the token to
+	// the matching preset variable for editor parity.
+	if ( blockGap.startsWith( 'var:preset|spacing|' ) ) {
+		const spacingSlug = normalizeSpacingPresetSlug(
+			blockGap.replace( 'var:preset|spacing|', '' )
+		);
+
+		return spacingSlug
+			? `var(--wp--preset--spacing--${ spacingSlug })`
+			: undefined;
+	}
+
+	return blockGap;
+}
+
 export default function Edit({ attributes, setAttributes }) {
 	const {
 		mediaType,
@@ -86,7 +115,9 @@ export default function Edit({ attributes, setAttributes }) {
 		contentPosition,
 		contentWidth,
 		align,
+		style,
 	} = attributes;
+	const blockGap = resolveBlockGapPreviewValue( style?.spacing?.blockGap );
 
 	const blockProps = useBlockProps({
 		className: [
@@ -100,6 +131,11 @@ export default function Edit({ attributes, setAttributes }) {
 		]
 			.filter(Boolean)
 			.join(' '),
+		style: blockGap
+			? {
+					'--wp--style--block-gap': blockGap,
+				}
+			: undefined,
 	});
 
 	const innerBlocksTemplate = [
@@ -167,26 +203,28 @@ export default function Edit({ attributes, setAttributes }) {
 					/>
 
 					{mediaType === 'video' && (
-						<MediaUploadCheck>
-							<MediaUpload
-								onSelect={onSelectFallbackImage}
-								allowedTypes={['image']}
-								value={fallbackImageId}
-								render={({ open }) => (
-									<Button variant="secondary" onClick={open}>
-										{fallbackImageUrl
-											? __(
-													'Replace fallback image',
-													'gutenberg-lab-blocks'
-											  )
-											: __(
-													'Select fallback image',
-													'gutenberg-lab-blocks'
-											  )}
-									</Button>
-								)}
-							/>
-						</MediaUploadCheck>
+						<div className="media-panel__inspector-upload">
+							<MediaUploadCheck>
+								<MediaUpload
+									onSelect={onSelectFallbackImage}
+									allowedTypes={['image']}
+									value={fallbackImageId}
+									render={({ open }) => (
+										<Button variant="secondary" onClick={open}>
+											{fallbackImageUrl
+												? __(
+														'Replace fallback image',
+														'gutenberg-lab-blocks'
+												  )
+												: __(
+														'Select fallback image',
+														'gutenberg-lab-blocks'
+												  )}
+										</Button>
+									)}
+								/>
+							</MediaUploadCheck>
+						</div>
 					)}
 
 					<ToggleControl

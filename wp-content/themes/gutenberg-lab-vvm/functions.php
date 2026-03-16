@@ -2,9 +2,10 @@
 /**
  * Theme setup for the VVM block theme port.
  *
- * Page/post body content stays editor-managed, but the shared site chrome
- * lives in version-controlled theme files and is synchronized into the
- * database-backed block entities WordPress renders.
+ * Page/post body content stays editor-managed. Shared site chrome now follows
+ * the native Gutenberg model: the theme files seed the initial template-part
+ * and navigation content, then the database-backed entities become editable in
+ * the Site Editor.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -40,59 +41,33 @@ function gutenberg_lab_vvm_setup() {
 add_action( 'after_setup_theme', 'gutenberg_lab_vvm_setup' );
 
 /**
- * Hides chrome-editing admin screens in this code-owned workflow.
+ * Returns the navigation post ID for a stable slug, or zero if missing.
  *
- * Header, footer, and navigation stay git-tracked, so the dashboard should
- * steer editors toward Pages instead of exposing competing site-chrome UIs.
+ * @param string $slug Navigation post slug.
+ * @return int
+ */
+function gutenberg_lab_vvm_get_navigation_post_id( $slug ) {
+	$navigation_post = get_page_by_path( $slug, OBJECT, 'wp_navigation' );
+
+	return $navigation_post instanceof WP_Post ? (int) $navigation_post->ID : 0;
+}
+
+/**
+ * Returns the seeded primary navigation post ID.
+ *
+ * @return int
+ */
+function gutenberg_lab_vvm_get_primary_navigation_post_id() {
+	return gutenberg_lab_vvm_get_navigation_post_id( 'navigation' );
+}
+
+/**
+ * Hides the classic Menus screen so the theme stays on the block-navigation workflow.
  */
 function gutenberg_lab_vvm_remove_classic_menus_screen() {
 	remove_submenu_page( 'themes.php', 'nav-menus.php' );
-	remove_submenu_page( 'themes.php', 'site-editor.php' );
 }
 add_action( 'admin_menu', 'gutenberg_lab_vvm_remove_classic_menus_screen', 100 );
-
-/**
- * Redirects requests away from admin screens that edit code-owned site chrome.
- *
- * We leave Pages available for normal content editing, but template, template
- * part, and navigation entities should not be maintained through wp-admin.
- */
-function gutenberg_lab_vvm_redirect_site_chrome_editing_screens() {
-	if ( ! is_admin() ) {
-		return;
-	}
-
-	global $pagenow;
-
-	$restricted_post_types = array(
-		'wp_template',
-		'wp_template_part',
-		'wp_navigation',
-	);
-
-	if ( 'site-editor.php' === $pagenow ) {
-		wp_safe_redirect( admin_url( 'edit.php?post_type=page' ) );
-		exit;
-	}
-
-	if ( ! in_array( $pagenow, array( 'edit.php', 'post.php', 'post-new.php' ), true ) ) {
-		return;
-	}
-
-	$post_type = '';
-
-	if ( ! empty( $_GET['post_type'] ) ) {
-		$post_type = sanitize_key( wp_unslash( $_GET['post_type'] ) );
-	} elseif ( ! empty( $_GET['post'] ) ) {
-		$post_type = get_post_type( (int) $_GET['post'] );
-	}
-
-	if ( in_array( $post_type, $restricted_post_types, true ) ) {
-		wp_safe_redirect( admin_url( 'edit.php?post_type=page' ) );
-		exit;
-	}
-}
-add_action( 'admin_init', 'gutenberg_lab_vvm_redirect_site_chrome_editing_screens' );
 
 /**
  * Registers VVM-specific button styles for the core Button block.
@@ -283,7 +258,36 @@ function gutenberg_lab_vvm_get_footer_navigation_content() {
 }
 
 /**
+ * Creates a navigation post only when it does not exist yet.
+ *
+ * @param string $slug    Stable post_name for the navigation entity.
+ * @param string $title   Editor-facing navigation title.
+ * @param string $content Serialized navigation block content.
+ * @return int
+ */
+function gutenberg_lab_vvm_seed_navigation_post( $slug, $title, $content ) {
+	$existing = get_page_by_path( $slug, OBJECT, 'wp_navigation' );
+
+	if ( $existing instanceof WP_Post ) {
+		return (int) $existing->ID;
+	}
+
+	return (int) wp_insert_post(
+		array(
+			'post_type'    => 'wp_navigation',
+			'post_status'  => 'publish',
+			'post_title'   => $title,
+			'post_name'    => $slug,
+			'post_content' => $content,
+		)
+	);
+}
+
+/**
  * Creates or updates a navigation post by slug.
+ *
+ * This is only used for the one-time migration from the old code-owned chrome
+ * setup to the new native Gutenberg workflow.
  *
  * @param string $slug    Stable post_name for the navigation entity.
  * @param string $title   Editor-facing navigation title.
@@ -341,11 +345,10 @@ function gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs ) 
 }
 
 /**
- * Creates or updates a theme-owned template part post from the file version.
+ * Creates a template part post only when it does not exist yet.
  *
- * WordPress renders the database-backed entity once it exists, so we upsert the
- * post from the canonical file content to keep the rendered template part
- * aligned with git-tracked source while still injecting local navigation refs.
+ * This keeps the initial header/footer markup version controlled, but once the
+ * entity exists Gutenberg owns subsequent edits through the Site Editor.
  *
  * @param string $slug            Template part slug.
  * @param string $title           Editor-facing template part title.
@@ -355,28 +358,9 @@ function gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs ) 
  */
 function gutenberg_lab_vvm_ensure_template_part_post( $slug, $title, $area, $navigation_refs ) {
 	$existing = get_block_template( get_stylesheet() . '//' . $slug, 'wp_template_part' );
-	$content  = gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs );
 
 	if ( $existing && ! empty( $existing->wp_id ) ) {
 		$post_id = (int) $existing->wp_id;
-		$post    = get_post( $post_id );
-
-		if ( $post instanceof WP_Post ) {
-			$updated_post = array(
-				'ID'           => $post_id,
-				'post_title'   => $title,
-				'post_name'    => $slug,
-				'post_content' => $content,
-			);
-
-			if (
-				$title !== $post->post_title ||
-				$slug !== $post->post_name ||
-				$content !== $post->post_content
-			) {
-				wp_update_post( $updated_post );
-			}
-		}
 
 		wp_set_post_terms( $post_id, array( get_stylesheet() ), 'wp_theme' );
 		wp_set_post_terms( $post_id, array( $area ), 'wp_template_part_area' );
@@ -384,6 +368,7 @@ function gutenberg_lab_vvm_ensure_template_part_post( $slug, $title, $area, $nav
 		return $post_id;
 	}
 
+	$content = gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs );
 	$post_id = wp_insert_post(
 		array(
 			'post_type'    => 'wp_template_part',
@@ -405,19 +390,57 @@ function gutenberg_lab_vvm_ensure_template_part_post( $slug, $title, $area, $nav
 }
 
 /**
- * Synchronizes the database-backed entities that power code-owned site chrome.
+ * Creates or updates a template-part post from the current file markup.
  *
- * Navigation, header, and footer are all generated from theme-controlled
- * source so front-end rendering stays aligned with git-tracked files.
+ * We use this once when migrating away from the old code-owned chrome setup so
+ * the live database entity picks up the locked native block structure.
+ *
+ * @param string $slug            Template part slug.
+ * @param string $title           Editor-facing template part title.
+ * @param string $area            Template part area taxonomy value.
+ * @param array  $navigation_refs Map of logical navigation keys to post IDs.
+ * @return int
+ */
+function gutenberg_lab_vvm_upsert_template_part_post( $slug, $title, $area, $navigation_refs ) {
+	$existing = get_block_template( get_stylesheet() . '//' . $slug, 'wp_template_part' );
+	$content  = gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs );
+
+	if ( $existing && ! empty( $existing->wp_id ) ) {
+		$post_id = (int) $existing->wp_id;
+
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_title'   => $title,
+				'post_name'    => $slug,
+				'post_content' => $content,
+			)
+		);
+
+		wp_set_post_terms( $post_id, array( get_stylesheet() ), 'wp_theme' );
+		wp_set_post_terms( $post_id, array( $area ), 'wp_template_part_area' );
+
+		return $post_id;
+	}
+
+	return gutenberg_lab_vvm_ensure_template_part_post( $slug, $title, $area, $navigation_refs );
+}
+
+/**
+ * Seeds the native Gutenberg entities that power the shared site chrome.
+ *
+ * The file markup acts as the initial template. After the first seed, the
+ * `wp_template_part` and `wp_navigation` entities become the editor-owned
+ * source of truth, which matches the WordPress.com style workflow.
  */
 function gutenberg_lab_vvm_bootstrap_native_entities() {
-	$primary_navigation_id = gutenberg_lab_vvm_upsert_navigation_post(
+	$primary_navigation_id = gutenberg_lab_vvm_seed_navigation_post(
 		'navigation',
 		'Primary Navigation',
 		gutenberg_lab_vvm_get_primary_navigation_content()
 	);
 
-	$footer_navigation_id = gutenberg_lab_vvm_upsert_navigation_post(
+	$footer_navigation_id = gutenberg_lab_vvm_seed_navigation_post(
 		'footer-navigation',
 		'Footer Navigation',
 		gutenberg_lab_vvm_get_footer_navigation_content()
@@ -453,12 +476,59 @@ function gutenberg_lab_vvm_bootstrap_native_entities_on_switch() {
 add_action( 'after_switch_theme', 'gutenberg_lab_vvm_bootstrap_native_entities_on_switch' );
 
 /**
- * Keeps code-owned navigation and template parts synchronized on normal loads.
+ * Seeds the native entities on normal loads if they are still missing.
  */
-function gutenberg_lab_vvm_sync_native_entities() {
+function gutenberg_lab_vvm_ensure_native_entities_exist() {
 	gutenberg_lab_vvm_bootstrap_native_entities();
 }
-add_action( 'init', 'gutenberg_lab_vvm_sync_native_entities', 20 );
+add_action( 'init', 'gutenberg_lab_vvm_ensure_native_entities_exist', 20 );
+
+/**
+ * Performs a one-time migration from code-owned chrome to native Gutenberg.
+ *
+ * Earlier versions rewrote the site chrome on every request. We intentionally
+ * replace that once so the current site gets the new locked header structure,
+ * then we stop touching the entities and let editors own them from there.
+ */
+function gutenberg_lab_vvm_migrate_site_chrome_to_native_gutenberg() {
+	if ( get_option( 'gutenberg_lab_vvm_native_site_editor_migrated' ) ) {
+		return;
+	}
+
+	$primary_navigation_id = gutenberg_lab_vvm_upsert_navigation_post(
+		'navigation',
+		'Primary Navigation',
+		gutenberg_lab_vvm_get_primary_navigation_content()
+	);
+
+	$footer_navigation_id = gutenberg_lab_vvm_upsert_navigation_post(
+		'footer-navigation',
+		'Footer Navigation',
+		gutenberg_lab_vvm_get_footer_navigation_content()
+	);
+
+	$navigation_refs = array(
+		'primary' => $primary_navigation_id,
+		'footer'  => $footer_navigation_id,
+	);
+
+	gutenberg_lab_vvm_upsert_template_part_post(
+		'header',
+		'Header',
+		WP_TEMPLATE_PART_AREA_HEADER,
+		$navigation_refs
+	);
+
+	gutenberg_lab_vvm_upsert_template_part_post(
+		'footer',
+		'Footer',
+		WP_TEMPLATE_PART_AREA_FOOTER,
+		$navigation_refs
+	);
+
+	update_option( 'gutenberg_lab_vvm_native_site_editor_migrated', 1, false );
+}
+add_action( 'init', 'gutenberg_lab_vvm_migrate_site_chrome_to_native_gutenberg', 21 );
 
 /**
  * Returns the first meaningful content block from a parsed block list.

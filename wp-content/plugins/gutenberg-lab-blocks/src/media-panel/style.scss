@@ -32,7 +32,6 @@
 	--media-panel-overlay-mid-alpha: 0;
 	--media-panel-overlay-deep-alpha: 0;
 	--media-panel-overlay-vignette-alpha: 0;
-	--wp--style--block-gap: var(--media-panel-flow-gap);
 
 	&.media-panel--height-small {
 		min-height: 18rem;
@@ -235,7 +234,7 @@
 		position: relative;
 		z-index: 1;
 		display: grid;
-		gap: var(--wp--style--block-gap);
+		gap: var(--wp--style--block-gap, var(--media-panel-flow-gap));
 		width: min(100%, var(--media-panel-surface-max-width));
 		margin: 0;
 		padding: var(--media-panel-surface-padding);
