@@ -1,6 +1,6 @@
 .wp-block-gutenberg-lab-blocks-split-content {
 	.split-content__grid {
-		min-height: 24rem;
+		min-height: var(--split-content-media-min-height);
 	}
 
 	.split-content__content-flow {
@@ -25,6 +25,10 @@
 
 	.split-content__media-placeholder {
 		min-height: 20rem;
+	}
+
+	.split-content__media-frame {
+		width: 100%;
 	}
 
 	.block-editor-inner-blocks,
@@ -54,6 +58,11 @@
 		.split-content__media {
 			position: absolute;
 			inset: 0;
+		}
+
+		.split-content__media-frame {
+			height: 100%;
+			min-height: 100%;
 		}
 
 		.split-content__content {
@@ -100,10 +109,14 @@
 		}
 
 		.split-content__media {
-			border-radius: 0;
 			align-self: center;
-			aspect-ratio: var(--split-content-overlap-media-aspect-ratio);
+		}
+
+		.split-content__media-frame {
+			height: auto;
 			min-height: var(--split-content-media-min-height);
+			border-radius: 0;
+			aspect-ratio: var(--split-content-overlap-media-aspect-ratio);
 		}
 
 		.split-content__content {

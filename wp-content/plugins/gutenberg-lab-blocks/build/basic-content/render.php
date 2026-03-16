@@ -9,6 +9,7 @@
 $with_sidebar     = ! empty( $attributes['withSidebar'] );
 $content_width    = $attributes['contentWidth'] ?? '100_percent';
 $content_alignment = $attributes['contentAlignment'] ?? 'left';
+$content_text_alignment = $attributes['contentTextAlignment'] ?? 'left';
 $sidebar_position = $attributes['sidebarPosition'] ?? 'right';
 $spacing_top      = $attributes['spacingTop'] ?? 'medium';
 $spacing_bottom   = $attributes['spacingBottom'] ?? 'medium';
@@ -26,6 +27,7 @@ $classes = array(
 	$with_sidebar ? 'vvm-basic-content--with-sidebar' : 'vvm-basic-content--no-sidebar',
 	'vvm-basic-content--content-width-' . sanitize_html_class( str_replace( '_percent', '', $content_width ) ),
 	'vvm-basic-content--content-align-' . sanitize_html_class( $content_alignment ),
+	'vvm-basic-content--text-align-' . sanitize_html_class( $content_text_alignment ),
 	'vvm-basic-content--sidebar-' . sanitize_html_class( $sidebar_position ),
 	'vvm-basic-content--spacing-top-' . sanitize_html_class( str_replace( '_', '-', $spacing_top ) ),
 	'vvm-basic-content--spacing-bottom-' . sanitize_html_class( str_replace( '_', '-', $spacing_bottom ) ),

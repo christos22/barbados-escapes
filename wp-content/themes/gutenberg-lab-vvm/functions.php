@@ -2,19 +2,14 @@
 /**
  * Theme setup for the VVM block theme port.
  *
- * The theme still uses block template parts as the source of truth, but we
- * register theme supports and menu locations so WordPress exposes the expected
- * editor UI for global site chrome.
+ * Page/post body content stays editor-managed, but the shared site chrome
+ * lives in version-controlled theme files and is synchronized into the
+ * database-backed block entities WordPress renders.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-/**
- * Internal bootstrap version for one-time native entity provisioning.
- */
-const GUTENBERG_LAB_VVM_BOOTSTRAP_VERSION = '2';
 
 /**
  * Registers the global theme supports used by the header/footer implementation.
@@ -41,15 +36,63 @@ function gutenberg_lab_vvm_setup() {
 			'flex-width'  => true,
 		)
 	);
-
-	register_nav_menus(
-		array(
-			'primary' => __( 'Primary Menu', 'gutenberg-lab-vvm' ),
-			'footer'  => __( 'Footer Menu', 'gutenberg-lab-vvm' ),
-		)
-	);
 }
 add_action( 'after_setup_theme', 'gutenberg_lab_vvm_setup' );
+
+/**
+ * Hides chrome-editing admin screens in this code-owned workflow.
+ *
+ * Header, footer, and navigation stay git-tracked, so the dashboard should
+ * steer editors toward Pages instead of exposing competing site-chrome UIs.
+ */
+function gutenberg_lab_vvm_remove_classic_menus_screen() {
+	remove_submenu_page( 'themes.php', 'nav-menus.php' );
+	remove_submenu_page( 'themes.php', 'site-editor.php' );
+}
+add_action( 'admin_menu', 'gutenberg_lab_vvm_remove_classic_menus_screen', 100 );
+
+/**
+ * Redirects requests away from admin screens that edit code-owned site chrome.
+ *
+ * We leave Pages available for normal content editing, but template, template
+ * part, and navigation entities should not be maintained through wp-admin.
+ */
+function gutenberg_lab_vvm_redirect_site_chrome_editing_screens() {
+	if ( ! is_admin() ) {
+		return;
+	}
+
+	global $pagenow;
+
+	$restricted_post_types = array(
+		'wp_template',
+		'wp_template_part',
+		'wp_navigation',
+	);
+
+	if ( 'site-editor.php' === $pagenow ) {
+		wp_safe_redirect( admin_url( 'edit.php?post_type=page' ) );
+		exit;
+	}
+
+	if ( ! in_array( $pagenow, array( 'edit.php', 'post.php', 'post-new.php' ), true ) ) {
+		return;
+	}
+
+	$post_type = '';
+
+	if ( ! empty( $_GET['post_type'] ) ) {
+		$post_type = sanitize_key( wp_unslash( $_GET['post_type'] ) );
+	} elseif ( ! empty( $_GET['post'] ) ) {
+		$post_type = get_post_type( (int) $_GET['post'] );
+	}
+
+	if ( in_array( $post_type, $restricted_post_types, true ) ) {
+		wp_safe_redirect( admin_url( 'edit.php?post_type=page' ) );
+		exit;
+	}
+}
+add_action( 'admin_init', 'gutenberg_lab_vvm_redirect_site_chrome_editing_screens' );
 
 /**
  * Registers VVM-specific button styles for the core Button block.
@@ -298,10 +341,11 @@ function gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs ) 
 }
 
 /**
- * Creates a theme-owned template part post when one does not already exist.
+ * Creates or updates a theme-owned template part post from the file version.
  *
- * Once the post exists, WordPress will render it instead of the file version,
- * which lets us keep navigation refs portable across environments.
+ * WordPress renders the database-backed entity once it exists, so we upsert the
+ * post from the canonical file content to keep the rendered template part
+ * aligned with git-tracked source while still injecting local navigation refs.
  *
  * @param string $slug            Template part slug.
  * @param string $title           Editor-facing template part title.
@@ -311,9 +355,33 @@ function gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs ) 
  */
 function gutenberg_lab_vvm_ensure_template_part_post( $slug, $title, $area, $navigation_refs ) {
 	$existing = get_block_template( get_stylesheet() . '//' . $slug, 'wp_template_part' );
+	$content  = gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs );
 
 	if ( $existing && ! empty( $existing->wp_id ) ) {
-		return (int) $existing->wp_id;
+		$post_id = (int) $existing->wp_id;
+		$post    = get_post( $post_id );
+
+		if ( $post instanceof WP_Post ) {
+			$updated_post = array(
+				'ID'           => $post_id,
+				'post_title'   => $title,
+				'post_name'    => $slug,
+				'post_content' => $content,
+			);
+
+			if (
+				$title !== $post->post_title ||
+				$slug !== $post->post_name ||
+				$content !== $post->post_content
+			) {
+				wp_update_post( $updated_post );
+			}
+		}
+
+		wp_set_post_terms( $post_id, array( get_stylesheet() ), 'wp_theme' );
+		wp_set_post_terms( $post_id, array( $area ), 'wp_template_part_area' );
+
+		return $post_id;
 	}
 
 	$post_id = wp_insert_post(
@@ -322,7 +390,7 @@ function gutenberg_lab_vvm_ensure_template_part_post( $slug, $title, $area, $nav
 			'post_status'  => 'publish',
 			'post_title'   => $title,
 			'post_name'    => $slug,
-			'post_content' => gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs ),
+			'post_content' => $content,
 		)
 	);
 
@@ -337,10 +405,10 @@ function gutenberg_lab_vvm_ensure_template_part_post( $slug, $title, $area, $nav
 }
 
 /**
- * Bootstraps native navigation and template-part entities for fresh installs.
+ * Synchronizes the database-backed entities that power code-owned site chrome.
  *
- * We only create missing entities. Existing Navigation or template-part posts
- * are treated as editor-managed content and left untouched.
+ * Navigation, header, and footer are all generated from theme-controlled
+ * source so front-end rendering stays aligned with git-tracked files.
  */
 function gutenberg_lab_vvm_bootstrap_native_entities() {
 	$primary_navigation_id = gutenberg_lab_vvm_upsert_navigation_post(
@@ -374,7 +442,6 @@ function gutenberg_lab_vvm_bootstrap_native_entities() {
 		$navigation_refs
 	);
 
-	update_option( 'gutenberg_lab_vvm_bootstrap_version', GUTENBERG_LAB_VVM_BOOTSTRAP_VERSION );
 }
 
 /**
@@ -386,16 +453,12 @@ function gutenberg_lab_vvm_bootstrap_native_entities_on_switch() {
 add_action( 'after_switch_theme', 'gutenberg_lab_vvm_bootstrap_native_entities_on_switch' );
 
 /**
- * Ensures the bootstrap also runs once for already-active local installs.
+ * Keeps code-owned navigation and template parts synchronized on normal loads.
  */
-function gutenberg_lab_vvm_maybe_bootstrap_native_entities() {
-	if ( get_option( 'gutenberg_lab_vvm_bootstrap_version' ) === GUTENBERG_LAB_VVM_BOOTSTRAP_VERSION ) {
-		return;
-	}
-
+function gutenberg_lab_vvm_sync_native_entities() {
 	gutenberg_lab_vvm_bootstrap_native_entities();
 }
-add_action( 'init', 'gutenberg_lab_vvm_maybe_bootstrap_native_entities', 20 );
+add_action( 'init', 'gutenberg_lab_vvm_sync_native_entities', 20 );
 
 /**
  * Returns the first meaningful content block from a parsed block list.

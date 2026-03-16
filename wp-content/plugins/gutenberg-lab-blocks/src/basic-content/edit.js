@@ -8,8 +8,7 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect, useRef } from '@wordpress/element';
-import { createBlocksFromInnerBlocksTemplate } from '@wordpress/blocks';
+import { useEffect } from '@wordpress/element';
 import {
 	Button,
 	ColorPicker,
@@ -28,6 +27,12 @@ const WIDTH_OPTIONS = [
 ];
 
 const ALIGNMENT_OPTIONS = [
+	{ label: __( 'Left', 'gutenberg-lab-blocks' ), value: 'left' },
+	{ label: __( 'Center', 'gutenberg-lab-blocks' ), value: 'center' },
+	{ label: __( 'Right', 'gutenberg-lab-blocks' ), value: 'right' },
+];
+
+const TEXT_ALIGNMENT_OPTIONS = [
 	{ label: __( 'Left', 'gutenberg-lab-blocks' ), value: 'left' },
 	{ label: __( 'Center', 'gutenberg-lab-blocks' ), value: 'center' },
 	{ label: __( 'Right', 'gutenberg-lab-blocks' ), value: 'right' },
@@ -184,6 +189,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		withSidebar,
 		contentWidth,
 		contentAlignment,
+		contentTextAlignment,
 		sidebarPosition,
 		spacingTop,
 		spacingBottom,
@@ -191,46 +197,13 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		backgroundColor,
 		backgroundImageId,
 		backgroundImageUrl,
-		hasInitializedTemplate,
 		hideSection,
 	} = attributes;
-	const { replaceInnerBlocks, updateBlockAttributes } = useDispatch( blockEditorStore );
+	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 	const innerBlocks = useSelect(
 		( select ) => select( blockEditorStore ).getBlocks( clientId ),
 		[ clientId ]
 	);
-	const hydrationGuardRef = useRef( false );
-
-	useEffect( () => {
-		if ( hasInitializedTemplate ) {
-			return;
-		}
-
-		// Existing saved blocks can report zero inner blocks briefly while the
-		// editor hydrates. Give that one pass before assuming the block is new.
-		if ( 0 === innerBlocks.length && ! hydrationGuardRef.current ) {
-			hydrationGuardRef.current = true;
-			return;
-		}
-
-		if ( 0 === innerBlocks.length ) {
-			replaceInnerBlocks(
-				clientId,
-				createBlocksFromInnerBlocksTemplate( TEMPLATE ),
-				false
-			);
-			setAttributes( { hasInitializedTemplate: true } );
-			return;
-		}
-
-		setAttributes( { hasInitializedTemplate: true } );
-	}, [
-		clientId,
-		hasInitializedTemplate,
-		innerBlocks.length,
-		replaceInnerBlocks,
-		setAttributes,
-	] );
 
 	useEffect( () => {
 		const columnsBlock = innerBlocks[ 0 ];
@@ -269,6 +242,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 			withSidebar ? 'vvm-basic-content--with-sidebar' : 'vvm-basic-content--no-sidebar',
 			`vvm-basic-content--content-width-${ contentWidth.replace( '_percent', '' ) }`,
 			`vvm-basic-content--content-align-${ contentAlignment }`,
+			`vvm-basic-content--text-align-${ contentTextAlignment }`,
 			`vvm-basic-content--sidebar-${ sidebarPosition }`,
 			`vvm-basic-content--spacing-top-${ spacingTop.replace( '_', '-' ) }`,
 			`vvm-basic-content--spacing-bottom-${ spacingBottom.replace( '_', '-' ) }`,
@@ -313,11 +287,19 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								}
 							/>
 							<SelectControl
-								label={ __( 'Content Alignment', 'gutenberg-lab-blocks' ) }
+								label={ __( 'Content Box Alignment', 'gutenberg-lab-blocks' ) }
 								value={ contentAlignment }
 								options={ ALIGNMENT_OPTIONS }
 								onChange={ ( value ) =>
 									setAttributes( { contentAlignment: value } )
+								}
+							/>
+							<SelectControl
+								label={ __( 'Text Alignment', 'gutenberg-lab-blocks' ) }
+								value={ contentTextAlignment }
+								options={ TEXT_ALIGNMENT_OPTIONS }
+								onChange={ ( value ) =>
+									setAttributes( { contentTextAlignment: value } )
 								}
 							/>
 						</>
@@ -433,8 +415,11 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					 * outer scaffold. The nested `templateLock` values on Columns/Column
 					 * decide where editing is still allowed.
 					 */}
-					<InnerBlocks templateLock="all" />
-				</section>
-		</>
-	);
+						<InnerBlocks
+							template={ TEMPLATE }
+							templateLock="all"
+						/>
+					</section>
+			</>
+		);
 }

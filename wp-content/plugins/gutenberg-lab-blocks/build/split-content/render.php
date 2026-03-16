@@ -13,6 +13,7 @@ $layout_style           = $attributes['layoutStyle'] ?? 'split';
 $media_position_desktop = $attributes['mediaPositionDesktop'] ?? 'right';
 $media_position_mobile  = $attributes['mediaPositionMobile'] ?? 'top';
 $media_width            = $attributes['mediaWidth'] ?? '50';
+$section_height         = $attributes['sectionHeight'] ?? 'medium';
 $media_type             = $attributes['mediaType'] ?? 'image';
 $media_on_edge          = ! empty( $attributes['mediaOnEdge'] );
 $image_url              = $attributes['imageUrl'] ?? '';
@@ -26,6 +27,7 @@ $classes = array(
 	'split-content--desktop-' . sanitize_html_class( $media_position_desktop ),
 	'split-content--mobile-' . sanitize_html_class( $media_position_mobile ),
 	'split-content--width-' . sanitize_html_class( $media_width ),
+	'split-content--height-' . sanitize_html_class( $section_height ),
 	$media_on_edge ? 'split-content--edge' : 'split-content--contained',
 );
 
@@ -58,61 +60,63 @@ $gallery_images = array_values(
 <section <?php echo $wrapper_attributes; ?>>
 	<div class="split-content__grid">
 		<div class="split-content__media">
-			<?php if ( 'video' === $media_type && '' !== $video_url ) : ?>
-				<video
-					class="split-content__media-asset"
-					src="<?php echo esc_url( $video_url ); ?>"
-					autoplay
-					muted
-					loop
-					playsinline
-					preload="metadata"
-				></video>
-			<?php elseif ( 'slider' === $media_type && ! empty( $gallery_images ) ) : ?>
-				<div class="split-content__slider" data-split-content-slider>
-					<div class="split-content__slides">
-						<?php foreach ( $gallery_images as $gallery_image ) : ?>
-							<figure class="split-content__slide">
-								<img
-									class="split-content__media-asset"
-									src="<?php echo esc_url( $gallery_image['url'] ); ?>"
-									alt="<?php echo esc_attr( $gallery_image['alt'] ); ?>"
-								/>
-							</figure>
-						<?php endforeach; ?>
-					</div>
-					<?php if ( count( $gallery_images ) > 1 ) : ?>
-						<div class="split-content__slider-controls vvm-slider-controls vvm-slider-controls--bottom-right">
-							<button
-								type="button"
-								class="split-content__slider-button vvm-slider-button vvm-slider-button--prev"
-								data-split-content-prev
-								aria-label="<?php esc_attr_e( 'Previous slide', 'gutenberg-lab-blocks' ); ?>"
-							>
-								<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							</button>
-							<button
-								type="button"
-								class="split-content__slider-button vvm-slider-button vvm-slider-button--next"
-								data-split-content-next
-								aria-label="<?php esc_attr_e( 'Next slide', 'gutenberg-lab-blocks' ); ?>"
-							>
-								<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							</button>
+			<div class="split-content__media-frame">
+				<?php if ( 'video' === $media_type && '' !== $video_url ) : ?>
+					<video
+						class="split-content__media-asset"
+						src="<?php echo esc_url( $video_url ); ?>"
+						autoplay
+						muted
+						loop
+						playsinline
+						preload="metadata"
+					></video>
+				<?php elseif ( 'slider' === $media_type && ! empty( $gallery_images ) ) : ?>
+					<div class="split-content__slider" data-split-content-slider>
+						<div class="split-content__slides">
+							<?php foreach ( $gallery_images as $gallery_image ) : ?>
+								<figure class="split-content__slide">
+									<img
+										class="split-content__media-asset"
+										src="<?php echo esc_url( $gallery_image['url'] ); ?>"
+										alt="<?php echo esc_attr( $gallery_image['alt'] ); ?>"
+									/>
+								</figure>
+							<?php endforeach; ?>
 						</div>
-					<?php endif; ?>
-				</div>
-			<?php elseif ( '' !== $image_url ) : ?>
-				<img
-					class="split-content__media-asset"
-					src="<?php echo esc_url( $image_url ); ?>"
-					alt="<?php echo esc_attr( $image_alt ); ?>"
-				/>
-			<?php else : ?>
-				<div class="split-content__media-placeholder">
-					<p><?php esc_html_e( 'Select a media item to complete this layout.', 'gutenberg-lab-blocks' ); ?></p>
-				</div>
-			<?php endif; ?>
+						<?php if ( count( $gallery_images ) > 1 ) : ?>
+							<div class="split-content__slider-controls vvm-slider-controls vvm-slider-controls--bottom-right">
+								<button
+									type="button"
+									class="split-content__slider-button vvm-slider-button vvm-slider-button--prev"
+									data-split-content-prev
+									aria-label="<?php esc_attr_e( 'Previous slide', 'gutenberg-lab-blocks' ); ?>"
+								>
+									<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</button>
+								<button
+									type="button"
+									class="split-content__slider-button vvm-slider-button vvm-slider-button--next"
+									data-split-content-next
+									aria-label="<?php esc_attr_e( 'Next slide', 'gutenberg-lab-blocks' ); ?>"
+								>
+									<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</button>
+							</div>
+						<?php endif; ?>
+					</div>
+				<?php elseif ( '' !== $image_url ) : ?>
+					<img
+						class="split-content__media-asset"
+						src="<?php echo esc_url( $image_url ); ?>"
+						alt="<?php echo esc_attr( $image_alt ); ?>"
+					/>
+				<?php else : ?>
+					<div class="split-content__media-placeholder">
+						<p><?php esc_html_e( 'Select a media item to complete this layout.', 'gutenberg-lab-blocks' ); ?></p>
+					</div>
+				<?php endif; ?>
+			</div>
 		</div>
 		<div class="split-content__content">
 			<div class="split-content__content-flow">

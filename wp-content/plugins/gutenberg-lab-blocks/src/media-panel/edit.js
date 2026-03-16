@@ -56,6 +56,8 @@ const ALLOWED_INNER_BLOCKS = [
 	'core/post-title',
 	// The package excerpt is native post data, so this stays dynamic in templates.
 	'core/post-excerpt',
+	// Package layouts often need the structured price + CTA block in the hero.
+	'gutenberg-lab-blocks/package-meta',
 	'core/paragraph',
 	'core/list',
 	'core/buttons',

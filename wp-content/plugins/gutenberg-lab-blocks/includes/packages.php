@@ -91,6 +91,100 @@ function gutenberg_lab_blocks_get_package_meta_schema() {
  * We keep this as a real post type so editors get native revisioning, URLs,
  * REST support, and the built-in excerpt UI without inventing custom tables.
  */
+function gutenberg_lab_blocks_get_packages_post_template() {
+	return array(
+		array(
+			'gutenberg-lab-blocks/media-panel',
+			array(
+				'align'            => 'full',
+				'containerHeight'  => 'large',
+				'contentPosition'  => 'center-center',
+				'contentWidth'     => 'md',
+			),
+			array(
+				array(
+					'core/heading',
+					array(
+						'level'       => 1,
+						'placeholder' => __( 'Add the package hero heading...', 'gutenberg-lab-blocks' ),
+					)
+				),
+				array(
+					'core/paragraph',
+					array(
+						'placeholder' => __( 'Add the hero summary text...', 'gutenberg-lab-blocks' ),
+					)
+				),
+				array(
+					'gutenberg-lab-blocks/package-meta',
+					array(
+						'variant' => 'hero',
+					)
+				),
+			),
+		),
+		array(
+			'gutenberg-lab-blocks/basic-content',
+			array(
+				'withSidebar'      => false,
+				'contentWidth'     => '100_percent',
+				'contentAlignment' => 'left',
+				'spacingTop'       => 'medium',
+				'spacingBottom'    => 'medium',
+			),
+		),
+		array(
+			'gutenberg-lab-blocks/packages-display',
+			array(
+				'heading'         => __( 'More Day Spa Packages', 'gutenberg-lab-blocks' ),
+				'introText'       => __( 'Explore other restorative day-away experiences built from the same shared package system.', 'gutenberg-lab-blocks' ),
+				'displayMode'     => 'carousel',
+				'count'           => 6,
+				'columns'         => '3',
+				'excludeCurrent'  => true,
+				'showPackageType' => true,
+				'showExcerpt'     => true,
+				'showPrice'       => true,
+				'showCta'         => false,
+				'align'           => 'wide',
+			),
+		),
+		array(
+			'core/buttons',
+			array(
+				'layout' => array(
+					'type'            => 'flex',
+					'justifyContent'  => 'center',
+				),
+				'style'  => array(
+					'spacing' => array(
+						'margin' => array(
+							'top'    => 'var:preset|spacing|lg',
+							'bottom' => 'var:preset|spacing|xl',
+						),
+					),
+				),
+			),
+			array(
+				array(
+					'core/button',
+					array(
+						'text'      => __( 'View All Packages', 'gutenberg-lab-blocks' ),
+						'url'       => '/packages/',
+						'className' => 'is-style-vvm-primary',
+					)
+				),
+			),
+		),
+	);
+}
+
+/**
+ * Registers the Packages content type used by block-driven listings.
+ *
+ * We keep this as a real post type so editors get native revisioning, URLs,
+ * REST support, and the built-in excerpt UI without inventing custom tables.
+ */
 function gutenberg_lab_blocks_register_packages_post_type() {
 	register_post_type(
 		'packages',
@@ -123,7 +217,9 @@ function gutenberg_lab_blocks_register_packages_post_type() {
 			),
 			'public'       => true,
 			'show_in_rest' => true,
-			'has_archive'  => true,
+				// Designers expect the Packages landing experience to live under
+				// Pages, so a real Page owns `/packages/` instead of the CPT archive.
+				'has_archive'  => false,
 			'menu_icon'    => 'dashicons-products',
 			'rewrite'      => array(
 				'slug' => 'packages',
@@ -136,6 +232,7 @@ function gutenberg_lab_blocks_register_packages_post_type() {
 				'page-attributes',
 				'revisions',
 			),
+			'template'     => gutenberg_lab_blocks_get_packages_post_template(),
 		)
 	);
 }

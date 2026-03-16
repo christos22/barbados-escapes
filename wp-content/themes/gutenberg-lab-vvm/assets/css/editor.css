@@ -29,8 +29,41 @@ body {
 }
 
 .editor-styles-wrapper .wp-site-blocks > main.wp-block-group > .alignfull,
-.editor-styles-wrapper .wp-site-blocks > .wp-block-group > main.wp-block-group > .alignfull {
+.editor-styles-wrapper .wp-site-blocks > .wp-block-group > main.wp-block-group > .alignfull,
+.editor-styles-wrapper .wp-site-blocks > main.wp-block-group > .wp-block-post-content > .alignfull,
+.editor-styles-wrapper
+	.wp-site-blocks
+	> .wp-block-group
+	> main.wp-block-group
+	> .wp-block-post-content
+	> .alignfull {
 	margin-inline: calc(var(--wp--custom--layout--gutter-current) * -1);
+}
+
+.editor-styles-wrapper .block-editor-block-list__layout p a:not(.wp-element-button),
+.editor-styles-wrapper .block-editor-block-list__layout li a:not(.wp-element-button),
+.editor-styles-wrapper .block-editor-block-list__layout .has-xs-font-size a:not(.wp-element-button) {
+	color: #0f2d23;
+	text-decoration-line: underline;
+	text-decoration-color: currentColor;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.14em;
+	transition:
+		color 0.2s ease,
+		text-decoration-color 0.2s ease,
+		text-decoration-thickness 0.2s ease,
+		text-underline-offset 0.2s ease;
+}
+
+.editor-styles-wrapper .block-editor-block-list__layout p a:not(.wp-element-button):hover,
+.editor-styles-wrapper .block-editor-block-list__layout p a:not(.wp-element-button):focus-visible,
+.editor-styles-wrapper .block-editor-block-list__layout li a:not(.wp-element-button):hover,
+.editor-styles-wrapper .block-editor-block-list__layout li a:not(.wp-element-button):focus-visible,
+.editor-styles-wrapper .block-editor-block-list__layout .has-xs-font-size a:not(.wp-element-button):hover,
+.editor-styles-wrapper .block-editor-block-list__layout .has-xs-font-size a:not(.wp-element-button):focus-visible {
+	color: #013223;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.2em;
 }
 
 .editor-styles-wrapper .wp-block-button.is-style-vvm-primary .wp-block-button__link,
@@ -50,6 +83,23 @@ body {
 	text-decoration: none !important;
 	text-transform: none;
 	box-shadow: none;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease,
+		border-color 0.2s ease,
+		box-shadow 0.2s ease,
+		transform 0.12s ease;
+}
+
+.editor-styles-wrapper .wp-block-button.is-style-vvm-primary .wp-block-button__link:hover,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-primary .wp-block-button__link:focus-visible,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-primary .wp-element-button:hover,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-primary .wp-element-button:focus-visible {
+	background: #0d2b18 !important;
+	border-color: #0d2b18;
+	color: #ffffff !important;
+	box-shadow: 0 10px 20px rgba(15, 45, 35, 0.14);
+	transform: translateY(-1px);
 }
 
 .editor-styles-wrapper .wp-block-button.is-style-vvm-secondary .wp-block-button__link,
@@ -69,6 +119,23 @@ body {
 	text-decoration: none !important;
 	text-transform: none;
 	box-shadow: none;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease,
+		border-color 0.2s ease,
+		box-shadow 0.2s ease,
+		transform 0.12s ease;
+}
+
+.editor-styles-wrapper .wp-block-button.is-style-vvm-secondary .wp-block-button__link:hover,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-secondary .wp-block-button__link:focus-visible,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-secondary .wp-element-button:hover,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-secondary .wp-element-button:focus-visible {
+	background: #0d2b18 !important;
+	border-color: #0d2b18;
+	color: #ffffff !important;
+	box-shadow: 0 10px 20px rgba(15, 45, 35, 0.12);
+	transform: translateY(-1px);
 }
 
 .editor-styles-wrapper .wp-block-button.is-style-vvm-link-primary .wp-block-button__link,
@@ -87,6 +154,10 @@ body {
 	letter-spacing: 0.02em;
 	text-decoration: underline !important;
 	text-transform: none;
+	transition:
+		color 0.2s ease,
+		text-decoration-color 0.2s ease,
+		transform 0.2s ease;
 }
 
 .editor-styles-wrapper .wp-block-button.is-style-vvm-link-primary .wp-block-button__link,
@@ -97,6 +168,18 @@ body {
 .editor-styles-wrapper .wp-block-button.is-style-vvm-link-secondary .wp-block-button__link,
 .editor-styles-wrapper .wp-block-button.is-style-vvm-link-secondary .wp-element-button {
 	color: #ffffff !important;
+}
+
+.editor-styles-wrapper .wp-block-button.is-style-vvm-link-primary .wp-block-button__link:hover,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-link-primary .wp-block-button__link:focus-visible,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-link-primary .wp-element-button:hover,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-link-primary .wp-element-button:focus-visible,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-link-secondary .wp-block-button__link:hover,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-link-secondary .wp-block-button__link:focus-visible,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-link-secondary .wp-element-button:hover,
+.editor-styles-wrapper .wp-block-button.is-style-vvm-link-secondary .wp-element-button:focus-visible {
+	color: #013223 !important;
+	text-decoration: none !important;
 }
 
 .editor-styles-wrapper .vvm-packages-archive-promo.wp-block-gutenberg-lab-blocks-split-content.split-content--layout-overlap {

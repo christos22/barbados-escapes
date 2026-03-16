@@ -28,6 +28,10 @@
 			"type": "string",
 			"default": "left"
 		},
+		"contentTextAlignment": {
+			"type": "string",
+			"default": "left"
+		},
 		"sidebarPosition": {
 			"type": "string",
 			"default": "right"

@@ -25,6 +25,10 @@
 			"type": "string",
 			"default": "50"
 		},
+		"sectionHeight": {
+			"type": "string",
+			"default": "medium"
+		},
 		"mediaType": {
 			"type": "string",
 			"default": "image"

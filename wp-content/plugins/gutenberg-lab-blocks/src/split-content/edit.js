@@ -12,6 +12,7 @@ import {
 	SelectControl,
 	ToggleControl,
 } from '@wordpress/components';
+import { useEffect, useRef } from '@wordpress/element';
 
 import './editor.scss';
 
@@ -35,6 +36,11 @@ const MEDIA_WIDTH_OPTIONS = [
 	{ label: __( '25%', 'gutenberg-lab-blocks' ), value: '25' },
 	{ label: __( '50%', 'gutenberg-lab-blocks' ), value: '50' },
 	{ label: __( '75%', 'gutenberg-lab-blocks' ), value: '75' },
+];
+
+const SECTION_HEIGHT_OPTIONS = [
+	{ label: __( 'Small', 'gutenberg-lab-blocks' ), value: 'small' },
+	{ label: __( 'Medium', 'gutenberg-lab-blocks' ), value: 'medium' },
 ];
 
 const MEDIA_TYPE_OPTIONS = [
@@ -106,6 +112,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		mediaPositionDesktop,
 		mediaPositionMobile,
 		mediaWidth,
+		sectionHeight,
 		mediaType,
 		mediaOnEdge,
 		imageId,
@@ -115,19 +122,104 @@ export default function Edit( { attributes, setAttributes } ) {
 		videoUrl,
 		galleryImages,
 	} = attributes;
+	const blockRef = useRef();
 
 	const blockProps = useBlockProps( {
+		ref: blockRef,
 		className: [
 			'split-content',
 			`split-content--layout-${ layoutStyle }`,
 			`split-content--desktop-${ mediaPositionDesktop }`,
 			`split-content--mobile-${ mediaPositionMobile }`,
 			`split-content--width-${ mediaWidth }`,
+			`split-content--height-${ sectionHeight }`,
 			mediaOnEdge ? 'split-content--edge' : 'split-content--contained',
 		]
 			.filter( Boolean )
 			.join( ' ' ),
 	} );
+
+	useEffect( () => {
+		const blockElement = blockRef.current;
+
+		if ( ! blockElement ) {
+			return undefined;
+		}
+
+		const syncMediaHeight = () => {
+			const mediaFrame = blockElement.querySelector( '.split-content__media-frame' );
+			const contentFlow = blockElement.querySelector( '.split-content__content-flow' );
+			const isDesktopSplitLayout =
+				blockElement.classList.contains( 'split-content--layout-split' ) &&
+				window.innerWidth > 1023;
+
+			if ( ! mediaFrame || ! contentFlow || ! isDesktopSplitLayout ) {
+				blockElement.style.removeProperty( '--split-content-media-target-height' );
+				return;
+			}
+
+			const computedStyles = window.getComputedStyle( blockElement );
+			const baselineHeight =
+				parseFloat(
+					computedStyles.getPropertyValue( '--split-content-media-min-height' )
+				) || 0;
+			const overhangHeight =
+				parseFloat(
+					computedStyles.getPropertyValue( '--split-content-media-overhang' )
+				) || 0;
+			const contentHeight = contentFlow.getBoundingClientRect().height;
+			const targetHeight = Math.max(
+				baselineHeight,
+				Math.ceil( contentHeight + overhangHeight )
+			);
+
+			blockElement.style.setProperty(
+				'--split-content-media-target-height',
+				`${ targetHeight }px`
+			);
+		};
+
+		const scheduleSync = () => {
+			window.requestAnimationFrame( syncMediaHeight );
+		};
+
+		scheduleSync();
+
+		if ( 'undefined' === typeof ResizeObserver ) {
+			window.addEventListener( 'resize', scheduleSync );
+
+			return () => {
+				window.removeEventListener( 'resize', scheduleSync );
+			};
+		}
+
+		const resizeObserver = new ResizeObserver( scheduleSync );
+		resizeObserver.observe( blockElement );
+
+		const contentFlow = blockElement.querySelector( '.split-content__content-flow' );
+
+		if ( contentFlow ) {
+			resizeObserver.observe( contentFlow );
+		}
+
+		window.addEventListener( 'resize', scheduleSync );
+
+		return () => {
+			resizeObserver.disconnect();
+			window.removeEventListener( 'resize', scheduleSync );
+		};
+	}, [
+		layoutStyle,
+		mediaPositionDesktop,
+		mediaPositionMobile,
+		mediaWidth,
+		sectionHeight,
+		mediaType,
+		mediaOnEdge,
+		imageUrl,
+		videoUrl,
+		galleryImages,
+	] );
 
 	const innerBlocksProps = useInnerBlocksProps(
 		{
@@ -305,6 +397,16 @@ export default function Edit( { attributes, setAttributes } ) {
 							setAttributes( { mediaPositionMobile: value } )
 						}
 					/>
+					<SelectControl
+						label={ __( 'Section Height', 'gutenberg-lab-blocks' ) }
+						value={ sectionHeight }
+						options={ SECTION_HEIGHT_OPTIONS }
+						onChange={ ( value ) => setAttributes( { sectionHeight: value } ) }
+						help={ __(
+							'Sets the baseline media height. If the content grows taller, the media will still overhang it slightly on desktop split layouts.',
+							'gutenberg-lab-blocks'
+						) }
+					/>
 					{ 'split' === layoutStyle && (
 						<>
 							<SelectControl
@@ -365,7 +467,9 @@ export default function Edit( { attributes, setAttributes } ) {
 						<div className="split-content__editor-actions">
 							{ renderMediaUploader() }
 						</div>
-						{ renderMediaPreview() }
+						<div className="split-content__media-frame">
+							{ renderMediaPreview() }
+						</div>
 					</div>
 					<div className="split-content__content">
 						<div { ...innerBlocksProps } />
