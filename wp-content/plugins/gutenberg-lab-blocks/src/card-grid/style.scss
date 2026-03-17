@@ -1,9 +1,4 @@
 .wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid {
-	// Provide a block-level default gap so this layout does not inherit the
-	// site root's zero block gap. When editors change "Block spacing" in the
-	// sidebar, WordPress writes an inline --wp--style--block-gap value that
-	// overrides this default automatically.
-	--wp--style--block-gap: var(--wp--preset--spacing--lg);
 	--vvm-card-grid-card-gap: var(--wp--preset--spacing--sm);
 	--vvm-card-grid-card-padding: var(--wp--preset--spacing--md);
 	--vvm-card-grid-visible-columns: 1;
@@ -134,11 +129,11 @@
 		.vvm-card-grid__items > * {
 			flex: 0 0
 				calc(
-					(100% - (var(--vvm-card-grid-visible-columns) - 1) * var(--wp--style--block-gap))
+					(100% - (var(--vvm-card-grid-visible-columns) - 1) * var(--wp--style--block-gap, var(--wp--preset--spacing--lg)))
 						/ var(--vvm-card-grid-visible-columns)
 				);
 			max-width: calc(
-				(100% - (var(--vvm-card-grid-visible-columns) - 1) * var(--wp--style--block-gap))
+				(100% - (var(--vvm-card-grid-visible-columns) - 1) * var(--wp--style--block-gap, var(--wp--preset--spacing--lg)))
 					/ var(--vvm-card-grid-visible-columns)
 			);
 		}
