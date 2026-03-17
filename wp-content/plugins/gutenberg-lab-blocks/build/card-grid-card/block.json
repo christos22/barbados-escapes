@@ -25,7 +25,16 @@
   },
   "supports": {
     "html": false,
-    "reusable": false
+    "reusable": false,
+    "color": {
+      "background": true
+    },
+    "border": {
+      "color": true,
+      "radius": true,
+      "style": true,
+      "width": true
+    }
   },
   "textdomain": "gutenberg-lab-blocks",
   "editorScript": "file:./index.js"
