@@ -18,4 +18,4 @@ $wrapper_attributes = get_block_wrapper_attributes(
 	)
 );
 
-echo gutenberg_lab_blocks_render_packages_display_markup( $attributes, $block ?? null, $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+echo gutenberg_lab_blocks_render_packages_display_markup( $attributes, $block ?? null, $wrapper_attributes, $content ?? '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped

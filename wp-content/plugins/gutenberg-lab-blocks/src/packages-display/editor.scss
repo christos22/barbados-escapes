@@ -1,8 +1,14 @@
 .vvm-packages-display-editor-preview {
+	display: grid;
+	gap: clamp(1.25rem, 2vw, 2rem);
 	padding: 0;
 }
 
-.vvm-packages-display-editor-preview .components-placeholder,
-.vvm-packages-display-editor-preview .block-editor-warning {
+.vvm-packages-display-editor-preview__results .components-placeholder,
+.vvm-packages-display-editor-preview__results .block-editor-warning {
 	margin: 0;
+}
+
+.vvm-packages-display-editor-preview__results .vvm-packages-display__header {
+	display: none;
 }

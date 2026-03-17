@@ -14,22 +14,27 @@
 	max-width: 48rem;
 }
 
-.vvm-packages-display__heading,
-.vvm-packages-display__intro {
+.vvm-packages-display__header > * {
 	margin: 0;
 }
 
-.vvm-packages-display__heading {
+.vvm-packages-display__heading,
+.vvm-packages-display__header .wp-block-heading {
 	color: var(--wp--preset--color--forest);
 	font-size: clamp(2rem, 4vw, 3rem);
 	font-weight: 300;
 	line-height: 1.1;
 }
 
-.vvm-packages-display__intro {
+.vvm-packages-display__intro,
+.vvm-packages-display__header p {
 	color: rgba(15, 45, 35, 0.82);
 	font-size: 1.05rem;
 	max-width: 42rem;
+}
+
+.vvm-packages-display__header .wp-block-buttons {
+	margin: 0;
 }
 
 .vvm-packages-display__carousel {

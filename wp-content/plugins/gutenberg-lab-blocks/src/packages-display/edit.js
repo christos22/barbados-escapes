@@ -1,12 +1,19 @@
-import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { createBlock } from '@wordpress/blocks';
+import {
+	InnerBlocks,
+	InspectorControls,
+	useBlockProps,
+	useInnerBlocksProps,
+	store as blockEditorStore,
+} from '@wordpress/block-editor';
 import {
 	PanelBody,
 	RangeControl,
 	SelectControl,
-	TextControl,
-	TextareaControl,
 	ToggleControl,
 } from '@wordpress/components';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import ServerSideRender from '@wordpress/server-side-render';
 
@@ -22,7 +29,35 @@ const DISPLAY_MODE_OPTIONS = [
 	{ label: __( 'Carousel', 'gutenberg-lab-blocks' ), value: 'carousel' },
 ];
 
-export default function Edit( { attributes, setAttributes } ) {
+const ALLOWED_BLOCKS = [ 'core/heading', 'core/paragraph', 'core/buttons' ];
+
+const TEMPLATE = [
+	[
+		'core/heading',
+		{
+			level: 2,
+			placeholder: __( 'Packages heading', 'gutenberg-lab-blocks' ),
+		},
+	],
+	[
+		'core/paragraph',
+		{
+			placeholder: __( 'Add an optional introduction.', 'gutenberg-lab-blocks' ),
+		},
+	],
+];
+
+function hasMeaningfulInnerBlocks( innerBlocks = [] ) {
+	return innerBlocks.some( ( innerBlock ) => {
+		if ( 'core/heading' === innerBlock.name || 'core/paragraph' === innerBlock.name ) {
+			return Boolean( innerBlock.attributes.content );
+		}
+
+		return true;
+	} );
+}
+
+export default function Edit( { attributes, setAttributes, clientId } ) {
 	const {
 		heading,
 		introText,
@@ -35,24 +70,74 @@ export default function Edit( { attributes, setAttributes } ) {
 		showPrice,
 		showCta,
 	} = attributes;
+	const { replaceInnerBlocks } = useDispatch( blockEditorStore );
+	const innerBlocks = useSelect(
+		( select ) => select( blockEditorStore ).getBlocks( clientId ),
+		[ clientId ]
+	);
+
+	useEffect( () => {
+		if (
+			hasMeaningfulInnerBlocks( innerBlocks ) ||
+			( ! heading && ! introText )
+		) {
+			return;
+		}
+
+		const migratedBlocks = [];
+
+		// Older block instances stored their marketing copy in attributes.
+		// Convert that copy into real nested blocks the first time they load.
+		if ( heading ) {
+			migratedBlocks.push(
+				createBlock( 'core/heading', {
+					level: 2,
+					content: heading,
+				} )
+			);
+		}
+
+		if ( introText ) {
+			migratedBlocks.push(
+				createBlock( 'core/paragraph', {
+					content: introText,
+				} )
+			);
+		}
+
+		replaceInnerBlocks( clientId, migratedBlocks, false );
+		setAttributes( {
+			heading: '',
+			introText: '',
+		} );
+	}, [
+		clientId,
+		heading,
+		innerBlocks,
+		introText,
+		replaceInnerBlocks,
+		setAttributes,
+	] );
+
 	const blockProps = useBlockProps( {
 		className: `vvm-packages-display-editor-preview vvm-packages-display-editor-preview--${ displayMode } vvm-packages-display-editor-preview--columns-${ columns }`,
 	} );
+	const innerBlocksProps = useInnerBlocksProps(
+		{
+			className: 'vvm-packages-display__header',
+		},
+		{
+			allowedBlocks: ALLOWED_BLOCKS,
+			template: TEMPLATE,
+			templateLock: false,
+			renderAppender: InnerBlocks.ButtonBlockAppender,
+		}
+	);
 
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Query Settings', 'gutenberg-lab-blocks' ) }>
-					<TextControl
-						label={ __( 'Heading', 'gutenberg-lab-blocks' ) }
-						value={ heading }
-						onChange={ ( value ) => setAttributes( { heading: value } ) }
-					/>
-					<TextareaControl
-						label={ __( 'Intro Text', 'gutenberg-lab-blocks' ) }
-						value={ introText }
-						onChange={ ( value ) => setAttributes( { introText: value } ) }
-					/>
 					<SelectControl
 						label={ __( 'Display Mode', 'gutenberg-lab-blocks' ) }
 						value={ displayMode }
@@ -102,12 +187,20 @@ export default function Edit( { attributes, setAttributes } ) {
 				</PanelBody>
 			</InspectorControls>
 
-			<div { ...blockProps }>
-				<ServerSideRender
-					block="gutenberg-lab-blocks/packages-display"
-					attributes={ attributes }
-				/>
-			</div>
+			<section { ...blockProps }>
+				<div { ...innerBlocksProps } />
+				<div className="vvm-packages-display-editor-preview__results">
+					<ServerSideRender
+						block="gutenberg-lab-blocks/packages-display"
+						attributes={ {
+							...attributes,
+							heading: '',
+							introText: '',
+							suppressHeader: true,
+						} }
+					/>
+				</div>
+			</section>
 		</>
 	);
 }

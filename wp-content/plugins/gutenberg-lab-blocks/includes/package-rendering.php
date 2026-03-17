@@ -365,9 +365,10 @@ function gutenberg_lab_blocks_render_package_card( $package_id, $args = array() 
  * @param array         $attributes         Block attributes.
  * @param WP_Block|null $block              Current block instance.
  * @param string        $wrapper_attributes Serialized wrapper attributes.
+ * @param string        $header_markup      Saved nested block markup.
  * @return string
  */
-function gutenberg_lab_blocks_render_packages_display_markup( $attributes, $block = null, $wrapper_attributes = '' ) {
+function gutenberg_lab_blocks_render_packages_display_markup( $attributes, $block = null, $wrapper_attributes = '', $header_markup = '' ) {
 	$attributes = wp_parse_args(
 		$attributes,
 		array(
@@ -381,10 +382,12 @@ function gutenberg_lab_blocks_render_packages_display_markup( $attributes, $bloc
 			'showExcerpt'     => true,
 			'showPrice'       => true,
 			'showCta'         => false,
+			'suppressHeader'  => false,
 		)
 	);
 
 	$heading           = trim( (string) $attributes['heading'] );
+	$header_markup     = trim( (string) $header_markup );
 	$intro_text        = trim( (string) $attributes['introText'] );
 	$count             = max( 1, (int) $attributes['count'] );
 	$columns           = in_array( (string) $attributes['columns'], array( '2', '3' ), true ) ? (string) $attributes['columns'] : '3';
@@ -394,6 +397,7 @@ function gutenberg_lab_blocks_render_packages_display_markup( $attributes, $bloc
 	$show_excerpt      = ! empty( $attributes['showExcerpt'] );
 	$show_price        = ! empty( $attributes['showPrice'] );
 	$show_cta          = ! empty( $attributes['showCta'] );
+	$suppress_header   = ! empty( $attributes['suppressHeader'] );
 	$current_id        = $exclude_current ? gutenberg_lab_blocks_resolve_package_id( $block ) : 0;
 	$visible_columns   = (int) $columns;
 
@@ -432,14 +436,18 @@ function gutenberg_lab_blocks_render_packages_display_markup( $attributes, $bloc
 	ob_start();
 	?>
 	<section <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-		<?php if ( '' !== $heading || '' !== $intro_text ) : ?>
+		<?php if ( ! $suppress_header && ( '' !== $header_markup || '' !== $heading || '' !== $intro_text ) ) : ?>
 			<header class="vvm-packages-display__header">
-				<?php if ( '' !== $heading ) : ?>
-					<h2 class="vvm-packages-display__heading"><?php echo esc_html( $heading ); ?></h2>
-				<?php endif; ?>
+				<?php if ( '' !== $header_markup ) : ?>
+					<?php echo $header_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php else : ?>
+					<?php if ( '' !== $heading ) : ?>
+						<h2 class="vvm-packages-display__heading"><?php echo esc_html( $heading ); ?></h2>
+					<?php endif; ?>
 
-				<?php if ( '' !== $intro_text ) : ?>
-					<p class="vvm-packages-display__intro"><?php echo esc_html( $intro_text ); ?></p>
+					<?php if ( '' !== $intro_text ) : ?>
+						<p class="vvm-packages-display__intro"><?php echo esc_html( $intro_text ); ?></p>
+					<?php endif; ?>
 				<?php endif; ?>
 			</header>
 		<?php endif; ?>
