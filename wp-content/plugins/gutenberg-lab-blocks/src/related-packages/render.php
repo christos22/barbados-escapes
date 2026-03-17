@@ -27,5 +27,6 @@ echo gutenberg_lab_blocks_render_packages_display_markup(
 		'showCta'         => false,
 	),
 	$block ?? null,
-	$wrapper_attributes
+	$wrapper_attributes,
+	$content ?? ''
 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped

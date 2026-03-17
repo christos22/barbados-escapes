@@ -1,12 +1,13 @@
 .vvm-related-packages-placeholder {
+	display: grid;
+	gap: clamp(1.25rem, 2vw, 2rem);
 	border: 1px dashed rgba(1, 50, 35, 0.3);
 	padding: 1.5rem;
 	background: rgba(223, 229, 225, 0.25);
 }
 
-.vvm-related-packages-placeholder__heading,
-.vvm-related-packages-placeholder__intro {
-	margin-top: 0;
+.vvm-related-packages__header > * {
+	margin: 0;
 }
 
 .vvm-related-packages-placeholder__grid {

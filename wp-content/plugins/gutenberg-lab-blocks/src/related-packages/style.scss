@@ -14,14 +14,14 @@
 	max-width: 48rem;
 }
 
-.vvm-related-packages__heading,
-.vvm-related-packages__intro,
+.vvm-related-packages__header > *,
 .vvm-related-packages .vvm-packages-display__heading,
 .vvm-related-packages .vvm-packages-display__intro {
 	margin: 0;
 }
 
 .vvm-related-packages__heading,
+.vvm-related-packages__header .wp-block-heading,
 .vvm-related-packages .vvm-packages-display__heading {
 	color: var(--wp--preset--color--forest);
 	font-size: clamp(2rem, 4vw, 3rem);
@@ -30,10 +30,15 @@
 }
 
 .vvm-related-packages__intro,
+.vvm-related-packages__header p,
 .vvm-related-packages .vvm-packages-display__intro {
 	color: rgba(15, 45, 35, 0.82);
 	font-size: 1.05rem;
 	max-width: 42rem;
+}
+
+.vvm-related-packages__header .wp-block-buttons {
+	margin: 0;
 }
 
 .vvm-related-packages__grid,

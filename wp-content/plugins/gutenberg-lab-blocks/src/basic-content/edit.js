@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { createBlock } from '@wordpress/blocks';
 import {
 	InnerBlocks,
 	InspectorControls,
@@ -92,24 +93,6 @@ const TEMPLATE = [
 					allowedBlocks: SMALL_ALLOWED_BLOCKS,
 					templateLock: false,
 				},
-				[
-					[
-						'core/heading',
-						{
-							level: 2,
-							placeholder: __( 'Add the main heading...', 'gutenberg-lab-blocks' ),
-						},
-					],
-					[
-						'core/paragraph',
-						{
-							placeholder: __(
-								'Add the main content...',
-								'gutenberg-lab-blocks'
-							),
-						},
-					],
-				],
 			],
 			[
 				'core/column',
@@ -119,28 +102,34 @@ const TEMPLATE = [
 					allowedBlocks: SMALL_ALLOWED_BLOCKS,
 					templateLock: false,
 				},
-				[
-					[
-						'core/heading',
-						{
-							level: 3,
-							placeholder: __( 'Add the sidebar heading...', 'gutenberg-lab-blocks' ),
-						},
-					],
-					[
-						'core/paragraph',
-						{
-							placeholder: __(
-								'Add the sidebar content...',
-								'gutenberg-lab-blocks'
-							),
-						},
-					],
-				],
 			],
 		],
 	],
 ];
+
+function createMainColumnStarterBlocks() {
+	return [
+		createBlock( 'core/heading', {
+			level: 2,
+			placeholder: __( 'Add the main heading...', 'gutenberg-lab-blocks' ),
+		} ),
+		createBlock( 'core/paragraph', {
+			placeholder: __( 'Add the main content...', 'gutenberg-lab-blocks' ),
+		} ),
+	];
+}
+
+function createSidebarStarterBlocks() {
+	return [
+		createBlock( 'core/heading', {
+			level: 3,
+			placeholder: __( 'Add the sidebar heading...', 'gutenberg-lab-blocks' ),
+		} ),
+		createBlock( 'core/paragraph', {
+			placeholder: __( 'Add the sidebar content...', 'gutenberg-lab-blocks' ),
+		} ),
+	];
+}
 
 function getLegacyPaddingValue( spacingValue ) {
 	return LEGACY_PADDING_VALUES[ spacingValue ] || '';
@@ -257,10 +246,13 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		backgroundColor,
 		backgroundImageId,
 		backgroundImageUrl,
+		hasInitializedTemplate,
 		hideSection,
 		style = {},
 	} = attributes;
-	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+	const { replaceInnerBlocks, updateBlockAttributes } = useDispatch(
+		blockEditorStore
+	);
 	const innerBlocks = useSelect(
 		( select ) => select( blockEditorStore ).getBlocks( clientId ),
 		[ clientId ]
@@ -295,7 +287,41 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 				} );
 			}
 		} );
-	}, [ innerBlocks, updateBlockAttributes ] );
+
+		const [ mainColumnBlock, sidebarColumnBlock ] = columnsBlock.innerBlocks;
+
+		if ( ! mainColumnBlock || ! sidebarColumnBlock || hasInitializedTemplate ) {
+			return;
+		}
+
+		// Seed starter content only for brand-new blocks. Existing authored
+		// content must not be synchronized against the template subtree.
+		if (
+			mainColumnBlock.innerBlocks.length > 0 ||
+			sidebarColumnBlock.innerBlocks.length > 0
+		) {
+			setAttributes( { hasInitializedTemplate: true } );
+			return;
+		}
+
+		replaceInnerBlocks(
+			mainColumnBlock.clientId,
+			createMainColumnStarterBlocks(),
+			false
+		);
+		replaceInnerBlocks(
+			sidebarColumnBlock.clientId,
+			createSidebarStarterBlocks(),
+			false
+		);
+		setAttributes( { hasInitializedTemplate: true } );
+	}, [
+		hasInitializedTemplate,
+		innerBlocks,
+		replaceInnerBlocks,
+		setAttributes,
+		updateBlockAttributes,
+	] );
 
 	useEffect( () => {
 		const migratedStyle = getMigratedStyle( style, {
