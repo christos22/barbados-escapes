@@ -196,6 +196,7 @@
 			},
 			"gutenberg-lab-blocks/split-content": {
 				"spacing": {
+					"blockGap": "clamp(0.75rem, 1.5vw, 1.25rem)",
 					"margin": {
 						"top": "var(--wp--preset--spacing--section-md)",
 						"bottom": "var(--wp--preset--spacing--section-md)"

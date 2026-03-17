@@ -14,14 +14,6 @@
     "query"
   ],
   "attributes": {
-    "heading": {
-      "type": "string",
-      "default": ""
-    },
-    "introText": {
-      "type": "string",
-      "default": ""
-    },
     "displayMode": {
       "type": "string",
       "default": "grid"

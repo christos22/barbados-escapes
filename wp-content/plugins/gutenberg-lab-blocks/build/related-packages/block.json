@@ -8,14 +8,6 @@
   "icon": "screenoptions",
   "description": "Queries and renders package cards for archive or related sections.",
   "attributes": {
-    "heading": {
-      "type": "string",
-      "default": "More Packages"
-    },
-    "introText": {
-      "type": "string",
-      "default": ""
-    },
     "count": {
       "type": "number",
       "default": 3

@@ -129,15 +129,11 @@ function gutenberg_lab_blocks_get_packages_post_template() {
 				'withSidebar'      => false,
 				'contentWidth'     => '100_percent',
 				'contentAlignment' => 'left',
-				'spacingTop'       => 'medium',
-				'spacingBottom'    => 'medium',
 			),
 		),
 		array(
 			'gutenberg-lab-blocks/packages-display',
 			array(
-				'heading'         => __( 'More Day Spa Packages', 'gutenberg-lab-blocks' ),
-				'introText'       => __( 'Explore other restorative day-away experiences built from the same shared package system.', 'gutenberg-lab-blocks' ),
 				'displayMode'     => 'carousel',
 				'count'           => 6,
 				'columns'         => '3',
@@ -147,6 +143,21 @@ function gutenberg_lab_blocks_get_packages_post_template() {
 				'showPrice'       => true,
 				'showCta'         => false,
 				'align'           => 'wide',
+			),
+			array(
+				array(
+					'core/heading',
+					array(
+						'level'   => 2,
+						'content' => __( 'More Day Spa Packages', 'gutenberg-lab-blocks' ),
+					)
+				),
+				array(
+					'core/paragraph',
+					array(
+						'content' => __( 'Explore other restorative day-away experiences built from the same shared package system.', 'gutenberg-lab-blocks' ),
+					)
+				),
 			),
 		),
 		array(

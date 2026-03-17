@@ -1,10 +1,8 @@
-import { createBlock } from '@wordpress/blocks';
 import {
 	InnerBlocks,
 	InspectorControls,
 	useBlockProps,
 	useInnerBlocksProps,
-	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -12,8 +10,6 @@ import {
 	SelectControl,
 	ToggleControl,
 } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import ServerSideRender from '@wordpress/server-side-render';
 
@@ -47,20 +43,8 @@ const TEMPLATE = [
 	],
 ];
 
-function hasMeaningfulInnerBlocks( innerBlocks = [] ) {
-	return innerBlocks.some( ( innerBlock ) => {
-		if ( 'core/heading' === innerBlock.name || 'core/paragraph' === innerBlock.name ) {
-			return Boolean( innerBlock.attributes.content );
-		}
-
-		return true;
-	} );
-}
-
-export default function Edit( { attributes, setAttributes, clientId } ) {
+export default function Edit( { attributes, setAttributes } ) {
 	const {
-		heading,
-		introText,
 		displayMode,
 		count,
 		columns,
@@ -70,54 +54,6 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		showPrice,
 		showCta,
 	} = attributes;
-	const { replaceInnerBlocks } = useDispatch( blockEditorStore );
-	const innerBlocks = useSelect(
-		( select ) => select( blockEditorStore ).getBlocks( clientId ),
-		[ clientId ]
-	);
-
-	useEffect( () => {
-		if (
-			hasMeaningfulInnerBlocks( innerBlocks ) ||
-			( ! heading && ! introText )
-		) {
-			return;
-		}
-
-		const migratedBlocks = [];
-
-		// Older block instances stored their marketing copy in attributes.
-		// Convert that copy into real nested blocks the first time they load.
-		if ( heading ) {
-			migratedBlocks.push(
-				createBlock( 'core/heading', {
-					level: 2,
-					content: heading,
-				} )
-			);
-		}
-
-		if ( introText ) {
-			migratedBlocks.push(
-				createBlock( 'core/paragraph', {
-					content: introText,
-				} )
-			);
-		}
-
-		replaceInnerBlocks( clientId, migratedBlocks, false );
-		setAttributes( {
-			heading: '',
-			introText: '',
-		} );
-	}, [
-		clientId,
-		heading,
-		innerBlocks,
-		introText,
-		replaceInnerBlocks,
-		setAttributes,
-	] );
 
 	const blockProps = useBlockProps( {
 		className: `vvm-packages-display-editor-preview vvm-packages-display-editor-preview--${ displayMode } vvm-packages-display-editor-preview--columns-${ columns }`,
@@ -194,8 +130,6 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						block="gutenberg-lab-blocks/packages-display"
 						attributes={ {
 							...attributes,
-							heading: '',
-							introText: '',
 							suppressHeader: true,
 						} }
 					/>

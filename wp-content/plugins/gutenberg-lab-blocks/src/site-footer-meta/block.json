@@ -14,7 +14,19 @@
 		}
 	},
 	"supports": {
-		"html": false
+		"html": false,
+		"spacing": {
+			"margin": [ "top", "bottom" ],
+			"padding": true
+		},
+		"color": {
+			"text": true,
+			"background": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true
+		}
 	},
 	"textdomain": "gutenberg-lab-blocks",
 	"editorScript": "file:./index.js",

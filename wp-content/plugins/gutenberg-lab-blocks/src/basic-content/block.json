@@ -41,22 +41,6 @@
 			"type": "string",
 			"default": "right"
 		},
-		"spacingTop": {
-			"type": "string",
-			"default": "medium"
-		},
-		"spacingBottom": {
-			"type": "string",
-			"default": "medium"
-		},
-		"backgroundType": {
-			"type": "string",
-			"default": "no_background"
-		},
-		"backgroundColor": {
-			"type": "string",
-			"default": ""
-		},
 		"backgroundImageId": {
 			"type": "number"
 		},

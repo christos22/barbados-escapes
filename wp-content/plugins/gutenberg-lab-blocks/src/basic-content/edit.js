@@ -43,15 +43,6 @@ const SIDEBAR_POSITION_OPTIONS = [
 	{ label: __( 'Left', 'gutenberg-lab-blocks' ), value: 'left' },
 ];
 
-const LEGACY_PADDING_VALUES = {
-	no_spacing: '0px',
-	extra_small: 'var(--wp--preset--spacing--section-xs)',
-	small: 'var(--wp--preset--spacing--section-sm)',
-	medium: 'var(--wp--preset--spacing--section-md)',
-	large: 'var(--wp--preset--spacing--section-lg)',
-	extra_large: 'var(--wp--preset--spacing--section-xl)',
-};
-
 // Keep the inner columns focused on content-oriented blocks instead of
 // exposing large layout primitives inside an already structured section block.
 const SMALL_ALLOWED_BLOCKS = [
@@ -131,86 +122,8 @@ function createSidebarStarterBlocks() {
 	];
 }
 
-function getLegacyPaddingValue( spacingValue ) {
-	return LEGACY_PADDING_VALUES[ spacingValue ] || '';
-}
-
-function getMigratedStyle( style = {}, legacyAttributes ) {
-	const nextStyle = {
-		...style,
-		spacing: {
-			...( style.spacing || {} ),
-			padding: {
-				...( style.spacing?.padding || {} ),
-			},
-		},
-		color: {
-			...( style.color || {} ),
-		},
-	};
-	let hasChanges = false;
-
-	if (
-		legacyAttributes.spacingTop &&
-		'medium' !== legacyAttributes.spacingTop &&
-		! nextStyle.spacing.padding?.top
-	) {
-		nextStyle.spacing.padding.top = getLegacyPaddingValue(
-			legacyAttributes.spacingTop
-		);
-		hasChanges = true;
-	}
-
-	if (
-		legacyAttributes.spacingBottom &&
-		'medium' !== legacyAttributes.spacingBottom &&
-		! nextStyle.spacing.padding?.bottom
-	) {
-		nextStyle.spacing.padding.bottom = getLegacyPaddingValue(
-			legacyAttributes.spacingBottom
-		);
-		hasChanges = true;
-	}
-
-	if (
-		'color' === legacyAttributes.backgroundType &&
-		legacyAttributes.backgroundColor &&
-		! nextStyle.color.background
-	) {
-		nextStyle.color.background = legacyAttributes.backgroundColor;
-		hasChanges = true;
-	}
-
-	return hasChanges ? nextStyle : null;
-}
-
-function getPreviewStyle( {
-	style = {},
-	spacingTop,
-	spacingBottom,
-	backgroundType,
-	backgroundColor,
-	backgroundImageUrl,
-} ) {
+function getPreviewStyle( { backgroundImageUrl } ) {
 	const previewStyle = {};
-
-	// Native padding lives in block styles now, so only preview legacy custom
-	// values when a block has not been migrated yet.
-	if ( 'medium' !== spacingTop && ! style.spacing?.padding?.top ) {
-		previewStyle.paddingTop = getLegacyPaddingValue( spacingTop );
-	}
-
-	if ( 'medium' !== spacingBottom && ! style.spacing?.padding?.bottom ) {
-		previewStyle.paddingBottom = getLegacyPaddingValue( spacingBottom );
-	}
-
-	if (
-		'color' === backgroundType &&
-		backgroundColor &&
-		! style.color?.background
-	) {
-		previewStyle.backgroundColor = backgroundColor;
-	}
 
 	// Gutenberg does not give this custom block a native background-image
 	// control, so we keep that one justified custom style.
@@ -240,15 +153,10 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		contentAlignment,
 		contentTextAlignment,
 		sidebarPosition,
-		spacingTop,
-		spacingBottom,
-		backgroundType,
-		backgroundColor,
 		backgroundImageId,
 		backgroundImageUrl,
 		hasInitializedTemplate,
 		hideSection,
-		style = {},
 	} = attributes;
 	const { replaceInnerBlocks, updateBlockAttributes } = useDispatch(
 		blockEditorStore
@@ -323,28 +231,6 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		updateBlockAttributes,
 	] );
 
-	useEffect( () => {
-		const migratedStyle = getMigratedStyle( style, {
-			spacingTop,
-			spacingBottom,
-			backgroundType,
-			backgroundColor,
-		} );
-
-		if ( migratedStyle ) {
-			// Move old custom spacing/background values into the native `style`
-			// attribute so the block starts behaving like a regular Gutenberg block.
-			setAttributes( { style: migratedStyle } );
-		}
-	}, [
-		backgroundColor,
-		backgroundType,
-		setAttributes,
-		spacingBottom,
-		spacingTop,
-		style,
-	] );
-
 	const blockProps = useBlockProps( {
 		className: [
 			'vvm-basic-content',
@@ -357,14 +243,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		]
 			.filter( Boolean )
 			.join( ' ' ),
-		style: getPreviewStyle( {
-			style,
-			spacingTop,
-			spacingBottom,
-			backgroundType,
-			backgroundColor,
-			backgroundImageUrl,
-		} ),
+		style: getPreviewStyle( { backgroundImageUrl } ),
 	} );
 
 	return (
@@ -442,7 +321,6 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								setAttributes( {
 									backgroundImageId: media.id,
 									backgroundImageUrl: media.url,
-									backgroundType: 'image',
 								} )
 							}
 							value={ backgroundImageId }
@@ -469,7 +347,6 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								setAttributes( {
 									backgroundImageId: undefined,
 									backgroundImageUrl: '',
-									backgroundType: 'no_background',
 								} )
 							}
 						>

@@ -17,7 +17,17 @@
 	"supports": {
 		"html": false,
 		"spacing": {
-			"margin": [ "top", "bottom" ]
+			"margin": [ "top", "bottom" ],
+			"padding": true
+		},
+		"color": {
+			"background": true
+		},
+		"border": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true
 		}
 	},
 	"textdomain": "gutenberg-lab-blocks",

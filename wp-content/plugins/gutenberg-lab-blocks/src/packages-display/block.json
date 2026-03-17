@@ -9,14 +9,6 @@
 	"description": "Queries package posts and renders them in a grid or carousel.",
 	"keywords": [ "packages", "grid", "carousel", "query" ],
 	"attributes": {
-		"heading": {
-			"type": "string",
-			"default": ""
-		},
-		"introText": {
-			"type": "string",
-			"default": ""
-		},
 		"displayMode": {
 			"type": "string",
 			"default": "grid"

@@ -15,8 +15,6 @@ $wrapper_attributes = get_block_wrapper_attributes(
 
 echo gutenberg_lab_blocks_render_packages_display_markup(
 	array(
-		'heading'         => $attributes['heading'] ?? '',
-		'introText'       => $attributes['introText'] ?? '',
 		'count'           => $attributes['count'] ?? 3,
 		'columns'         => $columns,
 		'displayMode'     => 'grid',

@@ -372,8 +372,6 @@ function gutenberg_lab_blocks_render_packages_display_markup( $attributes, $bloc
 	$attributes = wp_parse_args(
 		$attributes,
 		array(
-			'heading'         => '',
-			'introText'       => '',
 			'count'           => 3,
 			'columns'         => '3',
 			'displayMode'     => 'grid',
@@ -386,9 +384,7 @@ function gutenberg_lab_blocks_render_packages_display_markup( $attributes, $bloc
 		)
 	);
 
-	$heading           = trim( (string) $attributes['heading'] );
 	$header_markup     = trim( (string) $header_markup );
-	$intro_text        = trim( (string) $attributes['introText'] );
 	$count             = max( 1, (int) $attributes['count'] );
 	$columns           = in_array( (string) $attributes['columns'], array( '2', '3' ), true ) ? (string) $attributes['columns'] : '3';
 	$display_mode      = 'carousel' === $attributes['displayMode'] ? 'carousel' : 'grid';
@@ -436,19 +432,9 @@ function gutenberg_lab_blocks_render_packages_display_markup( $attributes, $bloc
 	ob_start();
 	?>
 	<section <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-		<?php if ( ! $suppress_header && ( '' !== $header_markup || '' !== $heading || '' !== $intro_text ) ) : ?>
+		<?php if ( ! $suppress_header && '' !== $header_markup ) : ?>
 			<header class="vvm-packages-display__header">
-				<?php if ( '' !== $header_markup ) : ?>
-					<?php echo $header_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				<?php else : ?>
-					<?php if ( '' !== $heading ) : ?>
-						<h2 class="vvm-packages-display__heading"><?php echo esc_html( $heading ); ?></h2>
-					<?php endif; ?>
-
-					<?php if ( '' !== $intro_text ) : ?>
-						<p class="vvm-packages-display__intro"><?php echo esc_html( $intro_text ); ?></p>
-					<?php endif; ?>
-				<?php endif; ?>
+				<?php echo $header_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</header>
 		<?php endif; ?>
 
