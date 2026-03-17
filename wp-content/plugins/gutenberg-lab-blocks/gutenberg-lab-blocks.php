@@ -55,7 +55,6 @@ function gutenberg_lab_blocks_enqueue_shared_assets() {
 add_action( 'enqueue_block_assets', 'gutenberg_lab_blocks_enqueue_shared_assets' );
 
 function gutenberg_lab_blocks_register_blocks() {
-	register_block_type( __DIR__ . '/build/notice-box' );
 	register_block_type( __DIR__ . '/build/media-panel' );
 	register_block_type( __DIR__ . '/build/package-meta' );
 	register_block_type( __DIR__ . '/build/packages-display' );

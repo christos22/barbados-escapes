@@ -1,1 +1,0 @@
-console.log("Hello World! (from gutenberg-lab-blocks-notice-box block)");

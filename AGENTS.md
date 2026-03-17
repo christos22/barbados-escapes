@@ -222,3 +222,24 @@ When teaching or implementing Gutenberg UX:
 - Explain the difference between post-content editing and full template rendering.
 - Do not treat editor/frontend mismatches as bugs unless they affect content authoring or cause misleading structure.
 - Prefer editor-only CSS overrides over adding frontend behavior into the editor.
+
+---
+
+# Gutenberg Block Rules
+
+For this repo, prefer a maximum-Gutenberg approach.
+
+- Prefer native Gutenberg supports in `block.json` over custom Inspector controls.
+- Use `theme.json` for design tokens, global defaults, spacing scales, colors, typography, and block defaults.
+- Use custom block controls only when Gutenberg does not provide a native option or when the block has real product-specific behavior.
+- Prefer dynamic blocks with PHP render callbacks for layout/data-driven blocks.
+- Treat `edit.js` as editor UI only; keep business logic and rendering decisions in PHP where practical.
+- Let editors control content and block-level presentation only where the block and theme explicitly allow it.
+- Code should control structure, defaults, constraints, and migrations.
+- For shared site chrome, use native `wp_template_part` and `wp_navigation` entities.
+- Header/footer layout may be locked, but content inside them should stay editable through native Gutenberg blocks when possible.
+- When refactoring an older custom block toward Gutenberg, prefer migrating old custom attributes into native block `style` attributes instead of adding more custom fields.
+- Avoid inventing duplicate settings when Gutenberg already has a native control for spacing, color, typography, border, shadow, margin, padding, or block gap.
+- Keep custom blocks feeling native to Gutenberg, not like ACF field groups inside the block editor.
+- When unsure, choose the more Gutenberg-native solution.
+- Keep learning notes concise in `docs/gutenberg-learning-notes.md`.

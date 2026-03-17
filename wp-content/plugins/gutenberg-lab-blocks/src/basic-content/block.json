@@ -12,7 +12,12 @@
 		"html": false,
 		"anchor": true,
 		"spacing": {
+			"margin": [ "top", "bottom" ],
+			"padding": true,
 			"blockGap": true
+		},
+		"color": {
+			"background": true
 		}
 	},
 	"attributes": {

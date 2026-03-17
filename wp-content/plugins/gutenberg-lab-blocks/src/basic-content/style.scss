@@ -2,50 +2,9 @@
 	--vvm-basic-content-column-gap: clamp(2rem, 3vw, 3rem);
 	--vvm-basic-content-flow-gap: clamp(0.75rem, 1.5vw, 1.25rem);
 	--vvm-basic-content-layout-max-width: 75rem;
-	--wp--style--block-gap: var(--vvm-basic-content-flow-gap);
 
 	margin: 0;
 	color: var(--wp--preset--color--deep-forest);
-
-	&.vvm-basic-content--spacing-top-no-spacing {
-		padding-top: 0;
-	}
-
-	&.vvm-basic-content--spacing-top-extra-small {
-		padding-top: var(--wp--preset--spacing--section-xs);
-	}
-
-	&.vvm-basic-content--spacing-top-small {
-		padding-top: var(--wp--preset--spacing--section-sm);
-	}
-
-	&.vvm-basic-content--spacing-top-medium {
-		padding-top: var(--wp--preset--spacing--section-md);
-	}
-
-	&.vvm-basic-content--spacing-top-large {
-		padding-top: var(--wp--preset--spacing--section-lg);
-	}
-
-	&.vvm-basic-content--spacing-top-extra-large {
-		padding-top: var(--wp--preset--spacing--section-xl);
-	}
-
-	&.vvm-basic-content--spacing-bottom-no-spacing {
-		padding-bottom: 0;
-	}
-
-	&.vvm-basic-content--spacing-bottom-small {
-		padding-bottom: var(--wp--preset--spacing--section-sm);
-	}
-
-	&.vvm-basic-content--spacing-bottom-medium {
-		padding-bottom: var(--wp--preset--spacing--section-md);
-	}
-
-	&.vvm-basic-content--spacing-bottom-large {
-		padding-bottom: var(--wp--preset--spacing--section-lg);
-	}
 
 	.wp-block-columns.vvm-basic-content__columns {
 		width: 100%;
@@ -56,7 +15,7 @@
 	.vvm-basic-content__sidebar-column {
 		display: grid;
 		align-content: start;
-		gap: var(--wp--style--block-gap);
+		gap: var(--wp--style--block-gap, var(--vvm-basic-content-flow-gap));
 	}
 
 	.vvm-basic-content__main-column > :not(.wp-block-buttons),

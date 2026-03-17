@@ -11,7 +11,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 import {
 	Button,
-	ColorPicker,
 	Notice,
 	PanelBody,
 	SelectControl,
@@ -43,27 +42,14 @@ const SIDEBAR_POSITION_OPTIONS = [
 	{ label: __( 'Left', 'gutenberg-lab-blocks' ), value: 'left' },
 ];
 
-const SPACING_TOP_OPTIONS = [
-	{ label: __( 'No Spacing', 'gutenberg-lab-blocks' ), value: 'no_spacing' },
-	{ label: __( 'Extra Small', 'gutenberg-lab-blocks' ), value: 'extra_small' },
-	{ label: __( 'Small', 'gutenberg-lab-blocks' ), value: 'small' },
-	{ label: __( 'Medium', 'gutenberg-lab-blocks' ), value: 'medium' },
-	{ label: __( 'Large', 'gutenberg-lab-blocks' ), value: 'large' },
-	{ label: __( 'Extra Large', 'gutenberg-lab-blocks' ), value: 'extra_large' },
-];
-
-const SPACING_BOTTOM_OPTIONS = [
-	{ label: __( 'No Spacing', 'gutenberg-lab-blocks' ), value: 'no_spacing' },
-	{ label: __( 'Small', 'gutenberg-lab-blocks' ), value: 'small' },
-	{ label: __( 'Medium', 'gutenberg-lab-blocks' ), value: 'medium' },
-	{ label: __( 'Large', 'gutenberg-lab-blocks' ), value: 'large' },
-];
-
-const BACKGROUND_OPTIONS = [
-	{ label: __( 'No Background', 'gutenberg-lab-blocks' ), value: 'no_background' },
-	{ label: __( 'Color', 'gutenberg-lab-blocks' ), value: 'color' },
-	{ label: __( 'Image', 'gutenberg-lab-blocks' ), value: 'image' },
-];
+const LEGACY_PADDING_VALUES = {
+	no_spacing: '0px',
+	extra_small: 'var(--wp--preset--spacing--section-xs)',
+	small: 'var(--wp--preset--spacing--section-sm)',
+	medium: 'var(--wp--preset--spacing--section-md)',
+	large: 'var(--wp--preset--spacing--section-lg)',
+	extra_large: 'var(--wp--preset--spacing--section-xl)',
+};
 
 // Keep the inner columns focused on content-oriented blocks instead of
 // exposing large layout primitives inside an already structured section block.
@@ -156,23 +142,97 @@ const TEMPLATE = [
 	],
 ];
 
-function getBackgroundStyle( backgroundType, backgroundColor, backgroundImageUrl ) {
-	if ( 'color' === backgroundType && backgroundColor ) {
-		return {
-			backgroundColor,
-		};
+function getLegacyPaddingValue( spacingValue ) {
+	return LEGACY_PADDING_VALUES[ spacingValue ] || '';
+}
+
+function getMigratedStyle( style = {}, legacyAttributes ) {
+	const nextStyle = {
+		...style,
+		spacing: {
+			...( style.spacing || {} ),
+			padding: {
+				...( style.spacing?.padding || {} ),
+			},
+		},
+		color: {
+			...( style.color || {} ),
+		},
+	};
+	let hasChanges = false;
+
+	if (
+		legacyAttributes.spacingTop &&
+		'medium' !== legacyAttributes.spacingTop &&
+		! nextStyle.spacing.padding?.top
+	) {
+		nextStyle.spacing.padding.top = getLegacyPaddingValue(
+			legacyAttributes.spacingTop
+		);
+		hasChanges = true;
 	}
 
-	if ( 'image' === backgroundType && backgroundImageUrl ) {
-		return {
-			backgroundImage: `url(${ backgroundImageUrl })`,
-			backgroundPosition: 'center',
-			backgroundRepeat: 'no-repeat',
-			backgroundSize: 'cover',
-		};
+	if (
+		legacyAttributes.spacingBottom &&
+		'medium' !== legacyAttributes.spacingBottom &&
+		! nextStyle.spacing.padding?.bottom
+	) {
+		nextStyle.spacing.padding.bottom = getLegacyPaddingValue(
+			legacyAttributes.spacingBottom
+		);
+		hasChanges = true;
 	}
 
-	return {};
+	if (
+		'color' === legacyAttributes.backgroundType &&
+		legacyAttributes.backgroundColor &&
+		! nextStyle.color.background
+	) {
+		nextStyle.color.background = legacyAttributes.backgroundColor;
+		hasChanges = true;
+	}
+
+	return hasChanges ? nextStyle : null;
+}
+
+function getPreviewStyle( {
+	style = {},
+	spacingTop,
+	spacingBottom,
+	backgroundType,
+	backgroundColor,
+	backgroundImageUrl,
+} ) {
+	const previewStyle = {};
+
+	// Native padding lives in block styles now, so only preview legacy custom
+	// values when a block has not been migrated yet.
+	if ( 'medium' !== spacingTop && ! style.spacing?.padding?.top ) {
+		previewStyle.paddingTop = getLegacyPaddingValue( spacingTop );
+	}
+
+	if ( 'medium' !== spacingBottom && ! style.spacing?.padding?.bottom ) {
+		previewStyle.paddingBottom = getLegacyPaddingValue( spacingBottom );
+	}
+
+	if (
+		'color' === backgroundType &&
+		backgroundColor &&
+		! style.color?.background
+	) {
+		previewStyle.backgroundColor = backgroundColor;
+	}
+
+	// Gutenberg does not give this custom block a native background-image
+	// control, so we keep that one justified custom style.
+	if ( backgroundImageUrl ) {
+		previewStyle.backgroundImage = `url(${ backgroundImageUrl })`;
+		previewStyle.backgroundPosition = 'center';
+		previewStyle.backgroundRepeat = 'no-repeat';
+		previewStyle.backgroundSize = 'cover';
+	}
+
+	return previewStyle;
 }
 
 function hasMatchingAllowedBlocks( allowedBlocks = [] ) {
@@ -198,6 +258,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		backgroundImageId,
 		backgroundImageUrl,
 		hideSection,
+		style = {},
 	} = attributes;
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 	const innerBlocks = useSelect(
@@ -236,6 +297,28 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		} );
 	}, [ innerBlocks, updateBlockAttributes ] );
 
+	useEffect( () => {
+		const migratedStyle = getMigratedStyle( style, {
+			spacingTop,
+			spacingBottom,
+			backgroundType,
+			backgroundColor,
+		} );
+
+		if ( migratedStyle ) {
+			// Move old custom spacing/background values into the native `style`
+			// attribute so the block starts behaving like a regular Gutenberg block.
+			setAttributes( { style: migratedStyle } );
+		}
+	}, [
+		backgroundColor,
+		backgroundType,
+		setAttributes,
+		spacingBottom,
+		spacingTop,
+		style,
+	] );
+
 	const blockProps = useBlockProps( {
 		className: [
 			'vvm-basic-content',
@@ -244,17 +327,18 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 			`vvm-basic-content--content-align-${ contentAlignment }`,
 			`vvm-basic-content--text-align-${ contentTextAlignment }`,
 			`vvm-basic-content--sidebar-${ sidebarPosition }`,
-			`vvm-basic-content--spacing-top-${ spacingTop.replace( '_', '-' ) }`,
-			`vvm-basic-content--spacing-bottom-${ spacingBottom.replace( '_', '-' ) }`,
 			hideSection ? 'is-hidden-section' : '',
 		]
 			.filter( Boolean )
 			.join( ' ' ),
-		style: getBackgroundStyle(
+		style: getPreviewStyle( {
+			style,
+			spacingTop,
+			spacingBottom,
 			backgroundType,
 			backgroundColor,
-			backgroundImageUrl
-		),
+			backgroundImageUrl,
+		} ),
 	} );
 
 	return (
@@ -312,97 +396,66 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						checked={ hideSection }
 						onChange={ ( value ) => setAttributes( { hideSection: value } ) }
 					/>
+				</PanelBody>
 
-					<SelectControl
-						label={ __( 'Spacing Top', 'gutenberg-lab-blocks' ) }
-						value={ spacingTop }
-						options={ SPACING_TOP_OPTIONS }
-						onChange={ ( value ) => setAttributes( { spacingTop: value } ) }
-					/>
+				<PanelBody
+					title={ __( 'Background Image', 'gutenberg-lab-blocks' ) }
+					initialOpen={ false }
+				>
+					<p>
+						{ __(
+							'Use the Styles tab for spacing and background color. This panel only manages an optional section background image.',
+							'gutenberg-lab-blocks'
+						) }
+					</p>
 
-					<SelectControl
-						label={ __( 'Spacing Bottom', 'gutenberg-lab-blocks' ) }
-						value={ spacingBottom }
-						options={ SPACING_BOTTOM_OPTIONS }
-						onChange={ ( value ) =>
-							setAttributes( { spacingBottom: value } )
-						}
-					/>
-
-					<SelectControl
-						label={ __( 'Background', 'gutenberg-lab-blocks' ) }
-						value={ backgroundType }
-						options={ BACKGROUND_OPTIONS }
-						onChange={ ( value ) =>
-							setAttributes( {
-								backgroundType: value,
-								backgroundImageId:
-									'image' === value ? backgroundImageId : undefined,
-								backgroundImageUrl:
-									'image' === value ? backgroundImageUrl : '',
-							} )
-						}
-					/>
-
-					{ 'color' === backgroundType && (
-						<ColorPicker
-							color={ backgroundColor || '#ffffff' }
-							enableAlpha={ true }
-							onChange={ ( value ) =>
-								setAttributes( { backgroundColor: value } )
+					<MediaUploadCheck>
+						<MediaUpload
+							allowedTypes={ [ 'image' ] }
+							onSelect={ ( media ) =>
+								setAttributes( {
+									backgroundImageId: media.id,
+									backgroundImageUrl: media.url,
+									backgroundType: 'image',
+								} )
 							}
-						/>
-					) }
-
-					{ 'image' === backgroundType && (
-						<>
-							<MediaUploadCheck>
-								<MediaUpload
-									allowedTypes={ [ 'image' ] }
-									onSelect={ ( media ) =>
-										setAttributes( {
-											backgroundImageId: media.id,
-											backgroundImageUrl: media.url,
-										} )
-									}
-									value={ backgroundImageId }
-									render={ ( { open } ) => (
-										<Button variant="secondary" onClick={ open }>
-											{ backgroundImageUrl
-												? __(
-														'Replace background image',
-														'gutenberg-lab-blocks'
-												  )
-												: __(
-														'Select background image',
-														'gutenberg-lab-blocks'
-												  ) }
-										</Button>
-									) }
-								/>
-							</MediaUploadCheck>
-
-							{ backgroundImageUrl && (
-								<Button
-									variant="tertiary"
-									onClick={ () =>
-										setAttributes( {
-											backgroundImageId: undefined,
-											backgroundImageUrl: '',
-										} )
-									}
-								>
-									{ __( 'Remove background image', 'gutenberg-lab-blocks' ) }
+							value={ backgroundImageId }
+							render={ ( { open } ) => (
+								<Button variant="secondary" onClick={ open }>
+									{ backgroundImageUrl
+										? __(
+												'Replace background image',
+												'gutenberg-lab-blocks'
+										  )
+										: __(
+												'Select background image',
+												'gutenberg-lab-blocks'
+										  ) }
 								</Button>
 							) }
-						</>
+						/>
+					</MediaUploadCheck>
+
+					{ backgroundImageUrl && (
+						<Button
+							variant="tertiary"
+							onClick={ () =>
+								setAttributes( {
+									backgroundImageId: undefined,
+									backgroundImageUrl: '',
+									backgroundType: 'no_background',
+								} )
+							}
+						>
+							{ __( 'Remove background image', 'gutenberg-lab-blocks' ) }
+						</Button>
 					) }
 				</PanelBody>
 			</InspectorControls>
 
-				<section { ...blockProps }>
-					{ hideSection && (
-						<Notice status="warning" isDismissible={ false }>
+			<section { ...blockProps }>
+				{ hideSection && (
+					<Notice status="warning" isDismissible={ false }>
 						{ __(
 							'This section is hidden on the front end.',
 							'gutenberg-lab-blocks'
@@ -410,16 +463,13 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					</Notice>
 				) }
 
-					{/*
-					 * The parent wrapper stays fully locked so authors cannot remove the
-					 * outer scaffold. The nested `templateLock` values on Columns/Column
-					 * decide where editing is still allowed.
-					 */}
-						<InnerBlocks
-							template={ TEMPLATE }
-							templateLock="all"
-						/>
-					</section>
-			</>
-		);
+				{/*
+				 * The parent wrapper stays fully locked so authors cannot remove the
+				 * outer scaffold. The nested `templateLock` values on Columns/Column
+				 * decide where editing is still allowed.
+				 */}
+				<InnerBlocks template={ TEMPLATE } templateLock="all" />
+			</section>
+		</>
+	);
 }
