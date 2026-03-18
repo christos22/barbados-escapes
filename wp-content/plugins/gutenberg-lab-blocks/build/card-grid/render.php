@@ -66,7 +66,9 @@ $styles = array();
 
 if ( is_string( $block_gap ) && '' !== $block_gap ) {
 	$block_gap = gutenberg_lab_card_grid_resolve_block_gap_value( $block_gap );
-	$styles[] = '--wp--style--block-gap:' . esc_attr( $block_gap );
+	// Keep a trailing semicolon so WordPress can safely append native support
+	// styles like padding/margin without producing an invalid style attribute.
+	$styles[] = '--wp--style--block-gap:' . esc_attr( $block_gap ) . ';';
 }
 
 $card_count = preg_match_all(

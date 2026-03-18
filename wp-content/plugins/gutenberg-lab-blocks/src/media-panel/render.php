@@ -16,6 +16,7 @@ $content_style    = $attributes['contentStyle'] ?? 'overlay';
 $container_height = $attributes['containerHeight'] ?? 'medium';
 $content_position = $attributes['contentPosition'] ?? 'center-center';
 $content_width    = $attributes['contentWidth'] ?? 'md';
+$atmosphere_edge  = $attributes['atmosphereEdge'] ?? 'none';
 $align            = $attributes['align'] ?? '';
 
 // When the block is used in a singular template, let the current post's
@@ -60,6 +61,11 @@ $classes = array(
 	'media-panel--content-width-' . sanitize_html_class( $content_width ),
 	$align ? 'align' . sanitize_html_class( $align ) : 'alignfull',
 );
+
+if ( 'none' !== $atmosphere_edge ) {
+	$classes[] = 'vvm-atmosphere-edge';
+	$classes[] = 'vvm-atmosphere-edge--' . sanitize_html_class( $atmosphere_edge );
+}
 
 if ( $dark_overlay ) {
 	$classes[] = 'media-panel--dark-overlay';

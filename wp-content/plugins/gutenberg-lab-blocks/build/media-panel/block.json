@@ -61,6 +61,10 @@
     "contentWidth": {
       "type": "string",
       "default": "md"
+    },
+    "atmosphereEdge": {
+      "type": "string",
+      "default": "none"
     }
   },
   "supports": {

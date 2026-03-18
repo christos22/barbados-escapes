@@ -50,6 +50,12 @@ const CONTENT_WIDTH_OPTIONS = [
 	{ label: 'Large', value: 'lg' },
 ];
 
+const ATMOSPHERE_EDGE_OPTIONS = [
+	{ label: 'None', value: 'none' },
+	{ label: 'Fog Top', value: 'fog-top' },
+	{ label: 'Fog Bottom', value: 'fog-bottom' },
+];
+
 const ALLOWED_INNER_BLOCKS = [
 	'core/heading',
 	// Allow template authors to pull the current singular item's title.
@@ -114,6 +120,7 @@ export default function Edit({ attributes, setAttributes }) {
 		containerHeight,
 		contentPosition,
 		contentWidth,
+		atmosphereEdge,
 		align,
 		style,
 	} = attributes;
@@ -126,6 +133,9 @@ export default function Edit({ attributes, setAttributes }) {
 			`media-panel--content-style-${contentStyle}`,
 			`media-panel--position-${contentPosition}`,
 			`media-panel--content-width-${contentWidth}`,
+			'none' !== atmosphereEdge
+				? `vvm-atmosphere-edge vvm-atmosphere-edge--${atmosphereEdge}`
+				: '',
 			align ? '' : 'alignfull',
 			darkOverlay ? 'media-panel--dark-overlay' : '',
 		]
@@ -269,6 +279,19 @@ export default function Edit({ attributes, setAttributes }) {
 						onChange={(contentWidthValue) =>
 							setAttributes({ contentWidth: contentWidthValue })
 						}
+					/>
+
+					<SelectControl
+						label={__('Atmosphere Edge', 'gutenberg-lab-blocks')}
+						value={atmosphereEdge}
+						options={ATMOSPHERE_EDGE_OPTIONS}
+						onChange={(atmosphereEdgeValue) =>
+							setAttributes({ atmosphereEdge: atmosphereEdgeValue })
+						}
+						help={__(
+							'Adds a soft fog-style fade at the top or bottom edge of the media. This is decorative and can be reused on future layouts.',
+							'gutenberg-lab-blocks'
+						)}
 					/>
 				</PanelBody>
 			</InspectorControls>
