@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/site-alerts",
+	"version": "0.1.0",
+	"title": "Site Alerts",
+	"category": "widgets",
+	"icon": "warning",
+	"description": "Renders active sitewide and targeted alert-bar messages for the current slot.",
+	"attributes": {
+		"slot": {
+			"type": "string",
+			"default": "header"
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php"
+}

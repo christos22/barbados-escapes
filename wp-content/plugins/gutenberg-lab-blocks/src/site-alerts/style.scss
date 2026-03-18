@@ -1,0 +1,102 @@
+.wp-block-gutenberg-lab-blocks-site-alerts {
+	margin: 0;
+}
+
+.vvm-site-alerts {
+	position: relative;
+	z-index: 2;
+}
+
+.vvm-site-alert {
+	background:
+		linear-gradient(90deg, rgba(0, 75, 54, 0.98), rgba(11, 63, 65, 0.96)),
+		var(--wp--preset--color--forest, #004b36);
+	color: #ffffff;
+}
+
+.vvm-site-alert + .vvm-site-alert {
+	border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.vvm-site-alert__inner {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 1rem;
+	max-width: min(100%, 1320px);
+	margin-inline: auto;
+	padding: 0.9rem var(--wp--custom--layout--gutter-current, 24px);
+}
+
+.vvm-site-alert__content {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.85rem 1.1rem;
+	font-size: 0.95rem;
+	line-height: 1.45;
+}
+
+.vvm-site-alert__content > * {
+	margin: 0;
+	color: inherit;
+}
+
+.vvm-site-alert__content .wp-block-buttons {
+	margin: 0;
+}
+
+.vvm-site-alert__content .wp-block-button {
+	margin: 0;
+}
+
+.vvm-site-alert__content .wp-block-button .wp-element-button {
+	min-height: 2.5rem;
+	padding: 0.7rem 1.2rem;
+	border-radius: 999px;
+	border-color: rgba(255, 255, 255, 0.42);
+	background: rgba(255, 255, 255, 0.14) !important;
+	color: #ffffff !important;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+}
+
+.vvm-site-alert__content .wp-block-button .wp-element-button:hover,
+.vvm-site-alert__content .wp-block-button .wp-element-button:focus-visible {
+	background: rgba(255, 255, 255, 0.24) !important;
+	border-color: rgba(255, 255, 255, 0.64);
+}
+
+.vvm-site-alert__dismiss {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 2.5rem;
+	block-size: 2.5rem;
+	padding: 0;
+	border: 0;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.12);
+	color: #ffffff;
+	font-size: 1.25rem;
+	line-height: 1;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.vvm-site-alert__dismiss:hover,
+.vvm-site-alert__dismiss:focus-visible {
+	background: rgba(255, 255, 255, 0.22);
+}
+
+@media (max-width: 781px) {
+	.vvm-site-alert__inner {
+		grid-template-columns: 1fr;
+		align-items: start;
+	}
+
+	.vvm-site-alert__dismiss {
+		justify-self: end;
+	}
+}

@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/includes/packages.php';
 require_once __DIR__ . '/includes/package-rendering.php';
+require_once __DIR__ . '/includes/site-messages.php';
 
 /**
  * Return a stable version string for plugin assets.
@@ -64,5 +65,6 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/split-content' );
 	register_block_type( __DIR__ . '/build/card-grid' );
 	register_block_type( __DIR__ . '/build/card-grid-card' );
+	register_block_type( __DIR__ . '/build/site-alerts' );
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_blocks' );
