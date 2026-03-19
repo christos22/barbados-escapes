@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "gutenberg-lab-blocks/stack-tab-item",
+  "version": "0.1.0",
+  "title": "Stack Tab Item",
+  "category": "design",
+  "icon": "excerpt-view",
+  "description": "One reveal item used inside a Stack Tab.",
+  "parent": [
+    "gutenberg-lab-blocks/stack-tab"
+  ],
+  "attributes": {
+    "label": {
+      "type": "string",
+      "default": ""
+    },
+    "mediaId": {
+      "type": "number"
+    },
+    "mediaUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "mediaAlt": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "textdomain": "gutenberg-lab-blocks",
+  "editorScript": "file:./index.js"
+}

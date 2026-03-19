@@ -65,6 +65,9 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/split-content' );
 	register_block_type( __DIR__ . '/build/card-grid' );
 	register_block_type( __DIR__ . '/build/card-grid-card' );
+	register_block_type( __DIR__ . '/build/stack-tabs' );
+	register_block_type( __DIR__ . '/build/stack-tab' );
+	register_block_type( __DIR__ . '/build/stack-tab-item' );
 	register_block_type( __DIR__ . '/build/site-alerts' );
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_blocks' );

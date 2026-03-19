@@ -1,0 +1,91 @@
+.wp-block-gutenberg-lab-blocks-stack-tabs.vvm-stack-tabs--editor {
+	.vvm-stack-tabs__header--editor {
+		margin-bottom: 1.5rem;
+	}
+
+	.vvm-stack-tabs__editor-preview {
+		margin-bottom: 1.5rem;
+	}
+
+	.vvm-stack-tabs__editor-note {
+		margin: 0.85rem 0 0;
+		color: rgb(15 45 35 / 0.74);
+		font-size: 0.9rem;
+	}
+
+	.vvm-stack-tabs__editor-tabs {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.vvm-stack-tabs__tab-editor {
+		padding: 1rem;
+		border: 1px solid rgb(17 75 77 / 0.12);
+		border-radius: 8px;
+		background: rgb(255 255 255 / 0.72);
+	}
+
+	.vvm-stack-tabs__tab-editor-header {
+		margin-bottom: 1rem;
+	}
+
+	.vvm-stack-tabs__tab-editor-items {
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.vvm-stack-tabs__item-editor {
+		padding: 1rem;
+		border: 1px solid rgb(17 75 77 / 0.1);
+		border-radius: 8px;
+		background: rgb(246 241 232 / 0.46);
+	}
+
+	.vvm-stack-tabs__item-editor-meta {
+		display: grid;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.vvm-stack-tabs__item-editor-media {
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.vvm-stack-tabs__item-editor-image,
+	.vvm-stack-tabs__item-editor-placeholder {
+		display: block;
+		width: 100%;
+		border-radius: 8px;
+		background: rgb(223 229 225 / 0.72);
+	}
+
+	.vvm-stack-tabs__item-editor-image {
+		aspect-ratio: 16 / 10;
+		object-fit: cover;
+	}
+
+	.vvm-stack-tabs__item-editor-placeholder {
+		padding: 1rem;
+
+		p {
+			margin: 0;
+		}
+	}
+
+	.vvm-stack-tabs__item-editor-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	.vvm-stack-tabs__item-editor-content {
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.block-list-appender {
+		margin-top: 0.25rem;
+	}
+}

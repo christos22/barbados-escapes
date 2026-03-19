@@ -211,6 +211,14 @@
 						"bottom": "var(--wp--preset--spacing--section-md)"
 					}
 				}
+			},
+			"gutenberg-lab-blocks/stack-tabs": {
+				"spacing": {
+					"padding": {
+						"top": "var(--wp--preset--spacing--section-md)",
+						"bottom": "var(--wp--preset--spacing--section-md)"
+					}
+				}
 			}
 		}
 	}

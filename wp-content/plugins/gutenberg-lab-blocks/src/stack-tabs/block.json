@@ -1,0 +1,40 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/stack-tabs",
+	"version": "0.1.0",
+	"title": "Stack Tabs",
+	"category": "design",
+	"icon": "screenoptions",
+	"description": "A three-tab section with nested reveal items and a shared media stage.",
+	"keywords": [ "tabs", "stack", "section", "layout" ],
+	"attributes": {
+		"heading": {
+			"type": "string",
+			"default": ""
+		},
+		"intro": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": [ "top", "bottom" ],
+			"padding": true,
+			"blockGap": true
+		},
+		"color": {
+			"background": true
+		}
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php",
+	"viewScript": "file:./view.js"
+}
