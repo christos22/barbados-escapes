@@ -260,6 +260,77 @@ body {
 	height: 100%;
 }
 
+/*
+ * Site Messages are edited as standalone posts, but the content is rendered as
+ * a header alert band. Give the canvas a representative alert treatment so the
+ * editor communicates the correct layout intent without trying to reproduce
+ * the full front-end header context.
+ */
+body.post-type-site_message.editor-styles-wrapper {
+	background: #ffffff;
+	color: #0f2d23;
+}
+
+body.post-type-site_message.editor-styles-wrapper > .is-root-container {
+	max-width: none;
+	margin-inline: auto;
+	padding: 0.9rem 0;
+}
+
+body.post-type-site_message.editor-styles-wrapper .wp-block-post-title.editor-post-title {
+	max-width: min(100%, 1320px);
+	margin: 0 auto 0.85rem;
+	padding-inline: var(--wp--custom--layout--gutter-current);
+	color: rgba(15, 45, 35, 0.78);
+	font-size: 0.95rem !important;
+	font-weight: 600 !important;
+	line-height: 1.4;
+	letter-spacing: 0.01em;
+}
+
+body.post-type-site_message.editor-styles-wrapper > .is-root-container > .wp-block-group:first-of-type {
+	max-width: min(100%, 1320px);
+	margin-inline: auto;
+	padding: 0.9rem var(--wp--custom--layout--gutter-current);
+	background:
+		linear-gradient(90deg, rgba(0, 75, 54, 0.98), rgba(11, 63, 65, 0.96)),
+		var(--wp--preset--color--forest, #004b36);
+	color: #ffffff;
+}
+
+body.post-type-site_message.editor-styles-wrapper p,
+body.post-type-site_message.editor-styles-wrapper .wp-block-heading,
+body.post-type-site_message.editor-styles-wrapper .wp-block-paragraph {
+	color: inherit;
+	margin-block: 0;
+}
+
+body.post-type-site_message.editor-styles-wrapper .wp-block-group.is-layout-flex {
+	align-items: center;
+}
+
+body.post-type-site_message.editor-styles-wrapper .wp-block-buttons {
+	margin: 0;
+}
+
+body.post-type-site_message.editor-styles-wrapper .wp-block-button {
+	margin: 0;
+}
+
+body.post-type-site_message.editor-styles-wrapper .wp-block-button .wp-element-button,
+body.post-type-site_message.editor-styles-wrapper .wp-block-button .wp-block-button__link {
+	min-height: 2.5rem;
+	padding: 0.7rem 1.2rem;
+	border-radius: 999px;
+	border-color: rgba(255, 255, 255, 0.42);
+	background: rgba(255, 255, 255, 0.14) !important;
+	color: #ffffff !important;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	box-shadow: none;
+}
+
 .editor-styles-wrapper .vvm-header .wp-block-site-logo img {
 	width: 72px !important;
 	height: 72px !important;

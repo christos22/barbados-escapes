@@ -1069,6 +1069,26 @@ function gutenberg_lab_blocks_enqueue_site_message_editor_assets() {
 add_action( 'enqueue_block_editor_assets', 'gutenberg_lab_blocks_enqueue_site_message_editor_assets' );
 
 /**
+ * Clarifies that the Site Message post title is an internal editor label.
+ *
+ * The live alert/modal renderer uses block content, not the post title. Making
+ * that explicit in the title placeholder reduces the “why doesn't this show on
+ * the front end?” confusion for editors.
+ *
+ * @param string  $placeholder Existing placeholder text.
+ * @param WP_Post $post        Current post object.
+ * @return string
+ */
+function gutenberg_lab_blocks_filter_site_message_title_placeholder( $placeholder, $post ) {
+	if ( $post instanceof WP_Post && 'site_message' === $post->post_type ) {
+		return __( 'Internal label for editors only', 'gutenberg-lab-blocks' );
+	}
+
+	return $placeholder;
+}
+add_filter( 'enter_title_here', 'gutenberg_lab_blocks_filter_site_message_title_placeholder', 10, 2 );
+
+/**
  * Renders the active Site Alerts markup for a slot.
  *
  * @param string $slot Placement slot.
