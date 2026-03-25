@@ -117,6 +117,15 @@ function gutenberg_lab_vvm_register_block_styles() {
 			'inline_style' => '',
 		)
 	);
+
+	register_block_style(
+		'gutenberg-lab-blocks/media-panel',
+		array(
+			'name'         => 'villa-hero',
+			'label'        => __( 'Villa Hero', 'gutenberg-lab-vvm' ),
+			'inline_style' => '',
+		)
+	);
 }
 add_action( 'init', 'gutenberg_lab_vvm_register_block_styles' );
 

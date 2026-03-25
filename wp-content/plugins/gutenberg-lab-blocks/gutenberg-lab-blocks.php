@@ -13,6 +13,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/includes/packages.php';
 require_once __DIR__ . '/includes/package-rendering.php';
 require_once __DIR__ . '/includes/site-messages.php';
+require_once __DIR__ . '/includes/villas.php';
+
+/**
+ * Registers rewrite-dependent content types before flushing plugin rules.
+ *
+ * WordPress only flushes what is registered in the current request, so we call
+ * the CPT/taxonomy registration functions directly during activation and
+ * deactivation to keep `/packages/`, `/villas/`, and their taxonomies stable.
+ */
+function gutenberg_lab_blocks_register_rewrite_content_types() {
+	gutenberg_lab_blocks_register_packages_post_type();
+	gutenberg_lab_blocks_register_package_type_taxonomy();
+	gutenberg_lab_blocks_register_villas_post_type();
+	gutenberg_lab_blocks_register_villa_location_taxonomy();
+}
+
+/**
+ * Flushes rewrite rules when the plugin is activated.
+ */
+function gutenberg_lab_blocks_activate() {
+	gutenberg_lab_blocks_register_rewrite_content_types();
+	flush_rewrite_rules();
+}
+register_activation_hook( __FILE__, 'gutenberg_lab_blocks_activate' );
+
+/**
+ * Flushes rewrite rules when the plugin is deactivated.
+ */
+function gutenberg_lab_blocks_deactivate() {
+	gutenberg_lab_blocks_register_rewrite_content_types();
+	flush_rewrite_rules();
+}
+register_deactivation_hook( __FILE__, 'gutenberg_lab_blocks_deactivate' );
 
 /**
  * Return a stable version string for plugin assets.
@@ -69,5 +102,6 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/stack-tab' );
 	register_block_type( __DIR__ . '/build/stack-tab-item' );
 	register_block_type( __DIR__ . '/build/site-alerts' );
+	register_block_type( __DIR__ . '/build/villa-hero-search' );
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_blocks' );

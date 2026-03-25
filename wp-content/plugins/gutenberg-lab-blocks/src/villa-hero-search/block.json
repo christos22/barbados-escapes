@@ -1,0 +1,29 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/villa-hero-search",
+	"version": "0.1.0",
+	"title": "Villa Hero Search",
+	"category": "widgets",
+	"icon": "search",
+	"description": "Renders the villa location search form used in the homepage hero and archive intro.",
+	"attributes": {
+		"buttonLabel": {
+			"type": "string",
+			"default": "Search Villas"
+		},
+		"locationPlaceholder": {
+			"type": "string",
+			"default": "Search by Location"
+		}
+	},
+	"supports": {
+		"html": false,
+		"reusable": false
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}

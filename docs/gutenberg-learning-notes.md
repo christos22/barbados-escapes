@@ -18,3 +18,9 @@
 - Editors usually control content plus block-level presentation.
 - Developers usually control layout setup, defaults, and constraints.
 - Spacing, fonts, colors, backgrounds, borders, and shadows are editable only when the theme and block expose those controls.
+
+## Hero Composition
+
+- Keep the hero shell and the search behavior separate when they solve different problems.
+- `media-panel` is the reusable visual container for video, overlay, and hero layout.
+- `villa-hero-search` is a dynamic block because its options come from real taxonomy terms and current query state.

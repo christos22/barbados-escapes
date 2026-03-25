@@ -1,0 +1,43 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","layout":{"type":"default"}} -->
+<main class="wp-block-group">
+	<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|section-sm","bottom":"var:preset|spacing|section-sm"}}},"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group alignfull">
+		<!-- wp:heading {"level":1} -->
+		<h1 class="wp-block-heading">Villas</h1>
+		<!-- /wp:heading -->
+
+		<!-- wp:paragraph -->
+		<p>Browse the current villa collection and narrow the results by location.</p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:gutenberg-lab-blocks/villa-hero-search /-->
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:query {"queryId":0,"query":{"inherit":true},"align":"wide","layout":{"type":"constrained"}} -->
+	<div class="wp-block-query alignwide">
+		<!-- wp:post-template {"layout":{"type":"grid","columnCount":3}} -->
+			<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"3/2"} /-->
+			<!-- wp:post-title {"isLink":true,"fontSize":"xl"} /-->
+			<!-- wp:post-excerpt {"moreText":"Read more"} /-->
+		<!-- /wp:post-template -->
+
+		<!-- wp:query-no-results -->
+			<!-- wp:paragraph -->
+			<p>No villas matched the selected location. Adjust the filter and try again.</p>
+			<!-- /wp:paragraph -->
+		<!-- /wp:query-no-results -->
+
+		<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
+			<!-- wp:query-pagination-previous /-->
+			<!-- wp:query-pagination-numbers /-->
+			<!-- wp:query-pagination-next /-->
+		<!-- /wp:query-pagination -->
+	</div>
+	<!-- /wp:query -->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

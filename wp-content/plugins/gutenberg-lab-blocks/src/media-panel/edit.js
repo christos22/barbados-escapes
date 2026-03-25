@@ -73,6 +73,7 @@ const ALLOWED_INNER_BLOCKS = [
 	'core/separator',
 	'core/details',
 	'core/spacer',
+	'gutenberg-lab-blocks/villa-hero-search',
 ];
 
 function normalizeSpacingPresetSlug( spacingSlug ) {

@@ -171,6 +171,88 @@
 		--media-panel-content-width: 56rem;
 		--media-panel-overlay-stop-shift: 10%;
 	}
+
+	&.is-style-villa-hero {
+		--media-panel-flow-gap: clamp(1rem, 2vw, 1.6rem);
+		--media-panel-content-width: 64rem;
+		--media-panel-surface-max-width: min(100%, 72rem);
+		--media-panel-overlay-base-alpha: 0.82;
+		--media-panel-overlay-strong-alpha: 0.66;
+		--media-panel-overlay-soft-alpha: 0.42;
+		--media-panel-overlay-mid-alpha: 0.2;
+		--media-panel-overlay-vignette-alpha: 0.22;
+
+		.media-panel__overlay {
+			padding-top: calc(var(--vvm-header-height, 88px) + clamp(3.5rem, 9vw, 6.5rem));
+			padding-bottom: clamp(2.5rem, 7vw, 5rem);
+		}
+
+		.media-panel__overlay-content {
+			justify-items: center;
+			width: min(100%, 72rem);
+			text-align: center;
+
+			&::before {
+				content: "";
+				display: block;
+				width: min(100%, 72rem);
+				height: 1px;
+				margin-bottom: clamp(1rem, 2vw, 1.5rem);
+				background: rgb(255 255 255 / 0.55);
+			}
+
+			> .wp-block-heading {
+				max-width: 16ch;
+				color: var(--wp--preset--color--white, #ffffff);
+				font-size: clamp(3rem, 7vw, 5.4rem);
+				line-height: 1.05;
+				letter-spacing: 0.02em;
+				text-shadow: 0 8px 30px rgb(0 0 0 / 0.24);
+			}
+
+			> p {
+				max-width: 46rem;
+				font-size: clamp(1rem, 1.5vw, 1.25rem);
+				color: rgb(255 255 255 / 0.88);
+				text-shadow: 0 4px 18px rgb(0 0 0 / 0.18);
+			}
+
+			.wp-block-buttons {
+				justify-content: center;
+			}
+		}
+
+		.vvm-villa-hero-search {
+			width: min(100%, 68rem);
+		}
+
+		.vvm-villa-hero-search__form {
+			grid-template-columns: minmax(0, 1fr) auto;
+			padding: 0.7rem;
+			border-radius: 999px;
+			background: rgb(255 255 255 / 0.95);
+			box-shadow: 0 24px 64px rgb(0 0 0 / 0.22);
+		}
+
+		.vvm-villa-hero-search__field::after {
+			color: var(--wp--preset--color--teal-800, #114b4d);
+		}
+
+		.vvm-villa-hero-search__select {
+			min-height: 4rem;
+			padding-inline: 1.5rem 3rem;
+			color: var(--wp--preset--color--deep-forest, #0f2d23);
+			background: transparent;
+		}
+
+		.vvm-villa-hero-search__submit {
+			min-height: 4rem;
+			padding-inline: 1.75rem;
+			border-radius: 999px;
+			background: linear-gradient(135deg, #6fb08a 0%, #4a9a71 100%);
+			box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
+		}
+	}
 }
 
 .media-panel {
@@ -280,6 +362,33 @@
 		}
 
 		&__overlay-content {
+			width: 100%;
+		}
+	}
+
+	.wp-block-gutenberg-lab-blocks-media-panel.is-style-villa-hero {
+		.media-panel__overlay {
+			padding-top: calc(var(--vvm-header-height, 88px) + 3rem);
+		}
+
+		.media-panel__overlay-content {
+			> .wp-block-heading {
+				max-width: 10ch;
+				font-size: clamp(2.4rem, 11vw, 3.5rem);
+			}
+
+			> p {
+				max-width: 28rem;
+			}
+		}
+
+		.vvm-villa-hero-search__form {
+			grid-template-columns: 1fr;
+			width: 100%;
+			border-radius: 1.5rem;
+		}
+
+		.vvm-villa-hero-search__submit {
 			width: 100%;
 		}
 	}
