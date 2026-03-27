@@ -243,3 +243,61 @@ For this repo, prefer a maximum-Gutenberg approach.
 - Keep custom blocks feeling native to Gutenberg, not like ACF field groups inside the block editor.
 - When unsure, choose the more Gutenberg-native solution.
 - Keep learning notes concise in `docs/gutenberg-learning-notes.md`.
+
+---
+
+# Barbados Escapes Project Rules
+
+- This repo is **Barbados Escapes**, a custom WordPress/Gutenberg villa marketing site.
+- The client provides **design and content**. Development implementation is the primary responsibility in this repo.
+- Treat the Young Estates homepage/search and Hammerton Barbados villa pages as **reference directions**, not exact clones.
+
+## Core Architecture
+
+- The homepage hero uses `gutenberg-lab-blocks/media-panel` as the visual shell.
+- The homepage hero search UI is a separate dynamic block: `gutenberg-lab-blocks/villa-hero-search`.
+- Do not collapse the search UI into the hero shell unless explicitly requested.
+- Villas are modeled as CPT `villa`.
+- Villa locations are modeled as taxonomy `villa_location`.
+- Prefer reusable systems and templates over one-off page-specific implementations.
+
+## Search Contract
+
+- V1 search submits to `/villas/`.
+- V1 search should only use filters that are actually supported by the current data model.
+- The current approved V1 direction is a structured location-based search.
+- Do not invent unsupported availability, booking, pricing, or calendar logic.
+- Additional filters such as bedrooms, guests, and price should only be added when the data model and scope are explicitly approved.
+
+## Scope Boundaries
+
+- Phase 1 should stay focused on the core site build:
+  - homepage
+  - header/footer
+  - villa CPT and supporting taxonomy/fields
+  - reusable single villa template
+  - archive/results page
+  - basic search
+- Advanced search behavior, availability logic, booking/PMS integration, and dynamic pricing are Phase 2+ features unless explicitly requested.
+- Do not implement booking engine logic, external sync, or PMS integrations by default.
+
+## Theme And Block Expectations
+
+- Prefer Gutenberg-native controls and supports before custom Inspector UI.
+- Keep `edit.js` focused on editor UX.
+- Keep business logic, querying, filtering, and rendering decisions in PHP where practical.
+- Use `theme.json` for design tokens, defaults, spacing, colors, and typography whenever possible.
+- Shared site chrome should stay native to block themes and Site Editor workflows.
+
+## Implementation Notes
+
+- Villa entries are reusable CMS content, not one-off manually coded pages.
+- The villa template should support editor-managed content sections such as hero/gallery, summary, facts, amenities, CTA, and related villas when those pieces are in scope.
+- Keep code commented, but keep comments concise and useful.
+- Avoid hardcoding content that should be editor-managed.
+
+## Build And Verification
+
+- Run `npm run build` in `wp-content/plugins/gutenberg-lab-blocks` after block changes.
+- Verify generated assets under `build/` when new blocks are added or block metadata changes.
+- Refresh rewrite rules or permalinks after introducing new CPT or taxonomy routes when needed.
