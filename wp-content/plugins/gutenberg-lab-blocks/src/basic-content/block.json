@@ -55,6 +55,10 @@
 		"hideSection": {
 			"type": "boolean",
 			"default": false
+		},
+		"fullWidth": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"textdomain": "gutenberg-lab-blocks",

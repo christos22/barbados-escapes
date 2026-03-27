@@ -15,7 +15,7 @@
 	.vvm-basic-content__sidebar-column {
 		display: grid;
 		align-content: start;
-		gap: var(--wp--style--block-gap, var(--vvm-basic-content-flow-gap));
+		gap: var(--vvm-basic-content-flow-gap, var(--wp--style--block-gap));
 	}
 
 	.vvm-basic-content__main-column > :not(.wp-block-buttons),
@@ -71,6 +71,25 @@
 
 		&.vvm-basic-content--content-align-center .vvm-basic-content__main-column {
 			margin-inline: auto;
+		}
+
+		/*
+		 * The Young Estates-inspired intro sections use a display heading followed
+		 * by a compact serif subheading. The generic block reset collapses child
+		 * margins to zero, so restore the specific rhythm here instead of relying
+		 * on global heading margins that never reach this grid wrapper.
+		 */
+		&.vvm-basic-content--content-align-center .vvm-basic-content__main-column > .wp-block-heading:first-child {
+			margin-bottom: 0.9375rem;
+		}
+
+		&.vvm-basic-content--content-align-center .vvm-basic-content__main-column > .wp-block-heading:first-child + .wp-block-heading {
+			font-family: var(--wp--preset--font-family--display-serif, Georgia, serif);
+			font-size: 1.5rem;
+			font-weight: 400;
+			line-height: 1;
+			letter-spacing: normal;
+			text-transform: none;
 		}
 
 		&.vvm-basic-content--content-align-right .vvm-basic-content__main-column {

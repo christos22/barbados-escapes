@@ -13,6 +13,8 @@ $content_text_alignment = $attributes['contentTextAlignment'] ?? 'left';
 $sidebar_position       = $attributes['sidebarPosition'] ?? 'right';
 $background_image       = $attributes['backgroundImageUrl'] ?? '';
 $hide_section           = ! empty( $attributes['hideSection'] );
+$full_width            = ! empty( $attributes['fullWidth'] );
+$block_gap             = $attributes['style']['spacing']['blockGap'] ?? '';
 
 if ( $hide_section ) {
 	return;
@@ -20,14 +22,28 @@ if ( $hide_section ) {
 
 $classes = array(
 	'vvm-basic-content',
+	$full_width ? 'alignfull' : '',
 	$with_sidebar ? 'vvm-basic-content--with-sidebar' : 'vvm-basic-content--no-sidebar',
 	'vvm-basic-content--content-width-' . sanitize_html_class( str_replace( '_percent', '', $content_width ) ),
 	'vvm-basic-content--content-align-' . sanitize_html_class( $content_alignment ),
 	'vvm-basic-content--text-align-' . sanitize_html_class( $content_text_alignment ),
 	'vvm-basic-content--sidebar-' . sanitize_html_class( $sidebar_position ),
+	$full_width ? 'vvm-basic-content--full-width' : '',
 );
 
 $styles = array();
+
+// Gutenberg stores preset selections as `var:preset|spacing|slug`. Convert
+// those tokens into real CSS variables so the block's internal grid gap can
+// consume the Dimensions > Block Spacing control on the front end.
+if ( is_string( $block_gap ) && '' !== $block_gap ) {
+	if ( 0 === strpos( $block_gap, 'var:preset|spacing|' ) ) {
+		$spacing_slug = substr( $block_gap, strlen( 'var:preset|spacing|' ) );
+		$block_gap    = 'var(--wp--preset--spacing--' . sanitize_html_class( $spacing_slug ) . ')';
+	}
+
+	$styles[] = '--vvm-basic-content-flow-gap:' . $block_gap;
+}
 
 // Background images still need a custom inline style because this block does
 // not get a native Gutenberg background-image control.

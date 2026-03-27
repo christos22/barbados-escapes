@@ -25,6 +25,28 @@ body {
 }
 
 /*
+ * Young Estates uses tight, deliberate heading spacing instead of relying on
+ * browser defaults. Setting the rhythm here keeps post content, patterns, and
+ * template parts visually aligned with the shared type scale from theme.json.
+ */
+.wp-site-blocks :where(h1, h2, h3, h4, h5, h6) {
+	margin-top: 0;
+}
+
+.wp-site-blocks :where(h1) {
+	margin-bottom: 0.9375rem;
+}
+
+.wp-site-blocks :where(h2, h3) {
+	margin-bottom: 0;
+}
+
+.wp-site-blocks :where(h6) {
+	margin-top: 1.875rem;
+	margin-bottom: 1.25rem;
+}
+
+/*
  * theme.json root padding only applies cleanly to direct children of
  * .wp-site-blocks. Our file/DB templates wrap page content in <main>, so we
  * recreate that gutter here and let alignfull sections cancel it back out.
@@ -338,9 +360,9 @@ body.post-type-archive-packages
 .vvm-header__nav .wp-block-navigation-submenu__toggle {
 	color: #0f2d23;
 	font-family: var(--wp--preset--font-family--refined-sans);
-	font-size: 0.95rem;
-	font-weight: 400;
-	letter-spacing: 0.14em;
+	font-size: 0.875rem;
+	font-weight: 300;
+	letter-spacing: 0.0625rem;
 	text-decoration: none;
 	background: transparent;
 	text-transform: uppercase;
@@ -364,9 +386,9 @@ body.post-type-archive-packages
 	border-radius: 999px;
 	padding: 0.9rem 1.45rem;
 	font-family: var(--wp--preset--font-family--refined-sans);
-	font-size: 0.9rem;
-	font-weight: 500;
-	letter-spacing: 0.14em;
+	font-size: 0.875rem;
+	font-weight: 300;
+	letter-spacing: 0.0625rem;
 	text-transform: uppercase;
 	box-shadow: none;
 	border: 1px solid transparent;
@@ -421,10 +443,10 @@ body.post-type-archive-packages
 	background: #013223 !important;
 	color: #ffffff !important;
 	font-size: 1rem;
-	font-weight: 700;
-	letter-spacing: 0.02em;
+	font-weight: 400;
+	letter-spacing: 0.0625rem;
 	text-decoration: none !important;
-	text-transform: none;
+	text-transform: uppercase;
 	box-shadow: none;
 	transition:
 		background-color 0.2s ease,
@@ -463,10 +485,10 @@ body.post-type-archive-packages
 	background: #ffffff !important;
 	color: #013223 !important;
 	font-size: 1rem;
-	font-weight: 700;
-	letter-spacing: 0.02em;
+	font-weight: 400;
+	letter-spacing: 0.0625rem;
 	text-decoration: none !important;
-	text-transform: none;
+	text-transform: uppercase;
 	box-shadow: none;
 	transition:
 		background-color 0.2s ease,
@@ -505,11 +527,11 @@ body.post-type-archive-packages
 	border-radius: 0;
 	background: transparent !important;
 	box-shadow: none;
-	font-size: 1rem;
-	font-weight: 700;
-	letter-spacing: 0.02em;
+	font-size: 1.25rem;
+	font-weight: 400;
+	letter-spacing: 0.0625rem;
 	text-decoration: underline !important;
-	text-transform: none;
+	text-transform: uppercase;
 	transition:
 		color 0.2s ease,
 		text-decoration-color 0.2s ease,
@@ -615,9 +637,9 @@ body.vvm-has-hero-header .vvm-header__cta .wp-element-button {
 	background: transparent !important;
 	color: #ffffff !important;
 	font-family: var(--wp--preset--font-family--refined-sans);
-	font-size: 0.95rem;
-	font-weight: 400;
-	letter-spacing: 0.14em;
+	font-size: 0.875rem;
+	font-weight: 300;
+	letter-spacing: 0.0625rem;
 	text-transform: uppercase;
 }
 

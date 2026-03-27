@@ -137,6 +137,20 @@ function getPreviewStyle( { backgroundImageUrl } ) {
 	return previewStyle;
 }
 
+function resolveSpacingValue( value ) {
+	if ( ! value || 'string' !== typeof value ) {
+		return '';
+	}
+
+	// Gutenberg stores preset tokens in `var:preset|spacing|slug` form.
+	if ( value.startsWith( 'var:preset|spacing|' ) ) {
+		const slug = value.replace( 'var:preset|spacing|', '' );
+		return `var(--wp--preset--spacing--${ slug })`;
+	}
+
+	return value;
+}
+
 function hasMatchingAllowedBlocks( allowedBlocks = [] ) {
 	return (
 		allowedBlocks.length === SMALL_ALLOWED_BLOCKS.length &&
@@ -155,8 +169,10 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		sidebarPosition,
 		backgroundImageId,
 		backgroundImageUrl,
+		style,
 		hasInitializedTemplate,
 		hideSection,
+		fullWidth,
 	} = attributes;
 	const { replaceInnerBlocks, updateBlockAttributes } = useDispatch(
 		blockEditorStore
@@ -234,26 +250,47 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	const blockProps = useBlockProps( {
 		className: [
 			'vvm-basic-content',
+			fullWidth ? 'alignfull' : '',
 			withSidebar ? 'vvm-basic-content--with-sidebar' : 'vvm-basic-content--no-sidebar',
 			`vvm-basic-content--content-width-${ contentWidth.replace( '_percent', '' ) }`,
 			`vvm-basic-content--content-align-${ contentAlignment }`,
 			`vvm-basic-content--text-align-${ contentTextAlignment }`,
 			`vvm-basic-content--sidebar-${ sidebarPosition }`,
+			fullWidth ? 'vvm-basic-content--full-width' : '',
 			hideSection ? 'is-hidden-section' : '',
 		]
 			.filter( Boolean )
 			.join( ' ' ),
-		style: getPreviewStyle( { backgroundImageUrl } ),
+		style: {
+			...getPreviewStyle( { backgroundImageUrl } ),
+			...( style?.spacing?.blockGap
+				? {
+						'--vvm-basic-content-flow-gap': resolveSpacingValue(
+							style.spacing.blockGap
+						),
+				  }
+				: {} ),
+		},
 	} );
 
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Content', 'gutenberg-lab-blocks' ) } initialOpen={ true }>
+				<PanelBody title={ __( 'Layout', 'gutenberg-lab-blocks' ) } initialOpen={ true }>
 					<ToggleControl
 						label={ __( 'With Sidebar', 'gutenberg-lab-blocks' ) }
 						checked={ withSidebar }
 						onChange={ ( value ) => setAttributes( { withSidebar: value } ) }
+					/>
+
+					<ToggleControl
+						label={ __( 'Full Width Section', 'gutenberg-lab-blocks' ) }
+						checked={ fullWidth }
+						onChange={ ( value ) => setAttributes( { fullWidth: value } ) }
+						help={ __(
+							'Let the section background span the full page width while the content still follows your width and spacing choices.',
+							'gutenberg-lab-blocks'
+						) }
 					/>
 
 					{ withSidebar ? (
@@ -268,7 +305,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					) : (
 						<>
 							<SelectControl
-								label={ __( 'Content Width', 'gutenberg-lab-blocks' ) }
+								label={ __( 'Content Area Width', 'gutenberg-lab-blocks' ) }
 								value={ contentWidth }
 								options={ WIDTH_OPTIONS }
 								onChange={ ( value ) =>
@@ -276,26 +313,27 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								}
 							/>
 							<SelectControl
-								label={ __( 'Content Box Alignment', 'gutenberg-lab-blocks' ) }
+								label={ __( 'Content Position', 'gutenberg-lab-blocks' ) }
 								value={ contentAlignment }
 								options={ ALIGNMENT_OPTIONS }
 								onChange={ ( value ) =>
 									setAttributes( { contentAlignment: value } )
 								}
 							/>
-							<SelectControl
-								label={ __( 'Text Alignment', 'gutenberg-lab-blocks' ) }
-								value={ contentTextAlignment }
-								options={ TEXT_ALIGNMENT_OPTIONS }
-								onChange={ ( value ) =>
-									setAttributes( { contentTextAlignment: value } )
-								}
-							/>
 						</>
 					) }
+
+					<SelectControl
+						label={ __( 'Text Alignment', 'gutenberg-lab-blocks' ) }
+						value={ contentTextAlignment }
+						options={ TEXT_ALIGNMENT_OPTIONS }
+						onChange={ ( value ) =>
+							setAttributes( { contentTextAlignment: value } )
+						}
+					/>
 				</PanelBody>
 
-				<PanelBody title={ __( 'Settings', 'gutenberg-lab-blocks' ) } initialOpen={ false }>
+				<PanelBody title={ __( 'Visibility', 'gutenberg-lab-blocks' ) } initialOpen={ false }>
 					<ToggleControl
 						label={ __( 'Hide Section', 'gutenberg-lab-blocks' ) }
 						checked={ hideSection }
@@ -304,7 +342,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 				</PanelBody>
 
 				<PanelBody
-					title={ __( 'Background Image', 'gutenberg-lab-blocks' ) }
+					title={ __( 'Background', 'gutenberg-lab-blocks' ) }
 					initialOpen={ false }
 				>
 					<p>

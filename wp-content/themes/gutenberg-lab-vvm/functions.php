@@ -656,16 +656,16 @@ function gutenberg_lab_vvm_asset_version( $relative_path ) {
 }
 
 /**
- * Enqueue the shared font stack for both the editor and the front end.
+ * Enqueue the remaining remote display font for both the editor and the front end.
  *
- * The hero/header work uses a display serif plus a refined sans in addition to
- * Nunito. Loading the shared stack here keeps the editor and the front end in
- * sync without scattering font imports across block stylesheets.
+ * TT Norms now ships locally via `theme.json` font-face declarations so the
+ * global sans stack is theme-native. We still enqueue the shared serif here
+ * because the theme continues to use Cormorant Garamond as a separate preset.
  */
 function gutenberg_lab_vvm_enqueue_fonts() {
 	wp_enqueue_style(
 		'gutenberg-lab-vvm-fonts',
-		'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Nunito:wght@300;400;600;700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap',
+		'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap',
 		array(),
 		null
 	);
