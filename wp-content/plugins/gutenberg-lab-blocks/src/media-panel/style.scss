@@ -172,10 +172,9 @@
 		--media-panel-overlay-stop-shift: 10%;
 	}
 
-	&.is-style-villa-hero {
+	&.is-style-villa-hero,
+	&.vvm-media-panel--villa-hero {
 		--media-panel-flow-gap: clamp(1rem, 2vw, 1.4rem);
-		--media-panel-content-width: 78rem;
-		--media-panel-surface-max-width: min(100%, 84rem);
 		--media-panel-overlay-base-alpha: 0.16;
 		--media-panel-overlay-strong-alpha: 0.08;
 		--media-panel-overlay-soft-alpha: 0.04;
@@ -183,19 +182,8 @@
 		--media-panel-overlay-deep-alpha: 0.34;
 		--media-panel-overlay-vignette-alpha: 0.14;
 
-		.media-panel__overlay {
-			padding-top: calc(var(--vvm-header-height, 96px) + clamp(2rem, 4vw, 3rem));
-			padding-bottom: clamp(4rem, 8vw, 6rem);
-			align-items: flex-end;
-		}
-
 		.media-panel__overlay-content {
-			justify-items: center;
-			width: min(100%, 78rem);
-			text-align: center;
-
 			> .wp-block-heading {
-				max-width: 12ch;
 				color: var(--wp--preset--color--white, #ffffff);
 				font-family: var(--wp--preset--font-family--display-serif, Georgia, serif);
 				font-size: clamp(3.75rem, 5.5vw, 6rem);
@@ -389,15 +377,10 @@
 		}
 	}
 
-	.wp-block-gutenberg-lab-blocks-media-panel.is-style-villa-hero {
-		.media-panel__overlay {
-			padding-top: calc(var(--vvm-header-height, 96px) + 2rem);
-			padding-bottom: 2rem;
-		}
-
+	.wp-block-gutenberg-lab-blocks-media-panel.is-style-villa-hero,
+	.wp-block-gutenberg-lab-blocks-media-panel.vvm-media-panel--villa-hero {
 		.media-panel__overlay-content {
 			> .wp-block-heading {
-				max-width: 10ch;
 				font-size: clamp(2.75rem, 11vw, 4rem);
 			}
 

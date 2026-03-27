@@ -255,7 +255,7 @@ function gutenberg_lab_blocks_register_villa_hero_pattern() {
 			'description' => __( 'A full-screen homepage hero with a centered headline and villa search bar.', 'gutenberg-lab-blocks' ),
 			'categories'  => array( 'featured' ),
 			'content'     =>
-				'<!-- wp:gutenberg-lab-blocks/media-panel {"align":"full","className":"is-style-villa-hero","mediaType":"image","darkOverlay":true,"containerHeight":"full","contentPosition":"bottom-center","contentWidth":"lg"} -->' .
+				'<!-- wp:gutenberg-lab-blocks/media-panel {"align":"full","className":"vvm-media-panel--villa-hero","mediaType":"image","darkOverlay":true,"containerHeight":"full","contentPosition":"bottom-center","contentWidth":"lg"} -->' .
 				'<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero"} --><h1 class="wp-block-heading has-text-align-center has-hero-font-size">' . esc_html__( 'Your Perfect Place in Barbados', 'gutenberg-lab-blocks' ) . '</h1><!-- /wp:heading -->' .
 				'<!-- wp:gutenberg-lab-blocks/villa-hero-search /-->' .
 				'<!-- /wp:gutenberg-lab-blocks/media-panel -->',
