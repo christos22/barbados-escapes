@@ -69,7 +69,7 @@
 				{ "slug": "xl", "name": "XL", "size": "1.75rem" },
 				{ "slug": "xxl", "name": "XXL", "size": "2.5rem" },
 				{ "slug": "hero", "name": "Hero", "size": "3.25rem" },
-				{ "slug": "hero-display", "name": "Hero Display", "size": "clamp(3.75rem, 5.5vw, 6rem)" }
+				{ "slug": "hero-display", "name": "Hero Display", "size": "clamp(3rem, 2.1rem + 1.7vw, 4rem)" }
 			]
 		},
 		"color": {
