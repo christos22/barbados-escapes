@@ -1,4 +1,3 @@
-name: wp-gutenberg-lab
 type: wordpress
 docroot: ""
 php_version: "8.4"

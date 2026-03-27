@@ -21,7 +21,7 @@ The development environment typically includes:
 - Gutenberg block development using `@wordpress/create-block`
 - Work performed in **VS Code**
 
-Local: https://wp-gutenberg-lab.ddev.site/
+Local: https://barbados-escapes.ddev.site/
 Admin user: Christos
 Admin password: j9PAqejbdiBRT
 
