@@ -6,7 +6,12 @@
 	<div class="wp-block-group vvm-header__inner">
 		<!-- wp:group {"className":"vvm-header__bar","lock":{"move":true,"remove":true},"templateLock":"all","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"nowrap"}} -->
 		<div class="wp-block-group vvm-header__bar">
-			<!-- wp:site-logo {"width":148,"shouldSyncIcon":false,"className":"vvm-header__logo"} /-->
+			<!-- wp:group {"className":"vvm-header__brand","layout":{"type":"constrained"}} -->
+			<div class="wp-block-group vvm-header__brand">
+				<!-- wp:site-logo {"width":52,"shouldSyncIcon":false,"className":"vvm-header__logo"} /-->
+				<!-- wp:site-title {"level":0,"className":"vvm-header__site-title"} /-->
+			</div>
+			<!-- /wp:group -->
 
 			<!-- wp:navigation {"ref":0,"overlayMenu":"mobile","className":"vvm-header__nav","layout":{"type":"flex","justifyContent":"right","flexWrap":"nowrap"},"style":{"spacing":{"blockGap":"2rem"}}} /-->
 

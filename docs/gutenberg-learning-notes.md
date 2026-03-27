@@ -24,3 +24,5 @@
 - Keep the hero shell and the search behavior separate when they solve different problems.
 - `media-panel` is the reusable visual container for video, overlay, and hero layout.
 - `villa-hero-search` is a dynamic block because its options come from real taxonomy terms and current query state.
+- Use `theme.json` for reusable font tokens and spacing values, then let a block style variation consume those tokens for a page-specific visual direction.
+- When a hero needs to affect shared chrome like the header, prefer a body class or first-block detection over hardcoding header markup into the block itself.

@@ -10,12 +10,18 @@
 		"useRootPaddingAwareAlignments": true,
 		"custom": {
 			"header": {
-				"height": "88px"
+				"height": "96px"
 			},
 			"layout": {
 				"gutterSm": "20px",
 				"gutterLg": "40px",
 				"gutterXl": "80px"
+			},
+			"hero": {
+				"accent": "#79b395",
+				"lineColor": "rgba(255,255,255,0.68)",
+				"searchSurface": "rgba(248,243,235,0.94)",
+				"searchText": "rgba(19,49,42,0.72)"
 			}
 		},
 		"spacing": {
@@ -43,6 +49,16 @@
 					"fontFamily": "var(--font-nunito), \"Nunito\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
 					"name": "Nunito",
 					"slug": "nunito"
+				},
+				{
+					"fontFamily": "\"Cormorant Garamond\", Georgia, serif",
+					"name": "Display Serif",
+					"slug": "display-serif"
+				},
+				{
+					"fontFamily": "\"Source Sans 3\", \"Segoe UI\", sans-serif",
+					"name": "Refined Sans",
+					"slug": "refined-sans"
 				}
 			],
 			"fontSizes": [
@@ -52,7 +68,8 @@
 				{ "slug": "lg", "name": "Large", "size": "1.25rem" },
 				{ "slug": "xl", "name": "XL", "size": "1.75rem" },
 				{ "slug": "xxl", "name": "XXL", "size": "2.5rem" },
-				{ "slug": "hero", "name": "Hero", "size": "3.25rem" }
+				{ "slug": "hero", "name": "Hero", "size": "3.25rem" },
+				{ "slug": "hero-display", "name": "Hero Display", "size": "clamp(3.75rem, 5.5vw, 6rem)" }
 			]
 		},
 		"color": {
@@ -69,7 +86,7 @@
 		}
 	},
 	"styles": {
-		"css": ":root { --font-nunito: \"Nunito\"; --vvm-header-height: 88px; --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-sm); } @media (min-width: 1024px) { :root { --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-lg); } } @media (min-width: 1920px) { :root { --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-xl); } }",
+		"css": ":root { --font-nunito: \"Nunito\"; --vvm-header-height: 96px; --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-sm); } @media (min-width: 1024px) { :root { --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-lg); } } @media (min-width: 1920px) { :root { --wp--custom--layout--gutter-current: var(--wp--custom--layout--gutter-xl); } }",
 		"color": {
 			"text": "var(--wp--preset--color--deep-forest)"
 		},

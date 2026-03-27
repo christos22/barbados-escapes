@@ -10,11 +10,11 @@
   "attributes": {
     "buttonLabel": {
       "type": "string",
-      "default": "Search Villas"
+      "default": "Search"
     },
     "locationPlaceholder": {
       "type": "string",
-      "default": "Search by Location"
+      "default": "Search by Area"
     }
   },
   "supports": {

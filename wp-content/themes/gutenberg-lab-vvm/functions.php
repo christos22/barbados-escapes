@@ -653,8 +653,10 @@ add_filter( 'body_class', 'gutenberg_lab_vvm_filter_body_class' );
  */
 function gutenberg_lab_vvm_asset_version( $relative_path ) {
 	$absolute_path = get_theme_file_path( $relative_path );
+	$environment   = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
+	$is_dev_env    = in_array( $environment, array( 'local', 'development' ), true ) || ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG );
 
-	if ( file_exists( $absolute_path ) ) {
+	if ( $is_dev_env && file_exists( $absolute_path ) ) {
 		return (string) filemtime( $absolute_path );
 	}
 
@@ -664,14 +666,14 @@ function gutenberg_lab_vvm_asset_version( $relative_path ) {
 /**
  * Enqueue the shared font stack for both the editor and the front end.
  *
- * VVM uses `next/font` to inject Nunito plus its CSS variable. In the lab
- * theme we need to load the family explicitly so the block editor and the
- * public site render with the same typography.
+ * The hero/header work uses a display serif plus a refined sans in addition to
+ * Nunito. Loading the shared stack here keeps the editor and the front end in
+ * sync without scattering font imports across block stylesheets.
  */
 function gutenberg_lab_vvm_enqueue_fonts() {
 	wp_enqueue_style(
 		'gutenberg-lab-vvm-fonts',
-		'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap',
+		'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Nunito:wght@300;400;600;700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap',
 		array(),
 		null
 	);

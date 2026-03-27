@@ -133,6 +133,12 @@ function gutenberg_lab_blocks_get_selected_villa_location_slug() {
  * @return WP_Term[]
  */
 function gutenberg_lab_blocks_get_villa_location_terms() {
+	static $terms = null;
+
+	if ( null !== $terms ) {
+		return $terms;
+	}
+
 	$terms = get_terms(
 		array(
 			'taxonomy'   => 'villa_location',
@@ -143,7 +149,7 @@ function gutenberg_lab_blocks_get_villa_location_terms() {
 	);
 
 	if ( is_wp_error( $terms ) ) {
-		return array();
+		$terms = array();
 	}
 
 	return $terms;
@@ -162,10 +168,10 @@ function gutenberg_lab_blocks_get_villa_location_terms() {
 function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = array(), $wrapper_attributes = '' ) {
 	$button_label        = isset( $attributes['buttonLabel'] ) && is_string( $attributes['buttonLabel'] )
 		? sanitize_text_field( $attributes['buttonLabel'] )
-		: __( 'Search Villas', 'gutenberg-lab-blocks' );
+		: __( 'Search', 'gutenberg-lab-blocks' );
 	$location_placeholder = isset( $attributes['locationPlaceholder'] ) && is_string( $attributes['locationPlaceholder'] )
 		? sanitize_text_field( $attributes['locationPlaceholder'] )
-		: __( 'Search by Location', 'gutenberg-lab-blocks' );
+		: __( 'Search by Area', 'gutenberg-lab-blocks' );
 	$locations            = gutenberg_lab_blocks_get_villa_location_terms();
 	$selected_location    = gutenberg_lab_blocks_get_selected_villa_location_slug();
 	$archive_url          = get_post_type_archive_link( 'villa' );
@@ -209,9 +215,18 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 				<button
 					class="vvm-villa-hero-search__submit"
 					type="submit"
+					aria-label="<?php echo esc_attr( $button_label ); ?>"
 					<?php disabled( ! $has_locations ); ?>
 				>
-					<?php echo esc_html( $button_label ); ?>
+					<span class="vvm-villa-hero-search__submit-label">
+						<?php echo esc_html( $button_label ); ?>
+					</span>
+					<span class="vvm-villa-hero-search__submit-icon" aria-hidden="true">
+						<svg viewBox="0 0 24 24" focusable="false">
+							<circle cx="11" cy="11" r="6.5"></circle>
+							<path d="M16 16l4 4"></path>
+						</svg>
+					</span>
 				</button>
 			</div>
 		</form>
@@ -237,12 +252,11 @@ function gutenberg_lab_blocks_register_villa_hero_pattern() {
 		'gutenberg-lab-blocks/villa-home-hero',
 		array(
 			'title'       => __( 'Villa Home Hero', 'gutenberg-lab-blocks' ),
-			'description' => __( 'A full-screen video hero with centered copy and the villa location search.', 'gutenberg-lab-blocks' ),
+			'description' => __( 'A full-screen homepage hero with a centered headline and villa search bar.', 'gutenberg-lab-blocks' ),
 			'categories'  => array( 'featured' ),
 			'content'     =>
-				'<!-- wp:gutenberg-lab-blocks/media-panel {"align":"full","className":"is-style-villa-hero","mediaType":"video","darkOverlay":true,"containerHeight":"full","contentPosition":"center-center","contentWidth":"lg"} -->' .
+				'<!-- wp:gutenberg-lab-blocks/media-panel {"align":"full","className":"is-style-villa-hero","mediaType":"image","darkOverlay":true,"containerHeight":"full","contentPosition":"bottom-center","contentWidth":"lg"} -->' .
 				'<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero"} --><h1 class="wp-block-heading has-text-align-center has-hero-font-size">' . esc_html__( 'Your Perfect Place in Barbados', 'gutenberg-lab-blocks' ) . '</h1><!-- /wp:heading -->' .
-				'<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center">' . esc_html__( 'Use a background video, a focused headline, and a single location filter to create a premium first impression that can grow over time.', 'gutenberg-lab-blocks' ) . '</p><!-- /wp:paragraph -->' .
 				'<!-- wp:gutenberg-lab-blocks/villa-hero-search /-->' .
 				'<!-- /wp:gutenberg-lab-blocks/media-panel -->',
 		)
