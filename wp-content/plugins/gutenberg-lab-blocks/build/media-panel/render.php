@@ -17,6 +17,7 @@ $container_height = $attributes['containerHeight'] ?? 'medium';
 $content_position = $attributes['contentPosition'] ?? 'center-center';
 $content_width    = $attributes['contentWidth'] ?? 'md';
 $atmosphere_edge  = $attributes['atmosphereEdge'] ?? 'none';
+$curtain_parallax = ! empty( $attributes['curtainParallax'] );
 $align            = $attributes['align'] ?? '';
 
 // When the block is used in a singular template, let the current post's
@@ -71,6 +72,10 @@ if ( $dark_overlay ) {
 	$classes[] = 'media-panel--dark-overlay';
 }
 
+if ( $curtain_parallax ) {
+	$classes[] = 'media-panel--curtain-parallax';
+}
+
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
 		'class' => implode( ' ', $classes ),
@@ -79,38 +84,40 @@ $wrapper_attributes = get_block_wrapper_attributes(
 ?>
 
 <section <?php echo $wrapper_attributes; ?>>
-	<div class="media-panel__media">
-		<?php if ( 'video' === $media_type && $video_url ) : ?>
-			<video
-				class="media-panel__video"
-				autoplay
-				muted
-				loop
-				playsinline
-				<?php if ( $fallback_image_url ) : ?>
-					poster="<?php echo esc_url( $fallback_image_url ); ?>"
-				<?php endif; ?>
-			>
-				<source src="<?php echo esc_url( $video_url ); ?>" type="video/mp4" />
-			</video>
-		<?php elseif ( 'video' === $media_type && $fallback_image_url ) : ?>
-			<img
-				class="media-panel__image"
-				src="<?php echo esc_url( $fallback_image_url ); ?>"
-				alt="<?php echo esc_attr( $fallback_image_alt ); ?>"
-			/>
-		<?php elseif ( $image_url ) : ?>
-			<img
-				class="media-panel__image"
-				src="<?php echo esc_url( $image_url ); ?>"
-				alt="<?php echo esc_attr( $image_alt ); ?>"
-			/>
-		<?php endif; ?>
-	</div>
+	<div class="media-panel__stage">
+		<div class="media-panel__media">
+			<?php if ( 'video' === $media_type && $video_url ) : ?>
+				<video
+					class="media-panel__video"
+					autoplay
+					muted
+					loop
+					playsinline
+					<?php if ( $fallback_image_url ) : ?>
+						poster="<?php echo esc_url( $fallback_image_url ); ?>"
+					<?php endif; ?>
+				>
+					<source src="<?php echo esc_url( $video_url ); ?>" type="video/mp4" />
+				</video>
+			<?php elseif ( 'video' === $media_type && $fallback_image_url ) : ?>
+				<img
+					class="media-panel__image"
+					src="<?php echo esc_url( $fallback_image_url ); ?>"
+					alt="<?php echo esc_attr( $fallback_image_alt ); ?>"
+				/>
+			<?php elseif ( $image_url ) : ?>
+				<img
+					class="media-panel__image"
+					src="<?php echo esc_url( $image_url ); ?>"
+					alt="<?php echo esc_attr( $image_alt ); ?>"
+				/>
+			<?php endif; ?>
+		</div>
 
-	<div class="media-panel__overlay">
-		<div class="media-panel__overlay-content">
-			<?php echo $content; ?>
+		<div class="media-panel__overlay">
+			<div class="media-panel__overlay-content">
+				<?php echo $content; ?>
+			</div>
 		</div>
 	</div>
 </section>

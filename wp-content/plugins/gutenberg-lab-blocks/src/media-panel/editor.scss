@@ -1,4 +1,10 @@
 .wp-block-gutenberg-lab-blocks-media-panel {
+	.media-panel__stage {
+		position: relative;
+		flex: 1 1 auto;
+		min-height: inherit;
+	}
+
 	.media-panel__editor-actions {
 		position: absolute;
 		top: 1rem;
@@ -61,6 +67,17 @@
 		}
 	}
 
+	// Keep the editor representative, not sticky. The curtain effect is a
+	// frontend presentation treatment and would make block editing awkward.
+	&.media-panel--curtain-parallax {
+		position: relative;
+		top: auto;
+	}
+}
+
+.editor-styles-wrapper .wp-block-gutenberg-lab-blocks-media-panel.media-panel--curtain-parallax ~ * {
+	position: static;
+	z-index: auto;
 }
 
 .media-panel__inspector-upload {

@@ -172,6 +172,23 @@
 		--media-panel-overlay-stop-shift: 10%;
 	}
 
+	&.media-panel--curtain-parallax {
+		position: sticky;
+		top: 0;
+		z-index: 0;
+
+		.media-panel__stage {
+			overflow: hidden;
+		}
+
+		// Following blocks need their own stacking layer so they can slide over
+		// the sticky media panel instead of sitting behind it.
+		& ~ * {
+			position: relative;
+			z-index: 1;
+		}
+	}
+
 	&.is-style-villa-hero,
 	&.vvm-media-panel--villa-hero {
 		--media-panel-flow-gap: clamp(2rem, 1.2rem + 2vw, 3.5rem);
@@ -267,6 +284,13 @@
 }
 
 .media-panel {
+	&__stage {
+		position: relative;
+		flex: 1 1 auto;
+		width: 100%;
+		min-height: inherit;
+	}
+
 	&__media,
 	&__overlay {
 		position: absolute;
@@ -374,6 +398,12 @@
 
 		&__overlay-content {
 			width: 100%;
+		}
+	}
+
+	.wp-block-gutenberg-lab-blocks-media-panel.media-panel--curtain-parallax {
+		.media-panel__stage {
+			position: relative;
 		}
 	}
 

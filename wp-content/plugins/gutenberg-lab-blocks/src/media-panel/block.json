@@ -65,6 +65,10 @@
 		"atmosphereEdge": {
 			"type": "string",
 			"default": "none"
+		},
+		"curtainParallax": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {

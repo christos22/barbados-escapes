@@ -122,6 +122,7 @@ export default function Edit({ attributes, setAttributes }) {
 		contentPosition,
 		contentWidth,
 		atmosphereEdge,
+		curtainParallax,
 		align,
 		style,
 	} = attributes;
@@ -139,6 +140,7 @@ export default function Edit({ attributes, setAttributes }) {
 				: '',
 			align ? '' : 'alignfull',
 			darkOverlay ? 'media-panel--dark-overlay' : '',
+			curtainParallax ? 'media-panel--curtain-parallax' : '',
 		]
 			.filter(Boolean)
 			.join(' '),
@@ -294,82 +296,98 @@ export default function Edit({ attributes, setAttributes }) {
 							'gutenberg-lab-blocks'
 						)}
 					/>
+
+					<ToggleControl
+						label={__('Curtain Parallax', 'gutenberg-lab-blocks')}
+						checked={curtainParallax}
+						onChange={(curtainParallaxValue) =>
+							setAttributes({
+								curtainParallax: curtainParallaxValue,
+							})
+						}
+						help={__(
+							'Keeps the panel fixed while the sections below scroll over it on the frontend.',
+							'gutenberg-lab-blocks'
+						)}
+					/>
 				</PanelBody>
 			</InspectorControls>
 
 			<div {...blockProps}>
-				<div className="media-panel__editor-actions">
-					{mediaType === 'image' ? (
-						<MediaUploadCheck>
-							<MediaUpload
-								onSelect={onSelectImage}
-								allowedTypes={['image']}
-								value={imageId}
-								render={({ open }) => (
-									<Button variant="secondary" onClick={open}>
-										{imageUrl
-											? __('Replace image', 'gutenberg-lab-blocks')
-											: __('Select image', 'gutenberg-lab-blocks')}
-									</Button>
+				<div className="media-panel__stage">
+					<div className="media-panel__editor-actions">
+						{mediaType === 'image' ? (
+							<MediaUploadCheck>
+								<MediaUpload
+									onSelect={onSelectImage}
+									allowedTypes={['image']}
+									value={imageId}
+									render={({ open }) => (
+										<Button variant="secondary" onClick={open}>
+											{imageUrl
+												? __('Replace image', 'gutenberg-lab-blocks')
+												: __('Select image', 'gutenberg-lab-blocks')}
+										</Button>
+									)}
+								/>
+							</MediaUploadCheck>
+						) : (
+							<MediaUploadCheck>
+								<MediaUpload
+									onSelect={onSelectVideo}
+									allowedTypes={['video']}
+									value={videoId}
+									render={({ open }) => (
+										<Button variant="secondary" onClick={open}>
+											{videoUrl
+												? __('Replace video', 'gutenberg-lab-blocks')
+												: __('Select video', 'gutenberg-lab-blocks')}
+										</Button>
+									)}
+								/>
+							</MediaUploadCheck>
+						)}
+					</div>
+
+					<div className="media-panel__media">
+						{mediaType === 'image' ? (
+							<>
+								{imageUrl && (
+									<img
+										className="media-panel__image"
+										src={imageUrl}
+										alt={imageAlt}
+									/>
 								)}
-							/>
-						</MediaUploadCheck>
-					) : (
-						<MediaUploadCheck>
-							<MediaUpload
-								onSelect={onSelectVideo}
-								allowedTypes={['video']}
-								value={videoId}
-								render={({ open }) => (
-									<Button variant="secondary" onClick={open}>
-										{videoUrl
-											? __('Replace video', 'gutenberg-lab-blocks')
-											: __('Select video', 'gutenberg-lab-blocks')}
-									</Button>
+							</>
+						) : (
+							<>
+								{videoUrl && (
+									<video
+										className="media-panel__video"
+										src={videoUrl}
+										autoPlay
+										muted
+										loop
+										playsInline
+										poster={fallbackImageUrl || undefined}
+									/>
 								)}
-							/>
-						</MediaUploadCheck>
-					)}
-				</div>
 
-				<div className="media-panel__media">
-					{mediaType === 'image' ? (
-						<>
-							{imageUrl && (
-								<img
-									className="media-panel__image"
-									src={imageUrl}
-									alt={imageAlt}
-								/>
-							)}
-						</>
-					) : (
-						<>
-							{videoUrl && (
-								<video
-									className="media-panel__video"
-									src={videoUrl}
-									autoPlay
-									muted
-									loop
-									playsInline
-									poster={fallbackImageUrl || undefined}
-								/>
-							)}
+								{!videoUrl && fallbackImageUrl && (
+									<img
+										className="media-panel__image"
+										src={fallbackImageUrl}
+										alt={fallbackImageAlt}
+									/>
+								)}
+							</>
+						)}
+					</div>
 
-							{!videoUrl && fallbackImageUrl && (
-								<img
-									className="media-panel__image"
-									src={fallbackImageUrl}
-									alt={fallbackImageAlt}
-								/>
-							)}
-						</>
-					)}
-				</div>
-
-				<div className="media-panel__overlay">
-					<div {...innerBlocksProps} />
+					<div className="media-panel__overlay">
+						<div {...innerBlocksProps} />
+					</div>
 				</div>
 			</div>
 		</>
