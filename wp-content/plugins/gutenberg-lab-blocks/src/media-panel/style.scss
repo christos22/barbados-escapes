@@ -57,13 +57,13 @@
 		--media-panel-overlay-vignette-alpha: 0.14;
 	}
 
-	&.media-panel--content-style-boxed {
-		--media-panel-surface-background: var(--wp--preset--color--sand, #f6f1e8);
-		--media-panel-surface-color: var(--wp--preset--color--deep-forest, #0f2d23);
-		--media-panel-surface-padding: clamp(1.75rem, 3vw, 3rem);
-		--media-panel-surface-shadow: 0 18px 36px rgb(15 45 35 / 0.12);
-		--media-panel-surface-max-width: min(100%, calc(var(--media-panel-content-width) + clamp(2.5rem, 4vw, 4rem)));
-	}
+		&.media-panel--content-style-boxed {
+			--media-panel-surface-background: var(--wp--preset--color--light-gold, #f5ecd7);
+			--media-panel-surface-color: var(--wp--preset--color--dark-green, #1e3d2f);
+			--media-panel-surface-padding: clamp(1.75rem, 3vw, 3rem);
+			--media-panel-surface-shadow: 0 18px 36px rgb(30 61 47 / 0.12);
+			--media-panel-surface-max-width: min(100%, calc(var(--media-panel-content-width) + clamp(2.5rem, 4vw, 4rem)));
+		}
 
 	&.media-panel--position-top-left {
 		--media-panel-align-items: flex-start;
@@ -201,12 +201,9 @@
 
 		.media-panel__overlay-content {
 			> .wp-block-heading {
+				// Keep the villa hero visual treatment, but let the heading itself
+				// inherit its font family and selected font size from global styles.
 				color: var(--wp--preset--color--white, #ffffff);
-				font-family: var(--wp--preset--font-family--display-serif, Georgia, serif);
-				font-size: var(--wp--preset--font-size--hero-display, clamp(3rem, 2.1rem + 1.7vw, 4rem));
-				font-weight: 400;
-				line-height: 1.3;
-				letter-spacing: 0;
 				text-shadow: 0 10px 35px rgb(0 0 0 / 0.2);
 			}
 
@@ -233,13 +230,13 @@
 			padding: 0.45rem;
 			border-radius: 999px;
 			border: 1px solid rgb(255 255 255 / 0.4);
-			background: var(--wp--custom--hero--search-surface, rgb(248 243 235 / 0.94));
+				background: var(--wp--custom--hero--search-surface, rgb(245 236 215 / 0.94));
 			box-shadow: 0 18px 50px rgb(0 0 0 / 0.16);
 		}
 
 		.vvm-villa-hero-search__field::after {
 			right: 1.75rem;
-			color: var(--wp--custom--hero--accent, #79b395);
+				color: var(--wp--custom--hero--accent, #c4922a);
 		}
 
 		.vvm-villa-hero-search__select {
@@ -249,7 +246,7 @@
 			font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
 			font-size: 1.02rem;
 			font-weight: 400;
-			color: var(--wp--custom--hero--search-text, rgb(19 49 42 / 0.72));
+				color: var(--wp--custom--hero--search-text, rgb(30 61 47 / 0.82));
 			background: transparent;
 		}
 
@@ -259,7 +256,7 @@
 			min-height: 4rem;
 			padding: 0;
 			border-radius: 50%;
-			background: var(--wp--custom--hero--accent, #79b395);
+				background: var(--wp--custom--hero--accent, #c4922a);
 			box-shadow: none;
 			font-size: 0;
 		}
@@ -325,19 +322,19 @@
 			background:
 				linear-gradient(
 					var(--media-panel-overlay-angle),
-					rgb(0 75 54 / var(--media-panel-overlay-base-alpha)) var(--media-panel-overlay-base-stop),
-					rgb(9 62 63 / var(--media-panel-overlay-strong-alpha)) var(--media-panel-overlay-strong-stop),
-					rgb(11 63 65 / var(--media-panel-overlay-soft-alpha)) var(--media-panel-overlay-soft-stop),
-					rgb(9 62 63 / var(--media-panel-overlay-mid-alpha)) var(--media-panel-overlay-mid-stop),
-					rgb(1 50 35 / var(--media-panel-overlay-deep-alpha)) var(--media-panel-overlay-deep-stop)
-				),
-				linear-gradient(
-					180deg,
-					rgb(1 50 35 / var(--media-panel-overlay-vignette-alpha)) 0%,
-					rgb(1 50 35 / 0) 26%,
-					rgb(1 50 35 / 0) 74%,
-					rgb(1 50 35 / calc(var(--media-panel-overlay-vignette-alpha) * 0.7)) 100%
-				);
+						rgb(30 61 47 / var(--media-panel-overlay-base-alpha)) var(--media-panel-overlay-base-stop),
+						rgb(30 61 47 / var(--media-panel-overlay-strong-alpha)) var(--media-panel-overlay-strong-stop),
+						rgb(196 146 42 / calc(var(--media-panel-overlay-soft-alpha) * 0.4)) var(--media-panel-overlay-soft-stop),
+						rgb(30 61 47 / var(--media-panel-overlay-mid-alpha)) var(--media-panel-overlay-mid-stop),
+						rgb(30 61 47 / var(--media-panel-overlay-deep-alpha)) var(--media-panel-overlay-deep-stop)
+					),
+					linear-gradient(
+						180deg,
+						rgb(30 61 47 / var(--media-panel-overlay-vignette-alpha)) 0%,
+						rgb(30 61 47 / 0) 26%,
+						rgb(30 61 47 / 0) 74%,
+						rgb(30 61 47 / calc(var(--media-panel-overlay-vignette-alpha) * 0.7)) 100%
+					);
 		}
 	}
 
@@ -410,10 +407,6 @@
 	.wp-block-gutenberg-lab-blocks-media-panel.is-style-villa-hero,
 	.wp-block-gutenberg-lab-blocks-media-panel.vvm-media-panel--villa-hero {
 		.media-panel__overlay-content {
-			> .wp-block-heading {
-				font-size: clamp(2.75rem, 9vw, 4rem);
-			}
-
 			> p {
 				max-width: 28rem;
 			}

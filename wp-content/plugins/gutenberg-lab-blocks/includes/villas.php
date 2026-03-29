@@ -256,7 +256,7 @@ function gutenberg_lab_blocks_register_villa_hero_pattern() {
 			'categories'  => array( 'featured' ),
 			'content'     =>
 				'<!-- wp:gutenberg-lab-blocks/media-panel {"align":"full","className":"vvm-media-panel--villa-hero","mediaType":"image","darkOverlay":true,"containerHeight":"full","contentPosition":"bottom-center","contentWidth":"lg"} -->' .
-				'<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero"} --><h1 class="wp-block-heading has-text-align-center has-hero-font-size">' . esc_html__( 'Your Perfect Place in Barbados', 'gutenberg-lab-blocks' ) . '</h1><!-- /wp:heading -->' .
+				'<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"six-xl"} --><h1 class="wp-block-heading has-text-align-center has-six-xl-font-size">' . esc_html__( 'Your Perfect Place in Barbados', 'gutenberg-lab-blocks' ) . '</h1><!-- /wp:heading -->' .
 				'<!-- wp:gutenberg-lab-blocks/villa-hero-search /-->' .
 				'<!-- /wp:gutenberg-lab-blocks/media-panel -->',
 		)
