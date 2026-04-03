@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "gutenberg-lab-blocks/value-pillar",
+  "version": "0.1.0",
+  "title": "Value Pillar",
+  "category": "design",
+  "icon": "star-half",
+  "description": "One icon-led value pillar used inside the Value Pillars section.",
+  "parent": [
+    "gutenberg-lab-blocks/value-pillars"
+  ],
+  "attributes": {
+    "iconSlug": {
+      "type": "string",
+      "default": "curated"
+    }
+  },
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "textdomain": "gutenberg-lab-blocks",
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}

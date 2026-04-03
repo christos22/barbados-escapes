@@ -73,6 +73,38 @@ function gutenberg_lab_blocks_get_slider_arrow_icon() {
 }
 
 /**
+ * Returns the temporary Dashicon map for the Value Pillars child block.
+ *
+ * We store semantic slugs in block attributes so the icon artwork can be
+ * swapped later without changing saved block content.
+ *
+ * @return array<string, string>
+ */
+function gutenberg_lab_blocks_get_value_pillar_icon_map() {
+	return array(
+		'curated'     => 'dashicons-star-filled',
+		'transparency' => 'dashicons-visibility',
+		'knowledge'   => 'dashicons-location-alt',
+		'availability' => 'dashicons-clock',
+		'service'     => 'dashicons-admin-users',
+		'privacy'     => 'dashicons-lock',
+	);
+}
+
+/**
+ * Returns the Dashicon class for one semantic Value Pillar icon slug.
+ *
+ * @param string $icon_slug Stored semantic icon slug.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_value_pillar_dashicon_class( $icon_slug ) {
+	$icon_map = gutenberg_lab_blocks_get_value_pillar_icon_map();
+	$icon_slug = is_string( $icon_slug ) ? sanitize_key( $icon_slug ) : '';
+
+	return $icon_map[ $icon_slug ] ?? $icon_map['curated'];
+}
+
+/**
  * Enqueue shared front-end/editor styles for reusable slider controls.
  *
  * Block-specific styles still handle layout, but the arrow buttons themselves
@@ -85,6 +117,12 @@ function gutenberg_lab_blocks_enqueue_shared_assets() {
 		array(),
 		gutenberg_lab_blocks_asset_version( 'assets/css/frontend.css' )
 	);
+
+	// Dashicons ship with WordPress core, but guest-facing pages do not load the
+	// font by default. The temporary Value Pillars icons need it on the front end.
+	if ( ! is_admin() ) {
+		wp_enqueue_style( 'dashicons' );
+	}
 }
 add_action( 'enqueue_block_assets', 'gutenberg_lab_blocks_enqueue_shared_assets' );
 
@@ -95,6 +133,8 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/related-packages' );
 	register_block_type( __DIR__ . '/build/site-footer-meta' );
 	register_block_type( __DIR__ . '/build/basic-content' );
+	register_block_type( __DIR__ . '/build/value-pillars' );
+	register_block_type( __DIR__ . '/build/value-pillar' );
 	register_block_type( __DIR__ . '/build/split-content' );
 	register_block_type( __DIR__ . '/build/card-grid' );
 	register_block_type( __DIR__ . '/build/card-grid-card' );

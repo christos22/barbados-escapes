@@ -27,3 +27,8 @@
 - Use `theme.json` for reusable font tokens and spacing values, then let a block style variation consume those tokens for a page-specific visual direction.
 - When editors need responsive type choices, define fluid `fontSizes` in `theme.json` and avoid hardcoding heading sizes in block CSS.
 - When a hero needs to affect shared chrome like the header, prefer a body class or first-block detection over hardcoding header markup into the block itself.
+
+## Value Pillars
+
+- Use a parent/child block pair when a section needs a locked scaffold but each repeated item still benefits from native drag-and-drop editing.
+- Store a semantic icon slug instead of a temporary Dashicon class so the icon artwork can change later without migrating saved block content.

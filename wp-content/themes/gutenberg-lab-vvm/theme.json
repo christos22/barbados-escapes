@@ -271,6 +271,15 @@
 					}
 				}
 			},
+			"gutenberg-lab-blocks/value-pillars": {
+				"spacing": {
+					"blockGap": "var(--wp--preset--spacing--lg)",
+					"padding": {
+						"top": "var(--wp--preset--spacing--section-md)",
+						"bottom": "var(--wp--preset--spacing--section-md)"
+					}
+				}
+			},
 			"gutenberg-lab-blocks/split-content": {
 				"spacing": {
 					"blockGap": "clamp(0.75rem, 1.5vw, 1.25rem)",
