@@ -62,6 +62,15 @@ function gutenberg_lab_vvm_get_primary_navigation_post_id() {
 }
 
 /**
+ * Returns the seeded flat header navigation post ID.
+ *
+ * @return int
+ */
+function gutenberg_lab_vvm_get_header_navigation_post_id() {
+	return gutenberg_lab_vvm_get_navigation_post_id( 'header-navigation' );
+}
+
+/**
  * Hides the classic Menus screen so the theme stays on the block-navigation workflow.
  */
 function gutenberg_lab_vvm_remove_classic_menus_screen() {
@@ -124,23 +133,32 @@ add_action( 'init', 'gutenberg_lab_vvm_register_block_styles' );
 /**
  * Builds serialized navigation-link markup from a page slug.
  *
- * @param string $label Human-readable menu label.
- * @param string $slug  Page slug to resolve.
+ * @param string $label           Human-readable menu label.
+ * @param string $slug            Page slug to resolve.
+ * @param array  $extra_attrs     Optional block attributes such as `className`.
  * @return string
  */
-function gutenberg_lab_vvm_navigation_link_markup( $label, $slug ) {
+function gutenberg_lab_vvm_navigation_link_markup( $label, $slug, $extra_attrs = array() ) {
 	$page = get_page_by_path( $slug, OBJECT, 'page' );
 
-	if ( ! $page instanceof WP_Post ) {
-		return '<!-- wp:navigation-link {"label":"' . esc_attr( $label ) . '","type":"custom","url":"' . esc_url( home_url( '/' . $slug . '/' ) ) . '","kind":"custom"} /-->';
+	$attributes = array(
+		'label' => $label,
+	);
+
+	if ( $page instanceof WP_Post ) {
+		$attributes['type'] = 'page';
+		$attributes['id']   = (int) $page->ID;
+		$attributes['url']  = get_permalink( $page );
+		$attributes['kind'] = 'post-type';
+	} else {
+		$attributes['type'] = 'custom';
+		$attributes['url']  = home_url( '/' . $slug . '/' );
+		$attributes['kind'] = 'custom';
 	}
 
-	return sprintf(
-		'<!-- wp:navigation-link {"label":"%1$s","type":"page","id":%2$d,"url":"%3$s","kind":"post-type"} /-->',
-		esc_attr( $label ),
-		(int) $page->ID,
-		esc_url( get_permalink( $page ) )
-	);
+	$attributes = array_merge( $attributes, $extra_attrs );
+
+	return '<!-- wp:navigation-link ' . wp_json_encode( $attributes ) . ' /-->';
 }
 
 /**
@@ -242,6 +260,79 @@ function gutenberg_lab_vvm_get_primary_navigation_content() {
 }
 
 /**
+ * Returns the canonical block markup for the flat header drawer navigation.
+ *
+ * The visual drawer design wants a single stacked list instead of nested
+ * disclosure groups. We store that as its own `wp_navigation` entity so the
+ * frontend semantics stay honest and the CSS can style plain links instead of
+ * fighting Gutenberg's submenu behavior.
+ *
+ * @return string
+ */
+function gutenberg_lab_vvm_get_header_navigation_content() {
+	$links = array(
+		array(
+			'label' => 'About Us',
+			'slug'  => 'about-us',
+		),
+		array(
+			'label' => 'Test Page 4',
+			'slug'  => 'test-page-4',
+			'class' => 'vvm-header-nav__child',
+		),
+		array(
+			'label' => 'Test Page 5',
+			'slug'  => 'test-page-5',
+			'class' => 'vvm-header-nav__child',
+		),
+		array(
+			'label' => 'Test Page 6',
+			'slug'  => 'test-page-6',
+			'class' => 'vvm-header-nav__child',
+		),
+		array(
+			'label' => 'Blog',
+			'slug'  => 'blog',
+		),
+		array(
+			'label' => 'Test Page 1',
+			'slug'  => 'test-page-1',
+			'class' => 'vvm-header-nav__child',
+		),
+		array(
+			'label' => 'Test Page 2',
+			'slug'  => 'test-page-2',
+			'class' => 'vvm-header-nav__child',
+		),
+		array(
+			'label' => 'Test Page 3',
+			'slug'  => 'test-page-3',
+			'class' => 'vvm-header-nav__child',
+		),
+		array(
+			'label' => 'Contact Us',
+			'slug'  => 'contact-us',
+		),
+	);
+
+	return implode(
+		"\n\n",
+		array_map(
+			static function ( $link ) {
+				$attributes = array();
+
+				if ( ! empty( $link['class'] ) ) {
+					$attributes['className'] = $link['class'];
+				}
+
+				return gutenberg_lab_vvm_navigation_link_markup( $link['label'], $link['slug'], $attributes );
+			},
+			$links
+		)
+	);
+}
+
+/**
  * Returns the canonical block markup for the footer utility navigation entity.
  *
  * @return string
@@ -335,7 +426,11 @@ function gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs ) 
 	}
 
 	if ( 'header' === $slug && ! empty( $navigation_refs['primary'] ) ) {
-		$content = preg_replace( '/"ref":\d+/', '"ref":' . (int) $navigation_refs['primary'], $content, 1 );
+		$header_navigation_id = ! empty( $navigation_refs['header'] )
+			? (int) $navigation_refs['header']
+			: (int) $navigation_refs['primary'];
+
+		$content = preg_replace( '/"ref":\d+/', '"ref":' . $header_navigation_id, $content, 1 );
 	}
 
 	if ( 'footer' === $slug && ! empty( $navigation_refs['footer'] ) ) {
@@ -447,8 +542,15 @@ function gutenberg_lab_vvm_bootstrap_native_entities() {
 		gutenberg_lab_vvm_get_footer_navigation_content()
 	);
 
+	$header_navigation_id = gutenberg_lab_vvm_seed_navigation_post(
+		'header-navigation',
+		'Header Navigation',
+		gutenberg_lab_vvm_get_header_navigation_content()
+	);
+
 	$navigation_refs = array(
 		'primary' => $primary_navigation_id,
+		'header'  => $header_navigation_id,
 		'footer'  => $footer_navigation_id,
 	);
 
@@ -508,8 +610,15 @@ function gutenberg_lab_vvm_migrate_site_chrome_to_native_gutenberg() {
 		gutenberg_lab_vvm_get_footer_navigation_content()
 	);
 
+	$header_navigation_id = gutenberg_lab_vvm_upsert_navigation_post(
+		'header-navigation',
+		'Header Navigation',
+		gutenberg_lab_vvm_get_header_navigation_content()
+	);
+
 	$navigation_refs = array(
 		'primary' => $primary_navigation_id,
+		'header'  => $header_navigation_id,
 		'footer'  => $footer_navigation_id,
 	);
 

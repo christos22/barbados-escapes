@@ -9,7 +9,6 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	// Pages without a hero keep the header in normal document flow.
 	if ( ! hasHeroHeader ) {
 		header.classList.remove( 'is-scrolled' );
-		document.body.classList.remove( 'vvm-header-is-scrolled' );
 		return;
 	}
 
@@ -18,7 +17,6 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		const isScrolled = window.scrollY > 32;
 
 		header.classList.toggle( 'is-scrolled', isScrolled );
-		document.body.classList.toggle( 'vvm-header-is-scrolled', isScrolled );
 	};
 
 	syncHeaderState();
