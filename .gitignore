@@ -5,6 +5,9 @@
 !.gitignore
 !AGENTS.md
 !.ddev/
+!.github/
+!.github/**
+!.cpanel.yml
 
 # Keep future Composer manifests if the project moves to Composer-managed WordPress.
 !composer.json

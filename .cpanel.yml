@@ -1,0 +1,12 @@
+---
+deployment:
+  tasks:
+    # Mirror the custom block theme into the live WordPress install.
+    - export THEMEPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm
+    - /bin/mkdir -p $THEMEPATH
+    - /bin/cp -R wp-content/themes/gutenberg-lab-vvm/* $THEMEPATH/
+
+    # Mirror the custom blocks plugin, including committed build assets.
+    - export PLUGINPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks
+    - /bin/mkdir -p $PLUGINPATH
+    - /bin/cp -R wp-content/plugins/gutenberg-lab-blocks/* $PLUGINPATH/
