@@ -728,7 +728,7 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-dialog {
 	position: fixed;
-	top: var(--vvm-admin-bar-offset) !important;
+	top: 0 !important;
 	left: 0;
 	width: min(21rem, calc(100vw - 3.5rem));
 	height: calc(100dvh - var(--vvm-admin-bar-offset)) !important;
