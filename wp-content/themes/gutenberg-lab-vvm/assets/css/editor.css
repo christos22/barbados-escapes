@@ -454,10 +454,29 @@ body.post-type-site_message.editor-styles-wrapper .wp-block-button .wp-block-but
 	display: none;
 }
 
-.editor-styles-wrapper .vvm-footer__social {
-	margin: 4rem 0 3rem;
+.editor-styles-wrapper .vvm-footer__columns {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 2rem;
 }
 
-.editor-styles-wrapper .vvm-footer__columns {
-	margin-bottom: 3rem;
+.editor-styles-wrapper .vvm-footer__motion-item {
+	opacity: 1 !important;
+	transform: none !important;
+	transition: none !important;
+}
+
+.editor-styles-wrapper .vvm-footer__divider {
+	margin-top: 2.5rem;
+	margin-bottom: 2.5rem;
+}
+
+.editor-styles-wrapper .vvm-footer__bottom {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+@media (max-width: 781px) {
+	.editor-styles-wrapper .vvm-footer__columns {
+		grid-template-columns: minmax(0, 1fr);
+	}
 }

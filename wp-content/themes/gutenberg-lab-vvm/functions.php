@@ -162,6 +162,83 @@ function gutenberg_lab_vvm_navigation_link_markup( $label, $slug, $extra_attrs =
 }
 
 /**
+ * Normalizes a navigation target into the URL stored in a nav-link block.
+ *
+ * Footer links mix internal clean slugs, post permalinks, and placeholder
+ * social URLs. Centralizing normalization keeps the seeded nav entities
+ * predictable without hardcoding different helper functions for each case.
+ *
+ * @param string $url Raw URL or relative path.
+ * @return string
+ */
+function gutenberg_lab_vvm_normalize_navigation_url( $url ) {
+	$url = trim( (string) $url );
+
+	if ( '' === $url ) {
+		return home_url( '/' );
+	}
+
+	if (
+		'#' === $url ||
+		str_starts_with( $url, 'http://' ) ||
+		str_starts_with( $url, 'https://' ) ||
+		str_starts_with( $url, 'mailto:' ) ||
+		str_starts_with( $url, 'tel:' )
+	) {
+		return $url;
+	}
+
+	if ( str_starts_with( $url, '/' ) ) {
+		return home_url( user_trailingslashit( ltrim( $url, '/' ) ) );
+	}
+
+	return home_url( user_trailingslashit( $url ) );
+}
+
+/**
+ * Builds serialized custom navigation-link markup from a URL or clean path.
+ *
+ * Footer legal links are chrome-only and may exist before the actual pages do,
+ * so we seed them as custom URLs to keep the paths stable and predictable.
+ *
+ * @param string $label       Human-readable menu label.
+ * @param string $url         Absolute URL, anchor, or relative site path.
+ * @param array  $extra_attrs Optional block attributes such as `className`.
+ * @return string
+ */
+function gutenberg_lab_vvm_custom_navigation_link_markup( $label, $url, $extra_attrs = array() ) {
+	$attributes = array_merge(
+		array(
+			'label' => $label,
+			'type'  => 'custom',
+			'url'   => gutenberg_lab_vvm_normalize_navigation_url( $url ),
+			'kind'  => 'custom',
+		),
+		$extra_attrs
+	);
+
+	return '<!-- wp:navigation-link ' . wp_json_encode( $attributes ) . ' /-->';
+}
+
+/**
+ * Builds a serialized list of custom navigation-link blocks.
+ *
+ * @param array[] $links Each link includes `label` and `url`.
+ * @return string
+ */
+function gutenberg_lab_vvm_custom_navigation_links_markup( $links ) {
+	return implode(
+		"\n\n",
+		array_map(
+			static function ( $link ) {
+				return gutenberg_lab_vvm_custom_navigation_link_markup( $link['label'], $link['url'] );
+			},
+			$links
+		)
+	);
+}
+
+/**
  * Builds serialized navigation-submenu markup from a page slug and children.
  *
  * @param string $label           Human-readable menu label.
@@ -338,13 +415,93 @@ function gutenberg_lab_vvm_get_header_navigation_content() {
  * @return string
  */
 function gutenberg_lab_vvm_get_footer_navigation_content() {
-	return implode(
-		"\n\n",
+	return gutenberg_lab_vvm_custom_navigation_links_markup(
 		array(
-			gutenberg_lab_vvm_navigation_link_markup( 'Contact Us', 'contact-us' ),
-			gutenberg_lab_vvm_navigation_link_markup( 'Site Map', 'site-map' ),
-			gutenberg_lab_vvm_navigation_link_markup( 'Privacy Policy', 'privacy-policy' ),
-			gutenberg_lab_vvm_navigation_link_markup( 'Accessibility', 'accessibility' ),
+			array(
+				'label' => 'Privacy Policy',
+				'url'   => '/privacy-policy/',
+			),
+			array(
+				'label' => 'Terms of Service',
+				'url'   => '/terms-of-service/',
+			),
+			array(
+				'label' => 'Sitemap',
+				'url'   => '/site-map/',
+			),
+		)
+	);
+}
+
+/**
+ * Returns the canonical block markup for the footer villas navigation entity.
+ *
+ * @return string
+ */
+function gutenberg_lab_vvm_get_footer_villas_navigation_content() {
+	$villas = array(
+		array(
+			'label' => 'Monkey Hill',
+			'slug'  => 'monkey-hill',
+		),
+		array(
+			'label' => 'Ocean Heights',
+			'slug'  => 'ocean-heights',
+		),
+		array(
+			'label' => 'Crick Hill House',
+			'slug'  => 'crick-hill-house',
+		),
+	);
+
+	$links = array_map(
+		static function ( $villa ) {
+			$post = get_page_by_path( $villa['slug'], OBJECT, 'villa' );
+			$url  = $post instanceof WP_Post
+				? get_permalink( $post )
+				: home_url( user_trailingslashit( 'villas/' . $villa['slug'] ) );
+
+			return array(
+				'label' => $villa['label'],
+				'url'   => $url,
+			);
+		},
+		$villas
+	);
+
+	return gutenberg_lab_vvm_custom_navigation_links_markup( $links );
+}
+
+/**
+ * Returns the canonical block markup for the footer explore navigation entity.
+ *
+ * @return string
+ */
+function gutenberg_lab_vvm_get_footer_explore_navigation_content() {
+	$villa_archive_url = get_post_type_archive_link( 'villa' );
+
+	if ( ! $villa_archive_url ) {
+		$villa_archive_url = '/villas/';
+	}
+
+	return gutenberg_lab_vvm_custom_navigation_links_markup(
+		array(
+			array(
+				'label' => 'Our Villas',
+				'url'   => $villa_archive_url,
+			),
+			array(
+				'label' => 'Private Experiences',
+				'url'   => '/private-experiences/',
+			),
+			array(
+				'label' => 'Destinations',
+				'url'   => '/destinations/',
+			),
+			array(
+				'label' => 'Membership',
+				'url'   => '/membership/',
+			),
 		)
 	);
 }
@@ -407,12 +564,64 @@ function gutenberg_lab_vvm_upsert_navigation_post( $slug, $title, $content ) {
 }
 
 /**
+ * Syncs the footer navigation entities used by the premium footer template.
+ *
+ * @param string $mode Either `seed` or `upsert`.
+ * @return array<string, int>
+ */
+function gutenberg_lab_vvm_sync_footer_navigation_entities( $mode = 'seed' ) {
+	$sync_navigation = 'upsert' === $mode
+		? 'gutenberg_lab_vvm_upsert_navigation_post'
+		: 'gutenberg_lab_vvm_seed_navigation_post';
+
+	return array(
+		'footer_villas'  => (int) call_user_func(
+			$sync_navigation,
+			'footer-villas-navigation',
+			'Footer Villas Navigation',
+			gutenberg_lab_vvm_get_footer_villas_navigation_content()
+		),
+		'footer_explore' => (int) call_user_func(
+			$sync_navigation,
+			'footer-explore-navigation',
+			'Footer Explore Navigation',
+			gutenberg_lab_vvm_get_footer_explore_navigation_content()
+		),
+		'footer_legal'   => (int) call_user_func(
+			$sync_navigation,
+			'footer-navigation',
+			'Footer Navigation',
+			gutenberg_lab_vvm_get_footer_navigation_content()
+		),
+	);
+}
+
+/**
+ * Replaces serialized navigation ref placeholders in template-part markup.
+ *
+ * @param string $content       Template-part block markup.
+ * @param array  $replacements  Placeholder ref integers keyed to live IDs.
+ * @return string
+ */
+function gutenberg_lab_vvm_replace_navigation_refs( $content, $replacements ) {
+	foreach ( $replacements as $placeholder => $navigation_id ) {
+		$content = str_replace(
+			'"ref":' . (int) $placeholder,
+			'"ref":' . (int) $navigation_id,
+			$content
+		);
+	}
+
+	return $content;
+}
+
+/**
  * Loads a file-based template part and swaps placeholder navigation refs.
  *
  * We intentionally keep the canonical block markup in the theme files, then
  * inject environment-specific navigation IDs when provisioning template-part
- * posts for the current site. The source files intentionally use `ref: 0`
- * so they stay valid block markup without implying a real database ID.
+ * posts for the current site. The source files intentionally use placeholder
+ * refs so they stay valid block markup without implying real database IDs.
  *
  * @param string $slug            Template part slug, for example `header`.
  * @param array  $navigation_refs Map of logical navigation keys to post IDs.
@@ -433,8 +642,15 @@ function gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs ) 
 		$content = preg_replace( '/"ref":\d+/', '"ref":' . $header_navigation_id, $content, 1 );
 	}
 
-	if ( 'footer' === $slug && ! empty( $navigation_refs['footer'] ) ) {
-		$content = preg_replace( '/"ref":\d+/', '"ref":' . (int) $navigation_refs['footer'], $content, 1 );
+	if ( 'footer' === $slug ) {
+		$content = gutenberg_lab_vvm_replace_navigation_refs(
+			$content,
+			array(
+				9101 => (int) ( $navigation_refs['footer_villas'] ?? 0 ),
+				9102 => (int) ( $navigation_refs['footer_explore'] ?? 0 ),
+				9105 => (int) ( $navigation_refs['footer_legal'] ?? 0 ),
+			)
+		);
 	}
 
 	return $content;
@@ -536,22 +752,18 @@ function gutenberg_lab_vvm_bootstrap_native_entities() {
 		gutenberg_lab_vvm_get_primary_navigation_content()
 	);
 
-	$footer_navigation_id = gutenberg_lab_vvm_seed_navigation_post(
-		'footer-navigation',
-		'Footer Navigation',
-		gutenberg_lab_vvm_get_footer_navigation_content()
-	);
-
 	$header_navigation_id = gutenberg_lab_vvm_seed_navigation_post(
 		'header-navigation',
 		'Header Navigation',
 		gutenberg_lab_vvm_get_header_navigation_content()
 	);
 
-	$navigation_refs = array(
-		'primary' => $primary_navigation_id,
-		'header'  => $header_navigation_id,
-		'footer'  => $footer_navigation_id,
+	$navigation_refs = array_merge(
+		array(
+			'primary' => $primary_navigation_id,
+			'header'  => $header_navigation_id,
+		),
+		gutenberg_lab_vvm_sync_footer_navigation_entities( 'seed' )
 	);
 
 	gutenberg_lab_vvm_ensure_template_part_post(
@@ -604,22 +816,18 @@ function gutenberg_lab_vvm_migrate_site_chrome_to_native_gutenberg() {
 		gutenberg_lab_vvm_get_primary_navigation_content()
 	);
 
-	$footer_navigation_id = gutenberg_lab_vvm_upsert_navigation_post(
-		'footer-navigation',
-		'Footer Navigation',
-		gutenberg_lab_vvm_get_footer_navigation_content()
-	);
-
 	$header_navigation_id = gutenberg_lab_vvm_upsert_navigation_post(
 		'header-navigation',
 		'Header Navigation',
 		gutenberg_lab_vvm_get_header_navigation_content()
 	);
 
-	$navigation_refs = array(
-		'primary' => $primary_navigation_id,
-		'header'  => $header_navigation_id,
-		'footer'  => $footer_navigation_id,
+	$navigation_refs = array_merge(
+		array(
+			'primary' => $primary_navigation_id,
+			'header'  => $header_navigation_id,
+		),
+		gutenberg_lab_vvm_sync_footer_navigation_entities( 'upsert' )
 	);
 
 	gutenberg_lab_vvm_upsert_template_part_post(
@@ -639,6 +847,93 @@ function gutenberg_lab_vvm_migrate_site_chrome_to_native_gutenberg() {
 	update_option( 'gutenberg_lab_vvm_native_site_editor_migrated', 1, false );
 }
 add_action( 'init', 'gutenberg_lab_vvm_migrate_site_chrome_to_native_gutenberg', 21 );
+
+/**
+ * Seeds the initial Barbados Escapes villa posts when they are missing.
+ *
+ * The CPT lives in the block plugin. The theme only owns the initial content
+ * bootstrap so the footer and archive have real content to point at.
+ */
+function gutenberg_lab_vvm_seed_initial_villas() {
+	$seed_version = '2026-04-11-barbados-escapes-villas-v1';
+
+	if ( get_option( 'gutenberg_lab_vvm_initial_villa_seed_version' ) === $seed_version ) {
+		return;
+	}
+
+	if ( ! post_type_exists( 'villa' ) ) {
+		return;
+	}
+
+	$villas = array(
+		array(
+			'title' => 'Monkey Hill',
+			'slug'  => 'monkey-hill',
+		),
+		array(
+			'title' => 'Ocean Heights',
+			'slug'  => 'ocean-heights',
+		),
+		array(
+			'title' => 'Crick Hill House',
+			'slug'  => 'crick-hill-house',
+		),
+	);
+
+	foreach ( $villas as $villa ) {
+		$existing = get_page_by_path( $villa['slug'], OBJECT, 'villa' );
+
+		if ( $existing instanceof WP_Post ) {
+			continue;
+		}
+
+		wp_insert_post(
+			array(
+				'post_type'   => 'villa',
+				'post_status' => 'publish',
+				'post_title'  => $villa['title'],
+				'post_name'   => $villa['slug'],
+			)
+		);
+	}
+
+	update_option( 'gutenberg_lab_vvm_initial_villa_seed_version', $seed_version, false );
+}
+add_action( 'init', 'gutenberg_lab_vvm_seed_initial_villas', 12 );
+
+/**
+ * Refreshes the seeded footer chrome when the canonical file markup changes.
+ *
+ * The site editor owns the footer entity after the original migration, but
+ * this gives us a safe one-time code-driven refresh for deliberate redesigns.
+ */
+function gutenberg_lab_vvm_refresh_footer_template_part() {
+	$footer_refresh_version = '2026-04-11-barbados-escapes-footer-v3';
+
+	if ( get_option( 'gutenberg_lab_vvm_footer_refresh_version' ) === $footer_refresh_version ) {
+		return;
+	}
+
+	$primary_navigation_id = gutenberg_lab_vvm_get_primary_navigation_post_id();
+	$header_navigation_id  = gutenberg_lab_vvm_get_header_navigation_post_id();
+	$navigation_refs       = array_merge(
+		array(
+			'primary' => $primary_navigation_id,
+			'header'  => $header_navigation_id ? $header_navigation_id : $primary_navigation_id,
+		),
+		gutenberg_lab_vvm_sync_footer_navigation_entities( 'upsert' )
+	);
+
+	gutenberg_lab_vvm_upsert_template_part_post(
+		'footer',
+		'Footer',
+		WP_TEMPLATE_PART_AREA_FOOTER,
+		$navigation_refs
+	);
+
+	update_option( 'gutenberg_lab_vvm_footer_refresh_version', $footer_refresh_version, false );
+}
+add_action( 'init', 'gutenberg_lab_vvm_refresh_footer_template_part', 22 );
 
 /**
  * Returns the first meaningful content block from a parsed block list.
@@ -783,7 +1078,7 @@ add_action( 'wp_enqueue_scripts', 'gutenberg_lab_vvm_enqueue_fonts' );
 add_action( 'enqueue_block_editor_assets', 'gutenberg_lab_vvm_enqueue_fonts' );
 
 /**
- * Enqueues the shared theme stylesheet and the minimal front-end header script.
+ * Enqueues the shared theme stylesheet and the minimal front-end chrome script.
  *
  * The editor does not need to reproduce every front-end behavior, but the
  * public site can still use small progressive enhancements when they serve
