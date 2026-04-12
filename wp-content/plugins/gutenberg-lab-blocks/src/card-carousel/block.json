@@ -1,13 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "gutenberg-lab-blocks/card-grid",
-	"version": "0.1.0",
-	"title": "Card Grid",
+	"name": "gutenberg-lab-blocks/card-carousel",
+	"version": "0.1.5",
+	"title": "Card Carousel",
 	"category": "design",
-	"icon": "screenoptions",
-	"description": "A card grid that can be authored manually or populated from villa posts.",
-	"keywords": [ "cards", "grid", "layout", "villas" ],
+	"icon": "images-alt2",
+	"description": "A split intro and card carousel that can be authored manually or populated from villa posts.",
+	"keywords": [ "carousel", "cards", "slider", "villas" ],
 	"attributes": {
 		"contentSource": {
 			"type": "string",
@@ -16,22 +16,6 @@
 		"villaCount": {
 			"type": "number",
 			"default": 3
-		},
-		"villaPresentation": {
-			"type": "string",
-			"default": "cinematic"
-		},
-		"columns": {
-			"type": "string",
-			"default": "2"
-		},
-		"enableCarousel": {
-			"type": "boolean",
-			"default": false
-		},
-		"mediaRatio": {
-			"type": "string",
-			"default": "landscape"
 		}
 	},
 	"supports": {

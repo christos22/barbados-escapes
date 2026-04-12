@@ -136,6 +136,8 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/value-pillars' );
 	register_block_type( __DIR__ . '/build/value-pillar' );
 	register_block_type( __DIR__ . '/build/split-content' );
+	register_block_type( __DIR__ . '/build/card-carousel' );
+	register_block_type( __DIR__ . '/build/card-carousel-slide' );
 	register_block_type( __DIR__ . '/build/card-grid' );
 	register_block_type( __DIR__ . '/build/card-grid-card' );
 	register_block_type( __DIR__ . '/build/stack-tabs' );

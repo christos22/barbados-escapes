@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/card-carousel-slide",
+	"version": "0.1.0",
+	"title": "Card Carousel Slide",
+	"category": "design",
+	"icon": "format-image",
+	"description": "A single slide item used inside the Card Carousel block.",
+	"ancestor": [ "gutenberg-lab-blocks/card-carousel" ],
+	"attributes": {
+		"imageId": {
+			"type": "number"
+		},
+		"imageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"imageAlt": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"reusable": false
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js"
+}

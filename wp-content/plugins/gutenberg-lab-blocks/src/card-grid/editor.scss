@@ -1,4 +1,19 @@
+// ServerSideRender gives the editor the real PHP markup, so pull the shared
+// frontend card styles into the editor bundle to keep the preview representative.
+@use "./style";
+
 .wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid {
+	.vvm-card-grid__dynamic-preview {
+		display: grid;
+		gap: var(--wp--preset--spacing--sm);
+	}
+
+	.vvm-card-grid__editor-note {
+		margin: 0;
+		color: var(--wp--preset--color--forest);
+		font-size: 0.875rem;
+	}
+
 	.vvm-card-grid__items {
 		align-items: stretch;
 	}

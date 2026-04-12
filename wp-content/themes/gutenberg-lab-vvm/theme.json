@@ -52,17 +52,17 @@
 			"customFontSize": true,
 			"fontFamilies": [
 				{
-					"fontFamily": "\"Cormorant Garamond\", Georgia, serif",
-					"name": "Display Serif",
+					"fontFamily": "\"Romely\", Georgia, serif",
+					"name": "Romely Display",
 					"slug": "display-serif"
 				},
 				{
-					"fontFamily": "\"Romely Regular\", sans-serif",
-					"name": "Romely Regular",
+					"fontFamily": "\"Romely\", Georgia, serif",
+					"name": "Romely",
 					"slug": "site-primary",
 					"fontFace": [
 						{
-							"fontFamily": "Romely Regular",
+							"fontFamily": "Romely",
 							"fontStyle": "normal",
 							"fontWeight": "400",
 							"src": [ "file:./assets/fonts/romely/Romely Regular.ttf" ]

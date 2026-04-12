@@ -5,8 +5,14 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
-import { PanelBody, SelectControl, ToggleControl } from '@wordpress/components';
+import {
+	PanelBody,
+	RangeControl,
+	SelectControl,
+	ToggleControl,
+} from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import ServerSideRender from '@wordpress/server-side-render';
 
 import './editor.scss';
 
@@ -21,6 +27,16 @@ const TEMPLATE = [
 const COLUMN_OPTIONS = [
 	{ label: __( '2 columns', 'gutenberg-lab-blocks' ), value: '2' },
 	{ label: __( '3 columns', 'gutenberg-lab-blocks' ), value: '3' },
+];
+
+const CONTENT_SOURCE_OPTIONS = [
+	{ label: __( 'Manual cards', 'gutenberg-lab-blocks' ), value: 'manual' },
+	{ label: __( 'Villa posts', 'gutenberg-lab-blocks' ), value: 'villas' },
+];
+
+const VILLA_PRESENTATION_OPTIONS = [
+	{ label: __( 'Cinematic', 'gutenberg-lab-blocks' ), value: 'cinematic' },
+	{ label: __( 'Standard', 'gutenberg-lab-blocks' ), value: 'standard' },
 ];
 
 const MEDIA_RATIO_OPTIONS = [
@@ -61,24 +77,42 @@ function resolveBlockGapPreviewValue( blockGap ) {
 }
 
 export default function Edit( { attributes, clientId, setAttributes } ) {
-	const { columns, enableCarousel, mediaRatio, style } = attributes;
+	const {
+		contentSource,
+		villaCount,
+		villaPresentation,
+		columns,
+		enableCarousel,
+		mediaRatio,
+		style,
+	} = attributes;
+	const isVillaCinematicStyle =
+		'villas' === contentSource && 'cinematic' === villaPresentation;
 	const blockGap = resolveBlockGapPreviewValue( style?.spacing?.blockGap );
-	const cardCount = useSelect(
+	const manualCardCount = useSelect(
 		( select ) =>
 			select( 'core/block-editor' ).getBlock( clientId )?.innerBlocks?.length ??
 			0,
 		[ clientId ]
 	);
+	const cardCount = 'villas' === contentSource ? villaCount : manualCardCount;
 	const willUseCarousel =
-		enableCarousel && cardCount > Number.parseInt( columns, 10 );
+		! isVillaCinematicStyle &&
+		enableCarousel &&
+		cardCount > Number.parseInt( columns, 10 );
 
 	const blockProps = useBlockProps( {
 		className: [
 			'vvm-card-grid',
-			enableCarousel ? 'vvm-card-grid--carousel-enabled' : '',
-			`vvm-card-grid--columns-${ columns }`,
-			`vvm-card-grid--ratio-${ mediaRatio }`,
-		].join( ' ' ),
+				isVillaCinematicStyle ? 'alignfull' : '',
+				enableCarousel ? 'vvm-card-grid--carousel-enabled' : '',
+				`vvm-card-grid--source-${ contentSource }`,
+				'villas' === contentSource
+					? `vvm-card-grid--villa-presentation-${ villaPresentation }`
+					: '',
+				`vvm-card-grid--columns-${ columns }`,
+				`vvm-card-grid--ratio-${ mediaRatio }`,
+			].join( ' ' ),
 		style: blockGap
 			? {
 					'--wp--style--block-gap': blockGap,
@@ -103,8 +137,66 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 		<>
 			<InspectorControls>
 				<PanelBody
-					title={ __( 'Layout', 'gutenberg-lab-blocks' ) }
+					title={ __( 'Content source', 'gutenberg-lab-blocks' ) }
 					initialOpen={ true }
+				>
+					<SelectControl
+						label={ __( 'Populate cards from', 'gutenberg-lab-blocks' ) }
+						value={ contentSource }
+						options={ CONTENT_SOURCE_OPTIONS }
+						onChange={ ( value ) =>
+							setAttributes( { contentSource: value } )
+						}
+						help={
+							'villas' === contentSource
+								? __(
+										'Villa mode maps each card to the villa featured image, title, excerpt, and CTA meta fallback.',
+										'gutenberg-lab-blocks'
+								  )
+								: __(
+										'Manual mode keeps each card fully editable with nested Gutenberg blocks.',
+										'gutenberg-lab-blocks'
+								  )
+						}
+					/>
+
+					{ 'villas' === contentSource ? (
+						<>
+							<RangeControl
+								label={ __( 'Villas to show', 'gutenberg-lab-blocks' ) }
+								value={ villaCount }
+								onChange={ ( value ) =>
+									setAttributes( { villaCount: value ?? 3 } )
+								}
+								min={ 1 }
+								max={ 12 }
+							/>
+							<SelectControl
+								label={ __( 'Villa presentation', 'gutenberg-lab-blocks' ) }
+								value={ villaPresentation }
+								options={ VILLA_PRESENTATION_OPTIONS }
+								onChange={ ( value ) =>
+									setAttributes( { villaPresentation: value } )
+								}
+								help={
+									'cinematic' === villaPresentation
+										? __(
+												'Uses the premium square editorial card layout from the mock.',
+												'gutenberg-lab-blocks'
+										  )
+										: __(
+												'Uses the standard card-grid card treatment.',
+												'gutenberg-lab-blocks'
+										  )
+								}
+							/>
+						</>
+					) : null }
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Layout', 'gutenberg-lab-blocks' ) }
+					initialOpen={ false }
 				>
 					<SelectControl
 						label={ __( 'Columns', 'gutenberg-lab-blocks' ) }
@@ -118,8 +210,14 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						onChange={ ( value ) =>
 							setAttributes( { enableCarousel: value } )
 						}
+						disabled={ isVillaCinematicStyle }
 						help={
-							willUseCarousel
+							isVillaCinematicStyle
+								? __(
+										'The Villa Cinematic variation always renders as a responsive editorial grid.',
+										'gutenberg-lab-blocks'
+								  )
+								: willUseCarousel
 								? __(
 										'The front end will switch to a carousel because the card count is greater than the selected columns.',
 										'gutenberg-lab-blocks'
@@ -137,18 +235,37 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						onChange={ ( value ) =>
 							setAttributes( { mediaRatio: value } )
 						}
-						help={ __(
-							'This controls the shared image shape for every card in the grid.',
-							'gutenberg-lab-blocks'
-						) }
+						disabled={ isVillaCinematicStyle }
+						help={
+							isVillaCinematicStyle
+								? __(
+										'The Villa Cinematic variation locks the cards to a square format.',
+										'gutenberg-lab-blocks'
+								  )
+								: __(
+										'This controls the shared image shape for every card in the grid.',
+										'gutenberg-lab-blocks'
+								  )
+						}
 					/>
 				</PanelBody>
 			</InspectorControls>
 
 			<section { ...blockProps }>
-				{/* Keep the parent focused on layout. Each child owns its own media
-					and native content blocks so typography and button styles stay global. */}
-				<div { ...innerBlocksProps } />
+				{ 'villas' === contentSource ? (
+					<div className="vvm-card-grid__dynamic-preview">
+						<ServerSideRender
+							block="gutenberg-lab-blocks/card-grid"
+							attributes={ attributes }
+						/>
+					</div>
+				) : (
+					<>
+						{/* Keep the parent focused on layout. Each child owns its own media
+							and native content blocks so typography and button styles stay global. */}
+						<div { ...innerBlocksProps } />
+					</>
+				) }
 			</section>
 		</>
 	);

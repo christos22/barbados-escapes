@@ -55,8 +55,56 @@ function initializeCardGridCarousel( carousel ) {
 	syncCarouselState();
 }
 
+function initializeVillaCinematicGrid( grid ) {
+	const cards = Array.from( grid.querySelectorAll( '.vvm-card-grid__card--villa' ) );
+
+	if ( cards.length === 0 ) {
+		return;
+	}
+
+	cards.forEach( ( card, index ) => {
+		card.style.setProperty( '--vvm-card-grid-enter-delay', `${ index * 0.2 }s` );
+	} );
+
+	if ( window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches ) {
+		grid.classList.add( 'is-in-view' );
+		return;
+	}
+
+	grid.classList.add( 'has-cinematic-reveal' );
+
+	if ( typeof window.IntersectionObserver !== 'function' ) {
+		grid.classList.add( 'is-in-view' );
+		return;
+	}
+
+	const observer = new window.IntersectionObserver(
+		( entries ) => {
+			entries.forEach( ( entry ) => {
+				if ( ! entry.isIntersecting ) {
+					return;
+				}
+
+				grid.classList.add( 'is-in-view' );
+				observer.disconnect();
+			} );
+		},
+		{
+			threshold: 0.18,
+		}
+	);
+
+	observer.observe( grid );
+}
+
 window.addEventListener( 'DOMContentLoaded', () => {
 	document
 		.querySelectorAll( '[data-card-grid-carousel]' )
 		.forEach( initializeCardGridCarousel );
+
+	document
+		.querySelectorAll(
+			'.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid--villa-presentation-cinematic.vvm-card-grid--source-villas'
+		)
+		.forEach( initializeVillaCinematicGrid );
 } );

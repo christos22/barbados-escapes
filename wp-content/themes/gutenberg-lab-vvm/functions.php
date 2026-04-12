@@ -37,6 +37,8 @@ function gutenberg_lab_vvm_setup() {
 			'flex-width'  => true,
 		)
 	);
+
+	add_theme_support( 'post-thumbnails' );
 }
 add_action( 'after_setup_theme', 'gutenberg_lab_vvm_setup' );
 
@@ -123,6 +125,15 @@ function gutenberg_lab_vvm_register_block_styles() {
 		array(
 			'name'         => 'vvm-link-secondary',
 			'label'        => __( 'Link Secondary', 'gutenberg-lab-vvm' ),
+			'inline_style' => '',
+		)
+	);
+
+	register_block_style(
+		'gutenberg-lab-blocks/card-grid',
+		array(
+			'name'         => 'villa-cinematic',
+			'label'        => __( 'Villa Cinematic', 'gutenberg-lab-vvm' ),
 			'inline_style' => '',
 		)
 	);
@@ -855,7 +866,7 @@ add_action( 'init', 'gutenberg_lab_vvm_migrate_site_chrome_to_native_gutenberg',
  * bootstrap so the footer and archive have real content to point at.
  */
 function gutenberg_lab_vvm_seed_initial_villas() {
-	$seed_version = '2026-04-11-barbados-escapes-villas-v1';
+	$seed_version = '2026-04-12-barbados-escapes-villas-v5';
 
 	if ( get_option( 'gutenberg_lab_vvm_initial_villa_seed_version' ) === $seed_version ) {
 		return;
@@ -867,34 +878,105 @@ function gutenberg_lab_vvm_seed_initial_villas() {
 
 	$villas = array(
 		array(
-			'title' => 'Monkey Hill',
-			'slug'  => 'monkey-hill',
+			'title'      => 'Monkey Hill',
+			'slug'       => 'monkey-hill',
+			'location'   => 'St. James',
+			'menu_order' => 0,
+			'excerpt'    => 'A breezy hilltop retreat with sea views, layered terraces, and generous indoor-outdoor living made for slow Barbados mornings.',
+			'content'    =>
+				'<!-- wp:paragraph --><p>Monkey Hill is placeholder villa content for the Barbados Escapes build. Use this post to test archive cards, hero search results, and the single-villa flow while the final client copy is still in progress.</p><!-- /wp:paragraph -->' .
+				'<!-- wp:paragraph --><p>The story here is a private west-coast stay with a calm arrival sequence, open-air lounging, and sunset-facing entertaining spaces.</p><!-- /wp:paragraph -->',
+			'cta_label'  => 'Explore Monkey Hill',
 		),
 		array(
-			'title' => 'Ocean Heights',
-			'slug'  => 'ocean-heights',
+			'title'      => 'Ocean Heights',
+			'slug'       => 'ocean-heights',
+			'location'   => 'Paynes Bay',
+			'menu_order' => 1,
+			'excerpt'    => 'A modern ocean-view villa concept with bright social spaces, a broad pool terrace, and easy access to Barbados beach clubs.',
+			'content'    =>
+				'<!-- wp:paragraph --><p>Ocean Heights gives the card grid and villa archive a second content shape: more contemporary, more open, and slightly more family-travel oriented than Monkey Hill.</p><!-- /wp:paragraph -->' .
+				'<!-- wp:paragraph --><p>Keep this as placeholder copy until the client delivers the final positioning, amenity list, and editorial description.</p><!-- /wp:paragraph -->',
+			'cta_label'  => 'View Ocean Heights',
 		),
 		array(
-			'title' => 'Crick Hill House',
-			'slug'  => 'crick-hill-house',
+			'title'      => 'Crick Hill House',
+			'slug'       => 'crick-hill-house',
+			'location'   => 'Mullins',
+			'menu_order' => 2,
+			'excerpt'    => 'A classic Barbados villa direction with garden privacy, warm timber details, and flexible gathering space for extended stays.',
+			'content'    =>
+				'<!-- wp:paragraph --><p>Crick Hill House rounds out the seeded villa set with a slightly more traditional voice and a longer-stay feel. It is here to support design development, search testing, and card-grid population.</p><!-- /wp:paragraph -->' .
+				'<!-- wp:paragraph --><p>Swap this text for final marketing copy once the client signs off on the villa narrative and photography package.</p><!-- /wp:paragraph -->',
+			'cta_label'  => 'Discover Crick Hill House',
 		),
 	);
+	$placeholder_image_ids = get_posts(
+		array(
+			'name'           => 'placeholder-dsc01270_1-scaled',
+			'post_type'      => 'attachment',
+			'post_status'    => 'inherit',
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+		)
+	);
+	$placeholder_image_id = ! empty( $placeholder_image_ids ) ? (int) $placeholder_image_ids[0] : 0;
 
 	foreach ( $villas as $villa ) {
 		$existing = get_page_by_path( $villa['slug'], OBJECT, 'villa' );
+		$villa_id = 0;
 
 		if ( $existing instanceof WP_Post ) {
+			$update_args = array(
+				'ID' => $existing->ID,
+			);
+
+			if ( (int) $existing->menu_order !== (int) $villa['menu_order'] ) {
+				$update_args['menu_order'] = (int) $villa['menu_order'];
+			}
+
+			if ( '' === trim( (string) $existing->post_excerpt ) ) {
+				$update_args['post_excerpt'] = $villa['excerpt'];
+			}
+
+			if ( '' === trim( (string) $existing->post_content ) ) {
+				$update_args['post_content'] = $villa['content'];
+			}
+
+			if ( count( $update_args ) > 1 ) {
+				wp_update_post( $update_args );
+			}
+
+			$villa_id = (int) $existing->ID;
+		} else {
+			$villa_id = wp_insert_post(
+				array(
+					'post_type'    => 'villa',
+					'post_status'  => 'publish',
+					'post_title'   => $villa['title'],
+					'post_name'    => $villa['slug'],
+					'post_excerpt' => $villa['excerpt'],
+					'post_content' => $villa['content'],
+					'menu_order'   => (int) $villa['menu_order'],
+				)
+			);
+		}
+
+		if ( ! $villa_id || is_wp_error( $villa_id ) ) {
 			continue;
 		}
 
-		wp_insert_post(
-			array(
-				'post_type'   => 'villa',
-				'post_status' => 'publish',
-				'post_title'  => $villa['title'],
-				'post_name'   => $villa['slug'],
-			)
-		);
+		if ( empty( wp_get_object_terms( $villa_id, 'villa_location', array( 'fields' => 'ids' ) ) ) ) {
+			wp_set_object_terms( $villa_id, array( $villa['location'] ), 'villa_location', false );
+		}
+
+		if ( '' === get_post_meta( $villa_id, 'villa_card_cta_label', true ) ) {
+			update_post_meta( $villa_id, 'villa_card_cta_label', $villa['cta_label'] );
+		}
+
+		if ( $placeholder_image_id && ! has_post_thumbnail( $villa_id ) ) {
+			set_post_thumbnail( $villa_id, $placeholder_image_id );
+		}
 	}
 
 	update_option( 'gutenberg_lab_vvm_initial_villa_seed_version', $seed_version, false );

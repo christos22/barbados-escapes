@@ -1,0 +1,58 @@
+// The carousel preview uses the same front-end shell in both the canvas and
+// the front end, so import the shared styles into the editor bundle.
+@use "./style";
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel {
+	.vvm-card-carousel__editor-shell {
+		display: grid;
+		gap: clamp(1.5rem, 3vw, 3rem);
+	}
+
+	.vvm-card-carousel__layout-editor
+		> .block-editor-inner-blocks
+		> .block-editor-block-list__layout {
+		display: grid;
+		gap: clamp(1.5rem, 3vw, 3rem);
+	}
+
+	.vvm-card-carousel__dynamic-preview {
+		display: none;
+	}
+
+	&.vvm-card-carousel--source-villas {
+		.vvm-card-carousel__slides {
+			display: none;
+		}
+
+		.vvm-card-carousel__dynamic-preview {
+			display: block;
+		}
+	}
+
+	.vvm-card-carousel__dynamic-preview .vvm-card-carousel {
+		padding: 0;
+		background: transparent !important;
+	}
+
+	.vvm-card-carousel__dynamic-preview .vvm-card-carousel__shell {
+		max-inline-size: none;
+	}
+
+	.vvm-card-carousel__dynamic-preview .vvm-card-carousel__intro {
+		display: none;
+	}
+
+	.block-editor-button-block-appender,
+	.block-list-appender {
+		margin-top: 0.75rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel.vvm-card-carousel--source-villas {
+		.vvm-card-carousel__editor-shell {
+			grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.55fr);
+			align-items: start;
+		}
+	}
+}

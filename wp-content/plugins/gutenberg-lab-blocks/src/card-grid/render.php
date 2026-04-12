@@ -40,7 +40,11 @@ if ( ! function_exists( 'gutenberg_lab_card_grid_resolve_block_gap_value' ) ) {
 	}
 }
 
-$columns     = $attributes['columns'] ?? '2';
+$content_source = 'villas' === ( $attributes['contentSource'] ?? 'manual' ) ? 'villas' : 'manual';
+$villa_count    = max( 1, (int) ( $attributes['villaCount'] ?? 3 ) );
+$villa_presentation = 'standard' === ( $attributes['villaPresentation'] ?? 'cinematic' ) ? 'standard' : 'cinematic';
+$columns        = $attributes['columns'] ?? '2';
+$is_villa_cinematic = 'villas' === $content_source && 'cinematic' === $villa_presentation;
 $enable_carousel = ! empty( $attributes['enableCarousel'] );
 $media_ratio = $attributes['mediaRatio'] ?? 'landscape';
 $block_gap   = $attributes['style']['spacing']['blockGap'] ?? '';
@@ -71,23 +75,80 @@ if ( is_string( $block_gap ) && '' !== $block_gap ) {
 	$styles[] = '--wp--style--block-gap:' . esc_attr( $block_gap ) . ';';
 }
 
-$card_count = preg_match_all(
-	'/wp-block-gutenberg-lab-blocks-card-grid-card\b/',
-	$content,
-	$matches
-);
-$card_count = false === $card_count ? 0 : $card_count;
+$card_markup = '';
+$card_count  = 0;
+
+if ( 'villas' === $content_source ) {
+	$villas_query = new WP_Query(
+		array(
+			'post_type'           => 'villa',
+			'post_status'         => 'publish',
+			'posts_per_page'      => $villa_count,
+			'ignore_sticky_posts' => true,
+			'orderby'             => array(
+				'menu_order' => 'ASC',
+				'title'      => 'ASC',
+			),
+		)
+	);
+
+	if ( $villas_query->have_posts() ) {
+		while ( $villas_query->have_posts() ) {
+			$villas_query->the_post();
+			$card_markup .= gutenberg_lab_blocks_render_villa_card(
+				get_the_ID(),
+				array(
+					'cta_label_override' => $is_villa_cinematic
+						? __( 'Enquire', 'gutenberg-lab-blocks' )
+						: '',
+				)
+			);
+		}
+
+		$card_count = (int) $villas_query->post_count;
+	}
+
+	wp_reset_postdata();
+
+	if ( 0 === $card_count ) {
+		$is_editor_preview =
+			is_admin() ||
+			( function_exists( 'wp_is_serving_rest_request' ) && wp_is_serving_rest_request() ) ||
+			( defined( 'REST_REQUEST' ) && REST_REQUEST );
+
+		if ( ! $is_editor_preview ) {
+			return;
+		}
+
+		$card_markup = sprintf(
+			'<p class="vvm-card-grid__empty-state">%s</p>',
+			esc_html__( 'Add published villa posts to populate this card grid.', 'gutenberg-lab-blocks' )
+		);
+	}
+} else {
+	$card_markup = $content;
+	$card_count  = preg_match_all(
+		'/wp-block-gutenberg-lab-blocks-card-grid-card\b/',
+		$content,
+		$matches
+	);
+	$card_count  = false === $card_count ? 0 : $card_count;
+}
+
 $columns_int   = (int) $columns;
-$use_carousel = $enable_carousel && $columns_int > 0 && $card_count > $columns_int;
+$use_carousel = ! $is_villa_cinematic && $enable_carousel && $columns_int > 0 && $card_count > $columns_int;
 
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
 		'class' => implode(
 			' ',
-			array(
-				'vvm-card-grid',
-				$enable_carousel ? 'vvm-card-grid--carousel-enabled' : '',
-				$use_carousel ? 'vvm-card-grid--display-carousel' : 'vvm-card-grid--display-grid',
+				array(
+					'vvm-card-grid',
+					$is_villa_cinematic ? 'alignfull' : '',
+					$enable_carousel ? 'vvm-card-grid--carousel-enabled' : '',
+					$use_carousel ? 'vvm-card-grid--display-carousel' : 'vvm-card-grid--display-grid',
+					'vvm-card-grid--source-' . sanitize_html_class( $content_source ),
+				'villas' === $content_source ? 'vvm-card-grid--villa-presentation-' . sanitize_html_class( $villa_presentation ) : '',
 				'vvm-card-grid--columns-' . sanitize_html_class( $columns ),
 				'vvm-card-grid--ratio-' . sanitize_html_class( $media_ratio ),
 				)
@@ -96,7 +157,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 	)
 );
 
-if ( '' === trim( $content ) ) {
+if ( '' === trim( $card_markup ) ) {
 	return;
 }
 ?>
@@ -128,13 +189,13 @@ if ( '' === trim( $content ) ) {
 			</div>
 			<div class="vvm-card-grid__viewport" data-card-grid-viewport>
 				<div class="vvm-card-grid__items" data-card-grid-track>
-					<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo $card_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</div>
 			</div>
 		</div>
 	<?php else : ?>
 		<div class="vvm-card-grid__items">
-			<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo $card_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 	<?php endif; ?>
 </section>

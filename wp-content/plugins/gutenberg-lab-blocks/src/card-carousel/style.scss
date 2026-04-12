@@ -1,0 +1,413 @@
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel {
+	--vvm-card-carousel-shell-width: min(
+		100%,
+		var(--wp--style--global--wide-size, 1760px)
+	);
+	--vvm-card-carousel-gap: clamp(1.75rem, 3vw, 3.5rem);
+	--vvm-card-carousel-section-padding-block: clamp(2.5rem, 5vw, 5rem);
+	--vvm-card-carousel-section-padding-inline: var(
+		--wp--custom--layout--gutter-current,
+		clamp(1.25rem, 4vw, 3rem)
+	);
+	--vvm-card-carousel-slide-width: 100%;
+	--vvm-card-carousel-slide-gap: clamp(1rem, 1.8vw, 1.5rem);
+	--vvm-card-carousel-slide-aspect-ratio: 7 / 10;
+	--vvm-card-carousel-intro-foreground: var(--wp--preset--color--dark-green, #1e3d2f);
+	--vvm-card-carousel-intro-muted: rgba(30, 61, 47, 0.78);
+	--vvm-card-carousel-card-foreground: #f5ecd7;
+	--vvm-card-carousel-card-accent: #c4922a;
+
+	box-sizing: border-box;
+	padding-block: var(--vvm-card-carousel-section-padding-block);
+	padding-inline: var(--vvm-card-carousel-section-padding-inline);
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__shell {
+	display: grid;
+	gap: var(--vvm-card-carousel-gap);
+	max-inline-size: var(--vvm-card-carousel-shell-width);
+	margin-inline: auto;
+	align-items: center;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__intro {
+	display: grid;
+	gap: 1rem;
+	color: var(--vvm-card-carousel-intro-foreground);
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__intro > * {
+	margin: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__intro .wp-block-heading {
+	margin: 0;
+	color: var(--vvm-card-carousel-intro-foreground);
+	font-family: var(--wp--preset--font-family--display-serif);
+	font-size: clamp(2.75rem, 4.8vw, 4.5rem);
+	font-weight: 400;
+	line-height: 0.95;
+	text-wrap: balance;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__intro .wp-block-heading a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__intro p {
+	margin: 0;
+	color: var(--vvm-card-carousel-intro-muted);
+	font-size: 1rem;
+	line-height: 1.7;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__intro .wp-block-buttons {
+	margin-top: 0.25rem;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__intro
+	.wp-block-button
+	.wp-block-button__link,
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__intro
+	.wp-block-button
+	.wp-element-button {
+	padding: 0;
+	border: 0;
+	background: transparent !important;
+	color: var(--vvm-card-carousel-intro-foreground) !important;
+	box-shadow: none;
+	font-size: 0.74rem;
+	font-weight: 600;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__rail {
+	min-width: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__carousel {
+	position: relative;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__controls {
+	position: absolute;
+	inset-block-start: 50%;
+	inset-inline: 0;
+	z-index: 3;
+	display: flex;
+	justify-content: space-between;
+	padding-inline: clamp(0.25rem, 1vw, 0.875rem);
+	pointer-events: none;
+	transform: translateY(-50%);
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__controls .vvm-slider-button {
+	/* Keep the carousel arrows more understated at rest so the cards stay primary. */
+	width: 40px;
+	height: 40px;
+	border-color: rgba(255, 255, 255, 0.22);
+	background: rgba(255, 255, 255, 0.44);
+	color: rgba(1, 50, 35, 0.8);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+	opacity: 0.48;
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	transition:
+		background 0.25s ease,
+		border-color 0.25s ease,
+		color 0.25s ease,
+		box-shadow 0.25s ease,
+		opacity 0.25s ease,
+		transform 0.25s ease;
+	pointer-events: auto;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__controls
+	.vvm-slider-button
+	.vvm-slider-button__icon {
+	width: 18px;
+	height: 18px;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__controls
+	.vvm-slider-button:hover:not(:disabled),
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__controls
+	.vvm-slider-button:focus-visible:not(:disabled) {
+	opacity: 1;
+	transform: scale(1.03);
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__carousel:hover
+	.vvm-slider-button:not(:disabled),
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__carousel:has(:focus-visible)
+	.vvm-slider-button:not(:disabled),
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__carousel.is-dragging
+	.vvm-slider-button:not(:disabled) {
+	opacity: 1;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__carousel:hover
+	.vvm-slider-button:disabled,
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__carousel:has(:focus-visible)
+	.vvm-slider-button:disabled,
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__carousel.is-dragging
+	.vvm-slider-button:disabled {
+	opacity: 0.32;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__controls
+	.vvm-slider-button:disabled {
+	opacity: 0.18;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__viewport {
+	overflow: hidden;
+	touch-action: pan-y;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__carousel.has-overflow
+	.vvm-card-carousel__viewport {
+	cursor: grab;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__carousel.is-dragging
+	.vvm-card-carousel__viewport {
+	cursor: grabbing;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__track {
+	display: flex;
+	gap: var(--vvm-card-carousel-slide-gap);
+	transition: transform 0.28s ease;
+	will-change: transform;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__carousel:not(.has-overflow)
+	.vvm-card-carousel__controls {
+	display: none;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide {
+	position: relative;
+	flex: 0 0 var(--vvm-card-carousel-slide-width);
+	inline-size: var(--vvm-card-carousel-slide-width);
+	aspect-ratio: var(--vvm-card-carousel-slide-aspect-ratio);
+	overflow: hidden;
+	isolation: isolate;
+	background: #101a17;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	background: linear-gradient(
+		180deg,
+		rgba(0, 0, 0, 0.06) 0%,
+		rgba(0, 0, 0, 0.18) 42%,
+		rgba(0, 0, 0, 0.68) 100%
+	);
+	pointer-events: none;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-media {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: linear-gradient(135deg, #c0d5d1 0%, #7f9896 100%);
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-media--placeholder {
+	display: flex;
+	align-items: flex-end;
+	padding: 1.25rem;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-placeholder {
+	display: flex;
+	flex: 1 1 auto;
+	inline-size: 100%;
+	align-items: center;
+	justify-content: center;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-image {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	object-fit: cover;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-placeholder-label {
+	max-inline-size: 11rem;
+	color: var(--vvm-card-carousel-card-foreground);
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-content {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 3;
+	display: grid;
+	gap: 0.75rem;
+	padding: clamp(1.25rem, 2.25vw, 1.75rem);
+	color: var(--vvm-card-carousel-card-foreground);
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-content > * {
+	margin: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-content .wp-block-heading {
+	margin: 0;
+	color: var(--vvm-card-carousel-card-foreground);
+	font-family: var(--wp--preset--font-family--display-serif);
+	font-size: clamp(1.9rem, 3vw, 2.45rem);
+	font-weight: 400;
+	line-height: 0.96;
+	text-wrap: balance;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__slide-content
+	.wp-block-heading
+	a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-content p {
+	margin: 0;
+	color: rgba(245, 236, 215, 0.88);
+	font-size: 0.98rem;
+	line-height: 1.55;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-content .wp-block-buttons {
+	margin-top: 0.25rem;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__slide-content
+	.wp-block-button
+	.wp-block-button__link,
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__slide-content
+	.wp-block-button
+	.wp-element-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-inline-size: 9.5rem;
+	padding: 0.8rem 1.35rem;
+	border: 1px solid var(--vvm-card-carousel-card-accent);
+	border-radius: 999px;
+	background: rgba(11, 20, 17, 0.34) !important;
+	color: var(--vvm-card-carousel-card-foreground) !important;
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	box-shadow: none;
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.18em;
+	text-decoration: none !important;
+	text-transform: uppercase;
+	transition:
+		background 0.24s ease,
+		color 0.24s ease,
+		border-color 0.24s ease,
+		transform 0.24s ease;
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__slide-content
+	.wp-block-button
+	.wp-block-button__link:hover,
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__slide-content
+	.wp-block-button
+	.wp-block-button__link:focus-visible,
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__slide-content
+	.wp-block-button
+	.wp-element-button:hover,
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+	.vvm-card-carousel__slide-content
+	.wp-block-button
+	.wp-element-button:focus-visible {
+	background: var(--vvm-card-carousel-card-accent) !important;
+	border-color: var(--vvm-card-carousel-card-accent);
+	color: #12231d !important;
+	transform: translateY(-1px);
+}
+
+.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__empty-state {
+	margin: 0;
+	padding: 1.5rem;
+	border: 1px dashed rgba(30, 61, 47, 0.18);
+	background: rgba(255, 255, 255, 0.8);
+	color: var(--vvm-card-carousel-intro-foreground);
+}
+
+@media (min-width: 782px) {
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel {
+		--vvm-card-carousel-slide-width: min(22rem, 62vw);
+	}
+}
+
+@media (min-width: 1024px) {
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel.vvm-card-carousel--has-intro
+		.vvm-card-carousel__shell {
+		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.55fr);
+	}
+
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel {
+		--vvm-card-carousel-slide-width: clamp(18rem, 23vw, 22.75rem);
+	}
+}
+
+@media (max-width: 781px) {
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__controls {
+		padding-inline: 0.5rem;
+	}
+
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__controls .vvm-slider-button {
+		width: 36px;
+		height: 36px;
+	}
+
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
+		.vvm-card-carousel__controls
+		.vvm-slider-button
+		.vvm-slider-button__icon {
+		width: 16px;
+		height: 16px;
+	}
+
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-content {
+		gap: 0.65rem;
+	}
+}

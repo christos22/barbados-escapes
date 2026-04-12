@@ -36,10 +36,14 @@
 	}
 
 	.vvm-card-grid__card-media {
+		display: block;
 		position: relative;
 		width: 100%;
 		overflow: hidden;
 		background: var(--wp--preset--color--mist, #dfe5e1);
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
 	}
 
 	.vvm-card-grid__card-image {
@@ -70,6 +74,44 @@
 
 	.vvm-card-grid__card-content .wp-block-heading {
 		color: var(--wp--preset--color--forest);
+	}
+
+	.vvm-card-grid__card-content .wp-block-heading a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.vvm-card-grid__card-content .wp-block-heading a:hover,
+	.vvm-card-grid__card-content .wp-block-heading a:focus-visible {
+		text-decoration: underline;
+	}
+
+	.vvm-card-grid__card-media--placeholder {
+		display: flex;
+		align-items: flex-end;
+		justify-content: flex-start;
+		padding: var(--wp--preset--spacing--md);
+		background:
+			linear-gradient(180deg, rgba(11, 36, 29, 0.08) 0%, rgba(11, 36, 29, 0.8) 100%),
+			linear-gradient(135deg, #d8e2da 0%, #b7c6be 100%);
+		text-decoration: none;
+	}
+
+	.vvm-card-grid__card-placeholder-label {
+		max-width: 12rem;
+		color: var(--wp--preset--color--white, #fff);
+		font-size: 0.875rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.vvm-card-grid__empty-state {
+		margin: 0;
+		padding: var(--wp--preset--spacing--lg);
+		border: 1px dashed rgba(11, 36, 29, 0.2);
+		background: rgba(255, 255, 255, 0.72);
+		color: var(--wp--preset--color--deep-forest);
 	}
 
 	&.vvm-card-grid--ratio-landscape .vvm-card-grid__card-media {
@@ -158,6 +200,203 @@
 		}
 
 		&.vvm-card-grid--columns-3 .vvm-card-grid__items {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+}
+
+.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-cinematic.vvm-card-grid--source-villas {
+	box-sizing: border-box;
+	padding-inline: var(--wp--custom--layout--gutter-current, clamp(1.5rem, 4vw, 3rem));
+
+	.vvm-card-grid__items {
+		gap: 2rem;
+		grid-template-columns: minmax(0, 1fr);
+		max-inline-size: min(100%, var(--wp--style--global--wide-size, 1320px));
+		margin-inline: auto;
+	}
+
+	.vvm-card-grid__card--villa {
+		position: relative;
+		aspect-ratio: 1 / 1;
+		overflow: hidden;
+		cursor: pointer;
+		isolation: isolate;
+		background: #111111;
+	}
+
+	.vvm-card-grid__card--villa::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		background: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0.7) 0%,
+			rgba(0, 0, 0, 0.3) 48%,
+			rgba(0, 0, 0, 0) 100%
+		);
+		opacity: 0.8;
+		pointer-events: none;
+		transition: opacity 0.5s ease;
+	}
+
+	.vvm-card-grid__card--villa .vvm-card-grid__card-media {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		display: block;
+		aspect-ratio: auto;
+		filter: brightness(0.75);
+		transform: scale(1);
+		transform-origin: center;
+		transition:
+			transform 0.7s ease,
+			filter 0.7s ease;
+		will-change: transform, filter;
+	}
+
+	.vvm-card-grid__card--villa .vvm-card-grid__card-media--placeholder {
+		background:
+			linear-gradient(180deg, rgba(12, 12, 12, 0.12) 0%, rgba(12, 12, 12, 0.48) 100%),
+			linear-gradient(135deg, #67543b 0%, #1a2431 100%);
+	}
+
+	.vvm-card-grid__card--villa .vvm-card-grid__card-placeholder-label {
+		max-width: 14rem;
+		font-family: var(--wp--preset--font-family--site-primary);
+		font-size: 0.95rem;
+		font-weight: 400;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.vvm-card-grid__card--villa .vvm-card-grid__card-content {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		z-index: 3;
+		padding: 2rem;
+		color: #f5ecd7;
+		background: transparent;
+		gap: 0;
+	}
+
+	.vvm-card-grid__card--villa .vvm-card-grid__card-content > * {
+		margin: 0;
+	}
+
+	.vvm-card-grid__card--villa .vvm-card-grid__card-content .wp-block-heading {
+		margin-bottom: 0.5rem;
+		color: #f5ecd7;
+		font-family: var(--wp--preset--font-family--site-primary);
+		font-size: 1.875rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		line-height: 1.1;
+		text-transform: none;
+	}
+
+	.vvm-card-grid__card--villa .vvm-card-grid__card-content .wp-block-heading a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.vvm-card-grid__card--villa .vvm-card-grid__card-content p {
+		margin-bottom: 1.5rem;
+		color: rgba(245, 236, 215, 0.9);
+		font-family: var(--wp--preset--font-family--site-primary);
+		font-size: 1rem;
+		font-weight: 400;
+		line-height: 1.45;
+	}
+
+	.vvm-card-grid__card--villa .vvm-card-grid__card-content > .wp-block-buttons:last-child {
+		margin-top: 0;
+		padding-top: 0;
+	}
+
+	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-block-button__link,
+	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-element-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 146px;
+		padding: 0.75rem 2rem;
+		border: 1px solid #c4922a;
+		border-radius: 0;
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%) !important;
+		color: #c4922a !important;
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		box-shadow: none;
+		font-family: var(--wp--preset--font-family--site-primary);
+		font-size: 0.875rem;
+		font-weight: 600;
+		letter-spacing: 0.15em;
+		line-height: 1;
+		text-decoration: none !important;
+		text-shadow:
+			0 2px 8px rgba(0, 0, 0, 0.6),
+			0 1px 4px rgba(0, 0, 0, 0.4);
+		text-transform: uppercase;
+		transition:
+			background 0.3s ease,
+			color 0.3s ease,
+			border-color 0.3s ease,
+			transform 0.3s ease,
+			box-shadow 0.3s ease;
+	}
+
+	.vvm-card-grid__card--villa:hover .vvm-card-grid__card-media,
+	.vvm-card-grid__card--villa:focus-within .vvm-card-grid__card-media {
+		filter: brightness(1);
+		transform: scale(1.1);
+	}
+
+	.vvm-card-grid__card--villa:hover::after,
+	.vvm-card-grid__card--villa:focus-within::after {
+		opacity: 0.4;
+	}
+
+	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-block-button__link:hover,
+	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-block-button__link:focus-visible,
+	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-element-button:hover,
+	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-element-button:focus-visible {
+		border-color: #c4922a;
+		background: #c4922a !important;
+		color: #ffffff !important;
+		box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
+		transform: translateY(-1px);
+	}
+
+	&.has-cinematic-reveal .vvm-card-grid__card--villa {
+		opacity: 0;
+		transform: translateY(40px);
+		transition:
+			opacity 0.8s ease-out,
+			transform 0.8s ease-out;
+		transition-delay: var(--vvm-card-grid-enter-delay, 0s);
+	}
+
+	&.has-cinematic-reveal.is-in-view .vvm-card-grid__card--villa {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media (min-width: 768px) {
+	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-cinematic.vvm-card-grid--source-villas {
+		.vvm-card-grid__items {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+}
+
+@media (min-width: 1024px) {
+	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-cinematic.vvm-card-grid--source-villas {
+		.vvm-card-grid__items {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 	}

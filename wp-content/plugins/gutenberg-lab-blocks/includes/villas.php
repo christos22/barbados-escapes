@@ -58,6 +58,7 @@ function gutenberg_lab_blocks_register_villas_post_type() {
 				'editor',
 				'excerpt',
 				'thumbnail',
+				'page-attributes',
 			),
 			'taxonomies'   => array(
 				'villa_location',
@@ -66,6 +67,169 @@ function gutenberg_lab_blocks_register_villas_post_type() {
 	);
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_villas_post_type' );
+
+/**
+ * Returns the registered villa meta schema.
+ *
+ * Keeping the CTA override in explicit post meta makes the card-grid query
+ * deterministic while defaulting cleanly back to the villa permalink.
+ *
+ * @return array<string, array<string, mixed>>
+ */
+function gutenberg_lab_blocks_get_villa_meta_schema() {
+	return array(
+		'villa_card_cta_label' => array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
+		'villa_card_cta_url'   => array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'esc_url_raw',
+		),
+	);
+}
+
+/**
+ * Registers the Villa meta fields used by the dynamic card grid.
+ */
+function gutenberg_lab_blocks_register_villa_meta() {
+	foreach ( gutenberg_lab_blocks_get_villa_meta_schema() as $meta_key => $meta_args ) {
+		register_post_meta(
+			'villa',
+			$meta_key,
+			array_merge(
+				$meta_args,
+				array(
+					'show_in_rest' => true,
+					'single'       => true,
+				)
+			)
+		);
+	}
+}
+add_action( 'init', 'gutenberg_lab_blocks_register_villa_meta' );
+
+/**
+ * Adds the focused villa CTA meta box instead of generic custom fields.
+ */
+function gutenberg_lab_blocks_add_villa_meta_boxes() {
+	add_meta_box(
+		'gutenberg-lab-villa-card-cta',
+		__( 'Card CTA', 'gutenberg-lab-blocks' ),
+		'gutenberg_lab_blocks_render_villa_card_cta_meta_box',
+		'villa',
+		'side',
+		'default'
+	);
+}
+add_action( 'add_meta_boxes_villa', 'gutenberg_lab_blocks_add_villa_meta_boxes' );
+
+/**
+ * Renders the villa CTA meta fields.
+ *
+ * @param WP_Post $post Current villa post object.
+ */
+function gutenberg_lab_blocks_render_villa_card_cta_meta_box( $post ) {
+	$cta_label = get_post_meta( $post->ID, 'villa_card_cta_label', true );
+	$cta_url   = get_post_meta( $post->ID, 'villa_card_cta_url', true );
+
+	wp_nonce_field( 'gutenberg_lab_blocks_save_villa_fields', 'gutenberg_lab_blocks_villa_fields_nonce' );
+	?>
+	<p>
+		<label for="gutenberg-lab-villa-card-cta-label">
+			<?php esc_html_e( 'CTA Label', 'gutenberg-lab-blocks' ); ?>
+		</label>
+	</p>
+	<input
+		type="text"
+		id="gutenberg-lab-villa-card-cta-label"
+		name="gutenberg_lab_villa_card_cta_label"
+		class="widefat"
+		value="<?php echo esc_attr( $cta_label ); ?>"
+		placeholder="<?php echo esc_attr__( 'View Villa', 'gutenberg-lab-blocks' ); ?>"
+	/>
+	<p class="description">
+		<?php esc_html_e( 'Leave blank to use the default card label.', 'gutenberg-lab-blocks' ); ?>
+	</p>
+
+	<p>
+		<label for="gutenberg-lab-villa-card-cta-url">
+			<?php esc_html_e( 'CTA URL', 'gutenberg-lab-blocks' ); ?>
+		</label>
+	</p>
+	<input
+		type="url"
+		id="gutenberg-lab-villa-card-cta-url"
+		name="gutenberg_lab_villa_card_cta_url"
+		class="widefat"
+		value="<?php echo esc_attr( $cta_url ); ?>"
+		placeholder="<?php echo esc_attr__( 'Leave blank to use the villa permalink.', 'gutenberg-lab-blocks' ); ?>"
+	/>
+	<p class="description">
+		<?php esc_html_e( 'Use this to override the default permalink on villa cards.', 'gutenberg-lab-blocks' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Saves the focused villa CTA fields.
+ *
+ * @param int $post_id Current villa ID.
+ */
+function gutenberg_lab_blocks_save_villa_meta( $post_id ) {
+	if ( ! isset( $_POST['gutenberg_lab_blocks_villa_fields_nonce'] ) ) {
+		return;
+	}
+
+	$nonce = sanitize_text_field( wp_unslash( $_POST['gutenberg_lab_blocks_villa_fields_nonce'] ) );
+
+	if ( ! wp_verify_nonce( $nonce, 'gutenberg_lab_blocks_save_villa_fields' ) ) {
+		return;
+	}
+
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	if ( wp_is_post_revision( $post_id ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	$field_map = array(
+		'villa_card_cta_label' => 'gutenberg_lab_villa_card_cta_label',
+		'villa_card_cta_url'   => 'gutenberg_lab_villa_card_cta_url',
+	);
+	$meta_schema = gutenberg_lab_blocks_get_villa_meta_schema();
+
+	foreach ( $field_map as $meta_key => $input_name ) {
+		if ( ! array_key_exists( $input_name, $_POST ) ) {
+			continue;
+		}
+
+		$value = wp_unslash( $_POST[ $input_name ] );
+
+		if (
+			isset( $meta_schema[ $meta_key ]['sanitize_callback'] ) &&
+			is_callable( $meta_schema[ $meta_key ]['sanitize_callback'] )
+		) {
+			$value = call_user_func( $meta_schema[ $meta_key ]['sanitize_callback'], $value );
+		}
+
+		if ( '' === $value ) {
+			delete_post_meta( $post_id, $meta_key );
+			continue;
+		}
+
+		update_post_meta( $post_id, $meta_key, $value );
+	}
+}
+add_action( 'save_post_villa', 'gutenberg_lab_blocks_save_villa_meta' );
 
 /**
  * Registers the structured location taxonomy for Villas.
@@ -153,6 +317,231 @@ function gutenberg_lab_blocks_get_villa_location_terms() {
 	}
 
 	return $terms;
+}
+
+/**
+ * Returns the default CTA label used by villa cards.
+ *
+ * @return string
+ */
+function gutenberg_lab_blocks_get_villa_card_default_cta_label() {
+	return __( 'View Villa', 'gutenberg-lab-blocks' );
+}
+
+/**
+ * Returns the normalized CTA payload for one villa card.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return array<string, string>
+ */
+function gutenberg_lab_blocks_get_villa_card_cta( $villa_id ) {
+	$cta_label = get_post_meta( $villa_id, 'villa_card_cta_label', true );
+	$cta_url   = get_post_meta( $villa_id, 'villa_card_cta_url', true );
+	$permalink = get_permalink( $villa_id );
+
+	if ( '' === $cta_label ) {
+		$cta_label = gutenberg_lab_blocks_get_villa_card_default_cta_label();
+	}
+
+	if ( '' === $cta_url && is_string( $permalink ) ) {
+		$cta_url = $permalink;
+	}
+
+	return array(
+		'label' => $cta_label,
+		'url'   => is_string( $cta_url ) ? $cta_url : '',
+	);
+}
+
+/**
+ * Returns the structured data used by the villa-driven card grid.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return array<string, mixed>|null
+ */
+function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
+	$villa = get_post( $villa_id );
+
+	if ( ! $villa instanceof WP_Post || 'villa' !== $villa->post_type ) {
+		return null;
+	}
+
+	$image_id  = (int) get_post_thumbnail_id( $villa_id );
+	$image_url = $image_id ? get_the_post_thumbnail_url( $villa_id, 'large' ) : '';
+	$image_alt = $image_id ? get_post_meta( $image_id, '_wp_attachment_image_alt', true ) : '';
+	$excerpt   = get_the_excerpt( $villa_id );
+
+	if ( '' === $excerpt ) {
+		$excerpt = wp_trim_words( wp_strip_all_tags( $villa->post_content ), 24 );
+	}
+
+	if ( '' === $image_alt && $image_id ) {
+		$image_alt = get_the_title( $image_id );
+	}
+
+	return array(
+		'id'        => $villa_id,
+		'title'     => get_the_title( $villa_id ),
+		'permalink' => get_permalink( $villa_id ),
+		'excerpt'   => $excerpt,
+		'image_url' => $image_url,
+		'image_alt' => $image_alt,
+		'cta'       => gutenberg_lab_blocks_get_villa_card_cta( $villa_id ),
+	);
+}
+
+/**
+ * Renders one villa card using the shared card-grid markup contract.
+ *
+ * The card-grid already owns the responsive layout. This helper just maps
+ * villa fields onto the same shell so manual and queried cards stay aligned.
+ *
+ * @param int   $villa_id Villa post ID.
+ * @param array $args     Render overrides for the active block variation.
+ * @return string
+ */
+function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
+	$villa_data = gutenberg_lab_blocks_get_villa_data( $villa_id );
+
+	if ( ! $villa_data ) {
+		return '';
+	}
+
+	$args = wp_parse_args(
+		$args,
+		array(
+			'cta_label_override' => '',
+		)
+	);
+
+	// The cinematic variation uses a fixed CTA label in the mock while still
+	// honoring the villa-level CTA destination override.
+	if ( '' !== $args['cta_label_override'] ) {
+		$villa_data['cta']['label'] = $args['cta_label_override'];
+	}
+
+	$media_classes = array(
+		'vvm-card-grid__card-media',
+		'' !== $villa_data['image_url']
+			? 'vvm-card-grid__card-media--background'
+			: 'vvm-card-grid__card-media--placeholder',
+	);
+	$media_styles  = '';
+
+	if ( '' !== $villa_data['image_url'] ) {
+		$media_styles = sprintf(
+			"background-image:url('%s');",
+			esc_url_raw( $villa_data['image_url'] )
+		);
+	}
+
+	ob_start();
+	?>
+	<article class="vvm-card-grid__card vvm-card-grid__card--villa">
+		<a
+			class="<?php echo esc_attr( implode( ' ', $media_classes ) ); ?>"
+			href="<?php echo esc_url( $villa_data['permalink'] ); ?>"
+			aria-label="<?php echo esc_attr( sprintf( __( 'View %s', 'gutenberg-lab-blocks' ), $villa_data['title'] ) ); ?>"
+			<?php if ( '' !== $media_styles ) : ?>
+				style="<?php echo esc_attr( $media_styles ); ?>"
+			<?php endif; ?>
+		>
+			<?php if ( '' === $villa_data['image_url'] ) : ?>
+				<span class="vvm-card-grid__card-placeholder-label">
+					<?php esc_html_e( 'Villa image coming soon', 'gutenberg-lab-blocks' ); ?>
+				</span>
+			<?php endif; ?>
+		</a>
+
+		<div class="vvm-card-grid__card-content">
+			<h3 class="wp-block-heading">
+				<a href="<?php echo esc_url( $villa_data['permalink'] ); ?>">
+					<?php echo esc_html( $villa_data['title'] ); ?>
+				</a>
+			</h3>
+
+			<?php if ( '' !== $villa_data['excerpt'] ) : ?>
+				<p><?php echo esc_html( $villa_data['excerpt'] ); ?></p>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $villa_data['cta']['url'] ) && ! empty( $villa_data['cta']['label'] ) ) : ?>
+				<div class="wp-block-buttons">
+					<div class="wp-block-button is-style-vvm-primary">
+						<a
+							class="wp-block-button__link wp-element-button"
+							href="<?php echo esc_url( $villa_data['cta']['url'] ); ?>"
+						>
+							<?php echo esc_html( $villa_data['cta']['label'] ); ?>
+						</a>
+					</div>
+				</div>
+			<?php endif; ?>
+		</div>
+	</article>
+	<?php
+
+	return trim( (string) ob_get_clean() );
+}
+
+/**
+ * Renders one villa slide using the Card Carousel shell.
+ *
+ * The carousel keeps the same villa content mapping as the card grid while
+ * swapping in the taller portrait card composition required by the new block.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return string
+ */
+function gutenberg_lab_blocks_render_villa_carousel_slide( $villa_id ) {
+	$villa_data = gutenberg_lab_blocks_get_villa_data( $villa_id );
+
+	if ( ! $villa_data ) {
+		return '';
+	}
+
+	$has_image = '' !== $villa_data['image_url'];
+
+	ob_start();
+	?>
+	<article class="vvm-card-carousel__slide vvm-card-carousel__slide--villa">
+		<div class="vvm-card-carousel__slide-media<?php echo $has_image ? '' : ' vvm-card-carousel__slide-media--placeholder'; ?>">
+			<?php if ( $has_image ) : ?>
+				<img
+					class="vvm-card-carousel__slide-image"
+					src="<?php echo esc_url( $villa_data['image_url'] ); ?>"
+					alt="<?php echo esc_attr( $villa_data['image_alt'] ); ?>"
+				/>
+			<?php else : ?>
+				<span class="vvm-card-carousel__slide-placeholder-label">
+					<?php esc_html_e( 'Villa image coming soon', 'gutenberg-lab-blocks' ); ?>
+				</span>
+			<?php endif; ?>
+		</div>
+
+		<div class="vvm-card-carousel__slide-content">
+			<h3 class="wp-block-heading"><?php echo esc_html( $villa_data['title'] ); ?></h3>
+
+			<?php if ( '' !== $villa_data['excerpt'] ) : ?>
+				<p><?php echo esc_html( $villa_data['excerpt'] ); ?></p>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $villa_data['cta']['url'] ) && ! empty( $villa_data['cta']['label'] ) ) : ?>
+				<div class="wp-block-buttons">
+					<div class="wp-block-button is-style-vvm-primary">
+						<a
+							class="wp-block-button__link wp-element-button"
+							href="<?php echo esc_url( $villa_data['cta']['url'] ); ?>"
+						>
+							<?php echo esc_html( $villa_data['cta']['label'] ); ?>
+						</a>
+					</div>
+				</div>
+			<?php endif; ?>
+		</div>
+	</article>
+	<?php
+
+	return trim( (string) ob_get_clean() );
 }
 
 /**
