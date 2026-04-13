@@ -10,5 +10,3 @@ deployment:
     - export PLUGINPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks
     - /bin/mkdir -p $PLUGINPATH
     - /bin/cp -R wp-content/plugins/gutenberg-lab-blocks/* $PLUGINPATH/
-
-# Actions deploy test 2026-04-13T01:43:08Z
