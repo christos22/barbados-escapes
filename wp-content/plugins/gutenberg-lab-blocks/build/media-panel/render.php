@@ -12,10 +12,12 @@ $video_url        = $attributes['videoUrl'] ?? '';
 $fallback_image_url = $attributes['fallbackImageUrl'] ?? '';
 $fallback_image_alt = $attributes['fallbackImageAlt'] ?? '';
 $dark_overlay     = ! empty( $attributes['darkOverlay'] );
+$overlay_gradient_style = $attributes['overlayGradientStyle'] ?? 'brand-green';
 $content_style    = $attributes['contentStyle'] ?? 'overlay';
 $container_height = $attributes['containerHeight'] ?? 'medium';
 $content_position = $attributes['contentPosition'] ?? 'center-center';
 $content_width    = $attributes['contentWidth'] ?? 'md';
+$accent_border    = $attributes['accentBorder'] ?? 'none';
 $atmosphere_edge  = $attributes['atmosphereEdge'] ?? 'none';
 $curtain_parallax = ! empty( $attributes['curtainParallax'] );
 $align            = $attributes['align'] ?? '';
@@ -63,6 +65,10 @@ $classes = array(
 	$align ? 'align' . sanitize_html_class( $align ) : 'alignfull',
 );
 
+if ( 'none' !== $accent_border ) {
+	$classes[] = 'media-panel--accent-border-' . sanitize_html_class( $accent_border );
+}
+
 if ( 'none' !== $atmosphere_edge ) {
 	$classes[] = 'vvm-atmosphere-edge';
 	$classes[] = 'vvm-atmosphere-edge--' . sanitize_html_class( $atmosphere_edge );
@@ -70,6 +76,7 @@ if ( 'none' !== $atmosphere_edge ) {
 
 if ( $dark_overlay ) {
 	$classes[] = 'media-panel--dark-overlay';
+	$classes[] = 'media-panel--overlay-style-' . sanitize_html_class( $overlay_gradient_style );
 }
 
 if ( $curtain_parallax ) {

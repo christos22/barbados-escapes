@@ -35,6 +35,10 @@
 			"type": "boolean",
 			"default": false
 		},
+		"overlayGradientStyle": {
+			"type": "string",
+			"default": "brand-green"
+		},
 		"contentStyle": {
 			"type": "string",
 			"default": "overlay"
@@ -61,6 +65,10 @@
 		"contentWidth": {
 			"type": "string",
 			"default": "md"
+		},
+		"accentBorder": {
+			"type": "string",
+			"default": "none"
 		},
 		"atmosphereEdge": {
 			"type": "string",

@@ -32,6 +32,11 @@ const CONTENT_STYLE_OPTIONS = [
 	{ label: 'Boxed', value: 'boxed' },
 ];
 
+const OVERLAY_GRADIENT_STYLE_OPTIONS = [
+	{ label: 'Barbados Green', value: 'brand-green' },
+	{ label: 'Dark Vignette', value: 'dark-vignette' },
+];
+
 const POSITION_OPTIONS = [
 	{ label: 'Top Left', value: 'top-left' },
 	{ label: 'Top Center', value: 'top-center' },
@@ -50,10 +55,17 @@ const CONTENT_WIDTH_OPTIONS = [
 	{ label: 'Large', value: 'lg' },
 ];
 
+const ACCENT_BORDER_OPTIONS = [
+	{ label: 'None', value: 'none' },
+	{ label: 'Top', value: 'top' },
+	{ label: 'Bottom', value: 'bottom' },
+	{ label: 'Top and Bottom', value: 'both' },
+];
+
 const ATMOSPHERE_EDGE_OPTIONS = [
 	{ label: 'None', value: 'none' },
 	{ label: 'Fog Top', value: 'fog-top' },
-	{ label: 'Fog Bottom', value: 'fog-bottom' },
+	{ label: 'Dark Green Bottom Edge', value: 'fog-bottom' },
 ];
 
 const ALLOWED_INNER_BLOCKS = [
@@ -117,10 +129,12 @@ export default function Edit({ attributes, setAttributes }) {
 		fallbackImageUrl,
 		fallbackImageAlt,
 		darkOverlay,
+		overlayGradientStyle,
 		contentStyle,
 		containerHeight,
 		contentPosition,
 		contentWidth,
+		accentBorder,
 		atmosphereEdge,
 		curtainParallax,
 		align,
@@ -135,11 +149,17 @@ export default function Edit({ attributes, setAttributes }) {
 			`media-panel--content-style-${contentStyle}`,
 			`media-panel--position-${contentPosition}`,
 			`media-panel--content-width-${contentWidth}`,
+			'none' !== accentBorder
+				? `media-panel--accent-border-${accentBorder}`
+				: '',
 			'none' !== atmosphereEdge
 				? `vvm-atmosphere-edge vvm-atmosphere-edge--${atmosphereEdge}`
 				: '',
 			align ? '' : 'alignfull',
 			darkOverlay ? 'media-panel--dark-overlay' : '',
+			darkOverlay
+				? `media-panel--overlay-style-${overlayGradientStyle}`
+				: '',
 			curtainParallax ? 'media-panel--curtain-parallax' : '',
 		]
 			.filter(Boolean)
@@ -246,7 +266,28 @@ export default function Edit({ attributes, setAttributes }) {
 						onChange={(darkOverlayValue) =>
 							setAttributes({ darkOverlay: darkOverlayValue })
 						}
+						help={__(
+							'Adds a full-height readability gradient over the media.',
+							'gutenberg-lab-blocks'
+						)}
 					/>
+
+					{darkOverlay && (
+						<SelectControl
+							label={__('Overlay Gradient Style', 'gutenberg-lab-blocks')}
+							value={overlayGradientStyle}
+							options={OVERLAY_GRADIENT_STYLE_OPTIONS}
+							onChange={(overlayGradientStyleValue) =>
+								setAttributes({
+									overlayGradientStyle: overlayGradientStyleValue,
+								})
+							}
+							help={__(
+								'Choose between the Barbados green overlay and the darker Figma-style vignette for header-safe hero images.',
+								'gutenberg-lab-blocks'
+							)}
+						/>
+					)}
 
 					<SelectControl
 						label={__('Content Style', 'gutenberg-lab-blocks')}
@@ -285,6 +326,19 @@ export default function Edit({ attributes, setAttributes }) {
 					/>
 
 					<SelectControl
+						label={__('Accent Border', 'gutenberg-lab-blocks')}
+						value={accentBorder}
+						options={ACCENT_BORDER_OPTIONS}
+						onChange={(accentBorderValue) =>
+							setAttributes({ accentBorder: accentBorderValue })
+						}
+						help={__(
+							'Adds an 8px gold rule at the top, bottom, or both edges of the panel.',
+							'gutenberg-lab-blocks'
+						)}
+					/>
+
+					<SelectControl
 						label={__('Atmosphere Edge', 'gutenberg-lab-blocks')}
 						value={atmosphereEdge}
 						options={ATMOSPHERE_EDGE_OPTIONS}
@@ -292,7 +346,7 @@ export default function Edit({ attributes, setAttributes }) {
 							setAttributes({ atmosphereEdge: atmosphereEdgeValue })
 						}
 						help={__(
-							'Adds a soft fog-style fade at the top or bottom edge of the media. This is decorative and can be reused on future layouts.',
+							'Adds a soft white fog at the top or a dark green cover at the bottom edge of the media.',
 							'gutenberg-lab-blocks'
 						)}
 					/>

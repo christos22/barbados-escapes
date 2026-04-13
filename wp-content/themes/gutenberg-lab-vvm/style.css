@@ -838,6 +838,12 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	--vvm-atmosphere-edge-white-mid: rgba(255, 255, 255, 0.56);
 	--vvm-atmosphere-edge-white-light: rgba(255, 255, 255, 0.22);
 	--vvm-atmosphere-edge-clear: rgba(255, 255, 255, 0);
+	--vvm-atmosphere-edge-green-solid: rgba(15, 31, 24, 1);
+	--vvm-atmosphere-edge-green-strong: rgba(15, 31, 24, 0.94);
+	--vvm-atmosphere-edge-green-mid: rgba(30, 61, 47, 0.62);
+	--vvm-atmosphere-edge-green-soft: rgba(30, 61, 47, 0.28);
+	--vvm-atmosphere-edge-green-light: rgba(30, 61, 47, 0.08);
+	--vvm-atmosphere-edge-green-clear: rgba(30, 61, 47, 0);
 }
 
 .vvm-atmosphere-edge::after {
@@ -872,18 +878,37 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	height: var(--vvm-atmosphere-edge-height);
 	background: linear-gradient(
 		0deg,
-		var(--vvm-atmosphere-edge-white-solid) 0%,
-		var(--vvm-atmosphere-edge-white-solid) 18%,
-		var(--vvm-atmosphere-edge-white-soft) 34%,
-		var(--vvm-atmosphere-edge-white-mid) 58%,
-		var(--vvm-atmosphere-edge-white-light) 80%,
-		var(--vvm-atmosphere-edge-clear) 100%
+		var(--vvm-atmosphere-edge-green-solid) 0%,
+		var(--vvm-atmosphere-edge-green-strong) 18%,
+		var(--vvm-atmosphere-edge-green-mid) 48%,
+		var(--vvm-atmosphere-edge-green-soft) 72%,
+		var(--vvm-atmosphere-edge-green-light) 88%,
+		var(--vvm-atmosphere-edge-green-clear) 100%
 	);
 }
 
 .wp-block-gutenberg-lab-blocks-media-panel.vvm-atmosphere-edge .media-panel__overlay {
-	position: relative;
+	position: absolute;
+	inset: 0;
 	z-index: 3;
+}
+
+.wp-block-gutenberg-lab-blocks-media-panel.media-panel--dark-overlay.media-panel--overlay-style-brand-green.vvm-atmosphere-edge--fog-bottom::after {
+	/* When the media panel already has the brand overlay enabled, a second
+	   bottom pseudo-element creates a visible handoff line. Let the main
+	   overlay own the full transition into the footer color instead. */
+	content: none;
+}
+
+.wp-block-gutenberg-lab-blocks-media-panel.media-panel--dark-overlay.media-panel--overlay-style-brand-green.vvm-atmosphere-edge--fog-bottom .media-panel__overlay::before {
+	background: linear-gradient(
+		180deg,
+		rgba(30, 61, 47, 0.85) 0%,
+		rgba(30, 61, 47, 0.8) 40%,
+		rgba(30, 61, 47, 0.74) 68%,
+		rgba(15, 31, 24, 0.9) 88%,
+		#0b1712 100%
+	) !important;
 }
 
 .vvm-footer {

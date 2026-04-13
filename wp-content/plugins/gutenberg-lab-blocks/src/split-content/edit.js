@@ -8,6 +8,8 @@ import {
 } from '@wordpress/block-editor';
 import {
 	Button,
+	BaseControl,
+	ColorPicker,
 	PanelBody,
 	SelectControl,
 	ToggleControl,
@@ -106,6 +108,18 @@ function getMediaPreviewLabel( mediaType ) {
 	return __( 'Select an image', 'gutenberg-lab-blocks' );
 }
 
+function getContentPanelStyleVars( contentBackgroundColor ) {
+	if ( typeof contentBackgroundColor !== 'string' || ! contentBackgroundColor ) {
+		return undefined;
+	}
+
+	return {
+		'--split-content-overlay-panel-bg': contentBackgroundColor,
+		'--split-content-overlay-panel-bg-reverse': contentBackgroundColor,
+		'--split-content-overlap-card-background': contentBackgroundColor,
+	};
+}
+
 export default function Edit( { attributes, setAttributes } ) {
 	const {
 		layoutStyle,
@@ -113,6 +127,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		mediaPositionMobile,
 		mediaWidth,
 		sectionHeight,
+		contentBackgroundColor,
 		mediaType,
 		mediaOnEdge,
 		imageId,
@@ -123,6 +138,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		galleryImages,
 	} = attributes;
 	const blockRef = useRef();
+	const contentPanelStyleVars = getContentPanelStyleVars( contentBackgroundColor );
 
 	const blockProps = useBlockProps( {
 		ref: blockRef,
@@ -137,6 +153,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		]
 			.filter( Boolean )
 			.join( ' ' ),
+		style: contentPanelStyleVars,
 	} );
 
 	useEffect( () => {
@@ -407,6 +424,32 @@ export default function Edit( { attributes, setAttributes } ) {
 							'gutenberg-lab-blocks'
 						) }
 					/>
+					{ 'split' !== layoutStyle && (
+						<BaseControl
+							label={ __( 'Content Background', 'gutenberg-lab-blocks' ) }
+							help={ __(
+								'Choose the panel color. Use the alpha slider to keep the panel translucent, or reset to return to the default white treatment.',
+								'gutenberg-lab-blocks'
+							) }
+						>
+							<ColorPicker
+								color={ contentBackgroundColor || '#ffffffff' }
+								enableAlpha
+								onChange={ ( value ) =>
+									setAttributes( { contentBackgroundColor: value } )
+								}
+							/>
+							<Button
+								variant="tertiary"
+								onClick={ () =>
+									setAttributes( { contentBackgroundColor: '' } )
+								}
+								disabled={ ! contentBackgroundColor }
+							>
+								{ __( 'Reset content background', 'gutenberg-lab-blocks' ) }
+							</Button>
+						</BaseControl>
+					) }
 					{ 'split' === layoutStyle && (
 						<>
 							<SelectControl

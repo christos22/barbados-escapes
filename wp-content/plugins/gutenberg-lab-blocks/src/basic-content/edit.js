@@ -43,6 +43,13 @@ const SIDEBAR_POSITION_OPTIONS = [
 	{ label: __( 'Left', 'gutenberg-lab-blocks' ), value: 'left' },
 ];
 
+const ACCENT_BORDER_OPTIONS = [
+	{ label: __( 'None', 'gutenberg-lab-blocks' ), value: 'none' },
+	{ label: __( 'Top', 'gutenberg-lab-blocks' ), value: 'top' },
+	{ label: __( 'Bottom', 'gutenberg-lab-blocks' ), value: 'bottom' },
+	{ label: __( 'Top and Bottom', 'gutenberg-lab-blocks' ), value: 'both' },
+];
+
 // Keep the inner columns focused on content-oriented blocks instead of
 // exposing large layout primitives inside an already structured section block.
 const SMALL_ALLOWED_BLOCKS = [
@@ -173,6 +180,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		hasInitializedTemplate,
 		hideSection,
 		fullWidth,
+		accentBorder,
 	} = attributes;
 	const { replaceInnerBlocks, updateBlockAttributes } = useDispatch(
 		blockEditorStore
@@ -257,6 +265,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 			`vvm-basic-content--text-align-${ contentTextAlignment }`,
 			`vvm-basic-content--sidebar-${ sidebarPosition }`,
 			fullWidth ? 'vvm-basic-content--full-width' : '',
+			'none' !== accentBorder
+				? `vvm-basic-content--accent-border-${ accentBorder }`
+				: '',
 			hideSection ? 'is-hidden-section' : '',
 		]
 			.filter( Boolean )
@@ -330,6 +341,17 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						onChange={ ( value ) =>
 							setAttributes( { contentTextAlignment: value } )
 						}
+					/>
+
+					<SelectControl
+						label={ __( 'Accent Border', 'gutenberg-lab-blocks' ) }
+						value={ accentBorder }
+						options={ ACCENT_BORDER_OPTIONS }
+						onChange={ ( value ) => setAttributes( { accentBorder: value } ) }
+						help={ __(
+							'Adds an 8px gold rule at the top, bottom, or both edges of the section.',
+							'gutenberg-lab-blocks'
+						) }
 					/>
 				</PanelBody>
 

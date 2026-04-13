@@ -73,6 +73,36 @@
 		position: relative;
 		top: auto;
 	}
+
+	&.media-panel--dark-overlay.vvm-atmosphere-edge--bottom:not(.media-panel--overlay-style-brand-green),
+	&.media-panel--dark-overlay.vvm-atmosphere-edge--fog-bottom:not(.media-panel--overlay-style-brand-green) {
+		// The frontend bottom edge sits on the block wrapper. In the editor that
+		// wrapper layer ends up behind the readability overlay, so repaint the
+		// edge inside the overlay stack for a clearer preview.
+		&::after {
+			content: none;
+		}
+
+		.media-panel__overlay::after {
+			content: "";
+			position: absolute;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			height: clamp(8rem, 20vw, 15rem);
+			pointer-events: none;
+			z-index: 1;
+			background: linear-gradient(
+				0deg,
+				rgba(15, 31, 24, 1) 0%,
+				rgba(15, 31, 24, 0.94) 18%,
+				rgba(30, 61, 47, 0.62) 48%,
+				rgba(30, 61, 47, 0.28) 72%,
+				rgba(30, 61, 47, 0.08) 88%,
+				rgba(30, 61, 47, 0) 100%
+			);
+		}
+	}
 }
 
 .editor-styles-wrapper .wp-block-gutenberg-lab-blocks-media-panel.media-panel--curtain-parallax ~ * {

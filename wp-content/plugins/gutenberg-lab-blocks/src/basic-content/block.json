@@ -59,6 +59,10 @@
 		"fullWidth": {
 			"type": "boolean",
 			"default": false
+		},
+		"accentBorder": {
+			"type": "string",
+			"default": "none"
 		}
 	},
 	"textdomain": "gutenberg-lab-blocks",

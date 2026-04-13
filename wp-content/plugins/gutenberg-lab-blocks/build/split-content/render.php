@@ -14,6 +14,7 @@ $media_position_desktop = $attributes['mediaPositionDesktop'] ?? 'right';
 $media_position_mobile  = $attributes['mediaPositionMobile'] ?? 'top';
 $media_width            = $attributes['mediaWidth'] ?? '50';
 $section_height         = $attributes['sectionHeight'] ?? 'medium';
+$content_background_color = $attributes['contentBackgroundColor'] ?? '';
 $media_type             = $attributes['mediaType'] ?? 'image';
 $media_on_edge          = ! empty( $attributes['mediaOnEdge'] );
 $image_url              = $attributes['imageUrl'] ?? '';
@@ -31,9 +32,21 @@ $classes = array(
 	$media_on_edge ? 'split-content--edge' : 'split-content--contained',
 );
 
+$custom_styles = '';
+
+if ( is_string( $content_background_color ) && '' !== $content_background_color ) {
+	$content_background_color = sanitize_text_field( $content_background_color );
+	$custom_styles            = safecss_filter_attr(
+		'--split-content-overlay-panel-bg:' . $content_background_color . ';' .
+		'--split-content-overlay-panel-bg-reverse:' . $content_background_color . ';' .
+		'--split-content-overlap-card-background:' . $content_background_color . ';'
+	);
+}
+
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
 		'class' => implode( ' ', $classes ),
+		'style' => $custom_styles,
 	)
 );
 $gallery_images = is_array( $gallery_images ) ? $gallery_images : array();

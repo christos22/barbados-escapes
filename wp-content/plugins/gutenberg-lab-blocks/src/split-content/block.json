@@ -29,6 +29,10 @@
 			"type": "string",
 			"default": "medium"
 		},
+		"contentBackgroundColor": {
+			"type": "string",
+			"default": ""
+		},
 		"mediaType": {
 			"type": "string",
 			"default": "image"

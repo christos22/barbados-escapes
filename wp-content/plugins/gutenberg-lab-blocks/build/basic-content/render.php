@@ -13,8 +13,9 @@ $content_text_alignment = $attributes['contentTextAlignment'] ?? 'left';
 $sidebar_position       = $attributes['sidebarPosition'] ?? 'right';
 $background_image       = $attributes['backgroundImageUrl'] ?? '';
 $hide_section           = ! empty( $attributes['hideSection'] );
-$full_width            = ! empty( $attributes['fullWidth'] );
-$block_gap             = $attributes['style']['spacing']['blockGap'] ?? '';
+$full_width             = ! empty( $attributes['fullWidth'] );
+$accent_border          = $attributes['accentBorder'] ?? 'none';
+$block_gap              = $attributes['style']['spacing']['blockGap'] ?? '';
 
 if ( $hide_section ) {
 	return;
@@ -30,6 +31,10 @@ $classes = array(
 	'vvm-basic-content--sidebar-' . sanitize_html_class( $sidebar_position ),
 	$full_width ? 'vvm-basic-content--full-width' : '',
 );
+
+if ( 'none' !== $accent_border ) {
+	$classes[] = 'vvm-basic-content--accent-border-' . sanitize_html_class( $accent_border );
+}
 
 $styles = array();
 

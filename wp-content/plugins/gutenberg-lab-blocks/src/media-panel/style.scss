@@ -32,6 +32,7 @@
 	--media-panel-overlay-mid-alpha: 0;
 	--media-panel-overlay-deep-alpha: 0;
 	--media-panel-overlay-vignette-alpha: 0;
+	--media-panel-accent-border: 8px solid var(--wp--preset--color--gold, #c4922a);
 
 	&.media-panel--height-small {
 		min-height: 18rem;
@@ -49,12 +50,41 @@
 		min-height: 100vh;
 	}
 
-	&.media-panel--dark-overlay {
-		--media-panel-overlay-base-alpha: 0.95;
-		--media-panel-overlay-strong-alpha: 0.8;
-		--media-panel-overlay-soft-alpha: 0.54;
-		--media-panel-overlay-mid-alpha: 0.24;
-		--media-panel-overlay-vignette-alpha: 0.14;
+	&.media-panel--accent-border-top,
+	&.media-panel--accent-border-both {
+		border-top: var(--media-panel-accent-border);
+	}
+
+	&.media-panel--accent-border-bottom,
+	&.media-panel--accent-border-both {
+		border-bottom: var(--media-panel-accent-border);
+	}
+
+	&.media-panel--dark-overlay.media-panel--overlay-style-brand-green {
+		.media-panel__overlay::before {
+			// Keep the main overlay consistent across the full panel.
+			// The separate bottom atmosphere edge can then take over the last
+			// portion and deepen this translucent green into a solid footer edge.
+			background: linear-gradient(
+				to bottom,
+				rgb(30 61 47 / 0.85) 0%,
+				rgb(30 61 47 / 0.78) 48%,
+				rgb(30 61 47 / 0.7) 100%
+			);
+		}
+	}
+
+	&.media-panel--dark-overlay.media-panel--overlay-style-dark-vignette {
+		.media-panel__overlay::before {
+			// This matches the Figma hero treatment: slightly darker behind the
+			// header, lighter across the image center, then grounded at the base.
+			background: linear-gradient(
+				to bottom,
+				rgb(0 0 0 / 0.4) 0%,
+				rgb(0 0 0 / 0.3) 50%,
+				rgb(0 0 0 / 0.5) 100%
+			);
+		}
 	}
 
 		&.media-panel--content-style-boxed {
