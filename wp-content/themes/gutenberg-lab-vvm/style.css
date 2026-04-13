@@ -606,6 +606,14 @@ body.admin-bar {
 	background: var(--wp--preset--color--gold, #c4922a) !important;
 }
 
+.wp-block-button.is-style-vvm-link-primary {
+	margin-top: 16px;
+}
+
+.wp-block-buttons .wp-block-button.is-style-vvm-link-primary {
+	margin-top: 0;
+}
+
 .wp-block-button.is-style-vvm-link-primary .wp-block-button__link,
 .wp-block-button.is-style-vvm-link-primary .wp-element-button,
 .wp-block-button.is-style-vvm-link-secondary .wp-block-button__link,
@@ -631,7 +639,17 @@ body.admin-bar {
 
 .wp-block-button.is-style-vvm-link-primary .wp-block-button__link,
 .wp-block-button.is-style-vvm-link-primary .wp-element-button {
-	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
+	gap: 0.5rem;
+	color: var(--wp--preset--color--gold, #c4922a) !important;
+	font-family: "Romely", sans-serif;
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: 0.025em;
+	text-decoration: none !important;
+	text-transform: none;
+	transition:
+		color 300ms ease,
+		transform 300ms ease;
 }
 
 .wp-block-button.is-style-vvm-link-secondary .wp-block-button__link,
@@ -640,7 +658,19 @@ body.admin-bar {
 }
 
 .wp-block-button.is-style-vvm-link-primary .wp-block-button__link::after,
-.wp-block-button.is-style-vvm-link-primary .wp-element-button::after,
+.wp-block-button.is-style-vvm-link-primary .wp-element-button::after {
+	content: "\2192";
+	width: auto;
+	height: auto;
+	margin-left: 0;
+	border: 0;
+	color: inherit;
+	font-size: 20px;
+	line-height: 1;
+	transition: transform 300ms ease;
+	vertical-align: middle;
+}
+
 .wp-block-button.is-style-vvm-link-secondary .wp-block-button__link::after,
 .wp-block-button.is-style-vvm-link-secondary .wp-element-button::after {
 	content: "";
@@ -667,10 +697,20 @@ body.admin-bar {
 	text-decoration: none !important;
 }
 
+.wp-block-button.is-style-vvm-link-primary .wp-block-button__link:hover,
+.wp-block-button.is-style-vvm-link-primary .wp-block-button__link:focus-visible,
+.wp-block-button.is-style-vvm-link-primary .wp-element-button:hover,
+.wp-block-button.is-style-vvm-link-primary .wp-element-button:focus-visible {
+	transform: translateX(5px);
+}
+
 .wp-block-button.is-style-vvm-link-primary .wp-block-button__link:hover::after,
 .wp-block-button.is-style-vvm-link-primary .wp-block-button__link:focus-visible::after,
 .wp-block-button.is-style-vvm-link-primary .wp-element-button:hover::after,
-.wp-block-button.is-style-vvm-link-primary .wp-element-button:focus-visible::after,
+.wp-block-button.is-style-vvm-link-primary .wp-element-button:focus-visible::after {
+	transform: translateX(4px);
+}
+
 .wp-block-button.is-style-vvm-link-secondary .wp-block-button__link:hover::after,
 .wp-block-button.is-style-vvm-link-secondary .wp-block-button__link:focus-visible::after,
 .wp-block-button.is-style-vvm-link-secondary .wp-element-button:hover::after,
