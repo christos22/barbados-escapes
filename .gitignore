@@ -8,6 +8,8 @@
 !.github/
 !.github/**
 !.cpanel.yml
+!docs/
+!docs/**
 
 # Keep future Composer manifests if the project moves to Composer-managed WordPress.
 !composer.json

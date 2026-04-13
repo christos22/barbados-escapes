@@ -243,6 +243,7 @@ For this repo, prefer a maximum-Gutenberg approach.
 - Keep custom blocks feeling native to Gutenberg, not like ACF field groups inside the block editor.
 - When unsure, choose the more Gutenberg-native solution.
 - Keep learning notes concise in `docs/gutenberg-learning-notes.md`.
+- For deployment or server tasks only, including InMotion/cPanel backend deployment, server Git setup, GitHub Actions deploy wiring, or `/wp-json/` rewrite issues, read `docs/inmotion-backend-deployment.md` first. Do not load it for routine local block, theme, CSS, or editor work unless the task touches deployment or environment behavior.
 
 ---
 
@@ -295,6 +296,7 @@ For this repo, prefer a maximum-Gutenberg approach.
 - The villa template should support editor-managed content sections such as hero/gallery, summary, facts, amenities, CTA, and related villas when those pieces are in scope.
 - Keep code commented, but keep comments concise and useful.
 - Avoid hardcoding content that should be editor-managed.
+- Treat `/home/grapsa5/barbadosescapes.verseandvision.ca/.htaccess` as a required server-side rewrite file until that requirement is intentionally moved into a repo-managed deployment step.
 
 ## Build And Verification
 
