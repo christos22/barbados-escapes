@@ -487,40 +487,80 @@ body.admin-bar {
 	align-items: center;
 	justify-content: center;
 	gap: 0.35rem;
-	padding: 12px 40px 14px;
-	border: 1px solid var(--wp--preset--color--dark-green, #1e3d2f);
+	position: relative;
+	z-index: 0;
+	padding: 12px 32px;
+	border: 0;
 	border-radius: 0;
-	background: var(--wp--preset--color--dark-green, #1e3d2f) !important;
-	color: #ffffff !important;
-	font-size: 1rem;
-	font-weight: 400;
-	letter-spacing: 0.0625rem;
+	overflow: hidden;
+	background: transparent !important;
+	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
+	font-family: "Romely", sans-serif;
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: 0.15em;
 	text-decoration: none !important;
 	text-transform: uppercase;
 	box-shadow: none;
-	transition:
-		background-color 0.2s ease,
-		color 0.2s ease,
-		border-color 0.2s ease,
-		box-shadow 0.2s ease,
-		transform 0.12s ease;
+	isolation: isolate;
+	transition: all 500ms ease;
+}
+
+/* Fade a reversed gradient layer in on hover so the direction change feels smooth. */
+.wp-block-button.is-style-vvm-primary .wp-block-button__link::before,
+.wp-block-button.is-style-vvm-primary .wp-block-button__link::after,
+.wp-block-button.is-style-vvm-primary .wp-element-button::before,
+.wp-block-button.is-style-vvm-primary .wp-element-button::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	transition: opacity 500ms ease;
+}
+
+.wp-block-button.is-style-vvm-primary .wp-block-button__link::before,
+.wp-block-button.is-style-vvm-primary .wp-element-button::before {
+	background: linear-gradient(to right, #c4922a, #d4a547);
+	opacity: 1;
+}
+
+.wp-block-button.is-style-vvm-primary .wp-block-button__link::after,
+.wp-block-button.is-style-vvm-primary .wp-element-button::after {
+	background: linear-gradient(to right, #d4a547, #c4922a);
+	opacity: 0;
 }
 
 .wp-block-button.is-style-vvm-primary .wp-block-button__link:hover,
 .wp-block-button.is-style-vvm-primary .wp-block-button__link:focus-visible,
 .wp-block-button.is-style-vvm-primary .wp-element-button:hover,
 .wp-block-button.is-style-vvm-primary .wp-element-button:focus-visible {
-	background: var(--wp--preset--color--gold, #c4922a) !important;
-	border-color: var(--wp--preset--color--gold, #c4922a);
 	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
-	box-shadow: 0 10px 20px rgb(30 61 47 / 0.14);
-	transform: translateY(-1px);
+	box-shadow: 0 0 40px rgb(196 146 42 / 0.4);
+	transform: scale(1.05);
+}
+
+.wp-block-button.is-style-vvm-primary .wp-block-button__link:hover::before,
+.wp-block-button.is-style-vvm-primary .wp-block-button__link:focus-visible::before,
+.wp-block-button.is-style-vvm-primary .wp-element-button:hover::before,
+.wp-block-button.is-style-vvm-primary .wp-element-button:focus-visible::before {
+	opacity: 0;
+}
+
+.wp-block-button.is-style-vvm-primary .wp-block-button__link:hover::after,
+.wp-block-button.is-style-vvm-primary .wp-block-button__link:focus-visible::after,
+.wp-block-button.is-style-vvm-primary .wp-element-button:hover::after,
+.wp-block-button.is-style-vvm-primary .wp-element-button:focus-visible::after {
+	opacity: 1;
 }
 
 .wp-block-button.is-style-vvm-primary .wp-block-button__link:active,
 .wp-block-button.is-style-vvm-primary .wp-element-button:active {
-	box-shadow: none;
-	transform: translateY(0);
+	transform: scale(0.98);
+}
+
+.wp-block-button.is-style-vvm-primary .wp-block-button__link:active::after,
+.wp-block-button.is-style-vvm-primary .wp-element-button:active::after {
+	opacity: 1;
 }
 
 .wp-block-button.is-style-vvm-secondary .wp-block-button__link,
@@ -529,23 +569,27 @@ body.admin-bar {
 	align-items: center;
 	justify-content: center;
 	gap: 0.35rem;
-	padding: 12px 40px 14px;
-	border: 1px solid var(--wp--preset--color--dark-green, #1e3d2f);
+	padding: 12px 32px;
+	border: 1px solid var(--wp--preset--color--gold, #c4922a);
 	border-radius: 0;
-	background: #ffffff !important;
-	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
-	font-size: 1rem;
-	font-weight: 400;
-	letter-spacing: 0.0625rem;
+	background: linear-gradient(
+		to bottom,
+		rgb(0 0 0 / 0.3),
+		rgb(0 0 0 / 0.5)
+	) !important;
+	color: var(--wp--preset--color--gold, #c4922a) !important;
+	font-family: "Romely", sans-serif;
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: 0.15em;
 	text-decoration: none !important;
 	text-transform: uppercase;
-	box-shadow: none;
-	transition:
-		background-color 0.2s ease,
-		color 0.2s ease,
-		border-color 0.2s ease,
-		box-shadow 0.2s ease,
-		transform 0.12s ease;
+	text-shadow:
+		0 2px 8px rgb(0 0 0 / 0.6),
+		0 1px 4px rgb(0 0 0 / 0.4);
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
+	transition: all 300ms ease;
 }
 
 .wp-block-button.is-style-vvm-secondary .wp-block-button__link:hover,
@@ -554,15 +598,12 @@ body.admin-bar {
 .wp-block-button.is-style-vvm-secondary .wp-element-button:focus-visible {
 	background: var(--wp--preset--color--gold, #c4922a) !important;
 	border-color: var(--wp--preset--color--gold, #c4922a);
-	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
-	box-shadow: 0 10px 20px rgb(30 61 47 / 0.12);
-	transform: translateY(-1px);
+	color: var(--wp--preset--color--white, #ffffff) !important;
 }
 
 .wp-block-button.is-style-vvm-secondary .wp-block-button__link:active,
 .wp-block-button.is-style-vvm-secondary .wp-element-button:active {
-	box-shadow: none;
-	transform: translateY(0);
+	background: var(--wp--preset--color--gold, #c4922a) !important;
 }
 
 .wp-block-button.is-style-vvm-link-primary .wp-block-button__link,
