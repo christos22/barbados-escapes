@@ -138,6 +138,72 @@ Current note:
 - it is not currently deployed from this repo
 - if the docroot is rebuilt or replaced, `/wp-json/` should be rechecked immediately
 
+## Local Refresh
+
+The standard local refresh workflow is a DDEV host command:
+
+```bash
+ddev sync-remote
+```
+
+This command is intended for local development only. It refreshes the local DDEV database and uploads from the live InMotion WordPress install.
+
+### Local SSH Prerequisite
+
+Use a local SSH alias named `inmotion-grapsasdev` so both manual SSH and the sync command share one source of truth for host, port, user, and key path.
+
+Recommended `~/.ssh/config` block:
+
+```sshconfig
+Host inmotion-grapsasdev
+    HostName 209.182.196.26
+    Port 2222
+    User grapsa5
+    IdentityFile /home/Quester/Nextcloud/Documents/Development/Server/SSH-Keys/inmotion
+    IdentitiesOnly yes
+```
+
+Keep the key passphrase-protected. Before running the sync command, unlock it with:
+
+```bash
+ssh-add /home/Quester/Nextcloud/Documents/Development/Server/SSH-Keys/inmotion
+```
+
+If `ssh -o BatchMode=yes inmotion-grapsasdev "echo ok"` fails, the command should be treated as not ready to run.
+
+### Local Sync Config
+
+Copy the example file:
+
+```bash
+cp .ddev/.env.sync-remote.example .ddev/.env.sync-remote
+```
+
+Then fill in the live database credentials. The real `.ddev/.env.sync-remote` file is intentionally ignored by Git.
+
+### Command Modes
+
+- `ddev sync-remote`
+  Refresh DB and uploads
+- `ddev sync-remote --db-only`
+  Refresh only the database
+- `ddev sync-remote --uploads-only`
+  Refresh only uploads
+- `ddev sync-remote --mirror-uploads`
+  Mirror uploads exactly using `rsync --delete`
+- `ddev sync-remote --skip-snapshot`
+  Skip the pre-import DDEV DB snapshot
+- `ddev sync-remote --dry-run`
+  Validate SSH and remote paths without importing data
+
+### Rollback
+
+By default, database refresh creates a DDEV snapshot first. Roll back with:
+
+```bash
+ddev snapshot restore --latest
+```
+
 ## Verification Checklist
 
 Use these checks after setup changes or deployment troubleshooting:

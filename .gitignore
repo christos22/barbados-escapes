@@ -11,6 +11,9 @@
 !docs/
 !docs/**
 
+# Keep local-only sync credentials out of Git.
+.ddev/.env.sync-remote
+
 # Keep future Composer manifests if the project moves to Composer-managed WordPress.
 !composer.json
 !composer.lock

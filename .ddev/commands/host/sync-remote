@@ -1,0 +1,191 @@
+#!/usr/bin/env bash
+## Description: Refresh local DB/uploads from the live InMotion WordPress site
+## Usage: sync-remote [--db-only] [--uploads-only] [--mirror-uploads] [--skip-snapshot] [--dry-run]
+## Example: "ddev sync-remote --db-only"
+
+set -euo pipefail
+
+APPROOT="${DDEV_APPROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+ENV_FILE="${APPROOT}/.ddev/.env.sync-remote"
+ENV_EXAMPLE_FILE="${APPROOT}/.ddev/.env.sync-remote.example"
+LOCAL_UPLOADS_PATH="${APPROOT}/wp-content/uploads"
+SSH_KEY_PATH="/home/Quester/Nextcloud/Documents/Development/Server/SSH-Keys/inmotion"
+
+sync_db=1
+sync_uploads=1
+mirror_uploads=0
+skip_snapshot=0
+dry_run=0
+snapshot_name=""
+temp_dump=""
+
+log() {
+	printf '\n==> %s\n' "$*"
+}
+
+fail() {
+	printf 'Error: %s\n' "$*" >&2
+	exit 1
+}
+
+usage() {
+	cat <<'EOF'
+Refresh the local DDEV database and uploads from the live InMotion WordPress site.
+
+Usage:
+  ddev sync-remote [flags]
+
+Flags:
+  --db-only          Refresh only the database
+  --uploads-only     Refresh only uploads
+  --mirror-uploads   Mirror uploads exactly with rsync --delete
+  --skip-snapshot    Skip the pre-import DDEV database snapshot
+  --dry-run          Validate SSH and remote paths without importing data
+  -h, --help         Show this help text
+
+Before running:
+  1. Copy .ddev/.env.sync-remote.example to .ddev/.env.sync-remote
+  2. Fill in the live database credentials
+  3. Load the local SSH key into ssh-agent:
+     ssh-add /home/Quester/Nextcloud/Documents/Development/Server/SSH-Keys/inmotion
+EOF
+}
+
+cleanup() {
+	if [[ -n "${temp_dump}" && -f "${temp_dump}" ]]; then
+		rm -f "${temp_dump}"
+	fi
+}
+trap cleanup EXIT
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--db-only)
+			sync_db=1
+			sync_uploads=0
+			;;
+		--uploads-only)
+			sync_db=0
+			sync_uploads=1
+			;;
+		--mirror-uploads)
+			mirror_uploads=1
+			;;
+		--skip-snapshot)
+			skip_snapshot=1
+			;;
+		--dry-run)
+			dry_run=1
+			;;
+		-h|--help)
+			usage
+			exit 0
+			;;
+		*)
+			fail "Unknown argument: $1"
+			;;
+	esac
+	shift
+done
+
+if (( sync_db == 0 && sync_uploads == 0 )); then
+	fail "Nothing to do. Choose either DB sync, uploads sync, or both."
+fi
+
+for required_command in ddev ssh rsync gzip mktemp; do
+	command -v "${required_command}" >/dev/null 2>&1 || fail "Missing required command: ${required_command}"
+done
+
+if (( sync_db )); then
+	command -v mysqldump >/dev/null 2>&1 || fail "Missing required command: mysqldump"
+fi
+
+[[ -f "${ENV_FILE}" ]] || fail "Missing ${ENV_FILE}. Copy ${ENV_EXAMPLE_FILE} and fill in the real remote DB credentials."
+
+# shellcheck disable=SC1090
+set -a
+source "${ENV_FILE}"
+set +a
+
+for required_var in REMOTE_SSH_HOST REMOTE_WP_PATH; do
+	[[ -n "${!required_var:-}" ]] || fail "Missing ${required_var} in ${ENV_FILE}"
+done
+
+if (( sync_db && dry_run == 0 )); then
+	for required_var in REMOTE_DB_HOST REMOTE_DB_NAME REMOTE_DB_USER REMOTE_DB_PASSWORD REMOTE_SITE_URL LOCAL_SITE_URL; do
+		[[ -n "${!required_var:-}" ]] || fail "Missing ${required_var} in ${ENV_FILE}"
+	done
+fi
+
+REMOTE_SITE_URL="${REMOTE_SITE_URL:-}"
+LOCAL_SITE_URL="${LOCAL_SITE_URL:-}"
+REMOTE_SITE_URL="${REMOTE_SITE_URL%/}"
+LOCAL_SITE_URL="${LOCAL_SITE_URL%/}"
+REMOTE_UPLOADS_PATH="${REMOTE_WP_PATH%/}/wp-content/uploads/"
+
+if ! ssh -o BatchMode=yes "${REMOTE_SSH_HOST}" 'echo ok' >/dev/null 2>&1; then
+	fail "SSH authentication failed for ${REMOTE_SSH_HOST}. Unlock the key first with: ssh-add ${SSH_KEY_PATH}"
+fi
+
+quoted_remote_wp_path=$(printf '%q' "${REMOTE_WP_PATH}")
+
+log "Validating remote WordPress path"
+ssh -o BatchMode=yes "${REMOTE_SSH_HOST}" "test -d ${quoted_remote_wp_path}"
+
+if (( sync_uploads )); then
+	log "Validating remote uploads path"
+	if (( dry_run )); then
+		rsync -azn -e "ssh -o BatchMode=yes" "${REMOTE_SSH_HOST}:${REMOTE_UPLOADS_PATH}" "${LOCAL_UPLOADS_PATH}/"
+	else
+		ssh -o BatchMode=yes "${REMOTE_SSH_HOST}" "test -d $(printf '%q' "${REMOTE_UPLOADS_PATH}")"
+	fi
+fi
+
+if (( dry_run )); then
+	log "Dry run succeeded. SSH and remote paths look good."
+	exit 0
+fi
+
+if (( sync_db && skip_snapshot == 0 )); then
+	snapshot_name="pre-sync-remote-$(date +%Y%m%d-%H%M%S)"
+	log "Creating local database snapshot ${snapshot_name}"
+	ddev snapshot --name "${snapshot_name}"
+fi
+
+if (( sync_db )); then
+	temp_dump="$(mktemp "${TMPDIR:-/tmp}/barbados-sync-remote.XXXXXX.sql.gz")"
+	quoted_remote_db_host=$(printf '%q' "${REMOTE_DB_HOST}")
+	quoted_remote_db_name=$(printf '%q' "${REMOTE_DB_NAME}")
+	quoted_remote_db_user=$(printf '%q' "${REMOTE_DB_USER}")
+	quoted_remote_db_password=$(printf '%q' "${REMOTE_DB_PASSWORD}")
+	log "Dumping the remote database"
+	ssh -o BatchMode=yes "${REMOTE_SSH_HOST}" \
+		"cd ${quoted_remote_wp_path} && MYSQL_PWD=${quoted_remote_db_password} mysqldump -h ${quoted_remote_db_host} -u ${quoted_remote_db_user} --single-transaction --quick --default-character-set=utf8mb4 ${quoted_remote_db_name} | gzip -c" \
+		> "${temp_dump}"
+
+	log "Importing the remote database into DDEV"
+	ddev import-db --file="${temp_dump}"
+
+	log "Updating local WordPress URLs"
+	ddev wp search-replace "${REMOTE_SITE_URL}" "${LOCAL_SITE_URL}" --skip-columns=guid --all-tables
+	if [[ "${REMOTE_SITE_URL}" == https://* ]]; then
+		ddev wp search-replace "http://${REMOTE_SITE_URL#https://}" "${LOCAL_SITE_URL}" --skip-columns=guid --all-tables
+	fi
+	ddev wp option update home "${LOCAL_SITE_URL}"
+	ddev wp option update siteurl "${LOCAL_SITE_URL}"
+
+	log "Flushing local rewrite rules"
+	ddev wp rewrite flush
+fi
+
+if (( sync_uploads )); then
+	log "Syncing remote uploads"
+	mkdir -p "${LOCAL_UPLOADS_PATH}"
+	rsync_flags=(-az)
+	if (( mirror_uploads )); then
+		rsync_flags+=(--delete)
+	fi
+	rsync "${rsync_flags[@]}" -e "ssh -o BatchMode=yes" "${REMOTE_SSH_HOST}:${REMOTE_UPLOADS_PATH}" "${LOCAL_UPLOADS_PATH}/"
+fi
+
+log "Local refresh complete."
