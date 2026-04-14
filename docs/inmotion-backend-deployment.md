@@ -181,6 +181,12 @@ cp .ddev/.env.sync-remote.example .ddev/.env.sync-remote
 
 Then fill in the live database credentials. The real `.ddev/.env.sync-remote` file is intentionally ignored by Git.
 
+When a live database is imported, the command auto-detects its WordPress table prefix and writes a local-only override file:
+
+- `wp-config-ddev-local.php`
+
+That file is intentionally ignored by Git. It exists so local DDEV can boot imported databases that do not use the default `wp_` prefix. The command also patches the local ignored `wp-config-ddev.php` once so DDEV loads that override file on future requests.
+
 ### Command Modes
 
 - `ddev sync-remote`
