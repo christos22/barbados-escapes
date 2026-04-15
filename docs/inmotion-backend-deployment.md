@@ -14,6 +14,7 @@ Verified on April 12-13, 2026.
   - `barbados-escapes-git` is for server -> GitHub pulls.
   - `github_deploy_key` is for GitHub Actions -> server SSH login.
 - If `/wp-json/` fails but `/?rest_route=/` works, suspect rewrite routing before suspecting WordPress or deployment.
+- If both `/wp-json/` and `/?rest_route=/` return `401`, suspect server-level Basic Auth before suspecting WordPress or rewrite routing.
 - The live `.htaccess` file is currently a server-side prerequisite, not a repo-managed artifact.
 
 ## Live Paths
@@ -101,6 +102,11 @@ Required GitHub Actions secrets:
 - `SSH_HOST=ecngx362.inmotionhosting.com`
 - `SSH_USERNAME=grapsa5`
 - `SSH_PRIVATE_KEY=<private key for server login>`
+
+Optional GitHub Actions secrets for REST verification when the live site is protected by Basic Auth:
+
+- `DEPLOY_VERIFY_BASIC_AUTH_USERNAME=<basic auth username>`
+- `DEPLOY_VERIFY_BASIC_AUTH_PASSWORD=<basic auth password>`
 
 For this project, the same private key used by the VVM deployment worked:
 
@@ -235,6 +241,16 @@ Use these checks after setup changes or deployment troubleshooting:
 
    Expected result: `HTTP/2 200`
 
+   If the live site is behind Basic Auth, provide credentials:
+
+   ```bash
+   curl -I -A "Mozilla/5.0" -u "<user>:<password>" https://barbadosescapes.verseandvision.ca/wp-json/
+   ```
+
+   On April 15, 2026, the unauthenticated live response returned `401` with:
+
+   - `www-authenticate: Basic realm="Access to A Bun In The Oven"`
+
 4. If `/wp-json/` fails, test the fallback route:
 
    ```bash
@@ -242,6 +258,8 @@ Use these checks after setup changes or deployment troubleshooting:
    ```
 
    If this returns `200`, WordPress is likely healthy and the issue is rewrite routing.
+
+   If this also returns `401`, the server-level auth wall is intercepting the request before WordPress handles it.
 
 ## Normal Workflow
 

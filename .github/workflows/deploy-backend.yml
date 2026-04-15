@@ -39,13 +39,60 @@ jobs:
             echo "Deployment complete."
 
       - name: Verify Deployment
+        env:
+          DEPLOY_VERIFY_BASIC_AUTH_USERNAME: ${{ secrets.DEPLOY_VERIFY_BASIC_AUTH_USERNAME }}
+          DEPLOY_VERIFY_BASIC_AUTH_PASSWORD: ${{ secrets.DEPLOY_VERIFY_BASIC_AUTH_PASSWORD }}
         run: |
           sleep 5
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -A "Mozilla/5.0" "https://barbadosescapes.verseandvision.ca/wp-json/")
+
+          request_status() {
+            local url="$1"
+            local -a curl_args=(
+              -s
+              -o /dev/null
+              -w "%{http_code}"
+              -A "Mozilla/5.0"
+            )
+
+            if [ -n "$DEPLOY_VERIFY_BASIC_AUTH_USERNAME" ] && [ -n "$DEPLOY_VERIFY_BASIC_AUTH_PASSWORD" ]; then
+              curl_args+=( --user "${DEPLOY_VERIFY_BASIC_AUTH_USERNAME}:${DEPLOY_VERIFY_BASIC_AUTH_PASSWORD}" )
+            fi
+
+            curl "${curl_args[@]}" "$url"
+          }
+
+          PRIMARY_URL="https://barbadosescapes.verseandvision.ca/wp-json/"
+          FALLBACK_URL="https://barbadosescapes.verseandvision.ca/?rest_route=/"
+          HTTP_STATUS=$(request_status "$PRIMARY_URL")
 
           if [ "$HTTP_STATUS" -eq 200 ]; then
-            echo "WordPress API responding correctly"
-          else
-            echo "WordPress API returned status: $HTTP_STATUS"
+            echo "WordPress API responding correctly at /wp-json/"
+            exit 0
+          fi
+
+          # A 404 here usually means rewrite routing is broken, so try the
+          # query-string fallback before failing the deployment.
+          if [ "$HTTP_STATUS" -eq 404 ]; then
+            FALLBACK_STATUS=$(request_status "$FALLBACK_URL")
+
+            if [ "$FALLBACK_STATUS" -eq 200 ]; then
+              echo "WordPress API responding correctly via ?rest_route=/"
+              exit 0
+            fi
+
+            echo "WordPress REST routing check failed: /wp-json/ returned 404 and ?rest_route=/ returned $FALLBACK_STATUS"
             exit 1
           fi
+
+          if [ "$HTTP_STATUS" -eq 401 ]; then
+            if [ -z "$DEPLOY_VERIFY_BASIC_AUTH_USERNAME" ] || [ -z "$DEPLOY_VERIFY_BASIC_AUTH_PASSWORD" ]; then
+              echo "WordPress API is protected by Basic Auth. Configure DEPLOY_VERIFY_BASIC_AUTH_USERNAME and DEPLOY_VERIFY_BASIC_AUTH_PASSWORD GitHub secrets for the verify step."
+            else
+              echo "WordPress API returned 401 even with the configured Basic Auth secrets."
+            fi
+
+            exit 1
+          fi
+
+          echo "WordPress API returned status: $HTTP_STATUS"
+          exit 1
