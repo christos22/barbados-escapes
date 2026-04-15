@@ -58,13 +58,6 @@
 			color: var(--media-panel-surface-color);
 			box-shadow: var(--media-panel-surface-shadow);
 		}
-
-		// In the editor the boxed surface sets a dark text color, so force the
-		// CTA label back to white to match the frontend button treatment.
-		.wp-block-button .wp-block-button__link,
-		.wp-block-button .wp-element-button {
-			color: var(--wp--preset--color--white, #ffffff) !important;
-		}
 	}
 
 	// Keep the editor representative, not sticky. The curtain effect is a

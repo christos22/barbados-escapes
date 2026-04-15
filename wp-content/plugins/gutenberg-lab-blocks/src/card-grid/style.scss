@@ -317,38 +317,6 @@
 		padding-top: 0;
 	}
 
-	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-block-button__link,
-	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-element-button {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-width: 146px;
-		padding: 0.75rem 2rem;
-		border: 1px solid #c4922a;
-		border-radius: 0;
-		background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%) !important;
-		color: #c4922a !important;
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		box-shadow: none;
-		font-family: var(--wp--preset--font-family--site-primary);
-		font-size: 0.875rem;
-		font-weight: 600;
-		letter-spacing: 0.15em;
-		line-height: 1;
-		text-decoration: none !important;
-		text-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.6),
-			0 1px 4px rgba(0, 0, 0, 0.4);
-		text-transform: uppercase;
-		transition:
-			background 0.3s ease,
-			color 0.3s ease,
-			border-color 0.3s ease,
-			transform 0.3s ease,
-			box-shadow 0.3s ease;
-	}
-
 	.vvm-card-grid__card--villa:hover .vvm-card-grid__card-media,
 	.vvm-card-grid__card--villa:focus-within .vvm-card-grid__card-media {
 		filter: brightness(1);
@@ -358,17 +326,6 @@
 	.vvm-card-grid__card--villa:hover::after,
 	.vvm-card-grid__card--villa:focus-within::after {
 		opacity: 0.4;
-	}
-
-	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-block-button__link:hover,
-	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-block-button__link:focus-visible,
-	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-element-button:hover,
-	.vvm-card-grid__card--villa .wp-block-button.is-style-vvm-primary .wp-element-button:focus-visible {
-		border-color: #c4922a;
-		background: #c4922a !important;
-		color: #ffffff !important;
-		box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
-		transform: translateY(-1px);
 	}
 
 	&.has-cinematic-reveal .vvm-card-grid__card--villa {

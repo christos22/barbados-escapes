@@ -24,6 +24,7 @@ function gutenberg_lab_vvm_setup() {
 	add_editor_style(
 		array(
 			'style.css',
+			'assets/css/buttons.css',
 			'assets/css/editor.css',
 		)
 	);
@@ -92,42 +93,41 @@ function gutenberg_lab_vvm_register_block_styles() {
 		return;
 	}
 
-	register_block_style(
-		'core/button',
+	foreach (
 		array(
-			'name'         => 'vvm-primary',
-			'label'        => __( 'Primary', 'gutenberg-lab-vvm' ),
-			'is_default'   => true,
-			'inline_style' => '',
-		)
-	);
-
-	register_block_style(
-		'core/button',
-		array(
-			'name'         => 'vvm-secondary',
-			'label'        => __( 'Secondary', 'gutenberg-lab-vvm' ),
-			'inline_style' => '',
-		)
-	);
-
-	register_block_style(
-		'core/button',
-		array(
-			'name'         => 'vvm-link-primary',
-			'label'        => __( 'Link Primary', 'gutenberg-lab-vvm' ),
-			'inline_style' => '',
-		)
-	);
-
-	register_block_style(
-		'core/button',
-		array(
-			'name'         => 'vvm-link-secondary',
-			'label'        => __( 'Link Secondary', 'gutenberg-lab-vvm' ),
-			'inline_style' => '',
-		)
-	);
+			array(
+				'name'       => 'vvm-primary',
+				'label'      => __( 'Primary', 'gutenberg-lab-vvm' ),
+				'is_default' => true,
+			),
+			array(
+				'name'  => 'vvm-secondary',
+				'label' => __( 'Secondary', 'gutenberg-lab-vvm' ),
+			),
+			array(
+				'name'  => 'vvm-ghost',
+				'label' => __( 'Ghost', 'gutenberg-lab-vvm' ),
+			),
+			array(
+				'name'  => 'vvm-link-primary',
+				'label' => __( 'Link Primary', 'gutenberg-lab-vvm' ),
+			),
+			array(
+				'name'  => 'vvm-link-secondary',
+				'label' => __( 'Link Secondary', 'gutenberg-lab-vvm' ),
+			),
+		) as $button_style
+	) {
+		register_block_style(
+			'core/button',
+			array_merge(
+				$button_style,
+				array(
+					'inline_style' => '',
+				)
+			)
+		);
+	}
 
 	register_block_style(
 		'gutenberg-lab-blocks/card-grid',
@@ -1160,6 +1160,26 @@ add_action( 'wp_enqueue_scripts', 'gutenberg_lab_vvm_enqueue_fonts' );
 add_action( 'enqueue_block_editor_assets', 'gutenberg_lab_vvm_enqueue_fonts' );
 
 /**
+ * Keeps the editor button style picker aligned with the theme's design system.
+ *
+ * We expose custom branded button variations, so the stock Outline option only
+ * creates ambiguity and makes it easy to pick a style the theme does not want
+ * editors using.
+ */
+function gutenberg_lab_vvm_enqueue_block_editor_script() {
+	wp_enqueue_script(
+		'gutenberg-lab-vvm-block-editor',
+		get_theme_file_uri( 'assets/js/block-editor.js' ),
+		array( 'wp-blocks', 'wp-dom-ready' ),
+		gutenberg_lab_vvm_asset_version( 'assets/js/block-editor.js' ),
+		array(
+			'in_footer' => true,
+		)
+	);
+}
+add_action( 'enqueue_block_editor_assets', 'gutenberg_lab_vvm_enqueue_block_editor_script' );
+
+/**
  * Enqueues the shared theme stylesheet and the minimal front-end chrome script.
  *
  * The editor does not need to reproduce every front-end behavior, but the
@@ -1172,6 +1192,15 @@ function gutenberg_lab_vvm_enqueue_assets() {
 		get_stylesheet_uri(),
 		array(),
 		gutenberg_lab_vvm_asset_version( 'style.css' )
+	);
+
+	// Keep the branded button system in one shared stylesheet so the front end
+	// and editor can consume the same source of truth.
+	wp_enqueue_style(
+		'gutenberg-lab-vvm-buttons',
+		get_theme_file_uri( 'assets/css/buttons.css' ),
+		array( 'gutenberg-lab-vvm-style' ),
+		gutenberg_lab_vvm_asset_version( 'assets/css/buttons.css' )
 	);
 
 	wp_enqueue_script(

@@ -28,7 +28,19 @@ const TEMPLATE = [
 			placeholder: __( 'Add slide text…', 'gutenberg-lab-blocks' ),
 		},
 	],
-	[ 'core/buttons', {} ],
+	[
+		'core/buttons',
+		{},
+		[
+			[
+				'core/button',
+				{
+					text: __( 'Learn More', 'gutenberg-lab-blocks' ),
+					className: 'is-style-vvm-ghost',
+				},
+			],
+		],
+	],
 ];
 
 export default function Edit( { attributes, setAttributes } ) {

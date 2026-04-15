@@ -466,7 +466,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 
 			<?php if ( ! empty( $villa_data['cta']['url'] ) && ! empty( $villa_data['cta']['label'] ) ) : ?>
 				<div class="wp-block-buttons">
-					<div class="wp-block-button is-style-vvm-primary">
+					<div class="wp-block-button is-style-vvm-ghost">
 						<a
 							class="wp-block-button__link wp-element-button"
 							href="<?php echo esc_url( $villa_data['cta']['url'] ); ?>"
@@ -527,7 +527,7 @@ function gutenberg_lab_blocks_render_villa_carousel_slide( $villa_id ) {
 
 			<?php if ( ! empty( $villa_data['cta']['url'] ) && ! empty( $villa_data['cta']['label'] ) ) : ?>
 				<div class="wp-block-buttons">
-					<div class="wp-block-button is-style-vvm-primary">
+					<div class="wp-block-button is-style-vvm-ghost">
 						<a
 							class="wp-block-button__link wp-element-button"
 							href="<?php echo esc_url( $villa_data['cta']['url'] ); ?>"

@@ -1,0 +1,364 @@
+/*
+ * Shared branded button system for both the front end and the editor iframe.
+ *
+ * The editor loads this file via `add_editor_style()`, so keep selectors scoped
+ * to button block markup rather than editor wrapper classes.
+ */
+
+/* Unstyled core buttons should follow the branded Primary treatment by default. */
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button) {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem;
+	position: relative;
+	z-index: 0;
+	padding: 12px 32px;
+	border: 0;
+	border-radius: 0;
+	overflow: visible;
+	background: transparent !important;
+	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
+	font-family: "Romely", sans-serif;
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: 0.15em;
+	text-decoration: none !important;
+	text-transform: uppercase;
+	box-shadow: none;
+	isolation: isolate;
+	transform: translateZ(0) scale(1);
+	transform-origin: center;
+	backface-visibility: hidden;
+	will-change: transform, box-shadow;
+	transition:
+		box-shadow 320ms ease,
+		color 240ms ease,
+		transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Keep the hover growth visual so nearby layout never reflows. */
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button)::before,
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button)::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	transform: scale(1);
+	transform-origin: center;
+	will-change: transform, opacity;
+	transition:
+		opacity 320ms ease,
+		transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button)::before {
+	background: linear-gradient(to right, #c4922a, #d4a547);
+	opacity: 1;
+}
+
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button)::after {
+	background: linear-gradient(to right, #d4a547, #c4922a);
+	opacity: 0;
+}
+
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button):hover,
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button):focus-visible {
+	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
+	transform: translateZ(0) scale(1.03);
+	box-shadow: 0 0 40px rgb(196 146 42 / 0.4);
+}
+
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button):hover::before,
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button):focus-visible::before {
+	opacity: 0;
+}
+
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button):hover::after,
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button):focus-visible::after {
+	opacity: 1;
+}
+
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button):active {
+	transform: translateZ(0) scale(1.01);
+	box-shadow: 0 0 24px rgb(196 146 42 / 0.28);
+}
+
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button):active::after {
+	opacity: 1;
+}
+
+.wp-block-button.is-style-vvm-secondary :is(.wp-block-button__link, .wp-element-button) {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem;
+	padding: 12px 32px;
+	border: 1px solid var(--wp--preset--color--gold, #c4922a);
+	border-radius: 0;
+	background: transparent !important;
+	color: var(--wp--preset--color--light-gold, #f5ecd7) !important;
+	font-family: "Romely", sans-serif;
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: 0.15em;
+	text-decoration: none !important;
+	text-transform: uppercase;
+	transition:
+		background-color 300ms ease,
+		border-color 300ms ease,
+		color 300ms ease;
+}
+
+.wp-block-button.is-style-vvm-secondary :is(.wp-block-button__link, .wp-element-button):hover,
+.wp-block-button.is-style-vvm-secondary :is(.wp-block-button__link, .wp-element-button):focus-visible {
+	background: var(--wp--preset--color--gold, #c4922a) !important;
+	border-color: var(--wp--preset--color--gold, #c4922a);
+	color: var(--wp--preset--color--light-gold, #f5ecd7) !important;
+}
+
+.wp-block-button.is-style-vvm-secondary :is(.wp-block-button__link, .wp-element-button):active {
+	background: var(--wp--preset--color--gold, #c4922a) !important;
+	color: var(--wp--preset--color--light-gold, #f5ecd7) !important;
+}
+
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button) {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem;
+	position: relative;
+	z-index: 0;
+	padding: 12px 32px;
+	border: 1px solid var(--wp--preset--color--gold, #c4922a);
+	border-radius: 0;
+	overflow: hidden;
+	background: transparent !important;
+	color: var(--wp--preset--color--gold, #c4922a) !important;
+	font-family: "Romely", sans-serif;
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: 0.15em;
+	text-decoration: none !important;
+	text-transform: uppercase;
+	text-shadow:
+		0 2px 8px rgb(0 0 0 / 0.6),
+		0 1px 4px rgb(0 0 0 / 0.4);
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
+	transition:
+		border-color 300ms ease,
+		color 300ms ease,
+		box-shadow 300ms ease;
+}
+
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button)::before,
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button)::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	transition: opacity 300ms ease;
+}
+
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button)::before {
+	background-image: linear-gradient(
+		to bottom,
+		rgb(0 0 0 / 0.3),
+		rgb(0 0 0 / 0.5)
+	);
+	opacity: 1;
+}
+
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button)::after {
+	background-image: linear-gradient(
+		in oklab to bottom,
+		#8d6717 0%,
+		#b88724 52%,
+		#d6a339 100%
+	);
+	opacity: 0;
+}
+
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button):hover,
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button):focus-visible {
+	border-color: var(--wp--preset--color--gold, #c4922a);
+	color: var(--wp--preset--color--light-gold, #f5ecd7) !important;
+	box-shadow: 0 0 18px rgb(0 0 0 / 0.14);
+}
+
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button):hover::before,
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button):focus-visible::before {
+	opacity: 0;
+}
+
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button):hover::after,
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button):focus-visible::after {
+	opacity: 1;
+}
+
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button):active {
+	color: var(--wp--preset--color--light-gold, #f5ecd7) !important;
+}
+
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button):active::before {
+	opacity: 0;
+}
+
+.wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button):active::after {
+	opacity: 1;
+}
+
+.wp-block-button.is-style-vvm-link-primary {
+	margin-top: 16px;
+}
+
+.wp-block-buttons .wp-block-button.is-style-vvm-link-primary {
+	margin-top: 0;
+}
+
+:where(
+	.wp-block-button.is-style-vvm-link-primary,
+	.wp-block-button.is-style-vvm-link-secondary
+) :is(.wp-block-button__link, .wp-element-button) {
+	display: inline-flex;
+	align-items: center;
+	gap: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent !important;
+	box-shadow: none;
+	font-size: 1.25rem;
+	font-weight: 400;
+	letter-spacing: 0.0625rem;
+	text-decoration: underline !important;
+	text-transform: uppercase;
+	transition:
+		color 0.2s ease,
+		text-decoration-color 0.2s ease,
+		transform 0.2s ease;
+}
+
+.wp-block-button.is-style-vvm-link-primary :is(.wp-block-button__link, .wp-element-button) {
+	gap: 0.5rem;
+	color: var(--wp--preset--color--gold, #c4922a) !important;
+	font-family: "Romely", sans-serif;
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: 0.025em;
+	text-decoration: none !important;
+	text-transform: none;
+	transition:
+		color 300ms ease,
+		transform 300ms ease;
+}
+
+.wp-block-button.is-style-vvm-link-secondary :is(.wp-block-button__link, .wp-element-button) {
+	color: #ffffff !important;
+}
+
+.wp-block-button.is-style-vvm-link-primary :is(.wp-block-button__link, .wp-element-button)::after {
+	content: "\2192";
+	width: auto;
+	height: auto;
+	margin-left: 0;
+	border: 0;
+	color: inherit;
+	font-size: 20px;
+	line-height: 1;
+	transition: transform 300ms ease;
+	vertical-align: middle;
+}
+
+.wp-block-button.is-style-vvm-link-secondary :is(.wp-block-button__link, .wp-element-button)::after {
+	content: "";
+	display: inline-block;
+	width: 0;
+	height: 0;
+	margin-left: 0.5rem;
+	border-top: 4px solid transparent;
+	border-bottom: 4px solid transparent;
+	border-left: 6px solid var(--wp--preset--color--gold, #c4922a);
+	transition: transform 0.2s ease;
+	vertical-align: middle;
+}
+
+:where(
+	.wp-block-button.is-style-vvm-link-primary,
+	.wp-block-button.is-style-vvm-link-secondary
+) :is(.wp-block-button__link, .wp-element-button):hover,
+:where(
+	.wp-block-button.is-style-vvm-link-primary,
+	.wp-block-button.is-style-vvm-link-secondary
+) :is(.wp-block-button__link, .wp-element-button):focus-visible {
+	color: var(--wp--preset--color--gold, #c4922a) !important;
+	text-decoration: none !important;
+}
+
+.wp-block-button.is-style-vvm-link-primary :is(.wp-block-button__link, .wp-element-button):hover,
+.wp-block-button.is-style-vvm-link-primary :is(.wp-block-button__link, .wp-element-button):focus-visible {
+	transform: translateX(5px);
+}
+
+.wp-block-button.is-style-vvm-link-primary :is(.wp-block-button__link, .wp-element-button):hover::after,
+.wp-block-button.is-style-vvm-link-primary :is(.wp-block-button__link, .wp-element-button):focus-visible::after {
+	transform: translateX(4px);
+}
+
+.wp-block-button.is-style-vvm-link-secondary :is(.wp-block-button__link, .wp-element-button):hover::after,
+.wp-block-button.is-style-vvm-link-secondary :is(.wp-block-button__link, .wp-element-button):focus-visible::after {
+	transform: translateX(3px);
+}

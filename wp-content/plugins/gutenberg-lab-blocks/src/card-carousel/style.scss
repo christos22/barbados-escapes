@@ -66,25 +66,6 @@
 	margin-top: 0.25rem;
 }
 
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__intro
-	.wp-block-button
-	.wp-block-button__link,
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__intro
-	.wp-block-button
-	.wp-element-button {
-	padding: 0;
-	border: 0;
-	background: transparent !important;
-	color: var(--vvm-card-carousel-intro-foreground) !important;
-	box-shadow: none;
-	font-size: 0.74rem;
-	font-weight: 600;
-	letter-spacing: 0.2em;
-	text-transform: uppercase;
-}
-
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__rail {
 	min-width: 0;
 }
@@ -308,60 +289,6 @@
 
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-content .wp-block-buttons {
 	margin-top: 0.25rem;
-}
-
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__slide-content
-	.wp-block-button
-	.wp-block-button__link,
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__slide-content
-	.wp-block-button
-	.wp-element-button {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-inline-size: 9.5rem;
-	padding: 0.8rem 1.35rem;
-	border: 1px solid var(--vvm-card-carousel-card-accent);
-	border-radius: 999px;
-	background: rgba(11, 20, 17, 0.34) !important;
-	color: var(--vvm-card-carousel-card-foreground) !important;
-	backdrop-filter: blur(6px);
-	-webkit-backdrop-filter: blur(6px);
-	box-shadow: none;
-	font-size: 0.72rem;
-	font-weight: 600;
-	letter-spacing: 0.18em;
-	text-decoration: none !important;
-	text-transform: uppercase;
-	transition:
-		background 0.24s ease,
-		color 0.24s ease,
-		border-color 0.24s ease,
-		transform 0.24s ease;
-}
-
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__slide-content
-	.wp-block-button
-	.wp-block-button__link:hover,
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__slide-content
-	.wp-block-button
-	.wp-block-button__link:focus-visible,
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__slide-content
-	.wp-block-button
-	.wp-element-button:hover,
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__slide-content
-	.wp-block-button
-	.wp-element-button:focus-visible {
-	background: var(--vvm-card-carousel-card-accent) !important;
-	border-color: var(--vvm-card-carousel-card-accent);
-	color: #12231d !important;
-	transform: translateY(-1px);
 }
 
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__empty-state {
