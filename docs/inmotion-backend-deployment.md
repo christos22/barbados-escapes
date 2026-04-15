@@ -33,6 +33,7 @@ Verified on April 12-13, 2026.
   - `wp-content/plugins/gutenberg-lab-blocks`
 - WordPress core, uploads, and third-party plugins remain server-managed.
 - Auto-deploy is triggered by pushes to `main` that touch:
+  - `.github/workflows/deploy-backend.yml`
   - `.cpanel.yml`
   - `wp-content/themes/gutenberg-lab-vvm/**`
   - `wp-content/plugins/gutenberg-lab-blocks/**`
@@ -102,11 +103,6 @@ Required GitHub Actions secrets:
 - `SSH_HOST=ecngx362.inmotionhosting.com`
 - `SSH_USERNAME=grapsa5`
 - `SSH_PRIVATE_KEY=<private key for server login>`
-
-Optional GitHub Actions secrets for REST verification when the live site is protected by Basic Auth:
-
-- `DEPLOY_VERIFY_BASIC_AUTH_USERNAME=<basic auth username>`
-- `DEPLOY_VERIFY_BASIC_AUTH_PASSWORD=<basic auth password>`
 
 For this project, the same private key used by the VVM deployment worked:
 
@@ -233,38 +229,35 @@ Use these checks after setup changes or deployment troubleshooting:
    test -f /home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php && echo "plugin ok"
    ```
 
-3. Confirm WordPress REST is healthy:
+3. Confirm the server repo is at the pushed commit:
+
+   ```bash
+   git -C /home/grapsa5/repositories/barbados-escapes rev-parse HEAD
+   ```
+
+4. Confirm the deployed files match the server repo:
+
+   ```bash
+   cmp -s /home/grapsa5/repositories/barbados-escapes/wp-content/themes/gutenberg-lab-vvm/style.css /home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm/style.css && echo "theme copy ok"
+   cmp -s /home/grapsa5/repositories/barbados-escapes/wp-content/themes/gutenberg-lab-vvm/functions.php /home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm/functions.php && echo "theme bootstrap ok"
+   cmp -s /home/grapsa5/repositories/barbados-escapes/wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php /home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php && echo "plugin copy ok"
+   ```
+
+5. If you need to debug live routing separately from deployment, test REST manually:
 
    ```bash
    curl -I -A "Mozilla/5.0" https://barbadosescapes.verseandvision.ca/wp-json/
-   ```
-
-   Expected result: `HTTP/2 200`
-
-   If the live site is behind Basic Auth, provide credentials:
-
-   ```bash
-   curl -I -A "Mozilla/5.0" -u "<user>:<password>" https://barbadosescapes.verseandvision.ca/wp-json/
-   ```
-
-   On April 15, 2026, the unauthenticated live response returned `401` with:
-
-   - `www-authenticate: Basic realm="Access to A Bun In The Oven"`
-
-4. If `/wp-json/` fails, test the fallback route:
-
-   ```bash
    curl -I -A "Mozilla/5.0" "https://barbadosescapes.verseandvision.ca/?rest_route=/"
    ```
 
-   If this returns `200`, WordPress is likely healthy and the issue is rewrite routing.
+   On April 15, 2026, both routes returned `401` because the live site was behind server-level Basic Auth:
 
-   If this also returns `401`, the server-level auth wall is intercepting the request before WordPress handles it.
+   - `www-authenticate: Basic realm="Access to A Bun In The Oven"`
 
 ## Normal Workflow
 
 1. Commit changes to `main`.
 2. Push to GitHub.
 3. GitHub Actions runs `Deploy Backend to InMotion`.
-4. The workflow SSHes into InMotion, pulls `/home/grapsa5/repositories/barbados-escapes`, copies the custom theme and plugin into the live WordPress install, and verifies `/wp-json/`.
+4. The workflow SSHes into InMotion, pulls `/home/grapsa5/repositories/barbados-escapes`, copies the custom theme and plugin into the live WordPress install, and verifies the deployed files over SSH.
 5. If needed, cPanel `Git Version Control -> Pull or Deploy -> Deploy HEAD Commit` remains available as a manual fallback.

@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - '.github/workflows/deploy-backend.yml'
       - '.cpanel.yml'
       - 'wp-content/themes/gutenberg-lab-vvm/**'
       - 'wp-content/plugins/gutenberg-lab-blocks/**'
@@ -38,61 +39,39 @@ jobs:
 
             echo "Deployment complete."
 
-      - name: Verify Deployment
+      - name: Verify Deployment over SSH
+        uses: appleboy/ssh-action@v1.0.3
         env:
-          DEPLOY_VERIFY_BASIC_AUTH_USERNAME: ${{ secrets.DEPLOY_VERIFY_BASIC_AUTH_USERNAME }}
-          DEPLOY_VERIFY_BASIC_AUTH_PASSWORD: ${{ secrets.DEPLOY_VERIFY_BASIC_AUTH_PASSWORD }}
-        run: |
-          sleep 5
+          GITHUB_SHA: ${{ github.sha }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 2222
+          envs: GITHUB_SHA
+          script: |
+            set -e
 
-          request_status() {
-            local url="$1"
-            local -a curl_args=(
-              -s
-              -o /dev/null
-              -w "%{http_code}"
-              -A "Mozilla/5.0"
-            )
+            export REPOPATH=/home/grapsa5/repositories/barbados-escapes
+            export THEMEPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm
+            export PLUGINPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks
 
-            if [ -n "$DEPLOY_VERIFY_BASIC_AUTH_USERNAME" ] && [ -n "$DEPLOY_VERIFY_BASIC_AUTH_PASSWORD" ]; then
-              curl_args+=( --user "${DEPLOY_VERIFY_BASIC_AUTH_USERNAME}:${DEPLOY_VERIFY_BASIC_AUTH_PASSWORD}" )
+            cd $REPOPATH
+            DEPLOYED_SHA=$(git rev-parse HEAD)
+
+            if [ "$DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
+              echo "Server repo SHA mismatch: expected $GITHUB_SHA, got $DEPLOYED_SHA"
+              exit 1
             fi
 
-            curl "${curl_args[@]}" "$url"
-          }
+            # Check a few sentinel files so we know the copy step reached both targets.
+            test -f "$THEMEPATH/style.css"
+            test -f "$THEMEPATH/functions.php"
+            test -f "$PLUGINPATH/gutenberg-lab-blocks.php"
+            test -d "$PLUGINPATH/build"
 
-          PRIMARY_URL="https://barbadosescapes.verseandvision.ca/wp-json/"
-          FALLBACK_URL="https://barbadosescapes.verseandvision.ca/?rest_route=/"
-          HTTP_STATUS=$(request_status "$PRIMARY_URL")
+            cmp -s "wp-content/themes/gutenberg-lab-vvm/style.css" "$THEMEPATH/style.css"
+            cmp -s "wp-content/themes/gutenberg-lab-vvm/functions.php" "$THEMEPATH/functions.php"
+            cmp -s "wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php" "$PLUGINPATH/gutenberg-lab-blocks.php"
 
-          if [ "$HTTP_STATUS" -eq 200 ]; then
-            echo "WordPress API responding correctly at /wp-json/"
-            exit 0
-          fi
-
-          # A 404 here usually means rewrite routing is broken, so try the
-          # query-string fallback before failing the deployment.
-          if [ "$HTTP_STATUS" -eq 404 ]; then
-            FALLBACK_STATUS=$(request_status "$FALLBACK_URL")
-
-            if [ "$FALLBACK_STATUS" -eq 200 ]; then
-              echo "WordPress API responding correctly via ?rest_route=/"
-              exit 0
-            fi
-
-            echo "WordPress REST routing check failed: /wp-json/ returned 404 and ?rest_route=/ returned $FALLBACK_STATUS"
-            exit 1
-          fi
-
-          if [ "$HTTP_STATUS" -eq 401 ]; then
-            if [ -z "$DEPLOY_VERIFY_BASIC_AUTH_USERNAME" ] || [ -z "$DEPLOY_VERIFY_BASIC_AUTH_PASSWORD" ]; then
-              echo "WordPress API is protected by Basic Auth. Configure DEPLOY_VERIFY_BASIC_AUTH_USERNAME and DEPLOY_VERIFY_BASIC_AUTH_PASSWORD GitHub secrets for the verify step."
-            else
-              echo "WordPress API returned 401 even with the configured Basic Auth secrets."
-            fi
-
-            exit 1
-          fi
-
-          echo "WordPress API returned status: $HTTP_STATUS"
-          exit 1
+            echo "Deployment verified on server."
