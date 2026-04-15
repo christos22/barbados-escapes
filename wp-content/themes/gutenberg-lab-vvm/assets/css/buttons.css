@@ -3,6 +3,7 @@
  *
  * The editor loads this file via `add_editor_style()`, so keep selectors scoped
  * to button block markup rather than editor wrapper classes.
+ * Keep dummy test edits comment-only so deploy checks can be exercised safely.
  */
 
 /* Unstyled core buttons should follow the branded Primary treatment by default. */
