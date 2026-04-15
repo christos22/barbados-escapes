@@ -93,6 +93,7 @@ function gutenberg_lab_vvm_register_block_styles() {
 		return;
 	}
 
+	// Register branded button variants in one place so block markup stays simple.
 	foreach (
 		array(
 			array(
