@@ -1076,7 +1076,7 @@ function gutenberg_lab_vvm_is_hero_block( $block ) {
 	$attrs      = $block['attrs'] ?? array();
 	$class_name = (string) ( $attrs['className'] ?? '' );
 
-	if ( in_array( $block_name, array( 'core/cover', 'gutenberg-lab-blocks/media-panel' ), true ) ) {
+	if ( in_array( $block_name, array( 'core/cover', 'gutenberg-lab-blocks/media-panel', 'gutenberg-lab-blocks/villa-gallery-hero' ), true ) ) {
 		return true;
 	}
 
@@ -1089,6 +1089,12 @@ function gutenberg_lab_vvm_is_hero_block( $block ) {
  * @return bool
  */
 function gutenberg_lab_vvm_current_view_has_hero() {
+	// The single-villa template now starts with the dedicated gallery hero, so
+	// the global header should always switch to overlay mode on that content type.
+	if ( is_singular( 'villa' ) ) {
+		return true;
+	}
+
 	if ( ! is_singular() ) {
 		return false;
 	}

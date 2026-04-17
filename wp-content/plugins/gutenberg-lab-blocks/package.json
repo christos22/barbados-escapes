@@ -12,5 +12,8 @@
   "license": "ISC",
   "devDependencies": {
     "@wordpress/scripts": "^31.6.0"
+  },
+  "dependencies": {
+    "@splidejs/splide": "^4.1.4"
   }
 }

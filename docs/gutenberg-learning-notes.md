@@ -27,6 +27,13 @@
 - Use `theme.json` for reusable font tokens and spacing values, then let a block style variation consume those tokens for a page-specific visual direction.
 - When editors need responsive type choices, define fluid `fontSizes` in `theme.json` and avoid hardcoding heading sizes in block CSS.
 - When a hero needs to affect shared chrome like the header, prefer a body class or first-block detection over hardcoding header markup into the block itself.
+- When a complex hero needs different editor regions but one precise frontend shell, keep the regions as child blocks and let the dynamic parent parse those nested blocks into the final markup.
+- The editor can preview PHP fallbacks, like an inherited post title, without storing extra block content or recreating the exact frontend layering.
+- When hero copy needs to align with shared chrome like the header menu, use the same layout gutter token on both systems instead of centering one and nudging it by eye.
+- Block inspector controls are a good fit for product-specific behavior toggles like optional slider arrows; the saved attribute can stay small while PHP decides whether to emit the interactive markup.
+- If a slider or other library needs structural CSS on the frontend, import it into `style.scss` so Gutenberg emits it in `style-index.css`; importing it in `index.js` only feeds the editor bundle.
+- Shared UI chrome such as slider arrows should live in shared plugin assets and be applied through reusable classes, while each block keeps only its own positioning and state rules.
+- When a hero needs to feel viewport-sized, cap the stage with the visible viewport minus the shared admin-bar offset, then reserve rail space only on viewports tall enough to show the whole hero in one screen.
 
 ## Value Pillars
 

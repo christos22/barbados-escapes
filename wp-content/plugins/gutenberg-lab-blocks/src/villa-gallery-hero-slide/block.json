@@ -1,0 +1,62 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/villa-gallery-hero-slide",
+	"version": "0.1.0",
+	"title": "Villa Gallery Hero Slide",
+	"category": "design",
+	"icon": "format-image",
+	"description": "A single synced media item inside the Villa Gallery Hero rail.",
+	"parent": [ "gutenberg-lab-blocks/villa-gallery-hero-media" ],
+	"attributes": {
+		"mediaType": {
+			"type": "string",
+			"default": "image"
+		},
+		"imageId": {
+			"type": "number"
+		},
+		"imageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"imageAlt": {
+			"type": "string",
+			"default": ""
+		},
+		"videoId": {
+			"type": "number"
+		},
+		"videoUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"posterImageId": {
+			"type": "number"
+		},
+		"posterImageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"posterImageAlt": {
+			"type": "string",
+			"default": ""
+		},
+		"thumbnailLabel": {
+			"type": "string",
+			"default": ""
+		},
+		"thumbnailAction": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"reusable": false
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}

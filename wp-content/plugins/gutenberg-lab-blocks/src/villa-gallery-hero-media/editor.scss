@@ -1,0 +1,29 @@
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero-media {
+	margin: 0;
+
+	.vvm-villa-gallery-hero__region-label {
+		margin: 0 0 0.75rem;
+		color: rgba(245, 236, 215, 0.84);
+		font-size: 0.7rem;
+		font-weight: 600;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+	}
+
+	.block-editor-inner-blocks,
+	.block-editor-inner-blocks > .block-editor-block-list__layout,
+	.vvm-villa-gallery-hero__media-region-shell {
+		display: flex;
+		gap: 0.85rem;
+		align-items: stretch;
+	}
+
+	.block-editor-inner-blocks {
+		overflow-x: auto;
+		padding-bottom: 0.15rem;
+	}
+
+	.block-editor-button-block-appender {
+		align-self: stretch;
+	}
+}

@@ -237,7 +237,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 					<div class="vvm-card-carousel__controls">
 						<button
 							type="button"
-							class="vvm-card-carousel__button vvm-slider-button vvm-slider-button--prev"
+							class="vvm-card-carousel__button vvm-slider-button vvm-slider-button--overlay vvm-slider-button--prev"
 							data-card-carousel-prev
 							aria-label="<?php esc_attr_e( 'Previous slides', 'gutenberg-lab-blocks' ); ?>"
 						>
@@ -245,7 +245,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 						</button>
 						<button
 							type="button"
-							class="vvm-card-carousel__button vvm-slider-button vvm-slider-button--next"
+							class="vvm-card-carousel__button vvm-slider-button vvm-slider-button--overlay vvm-slider-button--next"
 							data-card-carousel-next
 							aria-label="<?php esc_attr_e( 'Next slides', 'gutenberg-lab-blocks' ); ?>"
 						>

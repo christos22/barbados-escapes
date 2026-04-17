@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/villa-gallery-hero-media",
+	"version": "0.1.0",
+	"title": "Villa Gallery Hero Media",
+	"category": "design",
+	"icon": "format-gallery",
+	"description": "Internal media region for the Villa Gallery Hero block.",
+	"parent": [ "gutenberg-lab-blocks/villa-gallery-hero" ],
+	"supports": {
+		"html": false,
+		"inserter": false,
+		"reusable": false
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css"
+}

@@ -172,7 +172,7 @@ if ( '' === trim( $card_markup ) ) {
 			<div class="vvm-card-grid__carousel-controls vvm-slider-controls vvm-slider-controls--media-center">
 				<button
 					type="button"
-					class="vvm-card-grid__carousel-button vvm-slider-button vvm-slider-button--prev"
+					class="vvm-card-grid__carousel-button vvm-slider-button vvm-slider-button--overlay vvm-slider-button--prev"
 					data-card-grid-prev
 					aria-label="<?php esc_attr_e( 'Previous cards', 'gutenberg-lab-blocks' ); ?>"
 				>
@@ -180,7 +180,7 @@ if ( '' === trim( $card_markup ) ) {
 				</button>
 				<button
 					type="button"
-					class="vvm-card-grid__carousel-button vvm-slider-button vvm-slider-button--next"
+					class="vvm-card-grid__carousel-button vvm-slider-button vvm-slider-button--overlay vvm-slider-button--next"
 					data-card-grid-next
 					aria-label="<?php esc_attr_e( 'Next cards', 'gutenberg-lab-blocks' ); ?>"
 				>

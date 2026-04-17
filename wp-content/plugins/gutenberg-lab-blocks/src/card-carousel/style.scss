@@ -87,16 +87,6 @@
 }
 
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__controls .vvm-slider-button {
-	/* Keep the carousel arrows more understated at rest so the cards stay primary. */
-	width: 40px;
-	height: 40px;
-	border-color: rgba(255, 255, 255, 0.22);
-	background: rgba(255, 255, 255, 0.44);
-	color: rgba(1, 50, 35, 0.8);
-	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
-	opacity: 0.48;
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
 	transition:
 		background 0.25s ease,
 		border-color 0.25s ease,
@@ -105,14 +95,6 @@
 		opacity 0.25s ease,
 		transform 0.25s ease;
 	pointer-events: auto;
-}
-
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__controls
-	.vvm-slider-button
-	.vvm-slider-button__icon {
-	width: 18px;
-	height: 18px;
 }
 
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
@@ -147,12 +129,6 @@
 	.vvm-card-carousel__carousel.is-dragging
 	.vvm-slider-button:disabled {
 	opacity: 0.32;
-}
-
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__controls
-	.vvm-slider-button:disabled {
-	opacity: 0.18;
 }
 
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__viewport {
@@ -319,19 +295,6 @@
 @media (max-width: 781px) {
 	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__controls {
 		padding-inline: 0.5rem;
-	}
-
-	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__controls .vvm-slider-button {
-		width: 36px;
-		height: 36px;
-	}
-
-	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-		.vvm-card-carousel__controls
-		.vvm-slider-button
-		.vvm-slider-button__icon {
-		width: 16px;
-		height: 16px;
 	}
 
 	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__slide-content {

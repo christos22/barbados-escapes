@@ -1,0 +1,584 @@
+@import "@splidejs/splide/css/core";
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero,
+.vvm-villa-gallery-hero {
+	--vvm-villa-gallery-hero-accent: var(--wp--custom--hero--accent, #c4922a);
+	--vvm-villa-gallery-hero-stage-bg: #0d2a22;
+	/*
+	 * The stage should never exceed the visible viewport. The admin-bar offset
+	 * comes from the theme so logged-in users do not lose the top edge behind
+	 * WordPress chrome.
+	 */
+	--vvm-villa-gallery-hero-viewport-max-height: max(
+		24rem,
+		calc(100vh - var(--vvm-admin-bar-offset, 0px))
+	);
+	--vvm-villa-gallery-hero-stage-preferred-height: 62rem;
+	--vvm-villa-gallery-hero-stage-min-readable-height: 32rem;
+	--vvm-villa-gallery-hero-thumbs-visible-reserve: 0px;
+	--vvm-villa-gallery-hero-stage-height: min(
+		var(--vvm-villa-gallery-hero-viewport-max-height),
+		var(--vvm-villa-gallery-hero-stage-preferred-height),
+		max(
+			var(--vvm-villa-gallery-hero-stage-min-readable-height),
+			calc(
+				var(--vvm-villa-gallery-hero-viewport-max-height) -
+				var(--vvm-villa-gallery-hero-thumbs-visible-reserve)
+			)
+		)
+	);
+	--vvm-villa-gallery-hero-shell-width: min(
+		100%,
+		var(--wp--style--global--wide-size, 1760px)
+	);
+	--vvm-villa-gallery-hero-content-shell-width: min(
+		100%,
+		var(--wp--style--global--content-size, 1320px)
+	);
+	--vvm-villa-gallery-hero-inline-gutter: var(
+		--wp--custom--layout--gutter-current,
+		clamp(1.25rem, 4vw, 3rem)
+	);
+	--vvm-villa-gallery-hero-overlay-copy-width: 48rem;
+	--vvm-villa-gallery-hero-rail-overlap: clamp(2.5rem, 6vw, 4.5rem);
+	--vvm-villa-gallery-hero-rail-gap: clamp(0.75rem, 1.8vw, 1.15rem);
+	--vvm-villa-gallery-hero-thumb-width: clamp(11rem, 16vw, 15rem);
+	--vvm-villa-gallery-hero-thumb-height: clamp(7rem, 11vw, 9rem);
+
+	position: relative;
+	margin: 0;
+	padding-bottom: clamp(1.5rem, 4vw, 3rem);
+	background: linear-gradient(
+		180deg,
+		var(--vvm-villa-gallery-hero-stage-bg) 0%,
+		var(--vvm-villa-gallery-hero-stage-bg) calc(100% - 7rem),
+		#f7f2e8 calc(100% - 7rem),
+		#f7f2e8 100%
+	);
+	color: #f5ecd7;
+}
+
+@supports (height: 100dvh) {
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero,
+	.vvm-villa-gallery-hero {
+		--vvm-villa-gallery-hero-viewport-max-height: max(
+			24rem,
+			calc(100dvh - var(--vvm-admin-bar-offset, 0px))
+		);
+	}
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero.vvm-villa-gallery-hero--has-navigation,
+.vvm-villa-gallery-hero.vvm-villa-gallery-hero--has-navigation {
+	/*
+	 * On taller and portrait layouts we reserve room for the thumbnail band so
+	 * the whole hero can land inside the first viewport.
+	 */
+	--vvm-villa-gallery-hero-thumbs-visible-reserve: clamp(7.75rem, 11vw, 10rem);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero.vvm-villa-gallery-hero--height-large,
+.vvm-villa-gallery-hero.vvm-villa-gallery-hero--height-large {
+	--vvm-villa-gallery-hero-stage-preferred-height: 54rem;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero.vvm-villa-gallery-hero--height-full,
+.vvm-villa-gallery-hero.vvm-villa-gallery-hero--height-full {
+	--vvm-villa-gallery-hero-stage-preferred-height: 64rem;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell {
+	position: relative;
+	min-height: var(--vvm-villa-gallery-hero-stage-height);
+	height: var(--vvm-villa-gallery-hero-stage-height);
+	max-height: var(--vvm-villa-gallery-hero-viewport-max-height);
+	background: var(--vvm-villa-gallery-hero-stage-bg);
+	overflow: hidden;
+	isolation: isolate;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell::before,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	pointer-events: none;
+	background:
+		linear-gradient(
+			180deg,
+			rgba(30, 61, 47, 0.28) 0%,
+			rgba(30, 61, 47, 0.08) 24%,
+			rgba(30, 61, 47, 0.04) 48%,
+			rgba(30, 61, 47, 0.58) 100%
+		),
+		linear-gradient(
+			180deg,
+			rgba(7, 17, 14, 0.18) 0%,
+			rgba(7, 17, 14, 0) 26%,
+			rgba(7, 17, 14, 0.08) 64%,
+			rgba(7, 17, 14, 0.36) 100%
+		);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero.vvm-villa-gallery-hero--overlay-dark-vignette
+	.vvm-villa-gallery-hero__stage-shell::before,
+.vvm-villa-gallery-hero.vvm-villa-gallery-hero--overlay-dark-vignette
+	.vvm-villa-gallery-hero__stage-shell::before {
+	background: linear-gradient(
+		180deg,
+		rgba(0, 0, 0, 0.38) 0%,
+		rgba(0, 0, 0, 0.16) 22%,
+		rgba(0, 0, 0, 0.06) 44%,
+		rgba(0, 0, 0, 0.5) 100%
+	);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage,
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-static,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-static {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage {
+	height: 100%;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage .splide__track,
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage .splide__list,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage .splide__track,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage .splide__list {
+	height: 100%;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide,
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-static-media,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-static-media {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(135deg, #28463a 0%, #0d2a22 100%);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-media,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-media {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-static-placeholder,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-static-placeholder {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+	background: linear-gradient(135deg, #28463a 0%, #173528 100%);
+	color: rgba(245, 236, 215, 0.8);
+	font-size: 0.95rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content {
+	position: relative;
+	z-index: 3;
+	display: flex;
+	min-height: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	align-items: flex-end;
+	justify-content: center;
+	padding:
+		clamp(6rem, 10vw, 7.5rem)
+		var(--vvm-villa-gallery-hero-inline-gutter)
+		clamp(8rem, 13vw, 10rem);
+	pointer-events: none;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner {
+	display: grid;
+	width: var(--vvm-villa-gallery-hero-content-shell-width);
+	justify-items: start;
+	align-content: end;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+	:is(a, button, input, select, textarea, summary, [role="button"], .wp-element-button, .wp-block-buttons),
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+	:is(a, button, input, select, textarea, summary, [role="button"], .wp-element-button, .wp-block-buttons) {
+	pointer-events: auto;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > *,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > * {
+	margin: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+	> .wp-block-post-title,
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+	> .wp-block-heading,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-post-title,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-heading {
+	width: min(100%, var(--vvm-villa-gallery-hero-overlay-copy-width));
+	color: #f5ecd7;
+	font-family: var(--wp--preset--font-family--display-serif);
+	font-size: clamp(3.5rem, 8vw, 6.75rem);
+	font-weight: 400;
+	line-height: 0.94;
+	text-align: left;
+	text-wrap: balance;
+	text-shadow: 0 10px 35px rgba(0, 0, 0, 0.22);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+	> .wp-block-post-excerpt,
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+	> p,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-post-excerpt,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > p {
+	width: min(100%, 40rem);
+	margin-top: 1.5rem;
+	color: rgba(245, 236, 215, 0.84);
+	font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
+	font-size: clamp(1rem, 1.4vw, 1.125rem);
+	line-height: 1.65;
+	text-align: left;
+	text-shadow: 0 4px 18px rgba(0, 0, 0, 0.16);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+	> .wp-block-buttons,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-buttons {
+	margin-top: 2rem;
+	justify-content: flex-start;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+	> .wp-block-group,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-group {
+	display: grid;
+	width: min(100%, var(--vvm-villa-gallery-hero-overlay-copy-width));
+	justify-items: start;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs-shell,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs-shell {
+	position: relative;
+	z-index: 4;
+	width: 100%;
+	margin: calc(var(--vvm-villa-gallery-hero-rail-overlap) * -1) 0 0;
+	padding:
+		clamp(1rem, 2vw, 1.35rem)
+		var(--vvm-villa-gallery-hero-inline-gutter)
+		clamp(1.25rem, 2.4vw, 1.75rem);
+	box-sizing: border-box;
+	background: linear-gradient(180deg, #12362b 0%, #0d2a22 100%);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs {
+	padding: 0;
+	width: fit-content;
+	max-width: min(100%, var(--vvm-villa-gallery-hero-shell-width));
+	margin-inline: auto;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__track,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__track {
+	padding: 0 !important;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__list,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__list {
+	gap: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide {
+	width: var(--vvm-villa-gallery-hero-thumb-width);
+	cursor: pointer;
+	outline: none;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide:last-child,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide:last-child {
+	margin-right: 0 !important;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-card,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-card {
+	position: relative;
+	overflow: hidden;
+	height: var(--vvm-villa-gallery-hero-thumb-height);
+	border: 1px solid rgba(23, 53, 40, 0.08);
+	background: #173528;
+	box-shadow: 0 18px 50px rgba(18, 40, 33, 0.12);
+	transition:
+		box-shadow 0.28s ease,
+		border-color 0.28s ease;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-card::before,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-card::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	box-sizing: border-box;
+	border: 3px solid transparent;
+	pointer-events: none;
+	transition: border-color 0.28s ease;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-media,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-media {
+	position: absolute;
+	inset: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-media img,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-media-placeholder,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-media img,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-media-placeholder {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-media-placeholder,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-media-placeholder {
+	background: linear-gradient(135deg, #40635b 0%, #173528 100%);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-card::after,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-card::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: linear-gradient(
+		180deg,
+		rgba(8, 20, 18, 0.05) 0%,
+		rgba(8, 20, 18, 0.12) 40%,
+		rgba(8, 20, 18, 0.72) 100%
+	);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-copy,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-copy {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 2;
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 1rem;
+	color: #f5ecd7;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-label,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-label {
+	margin: 0;
+	font-size: 0.68rem;
+	letter-spacing: 0.22em;
+	line-height: 1.45;
+	text-transform: uppercase;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-action,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-action {
+	color: rgba(245, 236, 215, 0.82);
+	font-size: 0.62rem;
+	font-weight: 600;
+	letter-spacing: 0.2em;
+	line-height: 1.4;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-play-badge,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-play-badge {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	z-index: 2;
+	display: inline-flex;
+	width: 3.25rem;
+	height: 3.25rem;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.78);
+	box-shadow: 0 12px 30px rgba(18, 40, 33, 0.18);
+	color: var(--vvm-villa-gallery-hero-accent);
+	font-size: 1.25rem;
+	transform: translate(-50%, -50%);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide.vvm-villa-gallery-hero__thumb-slide--active .vvm-villa-gallery-hero__thumb-card,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide.vvm-villa-gallery-hero__thumb-slide--active .vvm-villa-gallery-hero__thumb-card {
+	border-color: rgba(23, 53, 40, 0.08);
+	box-shadow: 0 24px 60px rgba(18, 40, 33, 0.2);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide.vvm-villa-gallery-hero__thumb-slide--active .vvm-villa-gallery-hero__thumb-card::before,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide.vvm-villa-gallery-hero__thumb-slide--active .vvm-villa-gallery-hero__thumb-card::before {
+	border-color: rgba(196, 146, 42, 0.9);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide:focus-visible .vvm-villa-gallery-hero__thumb-card,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide:focus-visible .vvm-villa-gallery-hero__thumb-card {
+	border-color: rgba(196, 146, 42, 0.78);
+	box-shadow:
+		0 0 0 2px rgba(247, 242, 232, 0.82),
+		0 24px 60px rgba(18, 40, 33, 0.2);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide:focus-visible .vvm-villa-gallery-hero__thumb-card::before,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide:focus-visible .vvm-villa-gallery-hero__thumb-card::before {
+	border-color: rgba(196, 146, 42, 0.85);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__controls,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__controls {
+	position: absolute;
+	inset-block-start: 50%;
+	inset-inline: 0;
+	z-index: 3;
+	display: flex;
+	justify-content: space-between;
+	padding-inline: clamp(0.75rem, 2vw, 1.5rem);
+	pointer-events: none;
+	transform: translateY(-50%);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__controls .vvm-slider-button,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__controls .vvm-slider-button {
+	pointer-events: auto;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell:hover .vvm-slider-button:not(:disabled),
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell:focus-within .vvm-slider-button:not(:disabled),
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell:hover .vvm-slider-button:not(:disabled),
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell:focus-within .vvm-slider-button:not(:disabled) {
+	opacity: 1;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage .splide__pagination,
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__pagination,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage .splide__pagination,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__pagination {
+	display: none;
+}
+
+@media (max-width: 1023px) {
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero,
+	.vvm-villa-gallery-hero {
+		--vvm-villa-gallery-hero-thumb-width: clamp(10rem, 48vw, 12rem);
+	}
+}
+
+@media (max-width: 781px) {
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero,
+	.vvm-villa-gallery-hero {
+		--vvm-villa-gallery-hero-stage-preferred-height: 46rem;
+		--vvm-villa-gallery-hero-stage-min-readable-height: 26rem;
+		--vvm-villa-gallery-hero-rail-overlap: clamp(1.5rem, 6vw, 2.5rem);
+		--vvm-villa-gallery-hero-thumb-width: clamp(9.5rem, 62vw, 11rem);
+		--vvm-villa-gallery-hero-thumb-height: 6.75rem;
+
+		padding-bottom: 1.5rem;
+		background: linear-gradient(
+			180deg,
+			var(--vvm-villa-gallery-hero-stage-bg) 0%,
+			var(--vvm-villa-gallery-hero-stage-bg) calc(100% - 5rem),
+			#f7f2e8 calc(100% - 5rem),
+			#f7f2e8 100%
+		);
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content {
+		padding: 5rem 1rem 8rem;
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+		> .wp-block-post-title,
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+		> .wp-block-heading,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-post-title,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-heading {
+		font-size: clamp(2.9rem, 12vw, 4rem);
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+		> .wp-block-post-excerpt,
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+		> p,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-post-excerpt,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > p {
+		margin-top: 1rem;
+		font-size: 1rem;
+		line-height: 1.55;
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+		> .wp-block-buttons,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-buttons {
+		width: 100%;
+		margin-top: 1.5rem;
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs-shell,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs-shell {
+		padding:
+			0.85rem
+			1rem
+			1.25rem;
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-copy,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-copy {
+		padding: 0.75rem;
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-label,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-label {
+		font-size: 0.62rem;
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-action,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-action {
+		font-size: 0.58rem;
+	}
+}
+
+@media (max-height: 900px) and (orientation: landscape) {
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero.vvm-villa-gallery-hero--has-navigation,
+	.vvm-villa-gallery-hero.vvm-villa-gallery-hero--has-navigation {
+		/*
+		 * Short landscape viewports prioritise the hero image. The thumb band can
+		 * naturally fall below the fold and reveal itself on scroll.
+		 */
+		--vvm-villa-gallery-hero-thumbs-visible-reserve: 0px;
+	}
+}

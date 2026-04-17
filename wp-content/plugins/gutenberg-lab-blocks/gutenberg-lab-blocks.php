@@ -145,5 +145,9 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/stack-tab-item' );
 	register_block_type( __DIR__ . '/build/site-alerts' );
 	register_block_type( __DIR__ . '/build/villa-hero-search' );
+	register_block_type( __DIR__ . '/build/villa-gallery-hero' );
+	register_block_type( __DIR__ . '/build/villa-gallery-hero-media' );
+	register_block_type( __DIR__ . '/build/villa-gallery-hero-content' );
+	register_block_type( __DIR__ . '/build/villa-gallery-hero-slide' );
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_blocks' );
