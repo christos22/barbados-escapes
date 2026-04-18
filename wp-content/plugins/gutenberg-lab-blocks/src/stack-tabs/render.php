@@ -2,14 +2,11 @@
 /**
  * Server rendering for the Stack Tabs parent block.
  *
- * The parent owns the accessible tablist markup and delegates each panel's
- * left/right reveal layout to the child `stack-tab` renderer.
+ * The parent owns the accessible tablist markup and delegates each tab panel's
+ * content to the child `stack-tab` renderer.
  *
  * @package GutenbergLabBlocks
  */
-
-$heading = wp_kses_post( $attributes['heading'] ?? '' );
-$intro   = wp_kses_post( $attributes['intro'] ?? '' );
 
 $parsed_inner_blocks = $block->parsed_block['innerBlocks'] ?? array();
 $parsed_inner_blocks = is_array( $parsed_inner_blocks ) ? $parsed_inner_blocks : array();
@@ -26,11 +23,7 @@ if ( empty( $tab_blocks ) ) {
 	return;
 }
 
-$section_label = wp_strip_all_tags( $heading );
-
-if ( '' === $section_label ) {
-	$section_label = __( 'Stack tabs section', 'gutenberg-lab-blocks' );
-}
+$section_label = __( 'Tab section', 'gutenberg-lab-blocks' );
 
 $section_id_base = ! empty( $attributes['anchor'] )
 	? sanitize_html_class( $attributes['anchor'] )
@@ -47,22 +40,6 @@ $wrapper_attributes = get_block_wrapper_attributes(
 
 <section <?php echo $wrapper_attributes; ?>>
 	<div class="vvm-stack-tabs__shell">
-		<?php if ( '' !== trim( wp_strip_all_tags( $heading ) . wp_strip_all_tags( $intro ) ) ) : ?>
-			<div class="vvm-stack-tabs__header">
-				<?php if ( '' !== trim( wp_strip_all_tags( $heading ) ) ) : ?>
-					<h2 class="vvm-stack-tabs__heading">
-						<?php echo $heading; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</h2>
-				<?php endif; ?>
-
-				<?php if ( '' !== trim( wp_strip_all_tags( $intro ) ) ) : ?>
-					<div class="vvm-stack-tabs__intro">
-						<?php echo wpautop( $intro ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</div>
-				<?php endif; ?>
-			</div>
-		<?php endif; ?>
-
 		<div class="vvm-stack-tabs__nav" role="tablist" aria-label="<?php echo esc_attr( $section_label ); ?>">
 			<?php foreach ( $tab_blocks as $index => $tab_block ) : ?>
 				<?php

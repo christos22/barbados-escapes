@@ -1,19 +1,19 @@
 .wp-block-gutenberg-lab-blocks-stack-tabs.vvm-stack-tabs {
-	--stack-tabs-card-radius: 8px;
-	--stack-tabs-tab-shadow: 0 12px 28px rgb(15 45 35 / 0.08);
-	--stack-tabs-stage-background:
-		radial-gradient(
-			circle at top right,
-			rgb(17 75 77 / 0.18),
-			rgb(17 75 77 / 0) 48%
-		),
-		linear-gradient(135deg, rgb(223 229 225 / 0.82), rgb(255 255 255 / 0.98));
-	--stack-tabs-item-gap: clamp(0.75rem, 1.5vw, 1.25rem);
+	--stack-tabs-green: #173528;
+	--stack-tabs-gold: #c4922a;
+	--stack-tabs-ivory: #fbf8f2;
+	--stack-tabs-muted: #728178;
+	--stack-tabs-divider: rgb(23 53 40 / 0.16);
+	--stack-tabs-panel-border: rgb(23 53 40 / 0.12);
+	--stack-tabs-panel-shadow: 0 20px 48px rgb(23 53 40 / 0.06);
+	--stack-tabs-stage-shadow: 0 18px 36px rgb(23 53 40 / 0.08);
+	--stack-tabs-item-gap: clamp(0.85rem, 1.4vw, 1.2rem);
 
 	position: relative;
-	max-inline-size: min(100%, var(--wp--style--global--wide-size, 1760px));
-	margin-inline: auto;
 	box-sizing: border-box;
+	max-inline-size: min(100%, 1280px);
+	margin-inline: auto;
+	color: var(--stack-tabs-green);
 
 	&.alignfull {
 		padding-inline: var(--wp--custom--layout--gutter-current, 20px);
@@ -23,113 +23,132 @@
 		padding: 0;
 	}
 
-	.vvm-stack-tabs__header {
-		display: grid;
-		gap: clamp(0.75rem, 1.5vw, 1.125rem);
-		max-width: 42rem;
-		margin-inline: auto;
-		text-align: center;
-	}
-
-	.vvm-stack-tabs__heading,
-	.vvm-stack-tabs__intro > * {
-		margin: 0;
-	}
-
-	.vvm-stack-tabs__intro {
-		color: rgb(15 45 35 / 0.82);
-	}
-
+	// Keep the tab rail flat and editorial instead of turning it into pill buttons.
 	.vvm-stack-tabs__nav {
 		display: flex;
-		gap: 0.75rem;
-		margin-top: clamp(1.5rem, 3vw, 2.5rem);
-		padding-bottom: 0.25rem;
+		align-items: flex-end;
+		gap: clamp(1.25rem, 2.4vw, 2.75rem);
+		margin-top: 0;
+		padding: 0 0 0.35rem;
 		overflow-x: auto;
-		scrollbar-width: thin;
+		overflow-y: hidden;
+		border-bottom: 1px solid var(--stack-tabs-divider);
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
 	}
 
 	.vvm-stack-tabs__tab-button {
-		flex: 1 0 14rem;
+		position: relative;
 		display: inline-flex;
+		flex: 0 0 auto;
 		align-items: center;
 		justify-content: center;
-		min-height: 4rem;
-		padding: 1rem 1.25rem;
-		border: 1px solid rgb(17 75 77 / 0.08);
-		border-radius: 8px;
-		background: rgb(255 255 255 / 0.88);
-		color: var(--wp--preset--color--forest, #013223);
-		box-shadow: 0 1px 0 rgb(255 255 255 / 0.55) inset;
-		font-size: clamp(1rem, 1.3vw, 1.25rem);
-		font-weight: 600;
+		min-height: 0;
+		padding: 0 0 0.95rem;
+		border: 0;
+		background: transparent;
+		color: var(--stack-tabs-muted);
+		cursor: pointer;
+		font-size: 0.75rem;
+		font-weight: 500;
+		letter-spacing: 0.3em;
 		line-height: 1.2;
 		text-align: center;
-		transition:
-			transform 180ms ease,
-			box-shadow 180ms ease,
-			background-color 180ms ease,
-			color 180ms ease,
-			border-color 180ms ease;
-		cursor: pointer;
-	}
+		text-transform: uppercase;
+		white-space: nowrap;
+		transition: color 180ms ease;
 
-	.vvm-stack-tabs__tab-button:hover,
-	.vvm-stack-tabs__tab-button:focus-visible {
-		border-color: rgb(17 75 77 / 0.28);
-		box-shadow: var(--stack-tabs-tab-shadow);
-		outline: none;
-		transform: translateY(-1px);
-	}
+		&::after {
+			content: "";
+			position: absolute;
+			inset-inline: 0;
+			bottom: -0.35rem;
+			height: 2px;
+			background: var(--stack-tabs-gold);
+			opacity: 0;
+			transform: scaleX(0.45);
+			transform-origin: left center;
+			transition:
+				opacity 180ms ease,
+				transform 180ms ease;
+		}
 
-	.vvm-stack-tabs__tab-button.is-active {
-		border-color: rgb(17 75 77 / 0.18);
-		background:
-			linear-gradient(
-				180deg,
-				rgb(223 229 225 / 0.96) 0%,
-				rgb(255 255 255 / 0.98) 100%
-			);
-		color: var(--wp--preset--color--teal-800, #114b4d);
-		box-shadow: var(--stack-tabs-tab-shadow);
+		&:hover,
+		&:focus-visible {
+			color: var(--stack-tabs-green);
+			outline: none;
+		}
+
+		&.is-active {
+			color: var(--stack-tabs-green);
+
+			&::after {
+				opacity: 1;
+				transform: scaleX(1);
+			}
+		}
 	}
 
 	.vvm-stack-tabs__panels {
-		margin-top: clamp(1.25rem, 2.5vw, 2rem);
+		margin-top: clamp(1.5rem, 3vw, 2.25rem);
 	}
 
 	.vvm-stack-tabs__panel + .vvm-stack-tabs__panel {
-		margin-top: 1.5rem;
+		margin-top: 0;
 	}
 
 	&.is-enhanced {
 		.vvm-stack-tabs__panel[hidden] {
 			display: none;
 		}
+	}
+}
 
-		.vvm-stack-tabs__panel + .vvm-stack-tabs__panel {
-			margin-top: 0;
-		}
+// The panel shell provides the ivory reading surface beneath the tab rail.
+.vvm-stack-tabs__panel {
+	padding: clamp(1.5rem, 3vw, 2.75rem);
+	border: 1px solid rgb(23 53 40 / 0.12);
+	background:
+		linear-gradient(
+			180deg,
+			rgb(251 248 242 / 1) 0%,
+			rgb(255 255 255 / 1) 100%
+		);
+	box-shadow: 0 20px 48px rgb(23 53 40 / 0.06);
+
+	&:focus {
+		outline: none;
 	}
 }
 
 .vvm-stack-tabs__tab-content {
 	display: grid;
-	gap: clamp(1.5rem, 3vw, 2.5rem);
+	grid-template-columns: minmax(0, 1fr);
+	gap: clamp(1.5rem, 3vw, 3rem);
 	padding: 0;
 	border: 0;
-	border-radius: 0;
 	background: transparent;
 	box-shadow: none;
+
+	> * {
+		margin: 0;
+		min-width: 0;
+		max-width: 100%;
+	}
 }
 
 .vvm-stack-tabs__items {
 	display: grid;
 	gap: 0;
+	align-content: start;
 }
 
 .vvm-stack-tabs__item {
-	border-top: 1px solid rgb(17 75 77 / 0.12);
+	border-top: 1px solid rgb(23 53 40 / 0.12);
 
 	&:first-child {
 		border-top: 0;
@@ -137,49 +156,47 @@
 }
 
 .vvm-stack-tabs__item-button {
-	display: flex;
-	gap: 0.875rem;
-	align-items: center;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 1rem;
+	align-items: start;
 	width: 100%;
 	padding: 1rem 0;
 	border: 0;
 	background: transparent;
-	color: inherit;
+	color: rgb(23 53 40 / 0.9);
 	text-align: left;
 	cursor: pointer;
 	transition: color 180ms ease;
 
 	&:hover,
 	&:focus-visible {
-		color: var(--wp--preset--color--teal-800, #114b4d);
+		color: var(--stack-tabs-green, #173528);
 		outline: none;
 	}
 }
 
 .vvm-stack-tabs__item-index {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 2rem;
-	height: 2rem;
-	border-radius: 8px;
-	background: rgb(17 75 77 / 0.08);
-	color: var(--wp--preset--color--teal-800, #114b4d);
-	font-size: 0.8rem;
-	font-weight: 700;
-	letter-spacing: 0.04em;
+	display: inline-block;
+	min-width: 2.5rem;
+	padding-top: 0.15rem;
+	color: var(--stack-tabs-gold, #c4922a);
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.18em;
+	line-height: 1;
 }
 
 .vvm-stack-tabs__item-label {
-	font-size: clamp(1.05rem, 1.4vw, 1.35rem);
+	color: inherit;
+	font-size: clamp(1rem, 1.25vw, 1.15rem);
 	font-weight: 500;
-	line-height: 1.35;
+	line-height: 1.5;
 }
 
-.vvm-stack-tabs__item.is-active .vvm-stack-tabs__item-index,
-.vvm-stack-tabs__item-button.is-active .vvm-stack-tabs__item-index {
-	background: var(--wp--preset--color--forest, #013223);
-	color: var(--wp--preset--color--white, #fff);
+.vvm-stack-tabs__item.is-active .vvm-stack-tabs__item-button,
+.vvm-stack-tabs__item-button.is-active {
+	color: var(--stack-tabs-green, #173528);
 }
 
 .vvm-stack-tabs__item-body {
@@ -189,7 +206,8 @@
 .vvm-stack-tabs__item-content {
 	display: grid;
 	gap: var(--wp--style--block-gap, var(--stack-tabs-item-gap, 1rem));
-	padding-left: calc(2rem + 0.875rem);
+	padding-inline-start: calc(2.5rem + 1rem);
+	color: rgb(23 53 40 / 0.82);
 
 	> * {
 		margin: 0;
@@ -207,39 +225,42 @@
 .vvm-stack-tabs__media-stage {
 	display: grid;
 	gap: 1rem;
-	align-self: stretch;
+	align-self: start;
 }
 
 .vvm-stack-tabs__media-panel {
 	overflow: hidden;
 	margin: 0;
-	border-radius: var(--stack-tabs-card-radius, 1.5rem);
-	background: var(--stack-tabs-stage-background);
-	box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6);
+	border: 1px solid rgb(23 53 40 / 0.08);
+	background:
+		linear-gradient(
+			180deg,
+			rgb(251 248 242 / 1) 0%,
+			rgb(240 235 226 / 1) 100%
+		);
+	box-shadow: 0 18px 36px rgb(23 53 40 / 0.08);
 }
 
 .vvm-stack-tabs__media-image {
 	display: block;
 	width: 100%;
 	height: 100%;
-	aspect-ratio: 5 / 4;
+	aspect-ratio: 4 / 3;
 	object-fit: cover;
 }
 
 .vvm-stack-tabs__media-placeholder {
 	display: grid;
 	place-items: center;
-	min-height: clamp(18rem, 42vw, 30rem);
+	min-height: clamp(18rem, 42vw, 28rem);
 	padding: 1.5rem;
 	text-align: center;
-	color: rgb(15 45 35 / 0.76);
+	color: rgb(23 53 40 / 0.68);
 	background:
-		repeating-linear-gradient(
-			45deg,
-			rgb(17 75 77 / 0.04),
-			rgb(17 75 77 / 0.04) 10px,
-			rgb(17 75 77 / 0.08) 10px,
-			rgb(17 75 77 / 0.08) 20px
+		linear-gradient(
+			135deg,
+			rgb(251 248 242 / 1) 0%,
+			rgb(240 235 226 / 1) 100%
 		);
 
 	p {
@@ -264,68 +285,51 @@
 	gap: var(--wp--style--block-gap, 1rem);
 }
 
-@media (min-width: 960px) {
-	.wp-block-gutenberg-lab-blocks-stack-tabs.vvm-stack-tabs {
-		.vvm-stack-tabs__nav {
-			display: grid;
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-			overflow: visible;
-		}
-
-		.vvm-stack-tabs__tab-button {
-			flex: unset;
-			min-width: 0;
-		}
-	}
-
-	.vvm-stack-tabs__tab-content {
-		grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-		align-items: start;
-	}
-
-	.vvm-stack-tabs__media-stage {
-		position: sticky;
-		top: clamp(1rem, 3vw, 2rem);
-	}
-}
-
 @media (prefers-reduced-motion: no-preference) {
 	.vvm-stack-tabs__item-button,
+	.vvm-stack-tabs__media-panel,
 	.vvm-stack-tabs__tab-button,
-	.vvm-stack-tabs__media-panel {
+	.vvm-stack-tabs__tab-button::after {
 		transition:
-			transform 180ms ease,
-			box-shadow 180ms ease,
-			border-color 180ms ease,
-			background-color 180ms ease,
 			color 180ms ease,
-			opacity 180ms ease;
+			border-color 180ms ease,
+			box-shadow 180ms ease,
+			opacity 180ms ease,
+			transform 180ms ease;
 	}
 }
 
 @media (max-width: 781px) {
 	.wp-block-gutenberg-lab-blocks-stack-tabs.vvm-stack-tabs {
 		.vvm-stack-tabs__nav {
-			display: grid;
-			grid-template-columns: minmax(0, 1fr);
-			padding-bottom: 0;
-			overflow-x: visible;
+			gap: 1rem;
+			padding-bottom: 0.25rem;
 		}
 
 		.vvm-stack-tabs__tab-button {
-			flex: none;
-			width: 100%;
-			min-height: 3.5rem;
-			padding: 0.85rem 1rem;
+			padding-bottom: 0.8rem;
+			font-size: 0.6875rem;
+			letter-spacing: 0.24em;
+		}
+
+		.vvm-stack-tabs__panels {
+			margin-top: 1.25rem;
 		}
 	}
 
-	.vvm-stack-tabs__item-content {
-		padding-left: 0;
+	.vvm-stack-tabs__panel {
+		padding: 1.25rem;
 	}
 
 	.vvm-stack-tabs__item-button {
-		padding-top: 0.85rem;
-		padding-bottom: 0.85rem;
+		gap: 0.75rem;
+	}
+
+	.vvm-stack-tabs__item-index {
+		min-width: 2.1rem;
+	}
+
+	.vvm-stack-tabs__item-content {
+		padding-inline-start: 0;
 	}
 }

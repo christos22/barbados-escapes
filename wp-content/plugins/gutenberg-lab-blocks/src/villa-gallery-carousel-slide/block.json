@@ -1,0 +1,42 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/villa-gallery-carousel-slide",
+	"version": "0.1.0",
+	"title": "Villa Gallery Slide",
+	"category": "design",
+	"icon": "format-image",
+	"description": "A compact villa gallery card with image and overlay copy.",
+	"parent": [ "gutenberg-lab-blocks/villa-gallery-carousel" ],
+	"attributes": {
+		"imageId": {
+			"type": "number"
+		},
+		"imageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"imageAlt": {
+			"type": "string",
+			"default": ""
+		},
+		"eyebrow": {
+			"type": "string",
+			"default": ""
+		},
+		"title": {
+			"type": "string",
+			"default": ""
+		},
+		"detail": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"reusable": false
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js"
+}

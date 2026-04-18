@@ -1,6 +1,6 @@
 import { __, sprintf } from '@wordpress/i18n';
 import {
-	RichText,
+	InnerBlocks,
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
@@ -11,9 +11,22 @@ import './editor.scss';
 const ALLOWED_BLOCKS = [ 'gutenberg-lab-blocks/stack-tab' ];
 
 const TEMPLATE = [
-	[ 'gutenberg-lab-blocks/stack-tab', { label: __( 'Tab One', 'gutenberg-lab-blocks' ) } ],
-	[ 'gutenberg-lab-blocks/stack-tab', { label: __( 'Tab Two', 'gutenberg-lab-blocks' ) } ],
-	[ 'gutenberg-lab-blocks/stack-tab', { label: __( 'Tab Three', 'gutenberg-lab-blocks' ) } ],
+	[
+		'gutenberg-lab-blocks/stack-tab',
+		{ label: __( 'Bedrooms', 'gutenberg-lab-blocks' ) },
+	],
+	[
+		'gutenberg-lab-blocks/stack-tab',
+		{ label: __( 'Amenities', 'gutenberg-lab-blocks' ) },
+	],
+	[
+		'gutenberg-lab-blocks/stack-tab',
+		{ label: __( 'House Rules', 'gutenberg-lab-blocks' ) },
+	],
+	[
+		'gutenberg-lab-blocks/stack-tab',
+		{ label: __( 'Reviews', 'gutenberg-lab-blocks' ) },
+	],
 ];
 
 function getPreviewLabel( block, index ) {
@@ -26,22 +39,18 @@ function getPreviewLabel( block, index ) {
 	return sprintf( __( 'Tab %d', 'gutenberg-lab-blocks' ), index + 1 );
 }
 
-export default function Edit( { attributes, clientId, setAttributes } ) {
-	const { heading, intro } = attributes;
+export default function Edit( { clientId } ) {
 	const tabBlocks = useSelect(
 		( select ) =>
 			select( 'core/block-editor' ).getBlock( clientId )?.innerBlocks ?? [],
 		[ clientId ]
 	);
-	const previewLabels = TEMPLATE.map( ( templateItem, index ) => {
-		const templateAttributes = templateItem[ 1 ] || {};
-
-		return (
-			tabBlocks[ index ]?.attributes?.label?.trim() ||
-			templateAttributes.label ||
-			getPreviewLabel( null, index )
-		);
-	} );
+	const previewBlocks = tabBlocks.length
+		? tabBlocks
+		: TEMPLATE.map( ( [ , attributes ] ) => ( { attributes } ) );
+	const previewLabels = previewBlocks.map( ( block, index ) =>
+		getPreviewLabel( block, index )
+	);
 
 	const blockProps = useBlockProps( {
 		className: 'vvm-stack-tabs vvm-stack-tabs--editor',
@@ -53,38 +62,14 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 		{
 			allowedBlocks: ALLOWED_BLOCKS,
 			template: TEMPLATE,
-			templateLock: 'all',
-			renderAppender: false,
+			templateLock: false,
+			renderAppender: InnerBlocks.ButtonBlockAppender,
 		}
 	);
 
 	return (
 		<section { ...blockProps }>
 			<div className="vvm-stack-tabs__shell">
-				<div className="vvm-stack-tabs__header vvm-stack-tabs__header--editor">
-					<RichText
-						tagName="h2"
-						className="vvm-stack-tabs__heading"
-						value={ heading }
-						onChange={ ( value ) => setAttributes( { heading: value } ) }
-						placeholder={ __(
-							'Add the section heading…',
-							'gutenberg-lab-blocks'
-						) }
-						allowedFormats={ [] }
-					/>
-					<RichText
-						tagName="p"
-						className="vvm-stack-tabs__intro"
-						value={ intro }
-						onChange={ ( value ) => setAttributes( { intro: value } ) }
-						placeholder={ __(
-							'Add the section introduction…',
-							'gutenberg-lab-blocks'
-						) }
-					/>
-				</div>
-
 				<div className="vvm-stack-tabs__editor-preview" aria-hidden="true">
 					<div className="vvm-stack-tabs__nav">
 						{ previewLabels.map( ( label, index ) => (
@@ -107,7 +92,7 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 					</div>
 					<p className="vvm-stack-tabs__editor-note">
 						{ __(
-							'The front end will turn these three authored panels into interactive tabs. In the editor we keep each tab expanded so editing stays practical.',
+							'Edit each child tab label, then add any blocks inside the tab panel. The front end turns those panels into the interactive tab content.',
 							'gutenberg-lab-blocks'
 						) }
 					</p>

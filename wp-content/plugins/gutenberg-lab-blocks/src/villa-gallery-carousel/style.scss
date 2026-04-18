@@ -1,0 +1,342 @@
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel,
+.vvm-villa-gallery-carousel {
+	--vvm-villa-gallery-carousel-rail-gap: 1px;
+	--vvm-villa-gallery-carousel-thumb-width: clamp(12rem, 30vw, 18rem);
+	--vvm-villa-gallery-carousel-thumb-aspect-ratio: 1.58;
+	--vvm-villa-gallery-carousel-accent: #c4922a;
+	--vvm-villa-gallery-carousel-ink: #173528;
+	--vvm-villa-gallery-carousel-surface: #fbf8f2;
+	--vvm-villa-gallery-carousel-muted: rgba(23, 53, 40, 0.6);
+	width: 100%;
+	margin: 0;
+	color: var(--vvm-villa-gallery-carousel-ink);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__shell,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__shell {
+	position: relative;
+	width: 100%;
+	margin: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__carousel,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__carousel {
+	width: 100%;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__carousel
+	.splide__track,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__carousel .splide__track {
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__carousel
+	.splide__track::-webkit-scrollbar,
+.vvm-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__carousel
+	.splide__track::-webkit-scrollbar {
+	display: none;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__carousel
+	.splide__list,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__carousel .splide__list {
+	display: flex;
+	gap: var(--vvm-villa-gallery-carousel-rail-gap);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__carousel
+	.splide__slide,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__carousel .splide__slide {
+	flex: 0 0 var(--vvm-villa-gallery-carousel-thumb-width);
+	width: var(--vvm-villa-gallery-carousel-thumb-width);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__card,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__card {
+	appearance: none;
+	position: relative;
+	display: block;
+	width: 100%;
+	padding: 0;
+	overflow: hidden;
+	aspect-ratio: var(--vvm-villa-gallery-carousel-thumb-aspect-ratio);
+	border: 0;
+	border-radius: 0;
+	background: #0b1111;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	text-align: left;
+	transition:
+		transform 0.28s ease,
+		opacity 0.28s ease;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__card::before,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__card::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	box-sizing: border-box;
+	border: 2px solid transparent;
+	pointer-events: none;
+	transition:
+		border-color 0.28s ease,
+		opacity 0.28s ease;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__slide,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__slide {
+	opacity: 0.84;
+	transition:
+		opacity 0.28s ease,
+		transform 0.28s ease;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__slide.is-active,
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__slide:hover,
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__slide:focus-within,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__slide.is-active,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__slide:hover,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__slide:focus-within {
+	opacity: 1;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__slide.is-active
+	.vvm-villa-gallery-carousel__card::before,
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__slide:focus-within
+	.vvm-villa-gallery-carousel__card::before,
+.vvm-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__slide.is-active
+	.vvm-villa-gallery-carousel__card::before,
+.vvm-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__slide:focus-within
+	.vvm-villa-gallery-carousel__card::before {
+	border-color: var(--vvm-villa-gallery-carousel-accent);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__card:focus-visible,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__card:focus-visible {
+	outline: none;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__slide-media,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__slide-media {
+	position: absolute;
+	inset: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__slide-image,
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__slide-placeholder,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__slide-image,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__slide-placeholder {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__slide-placeholder,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__slide-placeholder {
+	display: grid;
+	place-items: center;
+	padding: 1rem;
+	background: linear-gradient(135deg, #314645 0%, #121919 100%);
+	color: rgba(251, 248, 242, 0.88);
+	font-size: 0.8rem;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__card::after,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__card::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: linear-gradient(
+		180deg,
+		rgba(7, 12, 12, 0.04) 0%,
+		rgba(7, 12, 12, 0.08) 32%,
+		rgba(7, 12, 12, 0.26) 58%,
+		rgba(7, 12, 12, 0.82) 100%
+	);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__copy,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__copy {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 2;
+	display: grid;
+	gap: 0.28rem;
+	padding: clamp(0.9rem, 1.5vw, 1.25rem);
+	color: #f5ecd7;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button {
+	position: absolute;
+	top: 50%;
+	z-index: 4;
+	display: inline-flex;
+	width: clamp(2.4rem, 3vw, 3rem);
+	height: clamp(2.4rem, 3vw, 3rem);
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.92);
+	cursor: pointer;
+	transform: translateY(-50%);
+	transition:
+		opacity 0.24s ease,
+		transform 0.24s ease;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__rail-button--prev,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button--prev {
+	left: clamp(0.25rem, 0.9vw, 0.8rem);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__rail-button--next,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button--next {
+	right: clamp(0.25rem, 0.9vw, 0.8rem);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:focus-visible,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:focus-visible {
+	outline: none;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:hover:not(:disabled),
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__rail-button:focus-visible:not(:disabled),
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:hover:not(:disabled),
+.vvm-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__rail-button:focus-visible:not(:disabled) {
+	color: #fff;
+	transform: translateY(-50%) scale(1.04);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:disabled,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:disabled {
+	opacity: 0.22;
+	cursor: default;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__rail-button
+	.vvm-slider-button__icon,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button .vvm-slider-button__icon {
+	width: clamp(1.9rem, 2.5vw, 2.35rem);
+	height: clamp(1.9rem, 2.5vw, 2.35rem);
+	stroke-width: 2.8;
+	filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__eyebrow,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__eyebrow {
+	margin: 0;
+	color: var(--vvm-villa-gallery-carousel-accent);
+	font-size: clamp(0.64rem, 0.72vw, 0.8rem);
+	letter-spacing: 0.3em;
+	line-height: 1.35;
+	text-transform: uppercase;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__title,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__title {
+	margin: 0;
+	font-family:
+		var(--wp--preset--font-family--heading, "Cormorant Garamond"),
+		Georgia,
+		serif;
+	font-size: clamp(1.3rem, 2vw, 2rem);
+	font-weight: 400;
+	line-height: 0.98;
+	text-wrap: balance;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__detail,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__detail {
+	margin: 0;
+	color: rgba(245, 236, 215, 0.9);
+	font-size: clamp(0.72rem, 0.9vw, 0.84rem);
+	letter-spacing: 0.2em;
+	line-height: 1.4;
+	text-transform: uppercase;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__caption,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__caption {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 0.25rem;
+	margin: 1.1rem 0 0;
+	color: var(--vvm-villa-gallery-carousel-ink);
+	font-size: clamp(1rem, 1.3vw, 1.32rem);
+	line-height: 1.4;
+	text-align: right;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__caption-title,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__caption-title {
+	font-family:
+		var(--wp--preset--font-family--heading, "Cormorant Garamond"),
+		Georgia,
+		serif;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__caption-detail,
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__caption-empty,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__caption-detail,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__caption-empty {
+	color: var(--vvm-villa-gallery-carousel-muted);
+}
+
+@media (max-width: 781px) {
+	.wp-block-gutenberg-lab-blocks-villa-gallery-carousel,
+	.vvm-villa-gallery-carousel {
+		--vvm-villa-gallery-carousel-thumb-width: clamp(12rem, 56vw, 16rem);
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+		.vvm-villa-gallery-carousel__caption,
+	.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__caption {
+		justify-content: flex-start;
+		text-align: left;
+	}
+}
+
+@media (max-width: 600px) {
+	.wp-block-gutenberg-lab-blocks-villa-gallery-carousel,
+	.vvm-villa-gallery-carousel {
+		--vvm-villa-gallery-carousel-thumb-width: clamp(12rem, 72vw, 16rem);
+	}
+}

@@ -537,16 +537,25 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 		</div>
 	</div>
 
-	<?php if ( $has_thumb_navigation ) : ?>
-		<div class="vvm-villa-gallery-hero__thumbs-shell">
-			<div
-				class="vvm-villa-gallery-hero__thumbs splide"
-				data-villa-gallery-thumbs
-				aria-label="<?php esc_attr_e( 'Villa gallery navigation', 'gutenberg-lab-blocks' ); ?>"
-			>
-				<div class="splide__track">
-					<ul class="splide__list">
-						<?php foreach ( $slides as $slide ) : ?>
+		<?php if ( $has_thumb_navigation ) : ?>
+			<div class="vvm-villa-gallery-hero__thumbs-shell">
+				<button
+					type="button"
+					class="vvm-villa-gallery-hero__thumb-rail-button vvm-villa-gallery-hero__thumb-rail-button--prev vvm-slider-button--prev"
+					data-villa-gallery-thumbs-prev
+					aria-label="<?php esc_attr_e( 'Scroll gallery thumbnails backward', 'gutenberg-lab-blocks' ); ?>"
+					hidden
+				>
+					<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</button>
+				<div
+					class="vvm-villa-gallery-hero__thumbs splide is-rendered"
+					data-villa-gallery-thumbs
+					aria-label="<?php esc_attr_e( 'Villa gallery navigation', 'gutenberg-lab-blocks' ); ?>"
+				>
+					<div class="splide__track">
+						<ul class="splide__list">
+							<?php foreach ( $slides as $slide ) : ?>
 							<li class="splide__slide">
 								<div class="vvm-villa-gallery-hero__thumb-card">
 									<div class="vvm-villa-gallery-hero__thumb-media">
@@ -563,21 +572,26 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 											<span class="vvm-villa-gallery-hero__thumb-play-badge" aria-hidden="true">▶</span>
 										<?php endif; ?>
 									</div>
-
-									<div class="vvm-villa-gallery-hero__thumb-copy">
-										<p class="vvm-villa-gallery-hero__thumb-label">
-											<?php echo esc_html( $slide['thumb_label'] ); ?>
-										</p>
-										<span class="vvm-villa-gallery-hero__thumb-action">
-											<?php echo esc_html( $slide['thumb_action'] ); ?>
-										</span>
+										<div class="vvm-villa-gallery-hero__thumb-copy">
+											<p class="vvm-villa-gallery-hero__thumb-label">
+												<?php echo esc_html( $slide['thumb_label'] ); ?>
+											</p>
+										</div>
 									</div>
-								</div>
-							</li>
-						<?php endforeach; ?>
-					</ul>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
 				</div>
+				<button
+					type="button"
+					class="vvm-villa-gallery-hero__thumb-rail-button vvm-villa-gallery-hero__thumb-rail-button--next vvm-slider-button--next"
+					data-villa-gallery-thumbs-next
+					aria-label="<?php esc_attr_e( 'Scroll gallery thumbnails forward', 'gutenberg-lab-blocks' ); ?>"
+					hidden
+				>
+					<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</button>
 			</div>
-		</div>
-	<?php endif; ?>
-</section>
+		<?php endif; ?>
+	</section>

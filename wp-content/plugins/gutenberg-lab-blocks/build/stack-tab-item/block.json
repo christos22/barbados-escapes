@@ -29,7 +29,8 @@
   },
   "supports": {
     "html": false,
-    "reusable": false
+    "reusable": false,
+    "inserter": false
   },
   "textdomain": "gutenberg-lab-blocks",
   "editorScript": "file:./index.js"

@@ -184,95 +184,120 @@ function setActiveThumbState( thumbsElement, activeIndex ) {
 
 			slide.classList.toggle( THUMB_ACTIVE_CLASS, isActive );
 			slide.setAttribute( 'aria-current', isActive ? 'true' : 'false' );
-		} );
+			} );
 }
 
-function revealActiveThumbIfNeeded( thumbs, activeIndex ) {
-	const move = thumbs?.Components?.Move;
-	const track = thumbs?.root?.querySelector( '.splide__track' );
-	const activeSlide = thumbs?.root?.querySelectorAll( '.splide__slide' )?.[
+function getRailStep( track, slides ) {
+	const firstSlide = slides?.[ 0 ];
+	const listElement = track?.querySelector( '.splide__list' );
+	const listStyles = listElement ? getComputedStyle( listElement ) : null;
+	const gap =
+		parseFloat( listStyles?.columnGap || listStyles?.gap || '0' ) || 0;
+
+	if ( ! firstSlide ) {
+		return track?.clientWidth || 0;
+	}
+
+	return firstSlide.offsetWidth + gap;
+}
+
+function syncRailButtons( track, previousButton, nextButton ) {
+	if ( ! track ) {
+		return;
+	}
+
+	const maxScrollLeft = Math.max( 0, track.scrollWidth - track.clientWidth );
+	const canScroll = maxScrollLeft > 12;
+
+	[ previousButton, nextButton ].forEach( ( button ) => {
+		if ( button ) {
+			button.hidden = ! canScroll;
+		}
+	} );
+
+	if ( previousButton ) {
+		previousButton.disabled = ! canScroll || track.scrollLeft <= 1;
+	}
+
+	if ( nextButton ) {
+		nextButton.disabled = ! canScroll || track.scrollLeft >= maxScrollLeft - 1;
+	}
+}
+
+function scrollRailByStep(
+	track,
+	slides,
+	direction,
+	prefersReducedMotion
+) {
+	if ( ! track ) {
+		return;
+	}
+
+	const maxScrollLeft = Math.max( 0, track.scrollWidth - track.clientWidth );
+	const step = getRailStep( track, slides ) || track.clientWidth;
+	const targetScrollLeft = Math.min(
+		maxScrollLeft,
+		Math.max( 0, track.scrollLeft + step * direction )
+	);
+
+	track.scrollTo( {
+		left: targetScrollLeft,
+		behavior: prefersReducedMotion ? 'auto' : 'smooth',
+	} );
+}
+
+function revealActiveThumbIfNeeded( thumbsElement, activeIndex, prefersReducedMotion ) {
+	const track = thumbsElement?.querySelector( '.splide__track' );
+	const activeSlide = thumbsElement?.querySelectorAll( '.splide__slide' )?.[
 		activeIndex
 	];
 
-	if ( ! move || ! track || ! activeSlide ) {
+	if ( ! track || ! activeSlide ) {
 		return;
 	}
 
-	const trackRect = track.getBoundingClientRect();
-	const slideRect = activeSlide.getBoundingClientRect();
-	const currentPosition = move.getPosition();
-	let nextPosition = currentPosition;
-
-	if ( slideRect.left < trackRect.left ) {
-		nextPosition += trackRect.left - slideRect.left;
-	} else if ( slideRect.right > trackRect.right ) {
-		nextPosition -= slideRect.right - trackRect.right;
-	}
-
-	const minPosition = move.getLimit( true );
-	const maxPosition = move.getLimit( false );
-
-	nextPosition = Math.min(
-		maxPosition,
-		Math.max( minPosition, nextPosition )
+	const maxScrollLeft = Math.max( 0, track.scrollWidth - track.clientWidth );
+	const targetScrollLeft = Math.min(
+		maxScrollLeft,
+		Math.max(
+			0,
+			activeSlide.offsetLeft + activeSlide.offsetWidth - track.clientWidth
+		)
 	);
 
-	if ( nextPosition === currentPosition ) {
+	if ( Math.abs( track.scrollLeft - targetScrollLeft ) < 1 ) {
 		return;
 	}
 
-	move.translate( nextPosition, true );
+	track.scrollTo( {
+		left: targetScrollLeft,
+		behavior: prefersReducedMotion ? 'auto' : 'smooth',
+	} );
 }
 
-function syncThumbRail( thumbs, activeIndex ) {
-	if ( ! thumbs ) {
+function syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion ) {
+	if ( ! thumbsElement ) {
 		return;
 	}
 
-	setActiveThumbState( thumbs.root, activeIndex );
-	revealActiveThumbIfNeeded( thumbs, activeIndex );
+	setActiveThumbState( thumbsElement, activeIndex );
+	revealActiveThumbIfNeeded( thumbsElement, activeIndex, prefersReducedMotion );
 }
 
 function syncActiveGalleryState(
 	stageElement,
-	thumbs,
+	thumbsElement,
 	activeIndex,
-	shouldAutoplay
+	shouldAutoplay,
+	prefersReducedMotion
 ) {
 	syncStageVideos( stageElement, shouldAutoplay );
-	syncThumbRail( thumbs, activeIndex );
+	syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion );
 }
 
-function getThumbOptions( thumbCount, prefersReducedMotion ) {
-	const useFullWidthRail = thumbCount <= FULL_WIDTH_THUMB_MAX;
-
-	return {
-		arrows: false,
-		autoWidth: ! useFullWidthRail,
-		drag: ! useFullWidthRail,
-		gap: '1px',
-		keyboard: false,
-		pagination: false,
-		perPage: useFullWidthRail ? thumbCount : undefined,
-		rewind: false,
-		speed: prefersReducedMotion ? 0 : 600,
-		trimSpace: ! useFullWidthRail,
-		updateOnMove: false,
-		breakpoints: useFullWidthRail
-			? {
-					1023: {
-						autoWidth: true,
-						drag: true,
-						perPage: 1,
-						trimSpace: true,
-					},
-				}
-			: undefined,
-	};
-}
-
-function bindThumbInteractions( thumbs, stage ) {
-	const thumbSlides = thumbs?.root?.querySelectorAll( '.splide__slide' ) ?? [];
+function bindThumbInteractions( thumbsElement, stage, prefersReducedMotion ) {
+	const thumbSlides = thumbsElement?.querySelectorAll( '.splide__slide' ) ?? [];
 
 	thumbSlides.forEach( ( slide, slideIndex ) => {
 		slide.setAttribute( 'role', 'button' );
@@ -289,6 +314,17 @@ function bindThumbInteractions( thumbs, stage ) {
 
 			event.preventDefault();
 			stage.go( slideIndex );
+		} );
+
+		slide.addEventListener( 'focus', () => {
+			window.requestAnimationFrame( () => {
+				slide.focus?.( { preventScroll: true } );
+				revealActiveThumbIfNeeded(
+					thumbsElement,
+					slideIndex,
+					prefersReducedMotion
+				);
+			} );
 		} );
 	} );
 }
@@ -316,6 +352,22 @@ function initializeVillaGalleryHero( rootElement ) {
 
 	const thumbCount = thumbsElement.querySelectorAll( '.splide__slide' ).length;
 	const prefersReducedMotion = reducedMotionMediaQuery.matches;
+	const thumbSlides = Array.from(
+		thumbsElement.querySelectorAll( '.splide__slide' )
+	);
+	const thumbTrack = thumbsElement.querySelector( '.splide__track' );
+	const previousThumbRailButton = rootElement.querySelector(
+		'[data-villa-gallery-thumbs-prev]'
+	);
+	const nextThumbRailButton = rootElement.querySelector(
+		'[data-villa-gallery-thumbs-next]'
+	);
+	const syncThumbRailButtons = () =>
+		syncRailButtons(
+			thumbTrack,
+			previousThumbRailButton,
+			nextThumbRailButton
+		);
 
 	if ( thumbCount <= 1 ) {
 		const syncStaticState = () =>
@@ -329,11 +381,6 @@ function initializeVillaGalleryHero( rootElement ) {
 	thumbsElement.classList.toggle(
 		'vvm-villa-gallery-hero__thumbs--full-width',
 		thumbCount <= FULL_WIDTH_THUMB_MAX
-	);
-
-	const thumbs = new Splide(
-		thumbsElement,
-		getThumbOptions( thumbCount, prefersReducedMotion )
 	);
 
 	const stage = new Splide( stageElement, {
@@ -351,17 +398,38 @@ function initializeVillaGalleryHero( rootElement ) {
 	const syncActiveState = () =>
 		syncActiveGalleryState(
 			stageElement,
-			thumbs,
+			thumbsElement,
 			stage.index,
-			shouldAutoplayVideos()
+			shouldAutoplayVideos(),
+			prefersReducedMotion
 		);
+
+	previousThumbRailButton?.addEventListener( 'click', () => {
+		scrollRailByStep( thumbTrack, thumbSlides, -1, prefersReducedMotion );
+	} );
+
+	nextThumbRailButton?.addEventListener( 'click', () => {
+		scrollRailByStep( thumbTrack, thumbSlides, 1, prefersReducedMotion );
+	} );
+
+	thumbTrack?.addEventListener(
+		'scroll',
+		() => {
+			window.requestAnimationFrame( syncThumbRailButtons );
+		},
+		{ passive: true }
+	);
+
+	window.addEventListener( 'resize', syncThumbRailButtons );
 
 	// `ready` fires after Splide finishes its initial setup, which means the
 	// first active slide is in place before we try to autoplay its inline video.
-	stage.on( 'ready moved', syncActiveState );
+	stage.on( 'ready moved', () => {
+		syncActiveState();
+		window.requestAnimationFrame( syncThumbRailButtons );
+	} );
 
 	stage.mount();
-	thumbs.mount();
 
 	previousButton?.addEventListener( 'click', () => {
 		stage.go( '<' );
@@ -371,8 +439,9 @@ function initializeVillaGalleryHero( rootElement ) {
 		stage.go( '>' );
 	} );
 
-	bindThumbInteractions( thumbs, stage );
+	bindThumbInteractions( thumbsElement, stage, prefersReducedMotion );
 	syncActiveState();
+	syncThumbRailButtons();
 	bindReducedMotionPreference( reducedMotionMediaQuery, syncActiveState );
 }
 

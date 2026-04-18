@@ -1,17 +1,17 @@
 {
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
-  "name": "gutenberg-lab-blocks/stack-tabs",
+  "name": "gutenberg-lab-blocks/villa-gallery-carousel",
   "version": "0.1.0",
-  "title": "Stack Tabs",
+  "title": "Villa Gallery Carousel",
   "category": "design",
-  "icon": "screenoptions",
-  "description": "An authored tab section with editable tab panels.",
+  "icon": "images-alt2",
+  "description": "A compact villa gallery rail styled like the hero thumbnails.",
   "keywords": [
-    "tabs",
-    "stack",
-    "section",
-    "layout"
+    "villa",
+    "gallery",
+    "carousel",
+    "slider"
   ],
   "supports": {
     "html": false,
@@ -25,11 +25,7 @@
         "top",
         "bottom"
       ],
-      "padding": true,
-      "blockGap": true
-    },
-    "color": {
-      "background": true
+      "padding": true
     }
   },
   "textdomain": "gutenberg-lab-blocks",
