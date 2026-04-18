@@ -433,6 +433,21 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 											preload="metadata"
 											data-villa-gallery-video
 										></video>
+										<button
+											type="button"
+											class="vvm-villa-gallery-hero__video-toggle"
+											data-villa-gallery-video-toggle
+											hidden
+											aria-label="<?php esc_attr_e( 'Play video', 'gutenberg-lab-blocks' ); ?>"
+										>
+											<span
+												class="vvm-villa-gallery-hero__video-toggle-icon"
+												aria-hidden="true"
+											>▶</span>
+											<span class="screen-reader-text">
+												<?php esc_html_e( 'Play video', 'gutenberg-lab-blocks' ); ?>
+											</span>
+										</button>
 									<?php else : ?>
 										<img
 											class="vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image"
@@ -484,6 +499,21 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 								preload="metadata"
 								data-villa-gallery-static-video
 							></video>
+							<button
+								type="button"
+								class="vvm-villa-gallery-hero__video-toggle"
+								data-villa-gallery-video-toggle
+								hidden
+								aria-label="<?php esc_attr_e( 'Play video', 'gutenberg-lab-blocks' ); ?>"
+							>
+								<span
+									class="vvm-villa-gallery-hero__video-toggle-icon"
+									aria-hidden="true"
+								>▶</span>
+								<span class="screen-reader-text">
+									<?php esc_html_e( 'Play video', 'gutenberg-lab-blocks' ); ?>
+								</span>
+							</button>
 						<?php else : ?>
 							<img
 								class="vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image"

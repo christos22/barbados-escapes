@@ -1,8 +1,138 @@
 import Splide from '@splidejs/splide';
 
+const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 const THUMB_ACTIVE_CLASS = 'vvm-villa-gallery-hero__thumb-slide--active';
+const FULL_WIDTH_THUMB_MAX = 5;
 
-function syncStageVideos( stageElement ) {
+function getManagedVideoToggle( video ) {
+	return (
+		video?.parentElement?.querySelector( '[data-villa-gallery-video-toggle]' ) ??
+		null
+	);
+}
+
+function setManagedVideoToggleVisibility( video, isVisible ) {
+	const toggle = getManagedVideoToggle( video );
+
+	if ( ! toggle ) {
+		return;
+	}
+
+	toggle.hidden = ! isVisible;
+	toggle.setAttribute( 'aria-hidden', isVisible ? 'false' : 'true' );
+}
+
+function showManagedVideoFallback( video ) {
+	if ( ! video ) {
+		return;
+	}
+
+	video.controls = false;
+	setManagedVideoToggleVisibility( video, true );
+}
+
+function hideManagedVideoFallback( video ) {
+	if ( ! video ) {
+		return;
+	}
+
+	setManagedVideoToggleVisibility( video, false );
+}
+
+function resetManagedVideo( video, { showFallback = false } = {} ) {
+	if ( ! video ) {
+		return;
+	}
+
+	video.pause?.();
+
+	try {
+		video.currentTime = 0;
+	} catch ( error ) {
+		// Some browsers guard the currentTime setter while metadata loads.
+	}
+
+	video.controls = false;
+
+	if ( showFallback ) {
+		showManagedVideoFallback( video );
+		return;
+	}
+
+	hideManagedVideoFallback( video );
+}
+
+function attemptManagedVideoAutoplay( video ) {
+	if ( ! video ) {
+		return;
+	}
+
+	video.controls = false;
+	hideManagedVideoFallback( video );
+
+	const playPromise = video.play?.();
+
+	if ( playPromise && 'function' === typeof playPromise.catch ) {
+		playPromise.catch( () => {
+			showManagedVideoFallback( video );
+		} );
+	}
+}
+
+function playManagedVideoFromUserAction( video ) {
+	if ( ! video ) {
+		return;
+	}
+
+	hideManagedVideoFallback( video );
+	video.controls = true;
+
+	const playPromise = video.play?.();
+
+	if ( playPromise && 'function' === typeof playPromise.catch ) {
+		playPromise.catch( () => {
+			showManagedVideoFallback( video );
+		} );
+	}
+
+	window.requestAnimationFrame( () => {
+		video.focus?.();
+	} );
+}
+
+function bindManagedVideoControls( rootElement ) {
+	rootElement
+		.querySelectorAll( '[data-villa-gallery-video-toggle]' )
+		.forEach( ( button ) => {
+			if ( 'true' === button.dataset.villaGalleryVideoBound ) {
+				return;
+			}
+
+			button.dataset.villaGalleryVideoBound = 'true';
+
+			button.addEventListener( 'click', () => {
+				const video =
+					button.parentElement?.querySelector(
+						'[data-villa-gallery-video], [data-villa-gallery-static-video]'
+					) ?? null;
+
+				playManagedVideoFromUserAction( video );
+			} );
+		} );
+}
+
+function bindReducedMotionPreference( mediaQuery, syncCallback ) {
+	if ( 'function' === typeof mediaQuery.addEventListener ) {
+		mediaQuery.addEventListener( 'change', syncCallback );
+		return;
+	}
+
+	if ( 'function' === typeof mediaQuery.addListener ) {
+		mediaQuery.addListener( syncCallback );
+	}
+}
+
+function syncStageVideos( stageElement, shouldAutoplay ) {
 	if ( ! stageElement ) {
 		return;
 	}
@@ -13,38 +143,33 @@ function syncStageVideos( stageElement ) {
 	videos.forEach( ( video ) => {
 		const isActive = activeSlide?.contains( video );
 
-		if ( isActive ) {
-			const playPromise = video.play?.();
-
-			if ( playPromise && 'function' === typeof playPromise.catch ) {
-				playPromise.catch( () => {} );
-			}
-
+		if ( ! isActive ) {
+			resetManagedVideo( video );
 			return;
 		}
 
-		video.pause?.();
-
-		try {
-			video.currentTime = 0;
-		} catch ( error ) {
-			// Some browsers guard the currentTime setter while metadata loads.
+		if ( shouldAutoplay ) {
+			attemptManagedVideoAutoplay( video );
+			return;
 		}
+
+		resetManagedVideo( video, { showFallback: true } );
 	} );
 }
 
-function playStaticVideo( rootElement ) {
+function syncStaticVideo( rootElement, shouldAutoplay ) {
 	const video = rootElement.querySelector( '[data-villa-gallery-static-video]' );
 
 	if ( ! video ) {
 		return;
 	}
 
-	const playPromise = video.play?.();
-
-	if ( playPromise && 'function' === typeof playPromise.catch ) {
-		playPromise.catch( () => {} );
+	if ( shouldAutoplay ) {
+		attemptManagedVideoAutoplay( video );
+		return;
 	}
+
+	resetManagedVideo( video, { showFallback: true } );
 }
 
 function setActiveThumbState( thumbsElement, activeIndex ) {
@@ -108,6 +233,44 @@ function syncThumbRail( thumbs, activeIndex ) {
 	revealActiveThumbIfNeeded( thumbs, activeIndex );
 }
 
+function syncActiveGalleryState(
+	stageElement,
+	thumbs,
+	activeIndex,
+	shouldAutoplay
+) {
+	syncStageVideos( stageElement, shouldAutoplay );
+	syncThumbRail( thumbs, activeIndex );
+}
+
+function getThumbOptions( thumbCount, prefersReducedMotion ) {
+	const useFullWidthRail = thumbCount <= FULL_WIDTH_THUMB_MAX;
+
+	return {
+		arrows: false,
+		autoWidth: ! useFullWidthRail,
+		drag: ! useFullWidthRail,
+		gap: '1px',
+		keyboard: false,
+		pagination: false,
+		perPage: useFullWidthRail ? thumbCount : undefined,
+		rewind: false,
+		speed: prefersReducedMotion ? 0 : 600,
+		trimSpace: ! useFullWidthRail,
+		updateOnMove: false,
+		breakpoints: useFullWidthRail
+			? {
+					1023: {
+						autoWidth: true,
+						drag: true,
+						perPage: 1,
+						trimSpace: true,
+					},
+				}
+			: undefined,
+	};
+}
+
 function bindThumbInteractions( thumbs, stage ) {
 	const thumbSlides = thumbs?.root?.querySelectorAll( '.splide__slide' ) ?? [];
 
@@ -135,39 +298,43 @@ function initializeVillaGalleryHero( rootElement ) {
 	const thumbsElement = rootElement.querySelector( '[data-villa-gallery-thumbs]' );
 	const previousButton = rootElement.querySelector( '[data-villa-gallery-prev]' );
 	const nextButton = rootElement.querySelector( '[data-villa-gallery-next]' );
+	const reducedMotionMediaQuery = window.matchMedia(
+		REDUCED_MOTION_MEDIA_QUERY
+	);
+	const shouldAutoplayVideos = () => ! reducedMotionMediaQuery.matches;
+
+	bindManagedVideoControls( rootElement );
 
 	if ( ! stageElement || ! thumbsElement ) {
-		playStaticVideo( rootElement );
+		const syncStaticState = () =>
+			syncStaticVideo( rootElement, shouldAutoplayVideos() );
+
+		syncStaticState();
+		bindReducedMotionPreference( reducedMotionMediaQuery, syncStaticState );
 		return;
 	}
 
 	const thumbCount = thumbsElement.querySelectorAll( '.splide__slide' ).length;
-	const prefersReducedMotion = window.matchMedia(
-		'(prefers-reduced-motion: reduce)'
-	).matches;
+	const prefersReducedMotion = reducedMotionMediaQuery.matches;
 
 	if ( thumbCount <= 1 ) {
-		playStaticVideo( rootElement );
+		const syncStaticState = () =>
+			syncStaticVideo( rootElement, shouldAutoplayVideos() );
+
+		syncStaticState();
+		bindReducedMotionPreference( reducedMotionMediaQuery, syncStaticState );
 		return;
 	}
 
-	const thumbs = new Splide( thumbsElement, {
-		arrows: false,
-		autoWidth: true,
-		drag: true,
-		gap: '1rem',
-		keyboard: false,
-		pagination: false,
-		rewind: false,
-		speed: prefersReducedMotion ? 0 : 600,
-		trimSpace: true,
-		updateOnMove: false,
-		breakpoints: {
-			781: {
-				gap: '0.75rem',
-			},
-		},
-	} );
+	thumbsElement.classList.toggle(
+		'vvm-villa-gallery-hero__thumbs--full-width',
+		thumbCount <= FULL_WIDTH_THUMB_MAX
+	);
+
+	const thumbs = new Splide(
+		thumbsElement,
+		getThumbOptions( thumbCount, prefersReducedMotion )
+	);
 
 	const stage = new Splide( stageElement, {
 		arrows: false,
@@ -181,10 +348,17 @@ function initializeVillaGalleryHero( rootElement ) {
 		waitForTransition: true,
 	} );
 
-	stage.on( 'mounted moved', () => {
-		syncStageVideos( stageElement );
-		syncThumbRail( thumbs, stage.index );
-	} );
+	const syncActiveState = () =>
+		syncActiveGalleryState(
+			stageElement,
+			thumbs,
+			stage.index,
+			shouldAutoplayVideos()
+		);
+
+	// `ready` fires after Splide finishes its initial setup, which means the
+	// first active slide is in place before we try to autoplay its inline video.
+	stage.on( 'ready moved', syncActiveState );
 
 	stage.mount();
 	thumbs.mount();
@@ -198,7 +372,8 @@ function initializeVillaGalleryHero( rootElement ) {
 	} );
 
 	bindThumbInteractions( thumbs, stage );
-	syncThumbRail( thumbs, stage.index );
+	syncActiveState();
+	bindReducedMotionPreference( reducedMotionMediaQuery, syncActiveState );
 }
 
 window.addEventListener( 'DOMContentLoaded', () => {

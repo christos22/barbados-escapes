@@ -6,27 +6,61 @@
  * Keep dummy test edits comment-only so deploy checks can be exercised safely.
  */
 
-/* Unstyled core buttons should follow the branded Primary treatment by default. */
+/*
+ * Primary, Secondary, and Ghost should share the same footprint.
+ * Only the palette and hover treatment should vary between the variants.
+ */
 :where(
 	.wp-block-button:not([class*="is-style-"]),
 	.wp-block-button.is-style-fill,
-	.wp-block-button.is-style-vvm-primary
+	.wp-block-button.is-style-vvm-primary,
+	.wp-block-button.is-style-vvm-secondary,
+	.wp-block-button.is-style-vvm-ghost
 ) :is(.wp-block-button__link, .wp-element-button) {
+	/*
+	 * Romely's uppercase caps render optically high even when the button box
+	 * math is symmetrical. Keep one shared shell spec, then apply a single
+	 * font compensation token so every filled/outlined button variant inherits
+	 * the same visual centering.
+	 */
+	--vvm-button-height: 44px;
+	--vvm-button-font-size: 18px;
+	--vvm-button-line-height: 1;
+	--vvm-button-border-width: 1px;
+	--vvm-button-padding-inline: 32px;
+	--vvm-button-optical-offset-block: 1px;
+	--vvm-button-padding-block-base: calc(
+		(
+			var(--vvm-button-height) -
+			(var(--vvm-button-font-size) * var(--vvm-button-line-height)) -
+			(var(--vvm-button-border-width) * 2)
+		) / 2
+	);
+
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 0.35rem;
 	position: relative;
 	z-index: 0;
-	padding: 12px 32px;
-	border: 0;
+	box-sizing: border-box;
+	min-block-size: var(--vvm-button-height);
+	padding-block-start: calc(
+		var(--vvm-button-padding-block-base) +
+		var(--vvm-button-optical-offset-block)
+	);
+	padding-block-end: calc(
+		var(--vvm-button-padding-block-base) -
+		var(--vvm-button-optical-offset-block)
+	);
+	padding-inline: var(--vvm-button-padding-inline);
+	border: var(--vvm-button-border-width) solid transparent;
 	border-radius: 0;
-	overflow: visible;
 	background: transparent !important;
-	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
 	font-family: "Romely", sans-serif;
-	font-size: 18px;
+	font-size: var(--vvm-button-font-size);
 	font-weight: 600;
+	line-height: var(--vvm-button-line-height);
 	letter-spacing: 0.15em;
 	text-decoration: none !important;
 	text-transform: uppercase;
@@ -35,6 +69,16 @@
 	transform: translateZ(0) scale(1);
 	transform-origin: center;
 	backface-visibility: hidden;
+}
+
+/* Unstyled core buttons should follow the branded Primary treatment by default. */
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button) {
+	overflow: visible;
+	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
 	will-change: transform, box-shadow;
 	transition:
 		box-shadow 320ms ease,
@@ -142,21 +186,8 @@
 }
 
 .wp-block-button.is-style-vvm-secondary :is(.wp-block-button__link, .wp-element-button) {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.35rem;
-	padding: 12px 32px;
-	border: 1px solid var(--wp--preset--color--gold, #c4922a);
-	border-radius: 0;
-	background: transparent !important;
+	border-color: var(--wp--preset--color--gold, #c4922a);
 	color: var(--wp--preset--color--light-gold, #f5ecd7) !important;
-	font-family: "Romely", sans-serif;
-	font-size: 14px;
-	font-weight: 600;
-	letter-spacing: 0.15em;
-	text-decoration: none !important;
-	text-transform: uppercase;
 	transition:
 		background-color 300ms ease,
 		border-color 300ms ease,
@@ -176,29 +207,9 @@
 }
 
 .wp-block-button.is-style-vvm-ghost :is(.wp-block-button__link, .wp-element-button) {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.35rem;
-	position: relative;
-	z-index: 0;
-	padding: 12px 32px;
-	border: 1px solid var(--wp--preset--color--gold, #c4922a);
-	border-radius: 0;
 	overflow: hidden;
-	background: transparent !important;
+	border-color: var(--wp--preset--color--gold, #c4922a);
 	color: var(--wp--preset--color--gold, #c4922a) !important;
-	font-family: "Romely", sans-serif;
-	font-size: 14px;
-	font-weight: 600;
-	letter-spacing: 0.15em;
-	text-decoration: none !important;
-	text-transform: uppercase;
-	text-shadow:
-		0 2px 8px rgb(0 0 0 / 0.6),
-		0 1px 4px rgb(0 0 0 / 0.4);
-	backdrop-filter: blur(4px);
-	-webkit-backdrop-filter: blur(4px);
 	transition:
 		border-color 300ms ease,
 		color 300ms ease,
@@ -282,7 +293,7 @@
 	border-radius: 0;
 	background: transparent !important;
 	box-shadow: none;
-	font-size: 1.25rem;
+	font-size: 18px;
 	font-weight: 400;
 	letter-spacing: 0.0625rem;
 	text-decoration: underline !important;
@@ -297,7 +308,6 @@
 	gap: 0.5rem;
 	color: var(--wp--preset--color--gold, #c4922a) !important;
 	font-family: "Romely", sans-serif;
-	font-size: 18px;
 	font-weight: 600;
 	letter-spacing: 0.025em;
 	text-decoration: none !important;
