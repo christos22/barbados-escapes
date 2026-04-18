@@ -5,6 +5,7 @@
 	--vvm-villa-gallery-carousel-thumb-aspect-ratio: 1.58;
 	--vvm-villa-gallery-carousel-accent: #c4922a;
 	--vvm-villa-gallery-carousel-ink: #173528;
+	--vvm-villa-gallery-carousel-overlay-ink: #ffffff;
 	--vvm-villa-gallery-carousel-surface: #fbf8f2;
 	--vvm-villa-gallery-carousel-muted: rgba(23, 53, 40, 0.6);
 	width: 100%;
@@ -189,7 +190,7 @@
 	display: grid;
 	gap: 0.28rem;
 	padding: clamp(0.9rem, 1.5vw, 1.25rem);
-	color: #f5ecd7;
+	color: var(--vvm-villa-gallery-carousel-overlay-ink);
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button,
@@ -259,32 +260,35 @@
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__eyebrow,
 .vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__eyebrow {
 	margin: 0;
-	color: var(--vvm-villa-gallery-carousel-accent);
-	font-size: clamp(0.64rem, 0.72vw, 0.8rem);
-	letter-spacing: 0.3em;
-	line-height: 1.35;
+	color: var(--vvm-villa-gallery-carousel-overlay-ink);
+	font-size: 10px;
+	font-weight: 400;
+	letter-spacing: 0.18em;
+	line-height: 1;
 	text-transform: uppercase;
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__title,
 .vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__title {
-	margin: 0;
+	margin: 8px 0 0;
+	color: var(--vvm-villa-gallery-carousel-overlay-ink);
 	font-family:
 		var(--wp--preset--font-family--heading, "Cormorant Garamond"),
 		Georgia,
 		serif;
-	font-size: clamp(1.3rem, 2vw, 2rem);
+	font-size: 24px;
 	font-weight: 400;
-	line-height: 0.98;
+	line-height: 1;
 	text-wrap: balance;
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__detail,
 .vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__detail {
-	margin: 0;
-	color: rgba(245, 236, 215, 0.9);
-	font-size: clamp(0.72rem, 0.9vw, 0.84rem);
-	letter-spacing: 0.2em;
+	margin: 8px 0 0;
+	color: rgba(245, 236, 215, 0.76);
+	font-size: 10px;
+	font-weight: 400;
+	letter-spacing: 0.18em;
 	line-height: 1.4;
 	text-transform: uppercase;
 }
