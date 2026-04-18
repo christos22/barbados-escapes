@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/villa-specs",
+	"version": "0.1.0",
+	"title": "Villa Specs",
+	"category": "design",
+	"icon": "list-view",
+	"description": "A villa-only strip of editable value and label pairs for key property specs.",
+	"keywords": [ "villa", "specs", "stats", "details" ],
+	"postTypes": [ "villa" ],
+	"supports": {
+		"anchor": true,
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": [ "top", "bottom" ],
+			"padding": true
+		}
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}
