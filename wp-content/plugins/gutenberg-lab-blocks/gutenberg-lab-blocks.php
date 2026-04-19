@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/includes/packages.php';
 require_once __DIR__ . '/includes/package-rendering.php';
+require_once __DIR__ . '/includes/peeking-carousel.php';
 require_once __DIR__ . '/includes/site-messages.php';
 require_once __DIR__ . '/includes/villas.php';
 
@@ -148,6 +149,8 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/split-content' );
 	register_block_type( __DIR__ . '/build/feature-carousel' );
 	register_block_type( __DIR__ . '/build/feature-carousel-slide' );
+	register_block_type( __DIR__ . '/build/two-up-carousel' );
+	register_block_type( __DIR__ . '/build/two-up-carousel-slide' );
 	register_block_type( __DIR__ . '/build/card-carousel' );
 	register_block_type( __DIR__ . '/build/card-carousel-slide' );
 	register_block_type( __DIR__ . '/build/card-grid' );

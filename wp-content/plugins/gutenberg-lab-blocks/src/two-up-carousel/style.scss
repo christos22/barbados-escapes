@@ -1,0 +1,318 @@
+.wp-block-gutenberg-lab-blocks-two-up-carousel.vvm-two-up-carousel,
+.vvm-two-up-carousel {
+	--vvm-two-up-carousel-shell-width: 100%;
+	--vvm-two-up-carousel-section-max-height: calc(
+		100vh - var(--vvm-header-height, 96px)
+	);
+	--vvm-two-up-carousel-section-padding-block: clamp(2.5rem, 5vw, 4.5rem);
+	--vvm-two-up-carousel-section-padding-inline: 0px;
+	--vvm-two-up-carousel-shell-gap: clamp(0.875rem, 1.8vw, 1.25rem);
+	--vvm-two-up-carousel-gap: clamp(1rem, 1.8vw, 1.5rem);
+	--vvm-two-up-carousel-controls-height: clamp(1.75rem, 2vw, 2rem);
+	/*
+	 * Target roughly 200px of visible inactive card at 1920px wide while still
+	 * scaling down on smaller viewports.
+	 */
+	--vvm-two-up-carousel-peek: clamp(3rem, 10.42vw, 12.5rem);
+	--vvm-two-up-carousel-visible-slides: 2;
+	--vvm-two-up-carousel-slide-width-by-viewport: calc(
+		(
+			100% - (var(--vvm-two-up-carousel-gap) * 3) -
+				(var(--vvm-two-up-carousel-peek) * 2)
+		) /
+			2
+	);
+	--vvm-two-up-carousel-card-max-height: max(
+		0px,
+		calc(
+			var(--vvm-two-up-carousel-section-max-height) -
+				(var(--vvm-two-up-carousel-section-padding-block) * 2) -
+				var(--vvm-two-up-carousel-shell-gap) -
+				var(--vvm-two-up-carousel-controls-height)
+		)
+	);
+	--vvm-two-up-carousel-slide-width-by-height: calc(
+		var(--vvm-two-up-carousel-card-max-height) * 4 / 5
+	);
+	--vvm-two-up-carousel-slide-width: min(
+		var(--vvm-two-up-carousel-slide-width-by-viewport),
+		var(--vvm-two-up-carousel-slide-width-by-height)
+	);
+	--vvm-two-up-carousel-slide-ratio: 4 / 5;
+	--vvm-two-up-carousel-surface: var(--wp--preset--color--light-gold, #f5ecd7);
+	--vvm-two-up-carousel-card-foreground: #fffdf7;
+	--vvm-two-up-carousel-card-muted: rgba(255, 253, 247, 0.84);
+	--vvm-two-up-carousel-ink: var(--wp--preset--color--dark-green, #1e3d2f);
+	--vvm-two-up-carousel-shadow: 0 28px 56px rgba(16, 34, 27, 0.18);
+
+	box-sizing: border-box;
+	margin: 0;
+	padding-block: var(--vvm-two-up-carousel-section-padding-block);
+	padding-inline: var(--vvm-two-up-carousel-section-padding-inline);
+	overflow: clip;
+	background: var(--vvm-two-up-carousel-surface);
+	color: var(--vvm-two-up-carousel-ink);
+	max-block-size: var(--vvm-two-up-carousel-section-max-height);
+	scroll-margin-top: var(--vvm-header-height, 96px);
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel.alignfull,
+.vvm-two-up-carousel.alignfull {
+	width: calc(
+		100% + (var(--wp--custom--layout--gutter-current, 0px) * 2)
+	);
+	max-width: none;
+	margin-inline: calc(var(--wp--custom--layout--gutter-current, 0px) * -1);
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__shell,
+.vvm-two-up-carousel .vvm-two-up-carousel__shell {
+	display: grid;
+	gap: var(--vvm-two-up-carousel-shell-gap);
+	max-inline-size: var(--vvm-two-up-carousel-shell-width);
+	inline-size: 100%;
+	margin-inline: auto;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__viewport,
+.vvm-two-up-carousel .vvm-two-up-carousel__viewport {
+	overflow: hidden;
+	touch-action: pan-y;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__carousel.has-overflow
+	.vvm-two-up-carousel__viewport,
+.vvm-two-up-carousel
+	.vvm-two-up-carousel__carousel.has-overflow
+	.vvm-two-up-carousel__viewport {
+	cursor: grab;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__carousel.is-dragging
+	.vvm-two-up-carousel__viewport,
+.vvm-two-up-carousel
+	.vvm-two-up-carousel__carousel.is-dragging
+	.vvm-two-up-carousel__viewport {
+	cursor: grabbing;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__track,
+.vvm-two-up-carousel .vvm-two-up-carousel__track {
+	align-items: stretch;
+	display: flex;
+	gap: var(--vvm-two-up-carousel-gap);
+	transition: transform 0.32s ease;
+	will-change: transform;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__slide,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide {
+	position: relative;
+	flex: 0 0 var(--vvm-two-up-carousel-slide-width);
+	inline-size: var(--vvm-two-up-carousel-slide-width);
+	aspect-ratio: var(--vvm-two-up-carousel-slide-ratio);
+	max-block-size: var(--vvm-two-up-carousel-card-max-height);
+	overflow: hidden;
+	isolation: isolate;
+	background: #d7e0da;
+	box-shadow: var(--vvm-two-up-carousel-shadow);
+	opacity: 0.32;
+	transition: opacity 0.32s ease, filter 0.32s ease;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__slide.is-active,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide.is-active {
+	opacity: 1;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__slide.is-clone,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide.is-clone {
+	pointer-events: none;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__slide::after,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	background: linear-gradient(
+		180deg,
+		rgba(0, 0, 0, 0.06) 0%,
+		rgba(0, 0, 0, 0.18) 48%,
+		rgba(0, 0, 0, 0.76) 100%
+	);
+	pointer-events: none;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__slide-media,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide-media {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(135deg, #bccac3 0%, #8aa198 100%);
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-media--placeholder,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide-media--placeholder {
+	display: grid;
+	place-items: end start;
+	padding: 1.25rem;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__slide-image,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide-image {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	object-fit: cover;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-placeholder-label,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide-placeholder-label {
+	max-inline-size: 12rem;
+	color: var(--vvm-two-up-carousel-card-foreground);
+	font-size: 0.78rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__slide-content,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide-content {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 3;
+	display: grid;
+	gap: 0.65rem;
+	padding: clamp(1rem, 2vw, 1.5rem);
+	color: var(--vvm-two-up-carousel-card-foreground);
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	> *,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide-content > * {
+	margin: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.wp-block-heading,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide-content .wp-block-heading {
+	margin: 0;
+	color: var(--vvm-two-up-carousel-card-foreground);
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: clamp(1rem, 1.8vw, 1.35rem);
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	line-height: 1.2;
+	text-transform: uppercase;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.wp-block-heading
+	a,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide-content .wp-block-heading a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	p,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide-content p {
+	margin: 0;
+	color: var(--vvm-two-up-carousel-card-muted);
+	font-size: 0.94rem;
+	line-height: 1.6;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.wp-block-buttons,
+.vvm-two-up-carousel .vvm-two-up-carousel__slide-content .wp-block-buttons {
+	margin-top: 0.25rem;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__controls,
+.vvm-two-up-carousel .vvm-two-up-carousel__controls {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: clamp(4rem, 12vw, 10rem);
+	min-block-size: var(--vvm-two-up-carousel-controls-height);
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__button,
+.vvm-two-up-carousel .vvm-two-up-carousel__button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.25rem 0;
+	border: 0;
+	background: transparent;
+	color: rgba(30, 61, 47, 0.72);
+	cursor: pointer;
+	transition:
+		color 0.24s ease,
+		opacity 0.24s ease,
+		transform 0.24s ease;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__button:hover:not(:disabled),
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__button:focus-visible:not(:disabled),
+.vvm-two-up-carousel .vvm-two-up-carousel__button:hover:not(:disabled),
+.vvm-two-up-carousel .vvm-two-up-carousel__button:focus-visible:not(:disabled) {
+	color: var(--vvm-two-up-carousel-ink);
+	transform: translateY(-1px);
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__button:focus-visible,
+.vvm-two-up-carousel .vvm-two-up-carousel__button:focus-visible {
+	outline: none;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__button:disabled,
+.vvm-two-up-carousel .vvm-two-up-carousel__button:disabled {
+	opacity: 0.28;
+	cursor: default;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__button
+	.vvm-slider-button__icon--line,
+.vvm-two-up-carousel .vvm-two-up-carousel__button .vvm-slider-button__icon--line {
+	inline-size: clamp(2.75rem, 5vw, 3.75rem);
+	block-size: 1rem;
+	stroke-width: 1.8;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__empty-state,
+.vvm-two-up-carousel .vvm-two-up-carousel__empty-state {
+	margin: 0 auto;
+	max-inline-size: var(--vvm-two-up-carousel-shell-width);
+	padding: 1.5rem;
+	border: 1px dashed rgba(30, 61, 47, 0.18);
+	background: rgba(255, 255, 255, 0.8);
+	color: var(--vvm-two-up-carousel-ink);
+}
+
+@media (max-width: 1023px) {
+	.wp-block-gutenberg-lab-blocks-two-up-carousel.vvm-two-up-carousel,
+	.vvm-two-up-carousel {
+		--vvm-two-up-carousel-visible-slides: 1;
+		--vvm-two-up-carousel-peek: 0px;
+		--vvm-two-up-carousel-slide-width: min(
+			100%,
+			var(--vvm-two-up-carousel-slide-width-by-height)
+		);
+	}
+}

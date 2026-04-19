@@ -38,9 +38,11 @@
 	margin: 0;
 	box-sizing: border-box;
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	align-items: stretch;
 	block-size: var(--vvm-feature-carousel-section-max-height);
 	padding-block: var(--vvm-feature-carousel-section-padding-block);
+	overflow-x: clip;
 	scroll-margin-top: var(--vvm-header-height, 96px);
 	background: var(--vvm-feature-carousel-shell-surface);
 	color: var(--vvm-feature-carousel-ink);
@@ -58,8 +60,10 @@
 .wp-block-gutenberg-lab-blocks-feature-carousel .vvm-feature-carousel__shell,
 .vvm-feature-carousel .vvm-feature-carousel__shell {
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	grid-template-rows: minmax(0, 1fr) auto;
 	gap: clamp(1rem, 2vw, 1.5rem);
+	min-width: 0;
 	width: 100%;
 	max-width: 100%;
 	block-size: 100%;
@@ -68,6 +72,7 @@
 
 .wp-block-gutenberg-lab-blocks-feature-carousel .vvm-feature-carousel__carousel,
 .vvm-feature-carousel .vvm-feature-carousel__carousel {
+	min-width: 0;
 	width: calc(100% + var(--vvm-feature-carousel-stage-shift));
 	block-size: 100%;
 	margin-inline-start: calc(var(--vvm-feature-carousel-stage-shift) * -1);
@@ -276,6 +281,7 @@
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) var(--vvm-feature-carousel-panel-width);
 	gap: var(--vvm-feature-carousel-slide-gap);
+	min-width: 0;
 	width: min(100%, var(--vvm-feature-carousel-slide-width));
 	margin-inline-start: calc(var(--vvm-feature-carousel-stage-shift) * -1);
 	padding-inline-end: var(--vvm-feature-carousel-next-peek);
