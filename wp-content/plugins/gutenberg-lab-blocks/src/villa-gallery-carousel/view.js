@@ -1,86 +1,11 @@
+import {
+	revealRailItem,
+	scrollRailByStep,
+	syncRailButtons,
+} from '../shared/rail-navigation';
+
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 const ACTIVE_CLASS = 'is-active';
-
-function getRailStep( track, slides ) {
-	const firstSlide = slides?.[ 0 ];
-	const listElement = track?.querySelector( '.splide__list' );
-	const listStyles = listElement ? getComputedStyle( listElement ) : null;
-	const gap =
-		parseFloat( listStyles?.columnGap || listStyles?.gap || '0' ) || 0;
-
-	if ( ! firstSlide ) {
-		return track?.clientWidth || 0;
-	}
-
-	return firstSlide.offsetWidth + gap;
-}
-
-function syncRailButtons( track, previousButton, nextButton ) {
-	if ( ! track ) {
-		return;
-	}
-
-	const maxScrollLeft = Math.max( 0, track.scrollWidth - track.clientWidth );
-	const canScroll = maxScrollLeft > 12;
-
-	[ previousButton, nextButton ].forEach( ( button ) => {
-		if ( button ) {
-			button.hidden = ! canScroll;
-		}
-	} );
-
-	if ( previousButton ) {
-		previousButton.disabled = ! canScroll || track.scrollLeft <= 1;
-	}
-
-	if ( nextButton ) {
-		nextButton.disabled = ! canScroll || track.scrollLeft >= maxScrollLeft - 1;
-	}
-}
-
-function scrollRailByStep(
-	track,
-	slides,
-	direction,
-	prefersReducedMotion
-) {
-	if ( ! track ) {
-		return;
-	}
-
-	const maxScrollLeft = Math.max( 0, track.scrollWidth - track.clientWidth );
-	const step = getRailStep( track, slides ) || track.clientWidth;
-	const targetScrollLeft = Math.min(
-		maxScrollLeft,
-		Math.max( 0, track.scrollLeft + step * direction )
-	);
-
-	track.scrollTo( {
-		left: targetScrollLeft,
-		behavior: prefersReducedMotion ? 'auto' : 'smooth',
-	} );
-}
-
-function revealCardIfNeeded( track, slide, prefersReducedMotion ) {
-	if ( ! track || ! slide ) {
-		return;
-	}
-
-	const maxScrollLeft = Math.max( 0, track.scrollWidth - track.clientWidth );
-	const targetScrollLeft = Math.min(
-		maxScrollLeft,
-		Math.max( 0, slide.offsetLeft + slide.offsetWidth - track.clientWidth )
-	);
-
-	if ( Math.abs( track.scrollLeft - targetScrollLeft ) < 1 ) {
-		return;
-	}
-
-	track.scrollTo( {
-		left: targetScrollLeft,
-		behavior: prefersReducedMotion ? 'auto' : 'smooth',
-	} );
-}
 
 function syncCaption( rootElement, button ) {
 	const titleElement = rootElement.querySelector(
@@ -162,7 +87,7 @@ function initializeVillaGalleryCarousel( rootElement ) {
 
 	const syncActiveState = () => {
 		setActiveSlide( rootElement, activeIndex );
-		revealCardIfNeeded( track, slides[ activeIndex ], prefersReducedMotion );
+		revealRailItem( track, slides[ activeIndex ], prefersReducedMotion );
 		window.requestAnimationFrame( syncRailState );
 	};
 
@@ -204,7 +129,6 @@ function initializeVillaGalleryCarousel( rootElement ) {
 	} );
 
 	syncActiveState();
-	syncRailState();
 }
 
 window.addEventListener( 'DOMContentLoaded', () => {

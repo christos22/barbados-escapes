@@ -47,10 +47,6 @@
     "thumbnailLabel": {
       "type": "string",
       "default": ""
-    },
-    "thumbnailAction": {
-      "type": "string",
-      "default": ""
     }
   },
   "supports": {

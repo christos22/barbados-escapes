@@ -118,24 +118,25 @@ $wrapper_attributes = get_block_wrapper_attributes(
 );
 ?>
 
-	<section <?php echo $wrapper_attributes; ?>>
-		<div class="vvm-villa-gallery-carousel__shell">
-			<button
-				type="button"
-				class="vvm-villa-gallery-carousel__rail-button vvm-villa-gallery-carousel__rail-button--prev vvm-slider-button--prev"
-				data-villa-gallery-carousel-rail-prev
-				aria-label="<?php esc_attr_e( 'Scroll gallery thumbnails backward', 'gutenberg-lab-blocks' ); ?>"
-				hidden
-			>
-				<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</button>
-			<div
-				class="vvm-villa-gallery-carousel__carousel splide is-rendered"
-				data-villa-gallery-carousel
-			>
-				<div class="splide__track">
-					<div class="splide__list">
-						<?php foreach ( $slide_blocks as $index => $slide_block ) : ?>
+<section <?php echo $wrapper_attributes; ?>>
+	<div class="vvm-villa-gallery-carousel__shell">
+		<button
+			type="button"
+			class="vvm-villa-gallery-carousel__rail-button vvm-villa-gallery-carousel__rail-button--prev vvm-slider-button--prev"
+			data-villa-gallery-carousel-rail-prev
+			aria-label="<?php esc_attr_e( 'Scroll gallery thumbnails backward', 'gutenberg-lab-blocks' ); ?>"
+			hidden
+		>
+			<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</button>
+
+		<div
+			class="vvm-villa-gallery-carousel__carousel splide is-rendered"
+			data-villa-gallery-carousel
+		>
+			<div class="splide__track">
+				<div class="splide__list">
+					<?php foreach ( $slide_blocks as $index => $slide_block ) : ?>
 						<?php
 						$slide_attributes = is_array( $slide_block['attrs'] ?? null ) ? $slide_block['attrs'] : array();
 						$image_url = trim( (string) ( $slide_attributes['imageUrl'] ?? '' ) );
@@ -171,37 +172,38 @@ $wrapper_attributes = get_block_wrapper_attributes(
 									<?php endif; ?>
 								</div>
 
-									<div class="vvm-villa-gallery-carousel__copy">
-										<?php if ( '' !== $eyebrow ) : ?>
-											<p class="vvm-villa-gallery-carousel__eyebrow"><?php echo esc_html( $eyebrow ); ?></p>
-										<?php endif; ?>
+								<div class="vvm-villa-gallery-carousel__copy">
+									<?php if ( '' !== $eyebrow ) : ?>
+										<p class="vvm-villa-gallery-carousel__eyebrow"><?php echo esc_html( $eyebrow ); ?></p>
+									<?php endif; ?>
 
 									<?php if ( '' !== $title ) : ?>
 										<h3 class="vvm-villa-gallery-carousel__title"><?php echo esc_html( $title ); ?></h3>
 									<?php endif; ?>
 
-										<?php if ( '' !== $detail ) : ?>
-											<p class="vvm-villa-gallery-carousel__detail"><?php echo esc_html( $detail ); ?></p>
-										<?php endif; ?>
-									</div>
-								</button>
-							</article>
-						<?php endforeach; ?>
-					</div>
+									<?php if ( '' !== $detail ) : ?>
+										<p class="vvm-villa-gallery-carousel__detail"><?php echo esc_html( $detail ); ?></p>
+									<?php endif; ?>
+								</div>
+							</button>
+						</article>
+					<?php endforeach; ?>
 				</div>
 			</div>
-			<button
-				type="button"
-				class="vvm-villa-gallery-carousel__rail-button vvm-villa-gallery-carousel__rail-button--next vvm-slider-button--next"
-				data-villa-gallery-carousel-rail-next
-				aria-label="<?php esc_attr_e( 'Scroll gallery thumbnails forward', 'gutenberg-lab-blocks' ); ?>"
-				hidden
-			>
-				<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</button>
+		</div>
 
-			<p class="vvm-villa-gallery-carousel__caption" data-villa-gallery-carousel-caption aria-live="polite">
-				<span class="vvm-villa-gallery-carousel__caption-title" data-villa-gallery-carousel-caption-title>
+		<button
+			type="button"
+			class="vvm-villa-gallery-carousel__rail-button vvm-villa-gallery-carousel__rail-button--next vvm-slider-button--next"
+			data-villa-gallery-carousel-rail-next
+			aria-label="<?php esc_attr_e( 'Scroll gallery thumbnails forward', 'gutenberg-lab-blocks' ); ?>"
+			hidden
+		>
+			<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</button>
+
+		<p class="vvm-villa-gallery-carousel__caption" data-villa-gallery-carousel-caption aria-live="polite">
+			<span class="vvm-villa-gallery-carousel__caption-title" data-villa-gallery-carousel-caption-title>
 				<?php echo esc_html( '' !== $first_title ? $first_title : __( 'Gallery image', 'gutenberg-lab-blocks' ) ); ?>
 			</span>
 			<span

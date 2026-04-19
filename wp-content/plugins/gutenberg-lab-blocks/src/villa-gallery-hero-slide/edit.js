@@ -19,16 +19,6 @@ const MEDIA_TYPE_OPTIONS = [
 	{ label: __( 'Video', 'gutenberg-lab-blocks' ), value: 'video' },
 ];
 
-function getResolvedActionLabel( mediaType, actionLabel ) {
-	if ( actionLabel ) {
-		return actionLabel;
-	}
-
-	return 'video' === mediaType
-		? __( 'Play', 'gutenberg-lab-blocks' )
-		: __( 'View', 'gutenberg-lab-blocks' );
-}
-
 export default function Edit( { attributes, setAttributes } ) {
 	const {
 		mediaType,
@@ -41,17 +31,12 @@ export default function Edit( { attributes, setAttributes } ) {
 		posterImageUrl,
 		posterImageAlt,
 		thumbnailLabel,
-		thumbnailAction,
 	} = attributes;
 
 	const previewImageUrl =
 		'video' === mediaType ? posterImageUrl || '' : imageUrl || '';
 	const previewAlt =
 		'video' === mediaType ? posterImageAlt || '' : imageAlt || '';
-	const resolvedActionLabel = getResolvedActionLabel(
-		mediaType,
-		thumbnailAction
-	);
 
 	const blockProps = useBlockProps( {
 		className: 'vvm-villa-gallery-hero__slide-editor',
@@ -210,26 +195,15 @@ export default function Edit( { attributes, setAttributes } ) {
 						</>
 					) : null }
 
-					<TextControl
-						label={ __( 'Thumbnail label', 'gutenberg-lab-blocks' ) }
-						value={ thumbnailLabel }
-						onChange={ ( value ) =>
-							setAttributes( { thumbnailLabel: value } )
-						}
-					/>
-					<TextControl
-						label={ __( 'Thumbnail action', 'gutenberg-lab-blocks' ) }
-						value={ thumbnailAction }
-						onChange={ ( value ) =>
-							setAttributes( { thumbnailAction: value } )
-						}
-						help={ __(
-							'Leave blank to use “View” for images or “Play” for video.',
-							'gutenberg-lab-blocks'
-						) }
-					/>
-				</PanelBody>
-			</InspectorControls>
+						<TextControl
+							label={ __( 'Thumbnail label', 'gutenberg-lab-blocks' ) }
+							value={ thumbnailLabel }
+							onChange={ ( value ) =>
+								setAttributes( { thumbnailLabel: value } )
+							}
+						/>
+					</PanelBody>
+				</InspectorControls>
 
 			<article { ...blockProps }>
 				<div className="vvm-villa-gallery-hero__slide-card">
@@ -284,9 +258,6 @@ export default function Edit( { attributes, setAttributes } ) {
 					</div>
 
 					<div className="vvm-villa-gallery-hero__slide-copy">
-						<p className="vvm-villa-gallery-hero__slide-action">
-							{ resolvedActionLabel }
-						</p>
 						<p className="vvm-villa-gallery-hero__slide-title">
 							{ thumbnailLabel ||
 								__( 'Add a thumbnail label', 'gutenberg-lab-blocks' ) }

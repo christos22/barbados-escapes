@@ -93,7 +93,6 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_get_featured_im
 			'thumb_label'     => get_the_title( $current_post_id )
 				? sanitize_text_field( get_the_title( $current_post_id ) )
 				: __( 'Featured image', 'gutenberg-lab-blocks' ),
-			'thumb_action'    => __( 'View', 'gutenberg-lab-blocks' ),
 		);
 	}
 }
@@ -160,7 +159,6 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_normalize_slide
 		$poster_url     = trim( (string) ( $attrs['posterImageUrl'] ?? '' ) );
 		$poster_alt     = trim( (string) ( $attrs['posterImageAlt'] ?? '' ) );
 		$thumb_label    = trim( (string) ( $attrs['thumbnailLabel'] ?? '' ) );
-		$thumb_action   = trim( (string) ( $attrs['thumbnailAction'] ?? '' ) );
 		$slide_number   = (int) $slide_index + 1;
 		$thumb_media_url = '';
 		$thumb_media_alt = '';
@@ -189,12 +187,6 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_normalize_slide
 			);
 		}
 
-		if ( '' === $thumb_action ) {
-			$thumb_action = 'video' === $media_type
-				? __( 'Play', 'gutenberg-lab-blocks' )
-				: __( 'View', 'gutenberg-lab-blocks' );
-		}
-
 		return array(
 			'media_type'      => $media_type,
 			'image_url'       => esc_url_raw( $image_url ),
@@ -205,7 +197,6 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_normalize_slide
 			'thumb_media_url' => esc_url_raw( $thumb_media_url ),
 			'thumb_media_alt' => sanitize_text_field( $thumb_media_alt ),
 			'thumb_label'     => sanitize_text_field( $thumb_label ),
-			'thumb_action'    => sanitize_text_field( $thumb_action ),
 		);
 	}
 }
@@ -548,6 +539,7 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 				>
 					<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</button>
+
 				<div
 					class="vvm-villa-gallery-hero__thumbs splide is-rendered"
 					data-villa-gallery-thumbs
@@ -556,22 +548,23 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 					<div class="splide__track">
 						<ul class="splide__list">
 							<?php foreach ( $slides as $slide ) : ?>
-							<li class="splide__slide">
-								<div class="vvm-villa-gallery-hero__thumb-card">
-									<div class="vvm-villa-gallery-hero__thumb-media">
-										<?php if ( '' !== $slide['thumb_media_url'] ) : ?>
-											<img
-												src="<?php echo esc_url( $slide['thumb_media_url'] ); ?>"
-												alt="<?php echo esc_attr( $slide['thumb_media_alt'] ); ?>"
-											/>
-										<?php else : ?>
-											<div class="vvm-villa-gallery-hero__thumb-media-placeholder"></div>
-										<?php endif; ?>
+								<li class="splide__slide">
+									<div class="vvm-villa-gallery-hero__thumb-card">
+										<div class="vvm-villa-gallery-hero__thumb-media">
+											<?php if ( '' !== $slide['thumb_media_url'] ) : ?>
+												<img
+													src="<?php echo esc_url( $slide['thumb_media_url'] ); ?>"
+													alt="<?php echo esc_attr( $slide['thumb_media_alt'] ); ?>"
+												/>
+											<?php else : ?>
+												<div class="vvm-villa-gallery-hero__thumb-media-placeholder"></div>
+											<?php endif; ?>
 
-										<?php if ( 'video' === $slide['media_type'] ) : ?>
-											<span class="vvm-villa-gallery-hero__thumb-play-badge" aria-hidden="true">▶</span>
-										<?php endif; ?>
-									</div>
+											<?php if ( 'video' === $slide['media_type'] ) : ?>
+												<span class="vvm-villa-gallery-hero__thumb-play-badge" aria-hidden="true">▶</span>
+											<?php endif; ?>
+										</div>
+
 										<div class="vvm-villa-gallery-hero__thumb-copy">
 											<p class="vvm-villa-gallery-hero__thumb-label">
 												<?php echo esc_html( $slide['thumb_label'] ); ?>
@@ -583,6 +576,7 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 						</ul>
 					</div>
 				</div>
+
 				<button
 					type="button"
 					class="vvm-villa-gallery-hero__thumb-rail-button vvm-villa-gallery-hero__thumb-rail-button--next vvm-slider-button--next"

@@ -42,15 +42,11 @@
 			"type": "string",
 			"default": ""
 		},
-		"thumbnailLabel": {
-			"type": "string",
-			"default": ""
+			"thumbnailLabel": {
+				"type": "string",
+				"default": ""
+			}
 		},
-		"thumbnailAction": {
-			"type": "string",
-			"default": ""
-		}
-	},
 	"supports": {
 		"html": false,
 		"reusable": false

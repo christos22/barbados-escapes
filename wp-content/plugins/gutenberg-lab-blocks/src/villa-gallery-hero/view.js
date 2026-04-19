@@ -1,4 +1,9 @@
 import Splide from '@splidejs/splide';
+import {
+	revealRailItem,
+	scrollRailByStep,
+	syncRailButtons,
+} from '../shared/rail-navigation';
 
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 const THUMB_ACTIVE_CLASS = 'vvm-villa-gallery-hero__thumb-slide--active';
@@ -184,67 +189,7 @@ function setActiveThumbState( thumbsElement, activeIndex ) {
 
 			slide.classList.toggle( THUMB_ACTIVE_CLASS, isActive );
 			slide.setAttribute( 'aria-current', isActive ? 'true' : 'false' );
-			} );
-}
-
-function getRailStep( track, slides ) {
-	const firstSlide = slides?.[ 0 ];
-	const listElement = track?.querySelector( '.splide__list' );
-	const listStyles = listElement ? getComputedStyle( listElement ) : null;
-	const gap =
-		parseFloat( listStyles?.columnGap || listStyles?.gap || '0' ) || 0;
-
-	if ( ! firstSlide ) {
-		return track?.clientWidth || 0;
-	}
-
-	return firstSlide.offsetWidth + gap;
-}
-
-function syncRailButtons( track, previousButton, nextButton ) {
-	if ( ! track ) {
-		return;
-	}
-
-	const maxScrollLeft = Math.max( 0, track.scrollWidth - track.clientWidth );
-	const canScroll = maxScrollLeft > 12;
-
-	[ previousButton, nextButton ].forEach( ( button ) => {
-		if ( button ) {
-			button.hidden = ! canScroll;
-		}
-	} );
-
-	if ( previousButton ) {
-		previousButton.disabled = ! canScroll || track.scrollLeft <= 1;
-	}
-
-	if ( nextButton ) {
-		nextButton.disabled = ! canScroll || track.scrollLeft >= maxScrollLeft - 1;
-	}
-}
-
-function scrollRailByStep(
-	track,
-	slides,
-	direction,
-	prefersReducedMotion
-) {
-	if ( ! track ) {
-		return;
-	}
-
-	const maxScrollLeft = Math.max( 0, track.scrollWidth - track.clientWidth );
-	const step = getRailStep( track, slides ) || track.clientWidth;
-	const targetScrollLeft = Math.min(
-		maxScrollLeft,
-		Math.max( 0, track.scrollLeft + step * direction )
-	);
-
-	track.scrollTo( {
-		left: targetScrollLeft,
-		behavior: prefersReducedMotion ? 'auto' : 'smooth',
-	} );
+		} );
 }
 
 function revealActiveThumbIfNeeded( thumbsElement, activeIndex, prefersReducedMotion ) {
@@ -253,27 +198,7 @@ function revealActiveThumbIfNeeded( thumbsElement, activeIndex, prefersReducedMo
 		activeIndex
 	];
 
-	if ( ! track || ! activeSlide ) {
-		return;
-	}
-
-	const maxScrollLeft = Math.max( 0, track.scrollWidth - track.clientWidth );
-	const targetScrollLeft = Math.min(
-		maxScrollLeft,
-		Math.max(
-			0,
-			activeSlide.offsetLeft + activeSlide.offsetWidth - track.clientWidth
-		)
-	);
-
-	if ( Math.abs( track.scrollLeft - targetScrollLeft ) < 1 ) {
-		return;
-	}
-
-	track.scrollTo( {
-		left: targetScrollLeft,
-		behavior: prefersReducedMotion ? 'auto' : 'smooth',
-	} );
+	revealRailItem( track, activeSlide, prefersReducedMotion );
 }
 
 function syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion ) {
