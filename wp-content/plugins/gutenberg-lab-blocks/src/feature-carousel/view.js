@@ -1,7 +1,7 @@
 import Splide from '@splidejs/splide';
 
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
-const DEFAULT_FADE_DURATION = '480ms';
+const DEFAULT_FADE_DURATION = '700ms';
 const NO_MOTION_DURATION = '0ms';
 const REAL_SLIDE_SELECTOR =
 	'.splide__slide:not(.splide__slide--clone)[data-feature-carousel-slide]';
