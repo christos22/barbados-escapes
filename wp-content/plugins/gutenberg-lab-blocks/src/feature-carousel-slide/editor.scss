@@ -1,0 +1,84 @@
+.wp-block-gutenberg-lab-blocks-feature-carousel-slide {
+	.vvm-feature-carousel__slide-editor {
+		display: grid;
+		grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+		background: #d7e0da;
+		box-shadow: inset 0 0 0 1px rgba(30, 61, 47, 0.08);
+	}
+
+	.vvm-feature-carousel__slide-editor-media {
+		position: relative;
+		min-height: clamp(14rem, 32vw, 22rem);
+		background: linear-gradient(135deg, #bccac3 0%, #8aa198 100%);
+	}
+
+	.vvm-feature-carousel__slide-editor-media--placeholder {
+		display: grid;
+		place-items: center;
+		padding: 1.5rem;
+	}
+
+	.vvm-feature-carousel__slide-editor-image,
+	.vvm-feature-carousel__slide-editor-placeholder {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.vvm-feature-carousel__slide-editor-image {
+		object-fit: cover;
+	}
+
+	.vvm-feature-carousel__slide-editor-placeholder {
+		display: grid;
+		place-items: center;
+	}
+
+	.vvm-feature-carousel__slide-editor-placeholder-label {
+		color: rgba(255, 255, 255, 0.94);
+		font-size: 0.8rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+
+	.vvm-feature-carousel__slide-editor-panel {
+		display: flex;
+		background: var(--wp--preset--color--light-gold, #f5ecd7);
+	}
+
+	.vvm-feature-carousel__slide-editor-panel-flow {
+		display: grid;
+		gap: 1rem;
+		width: 100%;
+		padding: clamp(1.25rem, 2vw, 2rem);
+		align-content: center;
+	}
+
+	.vvm-feature-carousel__slide-editor-panel-flow > .block-editor-inner-blocks,
+	.vvm-feature-carousel__slide-editor-panel-flow
+		> .block-editor-inner-blocks
+		> .block-editor-block-list__layout {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.vvm-feature-carousel__slide-editor-panel-flow .wp-block-heading {
+		margin: 0;
+		font-family: var(--wp--preset--font-family--display-serif);
+		font-size: clamp(1.8rem, 3vw, 2.5rem);
+		line-height: 1;
+	}
+
+	.vvm-feature-carousel__slide-editor-panel-flow p {
+		margin: 0;
+		color: rgba(30, 61, 47, 0.76);
+	}
+}
+
+@media (max-width: 781px) {
+	.wp-block-gutenberg-lab-blocks-feature-carousel-slide
+		.vvm-feature-carousel__slide-editor {
+		grid-template-columns: 1fr;
+	}
+}

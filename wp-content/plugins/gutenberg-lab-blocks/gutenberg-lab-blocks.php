@@ -73,6 +73,16 @@ function gutenberg_lab_blocks_get_slider_arrow_icon() {
 }
 
 /**
+ * Long line-arrow icon used by editorial carousel controls.
+ *
+ * This keeps the 1 Hotels-inspired feature carousel arrows visually distinct
+ * from the circular button treatment used by the other sliders.
+ */
+function gutenberg_lab_blocks_get_slider_line_arrow_icon() {
+	return '<svg class="vvm-slider-button__icon vvm-slider-button__icon--line" viewBox="0 0 72 24" aria-hidden="true" focusable="false"><path d="M2 12h62" /><path d="M54 3l9 9-9 9" /></svg>';
+}
+
+/**
  * Returns the temporary Dashicon map for the Value Pillars child block.
  *
  * We store semantic slugs in block attributes so the icon artwork can be
@@ -136,6 +146,8 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/value-pillars' );
 	register_block_type( __DIR__ . '/build/value-pillar' );
 	register_block_type( __DIR__ . '/build/split-content' );
+	register_block_type( __DIR__ . '/build/feature-carousel' );
+	register_block_type( __DIR__ . '/build/feature-carousel-slide' );
 	register_block_type( __DIR__ . '/build/card-carousel' );
 	register_block_type( __DIR__ . '/build/card-carousel-slide' );
 	register_block_type( __DIR__ . '/build/card-grid' );

@@ -1,0 +1,32 @@
+.wp-block-gutenberg-lab-blocks-feature-carousel.vvm-feature-carousel--editor {
+	.vvm-feature-carousel__editor-shell {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.vvm-feature-carousel__editor-note {
+		margin: 0;
+		max-width: 52rem;
+		color: rgba(30, 61, 47, 0.78);
+		font-size: 0.95rem;
+		line-height: 1.6;
+	}
+
+	.vvm-feature-carousel__editor-viewport {
+		padding: 1rem;
+		border: 1px solid rgba(30, 61, 47, 0.12);
+		background: rgba(255, 255, 255, 0.6);
+	}
+
+	.vvm-feature-carousel__editor-track
+		> .block-editor-inner-blocks
+		> .block-editor-block-list__layout {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.block-editor-button-block-appender,
+	.block-list-appender {
+		margin-top: 0.5rem;
+	}
+}

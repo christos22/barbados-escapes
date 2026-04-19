@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "gutenberg-lab-blocks/feature-carousel-slide",
+  "version": "0.1.0",
+  "title": "Feature Carousel Slide",
+  "category": "design",
+  "icon": "format-image",
+  "description": "A single editorial slide used inside the Feature Carousel block.",
+  "parent": [
+    "gutenberg-lab-blocks/feature-carousel"
+  ],
+  "attributes": {
+    "imageId": {
+      "type": "number"
+    },
+    "imageUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "imageAlt": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "textdomain": "gutenberg-lab-blocks",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css"
+}

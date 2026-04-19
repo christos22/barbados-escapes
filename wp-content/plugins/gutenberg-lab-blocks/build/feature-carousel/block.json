@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "gutenberg-lab-blocks/feature-carousel",
+  "version": "0.1.0",
+  "title": "Feature Carousel",
+  "category": "design",
+  "icon": "images-alt2",
+  "description": "An editorial carousel with large media, per-slide copy, and peeking neighboring slides.",
+  "keywords": [
+    "feature",
+    "carousel",
+    "editorial",
+    "slider"
+  ],
+  "supports": {
+    "anchor": true,
+    "html": false,
+    "align": [
+      "wide",
+      "full"
+    ],
+    "spacing": {
+      "margin": [
+        "top",
+        "bottom"
+      ],
+      "padding": true
+    },
+    "color": {
+      "background": true
+    }
+  },
+  "textdomain": "gutenberg-lab-blocks",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js"
+}
