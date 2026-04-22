@@ -21,11 +21,8 @@
 		var(--vvm-feature-carousel-media-visible-width) +
 			var(--vvm-feature-carousel-panel-width)
 	);
-	--vvm-feature-carousel-panel-surface: var(
-		--wp--preset--color--light-gold,
-		#f5ecd7
-	);
-	--vvm-feature-carousel-shell-surface: var(--wp--preset--color--mist, #fbf8f2);
+	--vvm-feature-carousel-panel-surface: var(--wp--preset--color--white, #fff);
+	--vvm-feature-carousel-shell-surface: var(--wp--preset--color--white, #fff);
 	--vvm-feature-carousel-ink: var(--wp--preset--color--dark-green, #1e3d2f);
 	--vvm-feature-carousel-muted: rgba(30, 61, 47, 0.76);
 	--vvm-feature-carousel-shadow: 0 24px 56px rgba(16, 34, 27, 0.14);
