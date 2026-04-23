@@ -14,6 +14,10 @@ import {
 import { useSelect } from '@wordpress/data';
 import ServerSideRender from '@wordpress/server-side-render';
 
+import {
+	SliderArrowControlsPanel,
+	SliderArrowPreview,
+} from '../shared/slider-arrow-controls';
 import './editor.scss';
 
 const ALLOWED_BLOCKS = [ 'gutenberg-lab-blocks/card-grid-card' ];
@@ -249,6 +253,13 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						}
 					/>
 				</PanelBody>
+				{ willUseCarousel ? (
+					<SliderArrowControlsPanel
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+						initialOpen={ false }
+					/>
+				) : null }
 			</InspectorControls>
 
 			<section { ...blockProps }>
@@ -260,11 +271,31 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						/>
 					</div>
 				) : (
-					<>
-						{/* Keep the parent focused on layout. Each child owns its own media
-							and native content blocks so typography and button styles stay global. */}
-						<div { ...innerBlocksProps } />
-					</>
+					<div
+						className={
+							willUseCarousel
+								? 'vvm-card-grid__carousel vvm-slider-surface'
+								: undefined
+						}
+					>
+						{ willUseCarousel ? (
+							<SliderArrowPreview
+								attributes={ attributes }
+								className="vvm-card-grid__carousel-controls"
+								buttonClassName="vvm-card-grid__carousel-button"
+							/>
+						) : null }
+						<div
+							className={
+								willUseCarousel ? 'vvm-card-grid__viewport' : undefined
+							}
+						>
+							{/* Keep the parent focused on layout. Each child owns its own
+								media and native content blocks so typography and button
+								styles stay global. */}
+							<div { ...innerBlocksProps } />
+						</div>
+					</div>
 				) }
 			</section>
 		</>

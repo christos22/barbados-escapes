@@ -7,6 +7,10 @@ import {
 } from '@wordpress/block-editor';
 import { PanelBody, SelectControl, ToggleControl } from '@wordpress/components';
 
+import {
+	SliderArrowControlsPanel,
+	SliderArrowPreview,
+} from '../shared/slider-arrow-controls';
 import './editor.scss';
 
 const HEIGHT_OPTIONS = [
@@ -43,12 +47,16 @@ const TEMPLATE = [
 	],
 ];
 
-function getPreviewMediaUrl( heroBlock ) {
+function getPreviewState( heroBlock ) {
 	const mediaRegion = heroBlock?.innerBlocks?.find(
 		( innerBlock ) =>
 			'gutenberg-lab-blocks/villa-gallery-hero-media' === innerBlock.name
 	);
-	const slideBlock = mediaRegion?.innerBlocks?.find( ( innerBlock ) => {
+	const slideBlocks = ( mediaRegion?.innerBlocks ?? [] ).filter(
+		( innerBlock ) =>
+			'gutenberg-lab-blocks/villa-gallery-hero-slide' === innerBlock.name
+	);
+	const slideBlock = slideBlocks.find( ( innerBlock ) => {
 		if ( 'gutenberg-lab-blocks/villa-gallery-hero-slide' !== innerBlock.name ) {
 			return false;
 		}
@@ -66,7 +74,10 @@ function getPreviewMediaUrl( heroBlock ) {
 	} );
 
 	if ( ! slideBlock ) {
-		return '';
+		return {
+			previewMediaUrl: '',
+			slideCount: slideBlocks.length,
+		};
 	}
 
 	const {
@@ -75,19 +86,25 @@ function getPreviewMediaUrl( heroBlock ) {
 		posterImageUrl = '',
 	} = slideBlock.attributes ?? {};
 
-	return 'video' === mediaType ? posterImageUrl || '' : imageUrl || '';
+	return {
+		previewMediaUrl:
+			'video' === mediaType ? posterImageUrl || '' : imageUrl || '',
+		slideCount: slideBlocks.length,
+	};
 }
 
 export default function Edit( { attributes, clientId, setAttributes } ) {
 	const { align, heroHeight, overlayStyle, showArrows } = attributes;
-	const previewMediaUrl = useSelect(
+	const { previewMediaUrl, slideCount } = useSelect(
 		( select ) => {
 			const heroBlock = select( 'core/block-editor' ).getBlock( clientId );
 
-			return getPreviewMediaUrl( heroBlock );
+			return getPreviewState( heroBlock );
 		},
 		[ clientId ]
 	);
+	const showStagePreviewArrows = showArrows && slideCount > 1;
+	const showThumbPreviewArrows = slideCount > 1;
 
 	const blockProps = useBlockProps( {
 		className: [
@@ -153,10 +170,59 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						}
 					/>
 				</PanelBody>
+				{ showStagePreviewArrows ? (
+					<SliderArrowControlsPanel
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+						title={ __( 'Stage arrows', 'gutenberg-lab-blocks' ) }
+						initialOpen={ false }
+					/>
+				) : null }
+				{ showThumbPreviewArrows ? (
+					<SliderArrowControlsPanel
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+						title={ __( 'Thumbnail arrows', 'gutenberg-lab-blocks' ) }
+						positionKey="thumbArrowPositionPreset"
+						offsetXKey="thumbArrowOffsetX"
+						offsetYKey="thumbArrowOffsetY"
+						initialOpen={ false }
+					/>
+				) : null }
 			</InspectorControls>
 
 			<section { ...blockProps }>
-				<div { ...innerBlocksProps } />
+				<div className="vvm-villa-gallery-hero__editor-stage-shell vvm-slider-surface">
+					<div { ...innerBlocksProps } />
+					<SliderArrowPreview
+						attributes={ attributes }
+						className="vvm-villa-gallery-hero__controls vvm-villa-gallery-hero__editor-controls"
+						buttonClassName="vvm-villa-gallery-hero__button"
+						isVisible={ showStagePreviewArrows }
+					/>
+				</div>
+				{ showThumbPreviewArrows ? (
+					<div className="vvm-villa-gallery-hero__editor-thumbs-shell vvm-slider-surface">
+						<div className="vvm-villa-gallery-hero__editor-thumbs-track">
+							{ Array.from( {
+								length: Math.min( slideCount, 4 ),
+							} ).map( ( _item, index ) => (
+								<span
+									key={ index }
+									className="vvm-villa-gallery-hero__editor-thumb"
+								/>
+							) ) }
+						</div>
+						<SliderArrowPreview
+							attributes={ attributes }
+							className="vvm-villa-gallery-hero__thumb-controls"
+							buttonClassName="vvm-villa-gallery-hero__thumb-rail-button"
+							positionKey="thumbArrowPositionPreset"
+							offsetXKey="thumbArrowOffsetX"
+							offsetYKey="thumbArrowOffsetY"
+						/>
+					</div>
+				) : null }
 			</section>
 		</>
 	);

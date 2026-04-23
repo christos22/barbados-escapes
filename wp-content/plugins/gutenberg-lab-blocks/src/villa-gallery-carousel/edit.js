@@ -1,11 +1,17 @@
 import { __ } from '@wordpress/i18n';
 import {
 	InnerBlocks,
+	InspectorControls,
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
+import { PanelBody } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 
+import {
+	SliderArrowControlsPanel,
+	SliderArrowPreview,
+} from '../shared/slider-arrow-controls';
 import './editor.scss';
 
 const ALLOWED_BLOCKS = [ 'gutenberg-lab-blocks/villa-gallery-carousel-slide' ];
@@ -45,7 +51,7 @@ function renderCaption( title, detail ) {
 	);
 }
 
-export default function Edit( { clientId } ) {
+export default function Edit( { attributes, clientId, setAttributes } ) {
 	const slideBlocks = useSelect(
 		( select ) =>
 			(
@@ -79,25 +85,53 @@ export default function Edit( { clientId } ) {
 	);
 
 	return (
-		<section { ...blockProps }>
-			<div className="vvm-villa-gallery-carousel__shell">
-				<div className="vvm-villa-gallery-carousel__editor-viewport">
-					<div { ...innerBlocksProps } />
-				</div>
+		<>
+			{ slideBlocks.length > 1 ? (
+				<InspectorControls>
+					<PanelBody
+						title={ __( 'Carousel Settings', 'gutenberg-lab-blocks' ) }
+						initialOpen={ true }
+					>
+						<p className="components-base-control__help">
+							{ __(
+								'Adjust the shared arrow placement for this villa gallery rail.',
+								'gutenberg-lab-blocks'
+							) }
+						</p>
+					</PanelBody>
+					<SliderArrowControlsPanel
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+						initialOpen={ false }
+					/>
+				</InspectorControls>
+			) : null }
+			<section { ...blockProps }>
+				<div className="vvm-villa-gallery-carousel__shell">
+					<div className="vvm-villa-gallery-carousel__editor-viewport vvm-slider-surface">
+						<SliderArrowPreview
+							attributes={ attributes }
+							className="vvm-villa-gallery-carousel__controls vvm-villa-gallery-carousel__editor-controls"
+							buttonClassName="vvm-villa-gallery-carousel__rail-button"
+							isVisible={ slideBlocks.length > 1 }
+						/>
+						<div { ...innerBlocksProps } />
+					</div>
 
-				<p className="vvm-villa-gallery-carousel__caption">
-					{ renderCaption( captionTitle, captionDetail ) }
-				</p>
-
-				{ 0 === slideBlocks.length ? (
-					<p className="vvm-villa-gallery-carousel__editor-note">
-						{ __(
-							'Add gallery slides only when you need them. Each slide holds its own image, label, title, and detail line.',
-							'gutenberg-lab-blocks'
-						) }
+					<p className="vvm-villa-gallery-carousel__caption">
+						{ renderCaption( captionTitle, captionDetail ) }
 					</p>
-				) : null }
-			</div>
-		</section>
+
+					{ 0 === slideBlocks.length ? (
+						<p className="vvm-villa-gallery-carousel__editor-note">
+							{ __(
+								'Add gallery slides only when you need them. Each slide holds its own image, label, title, and detail line.',
+								'gutenberg-lab-blocks'
+							) }
+						</p>
+					) : null }
+				</div>
+			</section>
+		</>
 	);
 }

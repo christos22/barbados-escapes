@@ -22,6 +22,7 @@
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__carousel,
 .vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__carousel {
+	position: relative;
 	width: 100%;
 }
 
@@ -193,68 +194,12 @@
 	color: var(--vvm-villa-gallery-carousel-overlay-ink);
 }
 
-.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button,
-.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button {
-	position: absolute;
-	top: 50%;
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__controls,
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__controls {
+	--vvm-slider-controls-inset-inline: clamp(0.25rem, 0.9vw, 0.8rem);
+	--vvm-slider-button-size: clamp(2.6rem, 3vw, 3rem);
+	--vvm-slider-button-icon-size: clamp(1rem, 1.2vw, 1.15rem);
 	z-index: 4;
-	display: inline-flex;
-	width: clamp(2.4rem, 3vw, 3rem);
-	height: clamp(2.4rem, 3vw, 3rem);
-	align-items: center;
-	justify-content: center;
-	padding: 0;
-	border: 0;
-	background: transparent;
-	color: rgba(255, 255, 255, 0.92);
-	cursor: pointer;
-	transform: translateY(-50%);
-	transition:
-		opacity 0.24s ease,
-		transform 0.24s ease;
-}
-
-.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
-	.vvm-villa-gallery-carousel__rail-button--prev,
-.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button--prev {
-	left: clamp(0.25rem, 0.9vw, 0.8rem);
-}
-
-.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
-	.vvm-villa-gallery-carousel__rail-button--next,
-.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button--next {
-	right: clamp(0.25rem, 0.9vw, 0.8rem);
-}
-
-.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:focus-visible,
-.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:focus-visible {
-	outline: none;
-}
-
-.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:hover:not(:disabled),
-.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
-	.vvm-villa-gallery-carousel__rail-button:focus-visible:not(:disabled),
-.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:hover:not(:disabled),
-.vvm-villa-gallery-carousel
-	.vvm-villa-gallery-carousel__rail-button:focus-visible:not(:disabled) {
-	color: #fff;
-	transform: translateY(-50%) scale(1.04);
-}
-
-.wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:disabled,
-.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button:disabled {
-	opacity: 0.22;
-	cursor: default;
-}
-
-.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
-	.vvm-villa-gallery-carousel__rail-button
-	.vvm-slider-button__icon,
-.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button .vvm-slider-button__icon {
-	width: clamp(1.9rem, 2.5vw, 2.35rem);
-	height: clamp(1.9rem, 2.5vw, 2.35rem);
-	stroke-width: 2.8;
-	filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__eyebrow,

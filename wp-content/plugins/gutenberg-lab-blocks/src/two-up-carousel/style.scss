@@ -7,8 +7,19 @@
 	--vvm-two-up-carousel-section-padding-block: clamp(2.5rem, 5vw, 4.5rem);
 	--vvm-two-up-carousel-section-padding-inline: 0px;
 	--vvm-two-up-carousel-shell-gap: clamp(0.875rem, 1.8vw, 1.25rem);
-	--vvm-two-up-carousel-gap: clamp(1rem, 1.8vw, 1.5rem);
-	--vvm-two-up-carousel-controls-height: clamp(1.75rem, 2vw, 2rem);
+	/*
+	 * Keep the center and side gaps in sync with the 200/700/700/200 target at
+	 * 1920px wide. At that width the gap needs to resolve to 40px.
+	 */
+	--vvm-two-up-carousel-gap: clamp(1rem, 2.08vw, 3rem);
+	--vvm-two-up-carousel-controls-height: var(
+		--vvm-slider-button-size,
+		clamp(2.8rem, 4vw, 3.5rem)
+	);
+	--vvm-two-up-carousel-center-trim-block-end: calc(
+		var(--vvm-two-up-carousel-controls-height) +
+			var(--vvm-two-up-carousel-shell-gap)
+	);
 	/*
 	 * Target roughly 200px of visible inactive card at 1920px wide while still
 	 * scaling down on smaller viewports.
@@ -67,11 +78,21 @@
 
 .wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__shell,
 .vvm-two-up-carousel .vvm-two-up-carousel__shell {
+	position: relative;
 	display: grid;
 	gap: var(--vvm-two-up-carousel-shell-gap);
 	max-inline-size: var(--vvm-two-up-carousel-shell-width);
 	inline-size: 100%;
 	margin-inline: auto;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__shell.vvm-two-up-carousel__shell--has-controls,
+.vvm-two-up-carousel .vvm-two-up-carousel__shell.vvm-two-up-carousel__shell--has-controls {
+	padding-block-end: calc(
+		var(--vvm-two-up-carousel-controls-height) +
+			var(--vvm-two-up-carousel-shell-gap)
+	);
 }
 
 .wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__viewport,
@@ -243,56 +264,10 @@
 
 .wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__controls,
 .vvm-two-up-carousel .vvm-two-up-carousel__controls {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: clamp(4rem, 12vw, 10rem);
-	min-block-size: var(--vvm-two-up-carousel-controls-height);
-}
-
-.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__button,
-.vvm-two-up-carousel .vvm-two-up-carousel__button {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0.25rem 0;
-	border: 0;
-	background: transparent;
-	color: rgba(30, 61, 47, 0.72);
-	cursor: pointer;
-	transition:
-		color 0.24s ease,
-		opacity 0.24s ease,
-		transform 0.24s ease;
-}
-
-.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__button:hover:not(:disabled),
-.wp-block-gutenberg-lab-blocks-two-up-carousel
-	.vvm-two-up-carousel__button:focus-visible:not(:disabled),
-.vvm-two-up-carousel .vvm-two-up-carousel__button:hover:not(:disabled),
-.vvm-two-up-carousel .vvm-two-up-carousel__button:focus-visible:not(:disabled) {
-	color: var(--vvm-two-up-carousel-ink);
-	transform: translateY(-1px);
-}
-
-.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__button:focus-visible,
-.vvm-two-up-carousel .vvm-two-up-carousel__button:focus-visible {
-	outline: none;
-}
-
-.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__button:disabled,
-.vvm-two-up-carousel .vvm-two-up-carousel__button:disabled {
-	opacity: 0.28;
-	cursor: default;
-}
-
-.wp-block-gutenberg-lab-blocks-two-up-carousel
-	.vvm-two-up-carousel__button
-	.vvm-slider-button__icon--line,
-.vvm-two-up-carousel .vvm-two-up-carousel__button .vvm-slider-button__icon--line {
-	inline-size: clamp(2.75rem, 5vw, 3.75rem);
-	block-size: 1rem;
-	stroke-width: 1.8;
+	--vvm-slider-controls-inset-block: 0px;
+	--vvm-slider-controls-center-trim-block-end: var(
+		--vvm-two-up-carousel-center-trim-block-end
+	);
 }
 
 .wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__empty-state,

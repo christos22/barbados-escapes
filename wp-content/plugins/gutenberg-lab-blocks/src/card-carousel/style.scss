@@ -75,60 +75,7 @@
 }
 
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__controls {
-	position: absolute;
-	inset-block-start: 50%;
-	inset-inline: 0;
-	z-index: 3;
-	display: flex;
-	justify-content: space-between;
-	padding-inline: clamp(0.25rem, 1vw, 0.875rem);
-	pointer-events: none;
-	transform: translateY(-50%);
-}
-
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__controls .vvm-slider-button {
-	transition:
-		background 0.25s ease,
-		border-color 0.25s ease,
-		color 0.25s ease,
-		box-shadow 0.25s ease,
-		opacity 0.25s ease,
-		transform 0.25s ease;
-	pointer-events: auto;
-}
-
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__controls
-	.vvm-slider-button:hover:not(:disabled),
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__controls
-	.vvm-slider-button:focus-visible:not(:disabled) {
-	opacity: 1;
-	transform: scale(1.03);
-}
-
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__carousel:hover
-	.vvm-slider-button:not(:disabled),
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__carousel:has(:focus-visible)
-	.vvm-slider-button:not(:disabled),
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__carousel.is-dragging
-	.vvm-slider-button:not(:disabled) {
-	opacity: 1;
-}
-
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__carousel:hover
-	.vvm-slider-button:disabled,
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__carousel:has(:focus-visible)
-	.vvm-slider-button:disabled,
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel
-	.vvm-card-carousel__carousel.is-dragging
-	.vvm-slider-button:disabled {
-	opacity: 0.32;
+	--vvm-slider-controls-inset-inline: clamp(0.25rem, 1vw, 0.875rem);
 }
 
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__viewport {

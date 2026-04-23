@@ -200,12 +200,8 @@
 	}
 
 	&__slider-controls {
-		--vvm-slider-controls-inset: 1rem;
-	}
-
-	&__slider-button {
-		// Shared slider button styles come from the plugin's global frontend CSS.
-		// The block-level class remains so layout-specific overrides stay possible.
+		--vvm-slider-controls-inset-inline: 1rem;
+		--vvm-slider-controls-inset-block: 1rem;
 	}
 
 	&__slider-preview {
@@ -215,7 +211,7 @@
 
 	&__slider-badge {
 		position: absolute;
-		right: 1rem;
+		left: 1rem;
 		bottom: 1rem;
 		z-index: 1;
 		padding: 0.45rem 0.75rem;
@@ -372,10 +368,6 @@
 		transform: translateX(calc(var(--split-content-overlap-card-shift) * -1));
 	}
 
-	&.split-content--layout-overlay .split-content__slider-controls {
-		right: 1.25rem;
-		bottom: 1.25rem;
-	}
 }
 
 @media (max-width: 1023px) {

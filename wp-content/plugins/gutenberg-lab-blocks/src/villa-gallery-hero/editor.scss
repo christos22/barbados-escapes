@@ -68,6 +68,10 @@
 		min-height: var(--vvm-villa-gallery-hero-stage-min-height);
 	}
 
+	.vvm-villa-gallery-hero__editor-stage-shell {
+		position: relative;
+	}
+
 	.vvm-villa-gallery-hero__layout-editor {
 		position: relative;
 		z-index: 2;
@@ -96,6 +100,29 @@
 		grid-area: media;
 		width: 100%;
 		z-index: 4;
+	}
+
+	.vvm-villa-gallery-hero__editor-thumbs-shell {
+		position: relative;
+		z-index: 3;
+		display: grid;
+		gap: 0;
+		padding: 0;
+		background: rgba(7, 12, 12, 0.88);
+	}
+
+	.vvm-villa-gallery-hero__editor-thumbs-track {
+		display: flex;
+		gap: var(--vvm-villa-gallery-hero-rail-gap);
+		overflow: hidden;
+	}
+
+	.vvm-villa-gallery-hero__editor-thumb {
+		flex: 0 0 var(--vvm-villa-gallery-hero-thumb-width);
+		width: var(--vvm-villa-gallery-hero-thumb-width);
+		aspect-ratio: var(--vvm-villa-gallery-hero-thumb-aspect-ratio);
+		background: linear-gradient(135deg, #314645 0%, #121919 100%);
+		opacity: 0.9;
 	}
 }
 

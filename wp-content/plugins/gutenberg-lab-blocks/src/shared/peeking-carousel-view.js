@@ -1,7 +1,9 @@
 import Splide from '@splidejs/splide';
 
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
+const DEFAULT_TRANSITION_MODE = 'fade';
 const DEFAULT_FADE_DURATION = '700ms';
+const DEFAULT_SLIDE_SPEED = 700;
 const NO_MOTION_DURATION = '0ms';
 const FOCUSABLE_SELECTOR =
 	'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]';
@@ -62,11 +64,38 @@ function syncActiveState( rootElement, splide, realSlideSelector ) {
 	} );
 }
 
-function syncMotionPreference( rootElement, mediaQuery, durationVariable ) {
+function getTransitionMode( rootElement ) {
+	return 'slide' === rootElement.dataset.carouselTransition
+		? 'slide'
+		: DEFAULT_TRANSITION_MODE;
+}
+
+function getCarouselSpeed( mediaQuery, transitionMode ) {
+	if ( mediaQuery.matches ) {
+		return 0;
+	}
+
+	return 'slide' === transitionMode ? DEFAULT_SLIDE_SPEED : 0;
+}
+
+function syncMotionPreference(
+	rootElement,
+	mediaQuery,
+	durationVariable,
+	splide,
+	transitionMode
+) {
 	rootElement.style.setProperty(
 		durationVariable,
 		mediaQuery.matches ? NO_MOTION_DURATION : DEFAULT_FADE_DURATION
 	);
+
+	if ( splide ) {
+		// Fade mode keeps the track jumpy so CSS owns the visual transition.
+		splide.options = {
+			speed: getCarouselSpeed( mediaQuery, transitionMode ),
+		};
+	}
 }
 
 function initializePeekingCarousel( rootElement, config ) {
@@ -84,6 +113,7 @@ function initializePeekingCarousel( rootElement, config ) {
 	const reducedMotionMediaQuery = window.matchMedia(
 		REDUCED_MOTION_MEDIA_QUERY
 	);
+	const transitionMode = getTransitionMode( rootElement );
 	const slideCount =
 		carouselElement?.querySelectorAll( slideSelector ).length ?? 0;
 
@@ -95,7 +125,9 @@ function initializePeekingCarousel( rootElement, config ) {
 		syncMotionPreference(
 			rootElement,
 			reducedMotionMediaQuery,
-			durationVariable
+			durationVariable,
+			null,
+			transitionMode
 		);
 		rootElement
 			.querySelectorAll( realSlideSelector )
@@ -104,8 +136,14 @@ function initializePeekingCarousel( rootElement, config ) {
 	}
 
 	// The paired layout keeps neighboring slides visible, so CSS owns the fade
-	// state while Splide only handles indexing, drag, and loop navigation.
-	syncMotionPreference( rootElement, reducedMotionMediaQuery, durationVariable );
+	// state in fade mode. Slide mode turns the track animation back on.
+	syncMotionPreference(
+		rootElement,
+		reducedMotionMediaQuery,
+		durationVariable,
+		null,
+		transitionMode
+	);
 	const splide = new Splide( carouselElement, {
 		arrows: false,
 		drag: true,
@@ -115,11 +153,11 @@ function initializePeekingCarousel( rootElement, config ) {
 		keyboard: 'focused',
 		pagination: false,
 		perMove: 1,
-		speed: 0,
+		speed: getCarouselSpeed( reducedMotionMediaQuery, transitionMode ),
 		trimSpace: false,
 		type: 'loop',
 		updateOnMove: true,
-		waitForTransition: true,
+		waitForTransition: 'slide' === transitionMode,
 		padding: {
 			left: '0rem',
 			right: '0rem',
@@ -160,7 +198,9 @@ function initializePeekingCarousel( rootElement, config ) {
 		syncMotionPreference(
 			rootElement,
 			reducedMotionMediaQuery,
-			durationVariable
+			durationVariable,
+			splide,
+			transitionMode
 		);
 	} );
 }

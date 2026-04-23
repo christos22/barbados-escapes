@@ -25,6 +25,30 @@
     "showArrows": {
       "type": "boolean",
       "default": false
+    },
+    "arrowPositionPreset": {
+      "type": "string",
+      "default": "center"
+    },
+    "arrowOffsetX": {
+      "type": "number",
+      "default": 0
+    },
+    "arrowOffsetY": {
+      "type": "number",
+      "default": 0
+    },
+    "thumbArrowPositionPreset": {
+      "type": "string",
+      "default": "center"
+    },
+    "thumbArrowOffsetX": {
+      "type": "number",
+      "default": 0
+    },
+    "thumbArrowOffsetY": {
+      "type": "number",
+      "default": 0
     }
   },
   "supports": {

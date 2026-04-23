@@ -21,6 +21,18 @@
     "villaCount": {
       "type": "number",
       "default": 3
+    },
+    "arrowPositionPreset": {
+      "type": "string",
+      "default": "center"
+    },
+    "arrowOffsetX": {
+      "type": "number",
+      "default": 0
+    },
+    "arrowOffsetY": {
+      "type": "number",
+      "default": 0
     }
   },
   "supports": {

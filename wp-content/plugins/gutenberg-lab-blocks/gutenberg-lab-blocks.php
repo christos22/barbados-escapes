@@ -74,13 +74,104 @@ function gutenberg_lab_blocks_get_slider_arrow_icon() {
 }
 
 /**
- * Long line-arrow icon used by editorial carousel controls.
+ * Normalizes one slider arrow preset to the supported shared CSS modifiers.
  *
- * This keeps the 1 Hotels-inspired feature carousel arrows visually distinct
- * from the circular button treatment used by the other sliders.
+ * @param string $preset Shared preset slug from block attributes.
+ * @param string $default Default preset for the current block.
+ * @return string
  */
-function gutenberg_lab_blocks_get_slider_line_arrow_icon() {
-	return '<svg class="vvm-slider-button__icon vvm-slider-button__icon--line" viewBox="0 0 72 24" aria-hidden="true" focusable="false"><path d="M2 12h62" /><path d="M54 3l9 9-9 9" /></svg>';
+function gutenberg_lab_blocks_normalize_slider_arrow_preset( $preset, $default = 'center' ) {
+	$allowed_presets = array( 'center', 'bottom-right', 'bottom-center' );
+	$default         = in_array( $default, $allowed_presets, true ) ? $default : 'center';
+
+	return in_array( $preset, $allowed_presets, true ) ? $preset : $default;
+}
+
+/**
+ * Clamps one slider arrow offset to the supported range and step size.
+ *
+ * Matching the editor control constraints here prevents unexpected values from
+ * bypassing the preset-based layout contract on the front end.
+ *
+ * @param mixed $offset Raw block attribute value.
+ * @return int
+ */
+function gutenberg_lab_blocks_normalize_slider_arrow_offset( $offset ) {
+	$offset = is_numeric( $offset ) ? (int) $offset : 0;
+	$offset = (int) round( $offset / 4 ) * 4;
+
+	return max( -64, min( 64, $offset ) );
+}
+
+/**
+ * Returns the class and inline style attributes for a shared arrow wrapper.
+ *
+ * @param array $attributes Block attributes.
+ * @param array $args Helper configuration.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_slider_controls_attributes( $attributes, $args = array() ) {
+	$args = wp_parse_args(
+		$args,
+		array(
+			'class_name'   => '',
+			'default_preset' => 'center',
+			'offset_x_key' => 'arrowOffsetX',
+			'offset_y_key' => 'arrowOffsetY',
+			'position_key' => 'arrowPositionPreset',
+			'style_vars'   => array(),
+		)
+	);
+
+	$preset = gutenberg_lab_blocks_normalize_slider_arrow_preset(
+		(string) ( $attributes[ $args['position_key'] ] ?? '' ),
+		$args['default_preset']
+	);
+	$style_vars = array(
+		'--vvm-slider-controls-offset-x' => gutenberg_lab_blocks_normalize_slider_arrow_offset(
+			$attributes[ $args['offset_x_key'] ] ?? 0
+		) . 'px',
+		'--vvm-slider-controls-offset-y' => gutenberg_lab_blocks_normalize_slider_arrow_offset(
+			$attributes[ $args['offset_y_key'] ] ?? 0
+		) . 'px',
+	);
+
+	foreach ( (array) $args['style_vars'] as $property => $value ) {
+		if ( ! is_string( $property ) || '' === trim( $property ) ) {
+			continue;
+		}
+
+		if ( ! is_scalar( $value ) || '' === trim( (string) $value ) ) {
+			continue;
+		}
+
+		$style_vars[ trim( $property ) ] = trim( (string) $value );
+	}
+
+	$style_tokens = array();
+
+	foreach ( $style_vars as $property => $value ) {
+		$style_tokens[] = $property . ':' . $value;
+	}
+
+	$style_attribute = safecss_filter_attr( implode( ';', $style_tokens ) . ';' );
+	$class_names     = array_filter(
+		preg_split(
+			'/\s+/',
+			trim(
+				'vvm-slider-controls vvm-slider-controls--preset-' .
+				$preset .
+				' ' .
+				(string) $args['class_name']
+			)
+		)
+	);
+
+	return sprintf(
+		'class="%1$s"%2$s',
+		esc_attr( implode( ' ', $class_names ) ),
+		'' !== $style_attribute ? ' style="' . esc_attr( $style_attribute ) . '"' : ''
+	);
 }
 
 /**

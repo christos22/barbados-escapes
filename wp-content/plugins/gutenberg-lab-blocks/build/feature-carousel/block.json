@@ -13,6 +13,24 @@
     "editorial",
     "slider"
   ],
+  "attributes": {
+    "transitionStyle": {
+      "type": "string",
+      "default": "fade"
+    },
+    "arrowPositionPreset": {
+      "type": "string",
+      "default": "bottom-center"
+    },
+    "arrowOffsetX": {
+      "type": "number",
+      "default": 0
+    },
+    "arrowOffsetY": {
+      "type": "number",
+      "default": 0
+    }
+  },
   "supports": {
     "anchor": true,
     "html": false,

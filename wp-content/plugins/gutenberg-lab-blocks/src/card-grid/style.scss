@@ -17,10 +17,7 @@
 	}
 
 	.vvm-card-grid__carousel-controls {
-		--vvm-slider-visible-columns: var(--vvm-card-grid-visible-columns);
-		--vvm-slider-media-ratio-width: var(--vvm-card-grid-media-ratio-width);
-		--vvm-slider-media-ratio-height: var(--vvm-card-grid-media-ratio-height);
-		--vvm-slider-controls-width: min(95%, calc(100% - 1rem));
+		--vvm-slider-controls-inset-inline: 0.5rem;
 	}
 
 	.vvm-card-grid__viewport {

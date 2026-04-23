@@ -218,6 +218,7 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render' ) ) {
 		$carousel_id         = wp_unique_id( $config['id_prefix'] );
 		$has_multiple_slides = count( $slide_blocks ) > 1;
 		$slides_markup       = '';
+		$transition_style    = 'slide' === ( $attributes['transitionStyle'] ?? '' ) ? 'slide' : 'fade';
 
 		foreach ( $slide_blocks as $index => $slide_block ) {
 			$slides_markup .= gutenberg_lab_peeking_carousel_render_slide(
@@ -234,23 +235,25 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render' ) ) {
 					array_filter(
 						array(
 							$config['wrapper_class'],
+							$config['wrapper_class'] . '--transition-' . sanitize_html_class( $transition_style ),
 							empty( $attributes['align'] ) ? 'alignfull' : '',
 						)
 					)
 				),
-				$config['root_data_attribute'] => '',
+				$config['root_data_attribute']   => '',
+				'data-carousel-transition'       => $transition_style,
 			)
 		);
 
 		ob_start();
 		?>
 		<section <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<div class="vvm-feature-carousel__shell">
-				<div
-					id="<?php echo esc_attr( $carousel_id ); ?>"
-					class="vvm-feature-carousel__carousel splide"
-					<?php echo esc_attr( $config['carousel_data_attribute'] ); ?>
-					aria-label="<?php echo esc_attr( $config['carousel_label'] ); ?>"
+			<div class="vvm-feature-carousel__shell vvm-slider-surface">
+			<div
+				id="<?php echo esc_attr( $carousel_id ); ?>"
+				class="vvm-feature-carousel__carousel splide"
+				<?php echo esc_attr( $config['carousel_data_attribute'] ); ?>
+				aria-label="<?php echo esc_attr( $config['carousel_label'] ); ?>"
 				>
 					<div class="splide__track">
 						<ul class="splide__list">
@@ -260,30 +263,36 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render' ) ) {
 				</div>
 
 				<?php if ( $has_multiple_slides ) : ?>
-					<div class="vvm-feature-carousel__chrome">
-						<div class="vvm-feature-carousel__chrome-spacer" aria-hidden="true"></div>
+					<div
+						<?php
+						echo gutenberg_lab_blocks_get_slider_controls_attributes(
+							$attributes,
+							array(
+								'class_name'     => 'vvm-feature-carousel__controls',
+								'default_preset' => 'bottom-center',
+							)
+						); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						?>
+					>
+						<button
+							type="button"
+							class="vvm-feature-carousel__button vvm-slider-button vvm-slider-button--prev"
+							<?php echo esc_attr( $config['previous_button_data_attribute'] ); ?>
+							aria-controls="<?php echo esc_attr( $carousel_id ); ?>"
+							aria-label="<?php echo esc_attr( $config['previous_button_label'] ); ?>"
+						>
+							<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						</button>
 
-						<div class="vvm-feature-carousel__controls">
-							<button
-								type="button"
-								class="vvm-feature-carousel__button vvm-feature-carousel__button--prev vvm-slider-button--prev"
-								<?php echo esc_attr( $config['previous_button_data_attribute'] ); ?>
-								aria-controls="<?php echo esc_attr( $carousel_id ); ?>"
-								aria-label="<?php echo esc_attr( $config['previous_button_label'] ); ?>"
-							>
-								<?php echo gutenberg_lab_blocks_get_slider_line_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							</button>
-
-							<button
-								type="button"
-								class="vvm-feature-carousel__button vvm-feature-carousel__button--next vvm-slider-button--next"
-								<?php echo esc_attr( $config['next_button_data_attribute'] ); ?>
-								aria-controls="<?php echo esc_attr( $carousel_id ); ?>"
-								aria-label="<?php echo esc_attr( $config['next_button_label'] ); ?>"
-							>
-								<?php echo gutenberg_lab_blocks_get_slider_line_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							</button>
-						</div>
+						<button
+							type="button"
+							class="vvm-feature-carousel__button vvm-slider-button vvm-slider-button--next"
+							<?php echo esc_attr( $config['next_button_data_attribute'] ); ?>
+							aria-controls="<?php echo esc_attr( $carousel_id ); ?>"
+							aria-label="<?php echo esc_attr( $config['next_button_label'] ); ?>"
+						>
+							<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						</button>
 					</div>
 				<?php endif; ?>
 			</div>

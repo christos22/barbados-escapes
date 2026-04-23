@@ -440,11 +440,21 @@ function gutenberg_lab_blocks_render_packages_display_markup( $attributes, $bloc
 
 		<?php if ( $use_carousel ) : ?>
 			<div
-				class="vvm-packages-display__carousel"
+				class="vvm-packages-display__carousel vvm-slider-surface"
 				data-packages-display-carousel
 				data-visible-columns="<?php echo esc_attr( $visible_columns ); ?>"
 			>
-				<div class="vvm-packages-display__carousel-controls vvm-slider-controls vvm-slider-controls--bottom-right">
+				<div
+					<?php
+					echo gutenberg_lab_blocks_get_slider_controls_attributes(
+						$attributes,
+						array(
+							'class_name'     => 'vvm-packages-display__carousel-controls',
+							'default_preset' => 'bottom-right',
+						)
+					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
+				>
 					<button
 						type="button"
 						class="vvm-packages-display__carousel-button vvm-slider-button vvm-slider-button--prev"

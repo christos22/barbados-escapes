@@ -1,5 +1,7 @@
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel
 	.vvm-villa-gallery-carousel__editor-viewport {
+	--vvm-slider-controls-center-trim-block-end: 0.75rem;
+	position: relative;
 	overflow-x: auto;
 	padding-bottom: 0.75rem;
 }

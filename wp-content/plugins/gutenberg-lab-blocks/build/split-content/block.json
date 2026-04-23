@@ -67,6 +67,18 @@
     "galleryImages": {
       "type": "array",
       "default": []
+    },
+    "arrowPositionPreset": {
+      "type": "string",
+      "default": "bottom-right"
+    },
+    "arrowOffsetX": {
+      "type": "number",
+      "default": 0
+    },
+    "arrowOffsetY": {
+      "type": "number",
+      "default": 0
     }
   },
   "supports": {

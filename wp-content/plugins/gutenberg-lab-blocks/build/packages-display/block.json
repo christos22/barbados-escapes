@@ -45,6 +45,18 @@
     "showCta": {
       "type": "boolean",
       "default": false
+    },
+    "arrowPositionPreset": {
+      "type": "string",
+      "default": "bottom-right"
+    },
+    "arrowOffsetX": {
+      "type": "number",
+      "default": 0
+    },
+    "arrowOffsetY": {
+      "type": "number",
+      "default": 0
     }
   },
   "usesContext": [

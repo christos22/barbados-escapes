@@ -1,32 +1,34 @@
+@use "../shared/carousel-editor" as carouselEditor;
+
 .wp-block-gutenberg-lab-blocks-two-up-carousel.vvm-two-up-carousel--editor {
+	@include carouselEditor.unclipped-editor-root();
+
 	.vvm-two-up-carousel__editor-shell {
-		display: grid;
-		gap: 1rem;
+		@include carouselEditor.editor-shell();
+	}
+
+	.vvm-two-up-carousel__editor-stage-shell {
+		position: relative;
+		--vvm-two-up-carousel-center-trim-block-end: calc(
+			clamp(2.8rem, 4vw, 3.5rem) + 1rem
+		);
 	}
 
 	.vvm-two-up-carousel__editor-note {
-		margin: 0;
-		max-width: 52rem;
-		color: rgba(30, 61, 47, 0.78);
-		font-size: 0.95rem;
-		line-height: 1.6;
+		@include carouselEditor.editor-note();
 	}
 
 	.vvm-two-up-carousel__editor-viewport {
-		padding: 1rem;
-		border: 1px solid rgba(30, 61, 47, 0.12);
-		background: rgba(255, 255, 255, 0.6);
+		@include carouselEditor.editor-viewport();
 	}
 
-	.vvm-two-up-carousel__editor-track
-		> .block-editor-inner-blocks
-		> .block-editor-block-list__layout {
-		display: grid;
-		gap: 1rem;
+	.vvm-two-up-carousel__editor-track {
+		@include carouselEditor.editor-track();
 	}
 
-	.block-editor-button-block-appender,
-	.block-list-appender {
-		margin-top: 0.5rem;
+	.vvm-two-up-carousel__editor-controls-shell {
+		min-block-size: clamp(2.8rem, 4vw, 3.5rem);
 	}
+
+	@include carouselEditor.editor-appender();
 }

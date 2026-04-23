@@ -8,6 +8,20 @@
 	"icon": "images-alt2",
 	"description": "A reusable carousel that shows two featured slides at a time with adjacent slides partially visible.",
 	"keywords": [ "two-up", "carousel", "paired", "slider" ],
+	"attributes": {
+		"arrowPositionPreset": {
+			"type": "string",
+			"default": "bottom-center"
+		},
+		"arrowOffsetX": {
+			"type": "number",
+			"default": 0
+		},
+		"arrowOffsetY": {
+			"type": "number",
+			"default": 0
+		}
+	},
 	"supports": {
 		"anchor": true,
 		"html": false,

@@ -16,6 +16,10 @@ import {
 } from '@wordpress/components';
 import { useEffect, useRef } from '@wordpress/element';
 
+import {
+	SliderArrowControlsPanel,
+	SliderArrowPreview,
+} from '../shared/slider-arrow-controls';
 import './editor.scss';
 
 const DESKTOP_POSITION_OPTIONS = [
@@ -139,6 +143,8 @@ export default function Edit( { attributes, setAttributes } ) {
 	} = attributes;
 	const blockRef = useRef();
 	const contentPanelStyleVars = getContentPanelStyleVars( contentBackgroundColor );
+	const hasSliderArrows =
+		'slider' === mediaType && galleryImages.length > 1;
 
 	const blockProps = useBlockProps( {
 		ref: blockRef,
@@ -351,11 +357,18 @@ export default function Edit( { attributes, setAttributes } ) {
 
 		if ( 'slider' === mediaType && galleryImages.length ) {
 			return (
-				<div className="split-content__slider-preview">
+				<div className="split-content__slider-preview vvm-slider-surface">
 					<img
 						className="split-content__media-asset"
 						src={ galleryImages[ 0 ].url }
 						alt={ galleryImages[ 0 ].alt }
+					/>
+					<SliderArrowPreview
+						attributes={ attributes }
+						className="split-content__slider-controls"
+						buttonClassName="split-content__slider-button"
+						defaultPreset="bottom-right"
+						isVisible={ hasSliderArrows }
 					/>
 					<span className="split-content__slider-badge">
 						{ sprintf(
@@ -502,6 +515,14 @@ export default function Edit( { attributes, setAttributes } ) {
 					/>
 					{ renderMediaUploader() }
 				</PanelBody>
+				{ hasSliderArrows ? (
+					<SliderArrowControlsPanel
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+						defaultPreset="bottom-right"
+						initialOpen={ false }
+					/>
+				) : null }
 			</InspectorControls>
 
 			<section { ...blockProps }>

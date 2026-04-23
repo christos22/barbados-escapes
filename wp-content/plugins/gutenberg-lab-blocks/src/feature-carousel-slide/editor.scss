@@ -1,9 +1,10 @@
 .wp-block-gutenberg-lab-blocks-feature-carousel-slide {
-	.vvm-feature-carousel__slide-editor {
+	&.vvm-feature-carousel__slide-editor {
 		display: grid;
 		grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
 		background: #d7e0da;
 		box-shadow: inset 0 0 0 1px rgba(30, 61, 47, 0.08);
+		overflow: hidden;
 	}
 
 	.vvm-feature-carousel__slide-editor-media {
@@ -50,17 +51,15 @@
 	.vvm-feature-carousel__slide-editor-panel-flow {
 		display: grid;
 		gap: 1rem;
+		min-height: 100%;
 		width: 100%;
-		padding: clamp(1.25rem, 2vw, 2rem);
-		align-content: center;
-	}
-
-	.vvm-feature-carousel__slide-editor-panel-flow > .block-editor-inner-blocks,
-	.vvm-feature-carousel__slide-editor-panel-flow
-		> .block-editor-inner-blocks
-		> .block-editor-block-list__layout {
-		display: grid;
-		gap: 1rem;
+		/*
+		 * Reserve some space for Gutenberg's floating block toolbar so the
+		 * heading stays easy to click and edit inside the slide panel.
+		 */
+		padding: clamp(1.5rem, 2.4vw, 2.25rem);
+		padding-top: clamp(3.75rem, 7vw, 4.75rem);
+		align-content: start;
 	}
 
 	.vvm-feature-carousel__slide-editor-panel-flow .wp-block-heading {
@@ -74,11 +73,21 @@
 		margin: 0;
 		color: rgba(30, 61, 47, 0.76);
 	}
+
+	.vvm-feature-carousel__slide-editor-panel-flow
+		.block-editor-button-block-appender,
+	.vvm-feature-carousel__slide-editor-panel-flow .block-list-appender {
+		margin-top: 0.25rem;
+	}
 }
 
 @media (max-width: 781px) {
-	.wp-block-gutenberg-lab-blocks-feature-carousel-slide
-		.vvm-feature-carousel__slide-editor {
+	.wp-block-gutenberg-lab-blocks-feature-carousel-slide.vvm-feature-carousel__slide-editor {
 		grid-template-columns: 1fr;
+	}
+
+	.wp-block-gutenberg-lab-blocks-feature-carousel-slide
+		.vvm-feature-carousel__slide-editor-panel-flow {
+		padding-top: clamp(1.5rem, 5vw, 2rem);
 	}
 }

@@ -399,7 +399,7 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 ?>
 
 <section <?php echo $wrapper_attributes; ?>>
-	<div class="vvm-villa-gallery-hero__stage-shell">
+	<div class="vvm-villa-gallery-hero__stage-shell vvm-slider-surface">
 		<?php if ( $has_thumb_navigation ) : ?>
 			<div
 				class="vvm-villa-gallery-hero__stage splide"
@@ -453,10 +453,19 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 				</div>
 			</div>
 			<?php if ( $show_arrows ) : ?>
-				<div class="vvm-villa-gallery-hero__controls">
+				<div
+					<?php
+					echo gutenberg_lab_blocks_get_slider_controls_attributes(
+						$attributes,
+						array(
+							'class_name' => 'vvm-villa-gallery-hero__controls',
+						)
+					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
+				>
 					<button
 						type="button"
-						class="vvm-villa-gallery-hero__button vvm-slider-button vvm-slider-button--overlay vvm-slider-button--prev"
+						class="vvm-villa-gallery-hero__button vvm-slider-button vvm-slider-button--prev"
 						data-villa-gallery-prev
 						aria-label="<?php esc_attr_e( 'Previous slide', 'gutenberg-lab-blocks' ); ?>"
 					>
@@ -464,7 +473,7 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 					</button>
 					<button
 						type="button"
-						class="vvm-villa-gallery-hero__button vvm-slider-button vvm-slider-button--overlay vvm-slider-button--next"
+						class="vvm-villa-gallery-hero__button vvm-slider-button vvm-slider-button--next"
 						data-villa-gallery-next
 						aria-label="<?php esc_attr_e( 'Next slide', 'gutenberg-lab-blocks' ); ?>"
 					>
@@ -529,16 +538,39 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 	</div>
 
 		<?php if ( $has_thumb_navigation ) : ?>
-			<div class="vvm-villa-gallery-hero__thumbs-shell">
-				<button
-					type="button"
-					class="vvm-villa-gallery-hero__thumb-rail-button vvm-villa-gallery-hero__thumb-rail-button--prev vvm-slider-button--prev"
-					data-villa-gallery-thumbs-prev
-					aria-label="<?php esc_attr_e( 'Scroll gallery thumbnails backward', 'gutenberg-lab-blocks' ); ?>"
-					hidden
+			<div class="vvm-villa-gallery-hero__thumbs-shell vvm-slider-surface">
+				<div
+					<?php
+					echo gutenberg_lab_blocks_get_slider_controls_attributes(
+						$attributes,
+						array(
+							'class_name'     => 'vvm-villa-gallery-hero__thumb-controls',
+							'position_key'   => 'thumbArrowPositionPreset',
+							'offset_x_key'   => 'thumbArrowOffsetX',
+							'offset_y_key'   => 'thumbArrowOffsetY',
+						)
+					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				>
-					<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				</button>
+					<button
+						type="button"
+						class="vvm-villa-gallery-hero__thumb-rail-button vvm-slider-button vvm-slider-button--prev"
+						data-villa-gallery-thumbs-prev
+						aria-label="<?php esc_attr_e( 'Scroll gallery thumbnails backward', 'gutenberg-lab-blocks' ); ?>"
+						hidden
+					>
+						<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</button>
+					<button
+						type="button"
+						class="vvm-villa-gallery-hero__thumb-rail-button vvm-slider-button vvm-slider-button--next"
+						data-villa-gallery-thumbs-next
+						aria-label="<?php esc_attr_e( 'Scroll gallery thumbnails forward', 'gutenberg-lab-blocks' ); ?>"
+						hidden
+					>
+						<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</button>
+				</div>
 
 				<div
 					class="vvm-villa-gallery-hero__thumbs splide is-rendered"
@@ -576,16 +608,6 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 						</ul>
 					</div>
 				</div>
-
-				<button
-					type="button"
-					class="vvm-villa-gallery-hero__thumb-rail-button vvm-villa-gallery-hero__thumb-rail-button--next vvm-slider-button--next"
-					data-villa-gallery-thumbs-next
-					aria-label="<?php esc_attr_e( 'Scroll gallery thumbnails forward', 'gutenberg-lab-blocks' ); ?>"
-					hidden
-				>
-					<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				</button>
 			</div>
 		<?php endif; ?>
 	</section>

@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
 import {
 	InnerBlocks,
 	InspectorControls,
@@ -12,6 +13,10 @@ import {
 } from '@wordpress/components';
 import ServerSideRender from '@wordpress/server-side-render';
 
+import {
+	SliderArrowControlsPanel,
+	SliderArrowPreview,
+} from '../shared/slider-arrow-controls';
 import './editor.scss';
 
 const CONTENT_SOURCE_OPTIONS = [
@@ -69,8 +74,28 @@ const TEMPLATE = [
 	],
 ];
 
-export default function Edit( { attributes, setAttributes } ) {
+export default function Edit( { attributes, clientId, setAttributes } ) {
 	const { align, contentSource, villaCount } = attributes;
+	const manualSlideCount = useSelect(
+		( select ) => {
+			const carouselBlock = select( 'core/block-editor' ).getBlock( clientId );
+			const slideRegion = ( carouselBlock?.innerBlocks ?? [] ).find(
+				( innerBlock ) =>
+					'core/group' === innerBlock.name &&
+					innerBlock.attributes?.className?.includes(
+						'vvm-card-carousel__slides'
+					)
+			);
+
+			return ( slideRegion?.innerBlocks ?? [] ).filter(
+				( innerBlock ) =>
+					'gutenberg-lab-blocks/card-carousel-slide' === innerBlock.name
+			).length;
+		},
+		[ clientId ]
+	);
+	const showPreviewArrows =
+		'villas' === contentSource ? villaCount > 1 : manualSlideCount > 1;
 
 	const blockProps = useBlockProps( {
 		className: [
@@ -132,11 +157,28 @@ export default function Edit( { attributes, setAttributes } ) {
 						/>
 					) : null }
 				</PanelBody>
+				{ showPreviewArrows ? (
+					<SliderArrowControlsPanel
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+						initialOpen={ false }
+					/>
+				) : null }
 			</InspectorControls>
 
 			<section { ...blockProps }>
 				<div className="vvm-card-carousel__editor-shell">
-					<div { ...innerBlocksProps } />
+					<div className="vvm-card-carousel__editor-layout-shell vvm-slider-surface">
+						<div { ...innerBlocksProps } />
+						<SliderArrowPreview
+							attributes={ attributes }
+							className="vvm-card-carousel__controls vvm-card-carousel__editor-controls"
+							buttonClassName="vvm-card-carousel__button"
+							isVisible={
+								'manual' === contentSource && showPreviewArrows
+							}
+						/>
+					</div>
 
 					{ 'villas' === contentSource ? (
 						<div className="vvm-card-carousel__dynamic-preview">

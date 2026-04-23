@@ -8,6 +8,10 @@
 		gap: clamp(1.5rem, 3vw, 3rem);
 	}
 
+	.vvm-card-carousel__editor-layout-shell {
+		position: relative;
+	}
+
 	.vvm-card-carousel__layout-editor
 		> .block-editor-inner-blocks
 		> .block-editor-block-list__layout {

@@ -13,6 +13,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import ServerSideRender from '@wordpress/server-side-render';
 
+import { SliderArrowControlsPanel } from '../shared/slider-arrow-controls';
 import './editor.scss';
 
 const COLUMN_OPTIONS = [
@@ -54,6 +55,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		showPrice,
 		showCta,
 	} = attributes;
+	const showArrowControls = 'carousel' === displayMode && count > 1;
 
 	const blockProps = useBlockProps( {
 		className: `vvm-packages-display-editor-preview vvm-packages-display-editor-preview--${ displayMode } vvm-packages-display-editor-preview--columns-${ columns }`,
@@ -121,6 +123,14 @@ export default function Edit( { attributes, setAttributes } ) {
 						onChange={ ( value ) => setAttributes( { showCta: value } ) }
 					/>
 				</PanelBody>
+				{ showArrowControls ? (
+					<SliderArrowControlsPanel
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+						defaultPreset="bottom-right"
+						initialOpen={ false }
+					/>
+				) : null }
 			</InspectorControls>
 
 			<section { ...blockProps }>

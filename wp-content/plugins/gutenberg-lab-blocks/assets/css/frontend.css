@@ -1,44 +1,107 @@
 .vvm-slider-controls {
+	--vvm-slider-controls-gap: 0.75rem;
+	--vvm-slider-controls-inset-inline: clamp(0.75rem, 2vw, 1.5rem);
+	--vvm-slider-controls-inset-block: clamp(0.75rem, 2vw, 1.5rem);
+	--vvm-slider-controls-offset-x: 0px;
+	--vvm-slider-controls-offset-y: 0px;
+	--vvm-slider-controls-width: calc(
+		100% - (var(--vvm-slider-controls-inset-inline) * 2)
+	);
+	--vvm-slider-controls-center-trim-block-start: 0px;
+	--vvm-slider-controls-center-trim-block-end: 0px;
+	--vvm-slider-controls-idle-opacity: 0.58;
+
 	position: absolute;
-	z-index: 2;
+	z-index: 3;
 	display: flex;
-	gap: 0.5rem;
+	align-items: center;
+	gap: var(--vvm-slider-controls-gap);
 	pointer-events: none;
+	opacity: var(--vvm-slider-controls-idle-opacity);
+	transition: opacity 0.24s ease;
 }
 
-.vvm-slider-controls--bottom-right {
-	right: var(--vvm-slider-controls-inset, 1rem);
-	bottom: var(--vvm-slider-controls-inset, 1rem);
-	justify-content: flex-end;
+/*
+ * Slider surfaces opt into the shared fade behavior so arrows stay visible but
+ * only reach full opacity when visitors engage with that carousel region.
+ */
+.vvm-slider-surface:hover .vvm-slider-controls,
+.vvm-slider-surface:focus-within .vvm-slider-controls,
+.vvm-slider-controls:hover,
+.vvm-slider-controls:focus-within {
+	opacity: 1;
 }
 
+.vvm-slider-controls--preset-center,
 .vvm-slider-controls--media-center {
-	top: 0;
+	top: calc(
+		var(--vvm-slider-controls-center-trim-block-start) +
+			(
+				(
+					100% - var(--vvm-slider-controls-center-trim-block-start) -
+						var(--vvm-slider-controls-center-trim-block-end)
+				) / 2
+			)
+	);
 	left: 0;
 	right: 0;
-	align-items: center;
 	justify-content: space-between;
-	width: var(--vvm-slider-controls-width, min(95%, calc(100% - 1rem)));
-	margin: 0 auto;
-	aspect-ratio:
-		calc(
-			var(--vvm-slider-visible-columns, 1) * var(--vvm-slider-media-ratio-width, 3)
-		) / var(--vvm-slider-media-ratio-height, 2);
+	width: min(100%, var(--vvm-slider-controls-width));
+	margin-inline: auto;
+	padding-inline: var(--vvm-slider-controls-inset-inline);
+	transform: translate(
+		var(--vvm-slider-controls-offset-x),
+		calc(-50% + var(--vvm-slider-controls-offset-y))
+	);
+}
+
+.vvm-slider-controls--preset-bottom-right,
+.vvm-slider-controls--bottom-right {
+	right: var(--vvm-slider-controls-inset-inline);
+	bottom: var(--vvm-slider-controls-inset-block);
+	justify-content: flex-end;
+	transform: translate(
+		var(--vvm-slider-controls-offset-x),
+		var(--vvm-slider-controls-offset-y)
+	);
+}
+
+.vvm-slider-controls--preset-bottom-center {
+	left: 50%;
+	bottom: var(--vvm-slider-controls-inset-block);
+	justify-content: center;
+	transform: translate(
+		calc(-50% + var(--vvm-slider-controls-offset-x)),
+		var(--vvm-slider-controls-offset-y)
+	);
 }
 
 .vvm-slider-button {
+	--vvm-slider-button-size: clamp(2.8rem, 4vw, 3.5rem);
+	--vvm-slider-button-icon-size: clamp(1rem, 1.4vw, 1.25rem);
+
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 48px;
-	height: 48px;
+	width: var(--vvm-slider-button-size);
+	height: var(--vvm-slider-button-size);
 	padding: 0;
-	border: 1px solid rgba(1, 50, 35, 0.15);
+	border: 1px solid rgba(1, 50, 35, 0.14);
 	border-radius: 999px;
-	background: #fff;
+	background: rgba(255, 255, 255, 0.92);
 	color: #013223;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-	transition: all 0.25s ease;
+	box-shadow:
+		0 14px 28px rgba(7, 20, 16, 0.14),
+		0 2px 6px rgba(7, 20, 16, 0.08);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	transition:
+		background 0.24s ease,
+		border-color 0.24s ease,
+		color 0.24s ease,
+		box-shadow 0.24s ease,
+		opacity 0.24s ease,
+		transform 0.24s ease;
 	opacity: 1;
 	cursor: pointer;
 	pointer-events: auto;
@@ -46,75 +109,57 @@
 
 .vvm-slider-button:hover:not(:disabled),
 .vvm-slider-button:focus-visible:not(:disabled) {
-	background: #013223;
-	border-color: #013223;
-	color: #fff;
+	background: #ffffff;
+	border-color: rgba(1, 50, 35, 0.22);
+	color: #013223;
+	box-shadow:
+		0 18px 34px rgba(7, 20, 16, 0.18),
+		0 4px 10px rgba(7, 20, 16, 0.1);
+	transform: scale(1.03);
+	opacity: 1;
+}
+
+.vvm-slider-button:focus-visible {
+	outline: none;
 }
 
 .vvm-slider-button:disabled {
-	opacity: 0.2;
+	opacity: 0.28;
 	cursor: default;
+	transform: none;
 }
 
 .vvm-slider-button__icon {
-	width: 24px;
-	height: 24px;
+	width: var(--vvm-slider-button-icon-size);
+	height: var(--vvm-slider-button-icon-size);
 	fill: none;
 	stroke: currentColor;
 	stroke-linecap: round;
 	stroke-linejoin: round;
-	stroke-width: 2;
+	stroke-width: 2.2;
 }
 
 .vvm-slider-button--prev .vvm-slider-button__icon {
 	transform: rotate(180deg);
 }
 
+/*
+ * Older block markup still includes the overlay modifier while we migrate each
+ * block to the single shared button treatment. Keep the selector as a no-op so
+ * existing templates do not lose the shared base styling.
+ */
 .vvm-slider-button--overlay {
-	width: 40px;
-	height: 40px;
-	border-color: rgba(255, 255, 255, 0.22);
-	background: rgba(255, 255, 255, 0.44);
-	color: rgba(1, 50, 35, 0.8);
-	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
-	opacity: 0.48;
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
-}
-
-.vvm-slider-button--overlay:hover:not(:disabled),
-.vvm-slider-button--overlay:focus-visible:not(:disabled) {
-	opacity: 1;
-	transform: scale(1.03);
-}
-
-.vvm-slider-button--overlay:disabled {
-	opacity: 0.18;
-}
-
-.vvm-slider-button--overlay .vvm-slider-button__icon {
-	width: 18px;
-	height: 18px;
 }
 
 @media (max-width: 781px) {
+	.vvm-slider-controls {
+		--vvm-slider-controls-gap: 0.5rem;
+		--vvm-slider-controls-inset-inline: 0.75rem;
+		--vvm-slider-controls-inset-block: 0.75rem;
+	}
+
 	.vvm-slider-button {
-		width: 42px;
-		height: 42px;
-	}
-
-	.vvm-slider-button__icon {
-		width: 20px;
-		height: 20px;
-	}
-
-	.vvm-slider-button--overlay {
-		width: 36px;
-		height: 36px;
-	}
-
-	.vvm-slider-button--overlay .vvm-slider-button__icon {
-		width: 16px;
-		height: 16px;
+		--vvm-slider-button-size: 2.9rem;
+		--vvm-slider-button-icon-size: 1rem;
 	}
 }

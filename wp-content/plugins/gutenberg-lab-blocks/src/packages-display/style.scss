@@ -1,6 +1,7 @@
 .wp-block-gutenberg-lab-blocks-packages-display {
 	--vvm-package-grid-gap: clamp(1.5rem, 2vw, 2.25rem);
 	--vvm-packages-display-visible-columns: 1;
+	--vvm-packages-display-controls-reserve: 4.5rem;
 }
 
 .vvm-packages-display {
@@ -39,12 +40,15 @@
 
 .vvm-packages-display__carousel {
 	position: relative;
-	padding-bottom: 4.5rem;
+	padding-bottom: var(--vvm-packages-display-controls-reserve);
 }
 
 .vvm-packages-display__carousel-controls {
-	right: 0;
-	bottom: 0;
+	--vvm-slider-controls-inset-inline: 0px;
+	--vvm-slider-controls-inset-block: 0px;
+	--vvm-slider-controls-center-trim-block-end: var(
+		--vvm-packages-display-controls-reserve
+	);
 }
 
 .vvm-packages-display__viewport {

@@ -13,6 +13,20 @@
     "carousel",
     "slider"
   ],
+  "attributes": {
+    "arrowPositionPreset": {
+      "type": "string",
+      "default": "center"
+    },
+    "arrowOffsetX": {
+      "type": "number",
+      "default": 0
+    },
+    "arrowOffsetY": {
+      "type": "number",
+      "default": 0
+    }
+  },
   "supports": {
     "html": false,
     "anchor": true,

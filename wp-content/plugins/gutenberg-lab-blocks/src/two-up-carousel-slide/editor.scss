@@ -1,31 +1,20 @@
 .wp-block-gutenberg-lab-blocks-two-up-carousel-slide {
-	.vvm-two-up-carousel__slide-editor {
-		position: relative;
+	&.vvm-two-up-carousel__slide-editor {
 		display: grid;
+		grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
 		overflow: hidden;
-		aspect-ratio: 4 / 5;
-		background: #d7e0da;
+		min-height: clamp(16rem, 30vw, 22rem);
+		background: var(--wp--preset--color--light-gold, #f5ecd7);
 		box-shadow: inset 0 0 0 1px rgba(30, 61, 47, 0.08);
-		isolation: isolate;
 	}
 
 	.vvm-two-up-carousel__slide-editor::after {
-		content: "";
-		position: absolute;
-		inset: 0;
-		z-index: 1;
-		background: linear-gradient(
-			180deg,
-			rgba(0, 0, 0, 0.06) 0%,
-			rgba(0, 0, 0, 0.18) 46%,
-			rgba(0, 0, 0, 0.74) 100%
-		);
-		pointer-events: none;
+		display: none;
 	}
 
 	.vvm-two-up-carousel__slide-editor-media {
-		position: absolute;
-		inset: 0;
+		position: relative;
+		min-height: 100%;
 		background: linear-gradient(135deg, #bccac3 0%, #8aa198 100%);
 	}
 
@@ -60,20 +49,24 @@
 	}
 
 	.vvm-two-up-carousel__slide-editor-overlay {
-		position: relative;
-		z-index: 2;
 		display: grid;
-		align-content: end;
-		gap: 0.75rem;
+		align-content: start;
+		gap: 1rem;
 		min-height: 100%;
-		padding: clamp(1rem, 2vw, 1.5rem);
-		color: #f5ecd7;
+		padding: clamp(1.5rem, 2.4vw, 2rem);
+		/*
+		 * The editor should privilege authoring over perfect visual parity.
+		 * A solid content panel prevents the toolbar and inserter controls from
+		 * colliding with overlay text.
+		 */
+		background: var(--wp--preset--color--light-gold, #f5ecd7);
+		color: var(--wp--preset--color--dark-green, #1e3d2f);
 	}
 
 	.vvm-two-up-carousel__slide-editor-note {
 		margin: 0;
-		max-width: 22rem;
-		color: rgba(245, 236, 215, 0.84);
+		max-width: 24rem;
+		color: rgba(30, 61, 47, 0.74);
 		font-size: 0.85rem;
 		line-height: 1.5;
 	}
@@ -81,20 +74,12 @@
 	.vvm-two-up-carousel__slide-editor-content {
 		display: grid;
 		gap: 0.85rem;
-		width: min(100%, 24rem);
-	}
-
-	.vvm-two-up-carousel__slide-editor-content > .block-editor-inner-blocks,
-	.vvm-two-up-carousel__slide-editor-content
-		> .block-editor-inner-blocks
-		> .block-editor-block-list__layout {
-		display: grid;
-		gap: 0.85rem;
+		width: 100%;
 	}
 
 	.vvm-two-up-carousel__slide-editor-content .wp-block-heading {
 		margin: 0;
-		color: #fff;
+		color: var(--wp--preset--color--dark-green, #1e3d2f);
 		font-family: var(--wp--preset--font-family--refined-sans);
 		font-size: clamp(1rem, 2vw, 1.35rem);
 		font-weight: 500;
@@ -105,6 +90,27 @@
 
 	.vvm-two-up-carousel__slide-editor-content p {
 		margin: 0;
-		color: rgba(245, 236, 215, 0.88);
+		color: rgba(30, 61, 47, 0.78);
+	}
+
+	.vvm-two-up-carousel__slide-editor-content .wp-block-buttons {
+		margin-top: 0.25rem;
+	}
+
+	.vvm-two-up-carousel__slide-editor-content
+		.block-editor-button-block-appender,
+	.vvm-two-up-carousel__slide-editor-content .block-list-appender {
+		margin-top: 0.25rem;
+	}
+}
+
+@media (max-width: 781px) {
+	.wp-block-gutenberg-lab-blocks-two-up-carousel-slide.vvm-two-up-carousel__slide-editor {
+		grid-template-columns: 1fr;
+	}
+
+	.wp-block-gutenberg-lab-blocks-two-up-carousel-slide
+		.vvm-two-up-carousel__slide-editor-media {
+		min-height: clamp(14rem, 52vw, 20rem);
 	}
 }

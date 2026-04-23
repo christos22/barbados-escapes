@@ -85,7 +85,7 @@ $gallery_images = array_values(
 						preload="metadata"
 					></video>
 				<?php elseif ( 'slider' === $media_type && ! empty( $gallery_images ) ) : ?>
-					<div class="split-content__slider" data-split-content-slider>
+					<div class="split-content__slider vvm-slider-surface" data-split-content-slider>
 						<div class="split-content__slides">
 							<?php foreach ( $gallery_images as $gallery_image ) : ?>
 								<figure class="split-content__slide">
@@ -98,7 +98,17 @@ $gallery_images = array_values(
 							<?php endforeach; ?>
 						</div>
 						<?php if ( count( $gallery_images ) > 1 ) : ?>
-							<div class="split-content__slider-controls vvm-slider-controls vvm-slider-controls--bottom-right">
+							<div
+								<?php
+								echo gutenberg_lab_blocks_get_slider_controls_attributes(
+									$attributes,
+									array(
+										'class_name'     => 'split-content__slider-controls',
+										'default_preset' => 'bottom-right',
+									)
+								); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								?>
+							>
 								<button
 									type="button"
 									class="split-content__slider-button vvm-slider-button vvm-slider-button--prev"

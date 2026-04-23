@@ -232,12 +232,21 @@ $wrapper_attributes = get_block_wrapper_attributes(
 		<?php endif; ?>
 
 		<div class="vvm-card-carousel__rail">
-			<div class="vvm-card-carousel__carousel<?php echo $has_overflow_ui ? ' has-overflow-ui' : ''; ?>" data-card-carousel>
+			<div class="vvm-card-carousel__carousel vvm-slider-surface<?php echo $has_overflow_ui ? ' has-overflow-ui' : ''; ?>" data-card-carousel>
 				<?php if ( $has_overflow_ui ) : ?>
-					<div class="vvm-card-carousel__controls">
+					<div
+						<?php
+						echo gutenberg_lab_blocks_get_slider_controls_attributes(
+							$attributes,
+							array(
+								'class_name' => 'vvm-card-carousel__controls',
+							)
+						); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						?>
+					>
 						<button
 							type="button"
-							class="vvm-card-carousel__button vvm-slider-button vvm-slider-button--overlay vvm-slider-button--prev"
+							class="vvm-card-carousel__button vvm-slider-button vvm-slider-button--prev"
 							data-card-carousel-prev
 							aria-label="<?php esc_attr_e( 'Previous slides', 'gutenberg-lab-blocks' ); ?>"
 						>
@@ -245,7 +254,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 						</button>
 						<button
 							type="button"
-							class="vvm-card-carousel__button vvm-slider-button vvm-slider-button--overlay vvm-slider-button--next"
+							class="vvm-card-carousel__button vvm-slider-button vvm-slider-button--next"
 							data-card-carousel-next
 							aria-label="<?php esc_attr_e( 'Next slides', 'gutenberg-lab-blocks' ); ?>"
 						>

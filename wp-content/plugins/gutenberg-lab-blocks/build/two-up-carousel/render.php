@@ -176,7 +176,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 ?>
 
 <section <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-	<div class="vvm-two-up-carousel__shell">
+	<div class="vvm-two-up-carousel__shell vvm-slider-surface<?php echo $has_multiple_slides ? ' vvm-two-up-carousel__shell--has-controls' : ''; ?>">
 		<div
 			class="vvm-two-up-carousel__carousel<?php echo $has_multiple_slides ? ' has-overflow' : ''; ?>"
 			data-two-up-carousel
@@ -190,22 +190,32 @@ $wrapper_attributes = get_block_wrapper_attributes(
 		</div>
 
 		<?php if ( $has_multiple_slides ) : ?>
-			<div class="vvm-two-up-carousel__controls">
+			<div
+				<?php
+				echo gutenberg_lab_blocks_get_slider_controls_attributes(
+					$attributes,
+					array(
+						'class_name'     => 'vvm-two-up-carousel__controls',
+						'default_preset' => 'bottom-center',
+					)
+				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
+			>
 				<button
 					type="button"
-					class="vvm-two-up-carousel__button vvm-slider-button--prev"
+					class="vvm-two-up-carousel__button vvm-slider-button vvm-slider-button--prev"
 					data-two-up-carousel-prev
 					aria-label="<?php esc_attr_e( 'Previous slides', 'gutenberg-lab-blocks' ); ?>"
 				>
-					<?php echo gutenberg_lab_blocks_get_slider_line_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</button>
 				<button
 					type="button"
-					class="vvm-two-up-carousel__button vvm-slider-button--next"
+					class="vvm-two-up-carousel__button vvm-slider-button vvm-slider-button--next"
 					data-two-up-carousel-next
 					aria-label="<?php esc_attr_e( 'Next slides', 'gutenberg-lab-blocks' ); ?>"
 				>
-					<?php echo gutenberg_lab_blocks_get_slider_line_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</button>
 			</div>
 		<?php endif; ?>
