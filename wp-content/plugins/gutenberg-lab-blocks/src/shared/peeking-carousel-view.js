@@ -91,7 +91,7 @@ function syncMotionPreference(
 	);
 
 	if ( splide ) {
-		// Fade mode keeps the track jumpy so CSS owns the visual transition.
+		// Fade mode keeps the track jumpy so CSS owns the visual treatment.
 		splide.options = {
 			speed: getCarouselSpeed( mediaQuery, transitionMode ),
 		};

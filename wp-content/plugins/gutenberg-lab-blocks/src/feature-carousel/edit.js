@@ -7,6 +7,7 @@ import {
 } from '@wordpress/block-editor';
 import { PanelBody, SelectControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
 
 import {
 	SliderArrowControlsPanel,
@@ -32,8 +33,14 @@ const TEMPLATE = [
 	[ 'gutenberg-lab-blocks/feature-carousel-slide' ],
 ];
 
+function normalizeTransitionStyle( transitionStyle ) {
+	return 'slide' === transitionStyle ? 'slide' : 'fade';
+}
+
 export default function Edit( { attributes, clientId, setAttributes } ) {
 	const { align, transitionStyle = 'fade' } = attributes;
+	const normalizedTransitionStyle =
+		normalizeTransitionStyle( transitionStyle );
 	const slideCount = useSelect(
 		( select ) =>
 			(
@@ -46,11 +53,20 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 		[ clientId ]
 	);
 
+	useEffect( () => {
+		// Keep saved attributes constrained to the supported transition values.
+		if ( transitionStyle !== normalizedTransitionStyle ) {
+			setAttributes( {
+				transitionStyle: normalizedTransitionStyle,
+			} );
+		}
+	}, [ normalizedTransitionStyle, setAttributes, transitionStyle ] );
+
 	const blockProps = useBlockProps( {
 		className: [
 			'vvm-feature-carousel',
 			'vvm-feature-carousel--editor',
-			`vvm-feature-carousel--transition-${ transitionStyle }`,
+			`vvm-feature-carousel--transition-${ normalizedTransitionStyle }`,
 			align ? '' : 'alignfull',
 		]
 			.filter( Boolean )
@@ -77,21 +93,21 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 					title={ __( 'Carousel Settings', 'gutenberg-lab-blocks' ) }
 					initialOpen={ true }
 				>
-					<SelectControl
-						label={ __( 'Transition', 'gutenberg-lab-blocks' ) }
-						value={ transitionStyle }
-						options={ TRANSITION_OPTIONS }
-						help={
-							'slide' === transitionStyle
-								? __(
-										'Slide animates the carousel track between items.',
-										'gutenberg-lab-blocks'
-								  )
-								: __(
-										'Fade keeps the current editorial crossfade treatment between active slides.',
-										'gutenberg-lab-blocks'
-								  )
-						}
+						<SelectControl
+							label={ __( 'Transition', 'gutenberg-lab-blocks' ) }
+							value={ normalizedTransitionStyle }
+							options={ TRANSITION_OPTIONS }
+							help={
+								'slide' === normalizedTransitionStyle
+									? __(
+											'Slide moves the carousel track while the text panel stays fully visible.',
+											'gutenberg-lab-blocks'
+									  )
+									: __(
+											'Fade crossfades the imagery while the text panel stays fixed.',
+											'gutenberg-lab-blocks'
+									  )
+							}
 						onChange={ ( value ) =>
 							setAttributes( {
 								transitionStyle: value,
@@ -123,17 +139,17 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 							  ) }
 					</p>
 
-					<p className="vvm-feature-carousel__editor-note">
-						{ 'slide' === transitionStyle
-							? __(
-									'Transition style: Slide. The shared view script will animate the track when visitors move between slides.',
-									'gutenberg-lab-blocks'
-							  )
-							: __(
-									'Transition style: Fade. The shared view script keeps the current crossfade behavior between active slides.',
-									'gutenberg-lab-blocks'
-							  ) }
-					</p>
+						<p className="vvm-feature-carousel__editor-note">
+							{ 'slide' === normalizedTransitionStyle
+								? __(
+										'Transition style: Slide. The track moves between slides while the text panel stays stable.',
+										'gutenberg-lab-blocks'
+								  )
+								: __(
+										'Transition style: Fade. The imagery crossfades while the text panel stays stable.',
+										'gutenberg-lab-blocks'
+								  ) }
+						</p>
 
 					<div className="vvm-feature-carousel__editor-viewport vvm-slider-surface">
 						<div { ...innerBlocksProps } />
