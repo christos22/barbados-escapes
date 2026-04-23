@@ -5,11 +5,16 @@
 		100vh - var(--vvm-header-height, 96px)
 	);
 	--vvm-two-up-carousel-section-padding-block: clamp(2.5rem, 5vw, 4.5rem);
-	--vvm-two-up-carousel-section-padding-inline: 0px;
+	/*
+	 * Add a small desktop gutter so the peeking edge cards do not sit flush
+	 * against the viewport. This helps the center pair read as the primary
+	 * content group.
+	 */
+	--vvm-two-up-carousel-section-padding-inline: clamp(1rem, 2.08vw, 2.5rem);
 	--vvm-two-up-carousel-shell-gap: clamp(0.875rem, 1.8vw, 1.25rem);
 	/*
-	 * Keep the center and side gaps in sync with the 200/700/700/200 target at
-	 * 1920px wide. At that width the gap needs to resolve to 40px.
+	 * Keep the gap close to 40px around the 1920px desktop target so the
+	 * featured pair has breathing room without letting the side cards grow.
 	 */
 	--vvm-two-up-carousel-gap: clamp(1rem, 2.08vw, 3rem);
 	--vvm-two-up-carousel-controls-height: var(
@@ -21,10 +26,10 @@
 			var(--vvm-two-up-carousel-shell-gap)
 	);
 	/*
-	 * Target roughly 200px of visible inactive card at 1920px wide while still
-	 * scaling down on smaller viewports.
+	 * Reserve a much smaller side peek on desktop so the active pair can own
+	 * most of the rail. Around 1920px this resolves to roughly 100px.
 	 */
-	--vvm-two-up-carousel-peek: clamp(3rem, 10.42vw, 12.5rem);
+	--vvm-two-up-carousel-peek: clamp(2rem, 5.2vw, 6.5rem);
 	--vvm-two-up-carousel-visible-slides: 2;
 	--vvm-two-up-carousel-slide-width-by-viewport: calc(
 		(
@@ -42,14 +47,18 @@
 				var(--vvm-two-up-carousel-controls-height)
 		)
 	);
+	/*
+	 * The desktop cards should read as wide editorial panels rather than tall
+	 * portrait tiles, so the height cap projects width using a landscape ratio.
+	 */
 	--vvm-two-up-carousel-slide-width-by-height: calc(
-		var(--vvm-two-up-carousel-card-max-height) * 4 / 5
+		var(--vvm-two-up-carousel-card-max-height) * 4 / 3
 	);
 	--vvm-two-up-carousel-slide-width: min(
 		var(--vvm-two-up-carousel-slide-width-by-viewport),
 		var(--vvm-two-up-carousel-slide-width-by-height)
 	);
-	--vvm-two-up-carousel-slide-ratio: 4 / 5;
+	--vvm-two-up-carousel-slide-ratio: 4 / 3;
 	--vvm-two-up-carousel-surface: var(--wp--preset--color--white, #fff);
 	--vvm-two-up-carousel-card-foreground: #fffdf7;
 	--vvm-two-up-carousel-card-muted: rgba(255, 253, 247, 0.84);
