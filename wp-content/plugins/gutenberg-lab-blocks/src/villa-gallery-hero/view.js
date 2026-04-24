@@ -4,6 +4,11 @@ import {
 	scrollRailByStep,
 	syncRailButtons,
 } from '../shared/rail-navigation';
+import {
+	attemptVimeoShellAutoplay,
+	bindVimeoShellPlayButtons,
+	resetVimeoShell,
+} from '../shared/vimeo-player-shell';
 
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 const THUMB_ACTIVE_CLASS = 'vvm-villa-gallery-hero__thumb-slide--active';
@@ -137,7 +142,7 @@ function bindReducedMotionPreference( mediaQuery, syncCallback ) {
 	}
 }
 
-function syncStageVideos( stageElement, shouldAutoplay ) {
+function syncStageNativeVideos( stageElement, shouldAutoplay ) {
 	if ( ! stageElement ) {
 		return;
 	}
@@ -162,7 +167,7 @@ function syncStageVideos( stageElement, shouldAutoplay ) {
 	} );
 }
 
-function syncStaticVideo( rootElement, shouldAutoplay ) {
+function syncStaticNativeVideo( rootElement, shouldAutoplay ) {
 	const video = rootElement.querySelector( '[data-villa-gallery-static-video]' );
 
 	if ( ! video ) {
@@ -175,6 +180,46 @@ function syncStaticVideo( rootElement, shouldAutoplay ) {
 	}
 
 	resetManagedVideo( video, { showFallback: true } );
+}
+
+function syncStageVimeoShells( stageElement, shouldAutoplay ) {
+	if ( ! stageElement ) {
+		return;
+	}
+
+	const activeSlide = stageElement.querySelector( '.splide__slide.is-active' );
+	const shells = stageElement.querySelectorAll( '[data-villa-gallery-vimeo]' );
+
+	shells.forEach( ( shell ) => {
+		const isActive = activeSlide?.contains( shell );
+
+		if ( ! isActive ) {
+			void resetVimeoShell( shell, { showPoster: true } );
+			return;
+		}
+
+		if ( shouldAutoplay ) {
+			void attemptVimeoShellAutoplay( shell );
+			return;
+		}
+
+		void resetVimeoShell( shell, { showPoster: true } );
+	} );
+}
+
+function syncStaticVimeoShell( rootElement, shouldAutoplay ) {
+	const shell = rootElement.querySelector( '[data-villa-gallery-vimeo]' );
+
+	if ( ! shell ) {
+		return;
+	}
+
+	if ( shouldAutoplay ) {
+		void attemptVimeoShellAutoplay( shell );
+		return;
+	}
+
+	void resetVimeoShell( shell, { showPoster: true } );
 }
 
 function setActiveThumbState( thumbsElement, activeIndex ) {
@@ -192,7 +237,11 @@ function setActiveThumbState( thumbsElement, activeIndex ) {
 		} );
 }
 
-function revealActiveThumbIfNeeded( thumbsElement, activeIndex, prefersReducedMotion ) {
+function revealActiveThumbIfNeeded(
+	thumbsElement,
+	activeIndex,
+	prefersReducedMotion
+) {
 	const track = thumbsElement?.querySelector( '.splide__track' );
 	const activeSlide = thumbsElement?.querySelectorAll( '.splide__slide' )?.[
 		activeIndex
@@ -217,7 +266,8 @@ function syncActiveGalleryState(
 	shouldAutoplay,
 	prefersReducedMotion
 ) {
-	syncStageVideos( stageElement, shouldAutoplay );
+	syncStageNativeVideos( stageElement, shouldAutoplay );
+	syncStageVimeoShells( stageElement, shouldAutoplay );
 	syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion );
 }
 
@@ -265,10 +315,13 @@ function initializeVillaGalleryHero( rootElement ) {
 	const shouldAutoplayVideos = () => ! reducedMotionMediaQuery.matches;
 
 	bindManagedVideoControls( rootElement );
+	bindVimeoShellPlayButtons( rootElement );
 
 	if ( ! stageElement || ! thumbsElement ) {
-		const syncStaticState = () =>
-			syncStaticVideo( rootElement, shouldAutoplayVideos() );
+		const syncStaticState = () => {
+			syncStaticNativeVideo( rootElement, shouldAutoplayVideos() );
+			syncStaticVimeoShell( rootElement, shouldAutoplayVideos() );
+		};
 
 		syncStaticState();
 		bindReducedMotionPreference( reducedMotionMediaQuery, syncStaticState );
@@ -295,8 +348,10 @@ function initializeVillaGalleryHero( rootElement ) {
 		);
 
 	if ( thumbCount <= 1 ) {
-		const syncStaticState = () =>
-			syncStaticVideo( rootElement, shouldAutoplayVideos() );
+		const syncStaticState = () => {
+			syncStaticNativeVideo( rootElement, shouldAutoplayVideos() );
+			syncStaticVimeoShell( rootElement, shouldAutoplayVideos() );
+		};
 
 		syncStaticState();
 		bindReducedMotionPreference( reducedMotionMediaQuery, syncStaticState );
@@ -320,7 +375,7 @@ function initializeVillaGalleryHero( rootElement ) {
 		waitForTransition: true,
 	} );
 
-	const syncActiveState = () =>
+	const syncActiveState = () => {
 		syncActiveGalleryState(
 			stageElement,
 			thumbsElement,
@@ -328,6 +383,7 @@ function initializeVillaGalleryHero( rootElement ) {
 			shouldAutoplayVideos(),
 			prefersReducedMotion
 		);
+	};
 
 	previousThumbRailButton?.addEventListener( 'click', () => {
 		scrollRailByStep( thumbTrack, thumbSlides, -1, prefersReducedMotion );
@@ -348,7 +404,7 @@ function initializeVillaGalleryHero( rootElement ) {
 	window.addEventListener( 'resize', syncThumbRailButtons );
 
 	// `ready` fires after Splide finishes its initial setup, which means the
-	// first active slide is in place before we try to autoplay its inline video.
+	// first active slide is in place before we try to autoplay its managed media.
 	stage.on( 'ready moved', () => {
 		syncActiveState();
 		window.requestAnimationFrame( syncThumbRailButtons );

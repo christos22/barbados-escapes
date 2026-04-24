@@ -27,7 +27,15 @@
 		"videoId": {
 			"type": "number"
 		},
+		"videoSource": {
+			"type": "string",
+			"default": "uploaded"
+		},
 		"videoUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"vimeoUrl": {
 			"type": "string",
 			"default": ""
 		},
@@ -94,5 +102,6 @@
 	"editorScript": "file:./index.js",
 	"editorStyle": "file:./index.css",
 	"style": "file:./style-index.css",
-	"render": "file:./render.php"
+	"render": "file:./render.php",
+	"viewScript": "file:./view.js"
 }

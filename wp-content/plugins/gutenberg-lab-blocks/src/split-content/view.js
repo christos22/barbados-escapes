@@ -1,3 +1,5 @@
+import { initializeStandaloneVimeoShells } from '../shared/vimeo-player-shell';
+
 function initializeSplitContentSlider( slider ) {
 	const track = slider.querySelector( '.split-content__slides' );
 	const slides = slider.querySelectorAll( '.split-content__slide' );
@@ -85,7 +87,10 @@ function initializeSplitContentSizing( block ) {
 window.addEventListener( 'DOMContentLoaded', () => {
 	document
 		.querySelectorAll( '.wp-block-gutenberg-lab-blocks-split-content' )
-		.forEach( initializeSplitContentSizing );
+		.forEach( ( block ) => {
+			initializeSplitContentSizing( block );
+			initializeStandaloneVimeoShells( block );
+		} );
 
 	document
 		.querySelectorAll( '[data-split-content-slider]' )

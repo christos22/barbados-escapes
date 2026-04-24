@@ -34,6 +34,8 @@
 - If a slider or other library needs structural CSS on the frontend, import it into `style.scss` so Gutenberg emits it in `style-index.css`; importing it in `index.js` only feeds the editor bundle.
 - Shared UI chrome such as slider arrows should live in shared plugin assets and be applied through reusable classes, while each block keeps only its own positioning and state rules.
 - When a hero needs to feel viewport-sized, cap the stage with the visible viewport minus the shared admin-bar offset, then reserve rail space only on viewports tall enough to show the whole hero in one screen.
+- Vimeo embeds need iframe/player handling instead of a native `<video>` tag, so the block should store the source choice and URL while PHP/front-end JS decide how to render the real player shell.
+- Keep `edit.js` preview-only for remote video sources: let the editor collect the Vimeo URL and poster image, then let dynamic PHP plus view scripts handle autoplay, fallback posters, and player lifecycle on the frontend.
 
 ## Value Pillars
 

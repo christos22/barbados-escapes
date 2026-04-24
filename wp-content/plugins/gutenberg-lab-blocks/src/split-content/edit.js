@@ -12,6 +12,7 @@ import {
 	ColorPicker,
 	PanelBody,
 	SelectControl,
+	TextControl,
 	ToggleControl,
 } from '@wordpress/components';
 import { useEffect, useRef } from '@wordpress/element';
@@ -20,6 +21,7 @@ import {
 	SliderArrowControlsPanel,
 	SliderArrowPreview,
 } from '../shared/slider-arrow-controls';
+import { getVimeoVideoId } from '../shared/vimeo-url';
 import './editor.scss';
 
 const DESKTOP_POSITION_OPTIONS = [
@@ -53,6 +55,14 @@ const MEDIA_TYPE_OPTIONS = [
 	{ label: __( 'Image', 'gutenberg-lab-blocks' ), value: 'image' },
 	{ label: __( 'Video', 'gutenberg-lab-blocks' ), value: 'video' },
 	{ label: __( 'Slider', 'gutenberg-lab-blocks' ), value: 'slider' },
+];
+
+const VIDEO_SOURCE_OPTIONS = [
+	{
+		label: __( 'Uploaded video', 'gutenberg-lab-blocks' ),
+		value: 'uploaded',
+	},
+	{ label: __( 'Vimeo URL', 'gutenberg-lab-blocks' ), value: 'vimeo' },
 ];
 
 const ALLOWED_INNER_BLOCKS = [
@@ -138,13 +148,21 @@ export default function Edit( { attributes, setAttributes } ) {
 		imageUrl,
 		imageAlt,
 		videoId,
+		videoSource,
 		videoUrl,
+		vimeoUrl,
+		posterImageId,
+		posterImageUrl,
+		posterImageAlt,
 		galleryImages,
 	} = attributes;
 	const blockRef = useRef();
 	const contentPanelStyleVars = getContentPanelStyleVars( contentBackgroundColor );
 	const hasSliderArrows =
 		'slider' === mediaType && galleryImages.length > 1;
+	const isVimeoVideo = 'video' === mediaType && 'vimeo' === videoSource;
+	const hasValidVimeoUrl = Boolean( getVimeoVideoId( vimeoUrl ) );
+	const hasCompleteVimeoVideo = hasValidVimeoUrl && Boolean( posterImageUrl );
 
 	const blockProps = useBlockProps( {
 		ref: blockRef,
@@ -241,6 +259,8 @@ export default function Edit( { attributes, setAttributes } ) {
 		mediaOnEdge,
 		imageUrl,
 		videoUrl,
+		vimeoUrl,
+		posterImageUrl,
 		galleryImages,
 	] );
 
@@ -267,6 +287,16 @@ export default function Edit( { attributes, setAttributes } ) {
 		setAttributes( {
 			videoId: media.id,
 			videoUrl: media.url,
+			videoSource: 'uploaded',
+			vimeoUrl: '',
+		} );
+	};
+
+	const onSelectPoster = ( media ) => {
+		setAttributes( {
+			posterImageId: media.id,
+			posterImageUrl: media.url,
+			posterImageAlt: media.alt || '',
 		} );
 	};
 
@@ -276,8 +306,84 @@ export default function Edit( { attributes, setAttributes } ) {
 		} );
 	};
 
+	const updateVideoSource = ( nextVideoSource ) => {
+		setAttributes( {
+			videoSource: nextVideoSource,
+			...( 'vimeo' === nextVideoSource
+				? {
+						videoId: undefined,
+						videoUrl: '',
+				  }
+				: {
+						vimeoUrl: '',
+				  } ),
+		} );
+	};
+
+	const updateMediaType = ( nextMediaType ) => {
+		setAttributes( {
+			mediaType: nextMediaType,
+			...( 'video' === nextMediaType
+				? {}
+				: {
+						videoSource: 'uploaded',
+						videoId: undefined,
+						videoUrl: '',
+						vimeoUrl: '',
+						posterImageId: undefined,
+						posterImageUrl: '',
+						posterImageAlt: '',
+				  } ),
+		} );
+	};
+
 	const renderMediaUploader = () => {
 		if ( 'video' === mediaType ) {
+			if ( 'vimeo' === videoSource ) {
+				return (
+					<>
+						<TextControl
+							label={ __( 'Vimeo URL', 'gutenberg-lab-blocks' ) }
+							value={ vimeoUrl }
+							onChange={ ( nextVimeoUrl ) =>
+								setAttributes( { vimeoUrl: nextVimeoUrl } )
+							}
+							help={
+								hasValidVimeoUrl
+									? __(
+											'Accepted formats include standard Vimeo and player.vimeo.com links.',
+											'gutenberg-lab-blocks'
+									  )
+									: __(
+											'Add a valid Vimeo URL to complete this media panel.',
+											'gutenberg-lab-blocks'
+									  )
+							}
+						/>
+						<MediaUploadCheck>
+							<MediaUpload
+								onSelect={ onSelectPoster }
+								allowedTypes={ [ 'image' ] }
+								value={ posterImageId }
+								render={ ( { open } ) => (
+									<Button variant="secondary" onClick={ open }>
+										{ posterImageUrl
+											? __(
+													'Replace poster image',
+													'gutenberg-lab-blocks'
+											  )
+											: __(
+													'Select poster image',
+													'gutenberg-lab-blocks'
+											  ) }
+									</Button>
+								) }
+							/>
+						</MediaUploadCheck>
+					</>
+				);
+			}
+
 			return (
 				<MediaUploadCheck>
 					<MediaUpload
@@ -342,6 +448,24 @@ export default function Edit( { attributes, setAttributes } ) {
 	};
 
 	const renderMediaPreview = () => {
+		if ( isVimeoVideo ) {
+			if ( posterImageUrl ) {
+				return (
+					<img
+						className="split-content__media-asset"
+						src={ posterImageUrl }
+						alt={ posterImageAlt }
+					/>
+				);
+			}
+
+			return (
+				<div className="split-content__media-placeholder">
+					<p>{ __( 'Select a poster image for Vimeo', 'gutenberg-lab-blocks' ) }</p>
+				</div>
+			);
+		}
+
 		if ( 'video' === mediaType && videoUrl ) {
 			return (
 				<video
@@ -511,8 +635,26 @@ export default function Edit( { attributes, setAttributes } ) {
 						label={ __( 'Media Type', 'gutenberg-lab-blocks' ) }
 						value={ mediaType }
 						options={ MEDIA_TYPE_OPTIONS }
-						onChange={ ( value ) => setAttributes( { mediaType: value } ) }
+						onChange={ updateMediaType }
 					/>
+					{ 'video' === mediaType ? (
+						<>
+							<SelectControl
+								label={ __( 'Video source', 'gutenberg-lab-blocks' ) }
+								value={ videoSource }
+								options={ VIDEO_SOURCE_OPTIONS }
+								onChange={ updateVideoSource }
+							/>
+							{ 'vimeo' === videoSource && ! hasCompleteVimeoVideo ? (
+								<p className="components-base-control__help">
+									{ __(
+										'Complete the Vimeo URL and poster image before this block can render the player on the frontend.',
+										'gutenberg-lab-blocks'
+									) }
+								</p>
+							) : null }
+						</>
+					) : null }
 					{ renderMediaUploader() }
 				</PanelBody>
 				{ hasSliderArrows ? (

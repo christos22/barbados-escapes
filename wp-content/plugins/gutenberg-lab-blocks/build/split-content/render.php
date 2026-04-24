@@ -19,8 +19,8 @@ $media_type             = $attributes['mediaType'] ?? 'image';
 $media_on_edge          = ! empty( $attributes['mediaOnEdge'] );
 $image_url              = $attributes['imageUrl'] ?? '';
 $image_alt              = $attributes['imageAlt'] ?? '';
-$video_url              = $attributes['videoUrl'] ?? '';
 $gallery_images         = $attributes['galleryImages'] ?? array();
+$video_data             = gutenberg_lab_blocks_get_video_data( $attributes );
 
 $classes = array(
 	'split-content',
@@ -74,16 +74,34 @@ $gallery_images = array_values(
 	<div class="split-content__grid">
 		<div class="split-content__media">
 			<div class="split-content__media-frame">
-				<?php if ( 'video' === $media_type && '' !== $video_url ) : ?>
+				<?php if ( 'video' === $media_type && $video_data['has_uploaded_video'] ) : ?>
 					<video
 						class="split-content__media-asset"
-						src="<?php echo esc_url( $video_url ); ?>"
+						src="<?php echo esc_url( $video_data['uploaded_video_url'] ); ?>"
 						autoplay
 						muted
 						loop
 						playsinline
 						preload="metadata"
 					></video>
+				<?php elseif ( 'video' === $media_type && $video_data['has_vimeo_video'] ) : ?>
+					<?php
+					echo gutenberg_lab_blocks_render_vimeo_shell(
+						array(
+							'autoplay_url'  => gutenberg_lab_blocks_get_vimeo_embed_url( $video_data['vimeo_id'], 'autoplay' ),
+							'manual_url'    => gutenberg_lab_blocks_get_vimeo_embed_url( $video_data['vimeo_id'], 'manual' ),
+							'iframe_class'  => 'split-content__media-asset',
+							'poster_alt'    => $video_data['poster_alt'],
+							'poster_class'  => 'split-content__media-asset',
+							'poster_url'    => $video_data['poster_url'],
+							'shell_class'   => 'split-content__vimeo-shell',
+							'title'         => __( 'Split content Vimeo video', 'gutenberg-lab-blocks' ),
+							'wrapper_attrs' => array(
+								'data-vimeo-autoplay-enabled' => 'true',
+							),
+						)
+					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				<?php elseif ( 'slider' === $media_type && ! empty( $gallery_images ) ) : ?>
 					<div class="split-content__slider vvm-slider-surface" data-split-content-slider>
 						<div class="split-content__slides">
@@ -128,6 +146,12 @@ $gallery_images = array_values(
 							</div>
 						<?php endif; ?>
 					</div>
+				<?php elseif ( 'video' === $media_type && '' !== $video_data['poster_url'] ) : ?>
+					<img
+						class="split-content__media-asset"
+						src="<?php echo esc_url( $video_data['poster_url'] ); ?>"
+						alt="<?php echo esc_attr( $video_data['poster_alt'] ); ?>"
+					/>
 				<?php elseif ( '' !== $image_url ) : ?>
 					<img
 						class="split-content__media-asset"

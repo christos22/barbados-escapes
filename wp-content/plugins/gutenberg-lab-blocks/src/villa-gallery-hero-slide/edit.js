@@ -13,10 +13,19 @@ import {
 } from '@wordpress/components';
 
 import './editor.scss';
+import { getVimeoVideoId } from '../shared/vimeo-url';
 
 const MEDIA_TYPE_OPTIONS = [
 	{ label: __( 'Image', 'gutenberg-lab-blocks' ), value: 'image' },
 	{ label: __( 'Video', 'gutenberg-lab-blocks' ), value: 'video' },
+];
+
+const VIDEO_SOURCE_OPTIONS = [
+	{
+		label: __( 'Uploaded video', 'gutenberg-lab-blocks' ),
+		value: 'uploaded',
+	},
+	{ label: __( 'Vimeo URL', 'gutenberg-lab-blocks' ), value: 'vimeo' },
 ];
 
 export default function Edit( { attributes, setAttributes } ) {
@@ -26,12 +35,17 @@ export default function Edit( { attributes, setAttributes } ) {
 		imageUrl,
 		imageAlt,
 		videoId,
+		videoSource,
 		videoUrl,
+		vimeoUrl,
 		posterImageId,
 		posterImageUrl,
 		posterImageAlt,
 		thumbnailLabel,
 	} = attributes;
+	const isVimeoVideo = 'video' === mediaType && 'vimeo' === videoSource;
+	const hasValidVimeoUrl = Boolean( getVimeoVideoId( vimeoUrl ) );
+	const hasCompleteVimeoVideo = hasValidVimeoUrl && Boolean( posterImageUrl );
 
 	const previewImageUrl =
 		'video' === mediaType ? posterImageUrl || '' : imageUrl || '';
@@ -53,7 +67,9 @@ export default function Edit( { attributes, setAttributes } ) {
 				  }
 				: {
 						videoId: undefined,
+						videoSource: 'uploaded',
 						videoUrl: '',
+						vimeoUrl: '',
 						posterImageId: undefined,
 						posterImageUrl: '',
 						posterImageAlt: '',
@@ -72,7 +88,23 @@ export default function Edit( { attributes, setAttributes } ) {
 	const onSelectVideo = ( media ) => {
 		setAttributes( {
 			videoId: media.id,
+			videoSource: 'uploaded',
 			videoUrl: media.url,
+			vimeoUrl: '',
+		} );
+	};
+
+	const updateVideoSource = ( value ) => {
+		setAttributes( {
+			videoSource: value,
+			...( 'vimeo' === value
+				? {
+						videoId: undefined,
+						videoUrl: '',
+				  }
+				: {
+						vimeoUrl: '',
+				  } ),
 		} );
 	};
 
@@ -90,6 +122,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				? {
 						videoId: undefined,
 						videoUrl: '',
+						vimeoUrl: '',
 				  }
 				: {
 						imageId: undefined,
@@ -121,26 +154,65 @@ export default function Edit( { attributes, setAttributes } ) {
 						onChange={ updateMediaType }
 					/>
 
-					<MediaUploadCheck>
-						<MediaUpload
-							onSelect={
-								'video' === mediaType ? onSelectVideo : onSelectImage
-							}
-							allowedTypes={ 'video' === mediaType ? [ 'video' ] : [ 'image' ] }
-							value={ 'video' === mediaType ? videoId : imageId }
-							render={ ( { open } ) => (
-								<Button variant="secondary" onClick={ open }>
-									{ 'video' === mediaType
-										? videoUrl
+					{ 'video' === mediaType ? (
+						<>
+							<SelectControl
+								label={ __( 'Video source', 'gutenberg-lab-blocks' ) }
+								value={ videoSource }
+								options={ VIDEO_SOURCE_OPTIONS }
+								onChange={ updateVideoSource }
+							/>
+							{ 'uploaded' === videoSource ? (
+								<MediaUploadCheck>
+									<MediaUpload
+										onSelect={ onSelectVideo }
+										allowedTypes={ [ 'video' ] }
+										value={ videoId }
+										render={ ( { open } ) => (
+											<Button variant="secondary" onClick={ open }>
+												{ videoUrl
+													? __(
+															'Replace video',
+															'gutenberg-lab-blocks'
+													  )
+													: __(
+															'Select video',
+															'gutenberg-lab-blocks'
+													  ) }
+											</Button>
+										) }
+									/>
+								</MediaUploadCheck>
+							) : (
+								<TextControl
+									label={ __( 'Vimeo URL', 'gutenberg-lab-blocks' ) }
+									value={ vimeoUrl }
+									onChange={ ( value ) =>
+										setAttributes( { vimeoUrl: value } )
+									}
+									help={
+										hasValidVimeoUrl
 											? __(
-													'Replace video',
+													'Accepted formats include standard Vimeo and player.vimeo.com links.',
 													'gutenberg-lab-blocks'
 											  )
 											: __(
-													'Select video',
+													'Add a valid Vimeo URL to complete this slide.',
 													'gutenberg-lab-blocks'
 											  )
-										: imageUrl
+									}
+								/>
+							) }
+						</>
+					) : (
+						<MediaUploadCheck>
+							<MediaUpload
+								onSelect={ onSelectImage }
+								allowedTypes={ [ 'image' ] }
+								value={ imageId }
+								render={ ( { open } ) => (
+									<Button variant="secondary" onClick={ open }>
+										{ imageUrl
 											? __(
 													'Replace image',
 													'gutenberg-lab-blocks'
@@ -149,12 +221,13 @@ export default function Edit( { attributes, setAttributes } ) {
 													'Select image',
 													'gutenberg-lab-blocks'
 											  ) }
-								</Button>
-							) }
-						/>
-					</MediaUploadCheck>
+									</Button>
+								) }
+							/>
+						</MediaUploadCheck>
+					)}
 
-					{ ( imageUrl || videoUrl ) ? (
+					{ ( imageUrl || videoUrl || vimeoUrl ) ? (
 						<Button variant="link" isDestructive onClick={ removeMedia }>
 							{ __( 'Remove media', 'gutenberg-lab-blocks' ) }
 						</Button>
@@ -192,6 +265,15 @@ export default function Edit( { attributes, setAttributes } ) {
 									{ __( 'Remove poster image', 'gutenberg-lab-blocks' ) }
 								</Button>
 							) : null }
+
+							{ ! hasCompleteVimeoVideo && isVimeoVideo ? (
+								<p className="components-base-control__help">
+									{ __(
+										'Vimeo slides need both a valid Vimeo URL and a poster image before they can render in the gallery.',
+										'gutenberg-lab-blocks'
+									) }
+								</p>
+							) : null }
 						</>
 					) : null }
 
@@ -218,6 +300,15 @@ export default function Edit( { attributes, setAttributes } ) {
 					>
 						{ previewImageUrl ? (
 							<img src={ previewImageUrl } alt={ previewAlt } />
+						) : 'video' === mediaType && 'vimeo' === videoSource ? (
+							<div className="vvm-villa-gallery-hero__slide-placeholder">
+								<Button variant="secondary" disabled>
+									{ __(
+										'Add Vimeo URL in the sidebar',
+										'gutenberg-lab-blocks'
+									) }
+								</Button>
+							</div>
 						) : (
 							<MediaUploadCheck>
 								<MediaUpload
@@ -232,10 +323,15 @@ export default function Edit( { attributes, setAttributes } ) {
 										<div className="vvm-villa-gallery-hero__slide-placeholder">
 											<Button variant="secondary" onClick={ open }>
 												{ 'video' === mediaType
-													? __(
-															'Select video',
-															'gutenberg-lab-blocks'
-													  )
+													? 'vimeo' === videoSource
+														? __(
+																'Add Vimeo URL in the sidebar',
+																'gutenberg-lab-blocks'
+														  )
+														: __(
+																'Select video',
+																'gutenberg-lab-blocks'
+														  )
 													: __(
 															'Select image',
 															'gutenberg-lab-blocks'

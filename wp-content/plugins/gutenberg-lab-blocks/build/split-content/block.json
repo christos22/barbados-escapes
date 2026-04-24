@@ -60,7 +60,26 @@
     "videoId": {
       "type": "number"
     },
+    "videoSource": {
+      "type": "string",
+      "default": "uploaded"
+    },
     "videoUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "vimeoUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "posterImageId": {
+      "type": "number"
+    },
+    "posterImageUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "posterImageAlt": {
       "type": "string",
       "default": ""
     },

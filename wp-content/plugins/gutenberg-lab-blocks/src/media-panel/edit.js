@@ -10,14 +10,21 @@ import {
 	Button,
 	PanelBody,
 	SelectControl,
+	TextControl,
 	ToggleControl,
 } from '@wordpress/components';
 
 import './editor.scss';
+import { getVimeoVideoId } from '../shared/vimeo-url';
 
 const MEDIA_TYPE_OPTIONS = [
 	{ label: 'Image', value: 'image' },
 	{ label: 'Video', value: 'video' },
+];
+
+const VIDEO_SOURCE_OPTIONS = [
+	{ label: __( 'Uploaded video', 'gutenberg-lab-blocks' ), value: 'uploaded' },
+	{ label: __( 'Vimeo URL', 'gutenberg-lab-blocks' ), value: 'vimeo' },
 ];
 
 const HEIGHT_OPTIONS = [
@@ -124,7 +131,9 @@ export default function Edit({ attributes, setAttributes }) {
 		imageUrl,
 		imageAlt,
 		videoId,
+		videoSource,
 		videoUrl,
+		vimeoUrl,
 		fallbackImageId,
 		fallbackImageUrl,
 		fallbackImageAlt,
@@ -141,6 +150,9 @@ export default function Edit({ attributes, setAttributes }) {
 		style,
 	} = attributes;
 	const blockGap = resolveBlockGapPreviewValue( style?.spacing?.blockGap );
+	const isVimeoVideo = 'video' === mediaType && 'vimeo' === videoSource;
+	const hasValidVimeoUrl = Boolean( getVimeoVideoId( vimeoUrl ) );
+	const hasCompleteVimeoVideo = hasValidVimeoUrl && Boolean( fallbackImageUrl );
 
 	const blockProps = useBlockProps({
 		className: [
@@ -211,6 +223,8 @@ export default function Edit({ attributes, setAttributes }) {
 		setAttributes({
 			videoId: media.id,
 			videoUrl: media.url,
+			videoSource: 'uploaded',
+			vimeoUrl: '',
 		});
 	};
 
@@ -222,6 +236,20 @@ export default function Edit({ attributes, setAttributes }) {
 		});
 	};
 
+	const updateVideoSource = ( nextVideoSource ) => {
+		setAttributes( {
+			videoSource: nextVideoSource,
+			...( 'vimeo' === nextVideoSource
+				? {
+						videoId: undefined,
+						videoUrl: '',
+				  }
+				: {
+						vimeoUrl: '',
+				  } ),
+		} );
+	};
+
 	return (
 		<>
 			<InspectorControls>
@@ -231,33 +259,98 @@ export default function Edit({ attributes, setAttributes }) {
 						value={mediaType}
 						options={MEDIA_TYPE_OPTIONS}
 						onChange={(mediaTypeValue) =>
-							setAttributes({ mediaType: mediaTypeValue })
+							setAttributes({
+								mediaType: mediaTypeValue,
+								...( 'video' === mediaTypeValue
+									? {}
+									: {
+											videoSource: 'uploaded',
+											videoId: undefined,
+											videoUrl: '',
+											vimeoUrl: '',
+											fallbackImageId: undefined,
+											fallbackImageUrl: '',
+											fallbackImageAlt: '',
+									  } ),
+							})
 						}
 					/>
 
 					{mediaType === 'video' && (
-						<div className="media-panel__inspector-upload">
-							<MediaUploadCheck>
-								<MediaUpload
-									onSelect={onSelectFallbackImage}
-									allowedTypes={['image']}
-									value={fallbackImageId}
-									render={({ open }) => (
-										<Button variant="secondary" onClick={open}>
-											{fallbackImageUrl
-												? __(
-														'Replace fallback image',
-														'gutenberg-lab-blocks'
-												  )
-												: __(
-														'Select fallback image',
-														'gutenberg-lab-blocks'
-												  )}
-										</Button>
+						<>
+							<SelectControl
+								label={__( 'Video source', 'gutenberg-lab-blocks' )}
+								value={videoSource}
+								options={VIDEO_SOURCE_OPTIONS}
+								onChange={updateVideoSource}
+							/>
+
+							{ 'uploaded' === videoSource ? (
+								<p className="components-base-control__help">
+									{__(
+										'Uploaded videos keep the current native HTML video behavior.',
+										'gutenberg-lab-blocks'
 									)}
+								</p>
+							) : (
+								<TextControl
+									label={__( 'Vimeo URL', 'gutenberg-lab-blocks' )}
+									value={vimeoUrl}
+									onChange={(nextVimeoUrl) =>
+										setAttributes({ vimeoUrl: nextVimeoUrl })
+									}
+									help={
+										hasValidVimeoUrl
+											? __(
+													'Accepted formats include standard Vimeo and player.vimeo.com links.',
+													'gutenberg-lab-blocks'
+											  )
+											: __(
+													'Add a valid Vimeo URL to complete this video source.',
+													'gutenberg-lab-blocks'
+											  )
+									}
 								/>
-							</MediaUploadCheck>
-						</div>
+							)}
+
+							<div className="media-panel__inspector-upload">
+								<MediaUploadCheck>
+									<MediaUpload
+										onSelect={onSelectFallbackImage}
+										allowedTypes={['image']}
+										value={fallbackImageId}
+										render={({ open }) => (
+											<Button variant="secondary" onClick={open}>
+												{fallbackImageUrl
+													? __(
+															'Replace fallback image',
+															'gutenberg-lab-blocks'
+													  )
+													: __(
+															'Select fallback image',
+															'gutenberg-lab-blocks'
+													  )}
+											</Button>
+										)}
+									/>
+								</MediaUploadCheck>
+								<p className="components-base-control__help">
+									{__(
+										'Vimeo requires a poster image so the block can stay polished while the player loads or if autoplay is blocked.',
+										'gutenberg-lab-blocks'
+									)}
+								</p>
+							</div>
+
+							{isVimeoVideo && !hasCompleteVimeoVideo && (
+								<p className="components-base-control__help">
+									{__(
+										'Complete the Vimeo URL and poster image before this video can render on the frontend.',
+										'gutenberg-lab-blocks'
+									)}
+								</p>
+							)}
+						</>
 					)}
 
 					<ToggleControl
@@ -385,7 +478,7 @@ export default function Edit({ attributes, setAttributes }) {
 									)}
 								/>
 							</MediaUploadCheck>
-						) : (
+						) : 'uploaded' === videoSource ? (
 							<MediaUploadCheck>
 								<MediaUpload
 									onSelect={onSelectVideo}
@@ -393,13 +486,23 @@ export default function Edit({ attributes, setAttributes }) {
 									value={videoId}
 									render={({ open }) => (
 										<Button variant="secondary" onClick={open}>
-											{videoUrl
+											{videoUrl && 'uploaded' === videoSource
 												? __('Replace video', 'gutenberg-lab-blocks')
 												: __('Select video', 'gutenberg-lab-blocks')}
 										</Button>
 									)}
 								/>
 							</MediaUploadCheck>
+						) : (
+							<Button
+								variant="secondary"
+								disabled
+							>
+								{__(
+									'Vimeo source configured in the sidebar',
+									'gutenberg-lab-blocks'
+								)}
+							</Button>
 						)}
 					</div>
 
@@ -416,7 +519,7 @@ export default function Edit({ attributes, setAttributes }) {
 							</>
 						) : (
 							<>
-								{videoUrl && (
+								{ 'uploaded' === videoSource && videoUrl && (
 									<video
 										className="media-panel__video"
 										src={videoUrl}
@@ -428,7 +531,15 @@ export default function Edit({ attributes, setAttributes }) {
 									/>
 								)}
 
-								{!videoUrl && fallbackImageUrl && (
+								{ isVimeoVideo && fallbackImageUrl && (
+									<img
+										className="media-panel__image"
+										src={fallbackImageUrl}
+										alt={fallbackImageAlt}
+									/>
+								)}
+
+								{ 'uploaded' === videoSource && !videoUrl && fallbackImageUrl && (
 									<img
 										className="media-panel__image"
 										src={fallbackImageUrl}

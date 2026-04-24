@@ -8,7 +8,6 @@
 $media_type       = $attributes['mediaType'] ?? 'image';
 $image_url        = $attributes['imageUrl'] ?? '';
 $image_alt        = $attributes['imageAlt'] ?? '';
-$video_url        = $attributes['videoUrl'] ?? '';
 $fallback_image_url = $attributes['fallbackImageUrl'] ?? '';
 $fallback_image_alt = $attributes['fallbackImageAlt'] ?? '';
 $dark_overlay     = ! empty( $attributes['darkOverlay'] );
@@ -21,6 +20,13 @@ $accent_border    = $attributes['accentBorder'] ?? 'none';
 $atmosphere_edge  = $attributes['atmosphereEdge'] ?? 'none';
 $curtain_parallax = ! empty( $attributes['curtainParallax'] );
 $align            = $attributes['align'] ?? '';
+$video_data       = gutenberg_lab_blocks_get_video_data(
+	$attributes,
+	array(
+		'poster_url_key' => 'fallbackImageUrl',
+		'poster_alt_key' => 'fallbackImageAlt',
+	)
+);
 
 // When the block is used in a singular template, let the current post's
 // featured image act as the hero media if the block itself has no media picked.
@@ -93,7 +99,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 <section <?php echo $wrapper_attributes; ?>>
 	<div class="media-panel__stage">
 		<div class="media-panel__media">
-			<?php if ( 'video' === $media_type && $video_url ) : ?>
+			<?php if ( 'video' === $media_type && $video_data['has_uploaded_video'] ) : ?>
 				<video
 					class="media-panel__video"
 					autoplay
@@ -104,8 +110,26 @@ $wrapper_attributes = get_block_wrapper_attributes(
 						poster="<?php echo esc_url( $fallback_image_url ); ?>"
 					<?php endif; ?>
 				>
-					<source src="<?php echo esc_url( $video_url ); ?>" type="video/mp4" />
+					<source src="<?php echo esc_url( $video_data['uploaded_video_url'] ); ?>" type="video/mp4" />
 				</video>
+			<?php elseif ( 'video' === $media_type && $video_data['has_vimeo_video'] ) : ?>
+				<?php
+				echo gutenberg_lab_blocks_render_vimeo_shell(
+					array(
+						'autoplay_url'  => gutenberg_lab_blocks_get_vimeo_embed_url( $video_data['vimeo_id'], 'autoplay' ),
+						'manual_url'    => gutenberg_lab_blocks_get_vimeo_embed_url( $video_data['vimeo_id'], 'manual' ),
+						'iframe_class'  => 'media-panel__video',
+						'poster_alt'    => $video_data['poster_alt'],
+						'poster_class'  => 'media-panel__image',
+						'poster_url'    => $video_data['poster_url'],
+						'shell_class'   => 'media-panel__vimeo-shell',
+						'title'         => __( 'Media panel Vimeo video', 'gutenberg-lab-blocks' ),
+						'wrapper_attrs' => array(
+							'data-vimeo-autoplay-enabled' => 'true',
+						),
+					)
+				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
 			<?php elseif ( 'video' === $media_type && $fallback_image_url ) : ?>
 				<img
 					class="media-panel__image"
