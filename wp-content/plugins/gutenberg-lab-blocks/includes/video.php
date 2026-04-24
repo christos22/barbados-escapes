@@ -170,8 +170,9 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 	/**
 	 * Renders the shared poster-first Vimeo shell used by the custom blocks.
 	 *
-	 * The iframe starts hidden behind the poster. Frontend JS decides whether to
-	 * reveal autoplay or keep the poster/play state when the player is slow.
+		 * The iframe starts hidden behind the poster. Frontend JS decides whether to
+		 * reveal autoplay or keep the poster/manual-start state when the player is
+		 * slow.
 	 *
 	 * @param array $args Render configuration.
 	 * @return string
@@ -179,14 +180,12 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 	function gutenberg_lab_blocks_render_vimeo_shell( $args = array() ) {
 		$args = wp_parse_args(
 			$args,
-			array(
-				'autoplay_url'   => '',
-				'manual_url'     => '',
-				'button_class'   => 'vvm-video-play-button',
-				'button_icon_class' => 'vvm-video-play-button__icon',
-				'button_label'   => __( 'Play video', 'gutenberg-lab-blocks' ),
-				'iframe_class'   => '',
-				'poster_alt'     => '',
+				array(
+					'autoplay_url'   => '',
+					'manual_url'     => '',
+					'button_label'   => __( 'Play video', 'gutenberg-lab-blocks' ),
+					'iframe_class'   => '',
+					'poster_alt'     => '',
 				'poster_class'   => '',
 				'poster_url'     => '',
 				'shell_class'    => '',
@@ -244,22 +243,21 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 					data-vimeo-iframe
 				></iframe>
 			</div>
-			<div class="vvm-vimeo-shell__poster-shell" data-vimeo-poster-shell>
-				<img
-					class="<?php echo esc_attr( trim( 'vvm-vimeo-shell__poster ' . $args['poster_class'] ) ); ?>"
-					src="<?php echo esc_url( $args['poster_url'] ); ?>"
-					alt="<?php echo esc_attr( $args['poster_alt'] ); ?>"
-				/>
-				<button
-					type="button"
-					class="<?php echo esc_attr( $args['button_class'] ); ?>"
+				<div
+					class="vvm-vimeo-shell__poster-shell"
+					data-vimeo-poster-shell
 					data-vimeo-play-trigger
+					role="button"
+					tabindex="0"
 					aria-label="<?php echo esc_attr( $args['button_label'] ); ?>"
 				>
-					<span class="<?php echo esc_attr( $args['button_icon_class'] ); ?>" aria-hidden="true">▶</span>
+					<img
+						class="<?php echo esc_attr( trim( 'vvm-vimeo-shell__poster ' . $args['poster_class'] ) ); ?>"
+						src="<?php echo esc_url( $args['poster_url'] ); ?>"
+						alt="<?php echo esc_attr( $args['poster_alt'] ); ?>"
+					/>
 					<span class="screen-reader-text"><?php echo esc_html( $args['button_label'] ); ?></span>
-				</button>
-			</div>
+				</div>
 		</div>
 		<?php
 

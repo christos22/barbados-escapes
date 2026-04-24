@@ -31,7 +31,7 @@ function getShellParts( shell ) {
 	}
 
 	return {
-		button: shell.querySelector( '[data-vimeo-play-trigger]' ),
+		trigger: shell.querySelector( '[data-vimeo-play-trigger]' ),
 		frameShell: shell.querySelector( '[data-vimeo-frame-shell]' ),
 		iframe: shell.querySelector( '[data-vimeo-iframe]' ),
 		posterShell: shell.querySelector( '[data-vimeo-poster-shell]' ),
@@ -63,10 +63,10 @@ function setPosterVisibility( shell, isVisible ) {
 }
 
 function setShellBusy( shell, isBusy ) {
-	const button = shell?.querySelector( '[data-vimeo-play-trigger]' );
+	const trigger = shell?.querySelector( '[data-vimeo-play-trigger]' );
 
-	if ( button ) {
-		button.disabled = isBusy;
+	if ( trigger ) {
+		trigger.setAttribute( 'aria-disabled', isBusy ? 'true' : 'false' );
 	}
 
 	shell.dataset.vimeoBusy = isBusy ? 'true' : 'false';
@@ -277,15 +277,30 @@ export function hasVimeoShells( root = document ) {
 
 export function bindVimeoShellPlayButtons( root = document ) {
 	root.querySelectorAll( '[data-vimeo-shell]' ).forEach( ( shell ) => {
-		const button = shell.querySelector( '[data-vimeo-play-trigger]' );
+		const trigger = shell.querySelector( '[data-vimeo-play-trigger]' );
 
-		if ( ! button || 'true' === button.dataset.vimeoShellBound ) {
+		if ( ! trigger || 'true' === trigger.dataset.vimeoShellBound ) {
 			return;
 		}
 
-		button.dataset.vimeoShellBound = 'true';
-		button.addEventListener( 'click', () => {
+		const handleTrigger = ( event ) => {
+			if ( 'true' === shell.dataset.vimeoBusy ) {
+				event.preventDefault();
+				return;
+			}
+
 			playVimeoShellFromUserAction( shell );
+		};
+
+		trigger.dataset.vimeoShellBound = 'true';
+		trigger.addEventListener( 'click', handleTrigger );
+		trigger.addEventListener( 'keydown', ( event ) => {
+			if ( 'Enter' !== event.key && ' ' !== event.key ) {
+				return;
+			}
+
+			event.preventDefault();
+			handleTrigger( event );
 		} );
 	} );
 }
