@@ -1,7 +1,7 @@
 import Splide from '@splidejs/splide';
 
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
-const DEFAULT_TRANSITION_MODE = 'fade';
+const DEFAULT_TRANSITION_MODE = 'slide';
 const DEFAULT_FADE_DURATION = '700ms';
 const DEFAULT_SLIDE_SPEED = 700;
 const NO_MOTION_DURATION = '0ms';
@@ -57,16 +57,52 @@ function syncSlideInteractivity( slide, isActive ) {
 	} );
 }
 
-function syncActiveState( rootElement, splide, realSlideSelector ) {
+function syncContentInteractivity( contentPanel, isActive ) {
+	contentPanel.classList.toggle( 'is-active', isActive );
+	contentPanel.setAttribute( 'aria-hidden', isActive ? 'false' : 'true' );
+
+	contentPanel.querySelectorAll( FOCUSABLE_SELECTOR ).forEach( ( element ) => {
+		if ( isActive ) {
+			const savedTabIndex = element.dataset[ TABINDEX_DATA_KEY ];
+
+			if ( undefined === savedTabIndex || '' === savedTabIndex ) {
+				element.removeAttribute( 'tabindex' );
+			} else {
+				element.setAttribute( 'tabindex', savedTabIndex );
+			}
+
+			delete element.dataset[ TABINDEX_DATA_KEY ];
+			return;
+		}
+
+		if ( undefined === element.dataset[ TABINDEX_DATA_KEY ] ) {
+			element.dataset[ TABINDEX_DATA_KEY ] =
+				element.getAttribute( 'tabindex' ) ?? '';
+		}
+
+		element.setAttribute( 'tabindex', '-1' );
+	} );
+}
+
+function syncActiveState( rootElement, splide, realSlideSelector, contentSelector ) {
 	// Ignore Splide loop clones so only the authored slides own focus state.
 	rootElement.querySelectorAll( realSlideSelector ).forEach( ( slide, index ) => {
 		syncSlideInteractivity( slide, index === splide.index );
 	} );
+
+	if ( contentSelector ) {
+		rootElement
+			.querySelectorAll( contentSelector )
+			.forEach( ( contentPanel, index ) => {
+				// The content panel is static; only its matching child swaps.
+				syncContentInteractivity( contentPanel, index === splide.index );
+			} );
+	}
 }
 
 function getTransitionMode( rootElement ) {
-	return 'slide' === rootElement.dataset.carouselTransition
-		? 'slide'
+	return 'fade' === rootElement.dataset.carouselTransition
+		? 'fade'
 		: DEFAULT_TRANSITION_MODE;
 }
 
@@ -101,6 +137,7 @@ function syncMotionPreference(
 function initializePeekingCarousel( rootElement, config ) {
 	const {
 		carouselSelector,
+		contentSelector,
 		durationVariable,
 		nextButtonSelector,
 		previousButtonSelector,
@@ -132,6 +169,13 @@ function initializePeekingCarousel( rootElement, config ) {
 		rootElement
 			.querySelectorAll( realSlideSelector )
 			.forEach( ( slide ) => syncSlideInteractivity( slide, true ) );
+		if ( contentSelector ) {
+			rootElement
+				.querySelectorAll( contentSelector )
+				.forEach( ( contentPanel ) =>
+					syncContentInteractivity( contentPanel, true )
+				);
+		}
 		return;
 	}
 
@@ -179,7 +223,12 @@ function initializePeekingCarousel( rootElement, config ) {
 
 	const syncUi = () => {
 		syncButtons( previousButton, nextButton );
-		syncActiveState( rootElement, splide, realSlideSelector );
+		syncActiveState(
+			rootElement,
+			splide,
+			realSlideSelector,
+			contentSelector
+		);
 	};
 
 	previousButton?.addEventListener( 'click', () => {

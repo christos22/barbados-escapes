@@ -2,16 +2,16 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "gutenberg-lab-blocks/feature-carousel",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"title": "Feature Carousel",
 	"category": "design",
 	"icon": "images-alt2",
-	"description": "An editorial carousel with large media, per-slide copy, and peeking neighboring slides.",
+	"description": "An editorial carousel with sliding media and a fixed copy panel.",
 	"keywords": [ "feature", "carousel", "editorial", "slider" ],
 	"attributes": {
 		"transitionStyle": {
 			"type": "string",
-			"default": "fade"
+			"default": "slide"
 		},
 		"arrowPositionPreset": {
 			"type": "string",

@@ -16,6 +16,8 @@
 	color: var(--stack-tabs-green);
 
 	&.alignfull {
+		// Full alignment should span the page, while the content keeps the theme gutter.
+		max-inline-size: none;
 		padding-inline: var(--wp--custom--layout--gutter-current, 20px);
 	}
 

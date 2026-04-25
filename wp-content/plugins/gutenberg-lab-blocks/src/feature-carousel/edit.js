@@ -41,11 +41,11 @@ const TEMPLATE = [
 ];
 
 function normalizeTransitionStyle( transitionStyle ) {
-	return 'slide' === transitionStyle ? 'slide' : 'fade';
+	return 'fade' === transitionStyle ? 'fade' : 'slide';
 }
 
 export default function Edit( { attributes, clientId, setAttributes } ) {
-	const { accentBorder = 'none', align, transitionStyle = 'fade' } = attributes;
+	const { accentBorder = 'none', align, transitionStyle = 'slide' } = attributes;
 	const normalizedTransitionStyle =
 		normalizeTransitionStyle( transitionStyle );
 	const slideCount = useSelect(
@@ -111,11 +111,11 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						help={
 							'slide' === normalizedTransitionStyle
 								? __(
-										'Slide moves the carousel track while the text panel stays fully visible.',
+										'Slide moves the image rail while the text panel stays fixed and swaps content.',
 										'gutenberg-lab-blocks'
 								  )
 								: __(
-										'Fade crossfades the imagery while the text panel stays fixed.',
+										'Fade crossfades the image rail while the text panel stays fixed and swaps content.',
 										'gutenberg-lab-blocks'
 								  )
 						}
@@ -155,11 +155,11 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 					<p className="vvm-feature-carousel__editor-note">
 						{ 0 === slideCount
 							? __(
-									'Add slides here. The front end turns them into a centered editorial carousel with peeking neighboring images.',
+									'Add slides here. The front end turns them into a media slider with one fixed copy panel.',
 									'gutenberg-lab-blocks'
 							  )
 							: __(
-									'Each slide owns its own image, heading, body copy, and CTA. The PHP render callback rebuilds the final carousel shell on the front end.',
+									'Each slide owns its image, heading, body copy, and CTA. PHP renders images into the rail and copy into the fixed panel.',
 									'gutenberg-lab-blocks'
 							  ) }
 					</p>
@@ -167,11 +167,11 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						<p className="vvm-feature-carousel__editor-note">
 							{ 'slide' === normalizedTransitionStyle
 								? __(
-										'Transition style: Slide. The track moves between slides while the text panel stays stable.',
+										'Transition style: Slide. Images move while the text panel stays in place.',
 										'gutenberg-lab-blocks'
 								  )
 								: __(
-										'Transition style: Fade. The imagery crossfades while the text panel stays stable.',
+										'Transition style: Fade. Images crossfade while the text panel stays in place.',
 										'gutenberg-lab-blocks'
 								  ) }
 						</p>
