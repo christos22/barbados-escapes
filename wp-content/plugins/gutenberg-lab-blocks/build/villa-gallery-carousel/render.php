@@ -108,12 +108,15 @@ if ( empty( $slide_blocks ) ) {
 $first_slide = $slide_blocks[0]['attrs'] ?? array();
 $first_title = trim( (string) ( $first_slide['title'] ?? '' ) );
 $first_detail = trim( (string) ( $first_slide['detail'] ?? '' ) );
+$is_card_interactive = false !== ( $attributes['isCardInteractive'] ?? true );
+$wrapper_class = 'vvm-villa-gallery-carousel' . ( $is_card_interactive ? '' : ' vvm-villa-gallery-carousel--noninteractive' );
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
 		// A default `alignfull` breakout causes nested uses, such as tab panels,
 		// to overflow their container. Only apply alignment when authored.
-		'class' => 'vvm-villa-gallery-carousel',
+		'class' => $wrapper_class,
 		'data-villa-gallery-carousel-root' => '',
+		'data-villa-gallery-carousel-interactive' => $is_card_interactive ? 'true' : 'false',
 	)
 );
 ?>
@@ -166,17 +169,21 @@ $wrapper_attributes = get_block_wrapper_attributes(
 						$caption_title = '' !== $title ? $title : __( 'Gallery image', 'gutenberg-lab-blocks' );
 						$card_label = trim( $caption_title . ( '' !== $detail ? ': ' . $detail : '' ) );
 						?>
-						<article class="splide__slide vvm-villa-gallery-carousel__slide<?php echo 0 === $index ? ' is-active' : ''; ?>">
-							<button
-								type="button"
-								class="vvm-villa-gallery-carousel__card"
-								data-villa-gallery-card
-								data-caption-title="<?php echo esc_attr( $caption_title ); ?>"
-								data-caption-detail="<?php echo esc_attr( $detail ); ?>"
-								aria-pressed="<?php echo 0 === $index ? 'true' : 'false'; ?>"
-								aria-current="<?php echo 0 === $index ? 'true' : 'false'; ?>"
-								aria-label="<?php echo esc_attr( $card_label ); ?>"
-							>
+						<article class="splide__slide vvm-villa-gallery-carousel__slide<?php echo $is_card_interactive && 0 === $index ? ' is-active' : ''; ?>">
+							<?php if ( $is_card_interactive ) : ?>
+								<button
+									type="button"
+									class="vvm-villa-gallery-carousel__card"
+									data-villa-gallery-card
+									data-caption-title="<?php echo esc_attr( $caption_title ); ?>"
+									data-caption-detail="<?php echo esc_attr( $detail ); ?>"
+									aria-pressed="<?php echo 0 === $index ? 'true' : 'false'; ?>"
+									aria-current="<?php echo 0 === $index ? 'true' : 'false'; ?>"
+									aria-label="<?php echo esc_attr( $card_label ); ?>"
+								>
+							<?php else : ?>
+								<div class="vvm-villa-gallery-carousel__card">
+							<?php endif; ?>
 								<div class="vvm-villa-gallery-carousel__slide-media<?php echo '' !== $image_url ? '' : ' vvm-villa-gallery-carousel__slide-media--placeholder'; ?>">
 									<?php if ( '' !== $image_url ) : ?>
 										<img
@@ -204,7 +211,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 										<p class="vvm-villa-gallery-carousel__detail"><?php echo esc_html( $detail ); ?></p>
 									<?php endif; ?>
 								</div>
-							</button>
+							<?php echo $is_card_interactive ? '</button>' : '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						</article>
 					<?php endforeach; ?>
 				</div>

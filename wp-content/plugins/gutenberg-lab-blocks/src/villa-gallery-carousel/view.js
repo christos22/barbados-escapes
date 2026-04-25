@@ -74,6 +74,8 @@ function initializeVillaGalleryCarousel( rootElement ) {
 	const prefersReducedMotion = window.matchMedia?.(
 		REDUCED_MOTION_MEDIA_QUERY
 	).matches;
+	const isCardInteractive =
+		rootElement.dataset.villaGalleryCarouselInteractive !== 'false';
 	let activeIndex = 0;
 	const track = carouselElement.querySelector( '.splide__track' );
 	const previousRailButton = rootElement.querySelector(
@@ -108,6 +110,11 @@ function initializeVillaGalleryCarousel( rootElement ) {
 	);
 
 	window.addEventListener( 'resize', syncRailState );
+
+	if ( ! isCardInteractive ) {
+		window.requestAnimationFrame( syncRailState );
+		return;
+	}
 
 	slides.forEach( ( slide, index ) => {
 		const button = slide.querySelector( '[data-villa-gallery-card]' );

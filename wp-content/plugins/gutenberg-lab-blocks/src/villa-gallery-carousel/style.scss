@@ -136,6 +136,29 @@
 	outline: none;
 }
 
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__card,
+.vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__card {
+	cursor: default;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__slide,
+.vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__slide {
+	opacity: 1;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__slide.is-active
+	.vvm-villa-gallery-carousel__card::before,
+.vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__slide.is-active
+	.vvm-villa-gallery-carousel__card::before {
+	border-color: transparent;
+}
+
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__slide-media,
 .vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__slide-media {
 	position: absolute;

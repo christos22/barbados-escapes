@@ -5,7 +5,7 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
-import { PanelBody } from '@wordpress/components';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 
 import {
@@ -52,6 +52,7 @@ function renderCaption( title, detail ) {
 }
 
 export default function Edit( { attributes, clientId, setAttributes } ) {
+	const { isCardInteractive = true } = attributes;
 	const slideBlocks = useSelect(
 		( select ) =>
 			(
@@ -69,7 +70,13 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 	const captionDetail = activeSlide.detail?.trim() ?? '';
 
 	const blockProps = useBlockProps( {
-		className: 'vvm-villa-gallery-carousel vvm-villa-gallery-carousel--editor',
+		className: [
+			'vvm-villa-gallery-carousel',
+			'vvm-villa-gallery-carousel--editor',
+			isCardInteractive ? '' : 'vvm-villa-gallery-carousel--noninteractive',
+		]
+			.filter( Boolean )
+			.join( ' ' ),
 	} );
 	const innerBlocksProps = useInnerBlocksProps(
 		{
@@ -92,6 +99,24 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						title={ __( 'Carousel Settings', 'gutenberg-lab-blocks' ) }
 						initialOpen={ true }
 					>
+						<ToggleControl
+							label={ __( 'Interactive slide cards', 'gutenberg-lab-blocks' ) }
+							help={
+								isCardInteractive
+									? __(
+											'Slide cards can be selected to update the active caption.',
+											'gutenberg-lab-blocks'
+										)
+									: __(
+											'Slide cards render as static preview panels.',
+											'gutenberg-lab-blocks'
+										)
+							}
+							checked={ isCardInteractive }
+							onChange={ ( value ) =>
+								setAttributes( { isCardInteractive: value } )
+							}
+						/>
 						<p className="components-base-control__help">
 							{ __(
 								'Adjust the shared arrow placement for this villa gallery rail.',

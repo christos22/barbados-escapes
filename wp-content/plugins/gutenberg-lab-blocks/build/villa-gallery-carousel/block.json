@@ -25,6 +25,10 @@
     "arrowOffsetY": {
       "type": "number",
       "default": 0
+    },
+    "isCardInteractive": {
+      "type": "boolean",
+      "default": true
     }
   },
   "supports": {
