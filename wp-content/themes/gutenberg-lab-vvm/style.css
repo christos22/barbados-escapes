@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.0
+Version: 0.1.1
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -336,6 +336,236 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	letter-spacing: 0.34em;
 	text-transform: uppercase;
 	color: rgb(196 146 42 / 0.88);
+}
+
+/*
+ * Villa bedroom level cards. This stays in the theme because the section is
+ * authored with native Gutenberg blocks while the visual system is site-wide.
+ */
+.wp-site-blocks .vvm-bedroom-levels {
+	--vvm-bedroom-levels-ink: var(--wp--preset--color--dark-green, #173528);
+	--vvm-bedroom-levels-muted: rgb(23 53 40 / 0.66);
+	--vvm-bedroom-levels-gold: var(--wp--preset--color--gold, #c4922a);
+	--vvm-bedroom-levels-rule: rgb(23 53 40 / 0.13);
+	--vvm-bedroom-levels-card: #fffdf8;
+	--vvm-bedroom-levels-soft: #f7f1e7;
+	margin-block-start: clamp(2rem, 4vw, 3rem);
+	padding-block: clamp(1.5rem, 3vw, 2rem);
+	border-block: 1px solid var(--vvm-bedroom-levels-rule);
+	color: var(--vvm-bedroom-levels-ink);
+}
+
+.wp-site-blocks .vvm-bedroom-levels__nav {
+	align-items: stretch;
+	gap: clamp(0.45rem, 0.8vw, 0.75rem);
+	margin: 0 0 clamp(1.5rem, 2.6vw, 2rem);
+	padding-bottom: 0;
+	border-bottom: 1px solid var(--vvm-bedroom-levels-rule);
+}
+
+.wp-site-blocks .vvm-bedroom-levels__nav .wp-block-button__link {
+	display: inline-flex;
+	align-items: center;
+	min-height: 3rem;
+	padding: 0.85rem clamp(1.2rem, 2.2vw, 2rem);
+	border: 1px solid transparent;
+	border-radius: 0;
+	background: var(--vvm-bedroom-levels-soft);
+	color: var(--vvm-bedroom-levels-muted);
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 0.72rem;
+	font-weight: 400;
+	letter-spacing: 0.34em;
+	line-height: 1.2;
+	text-transform: uppercase;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__nav-button.is-active .wp-block-button__link {
+	border-color: var(--vvm-bedroom-levels-rule);
+	border-top-color: var(--vvm-bedroom-levels-gold);
+	background: var(--vvm-bedroom-levels-card);
+	box-shadow: inset 0 2px 0 var(--vvm-bedroom-levels-gold);
+	color: var(--vvm-bedroom-levels-ink);
+}
+
+.wp-site-blocks .vvm-bedroom-levels__grid {
+	display: grid;
+	grid-template-columns: minmax(18rem, 1.4fr) repeat(3, minmax(0, 1fr));
+	gap: clamp(0.9rem, 1.5vw, 1.5rem);
+	align-items: stretch;
+	margin: 0;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__card {
+	position: relative;
+	box-sizing: border-box;
+	min-height: clamp(20rem, 28vw, 25.75rem);
+	margin: 0;
+	padding: clamp(1.5rem, 2.25vw, 2rem);
+	border: 1px solid var(--vvm-bedroom-levels-rule);
+	background: var(--vvm-bedroom-levels-card);
+}
+
+.wp-site-blocks .vvm-bedroom-levels__intro-card {
+	background: #fbf8f2;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__eyebrow,
+.wp-site-blocks .vvm-bedroom-levels__hint,
+.wp-site-blocks .vvm-bedroom-levels__room-count,
+.wp-site-blocks .vvm-bedroom-levels__chip,
+.wp-site-blocks .vvm-bedroom-levels__badge {
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-weight: 400;
+	letter-spacing: 0.32em;
+	line-height: 1.3;
+	text-transform: uppercase;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__eyebrow {
+	margin: 0 0 1.05rem;
+	color: var(--vvm-bedroom-levels-gold);
+	font-size: 0.72rem;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__title {
+	max-width: 12ch;
+	margin: 0;
+	color: var(--vvm-bedroom-levels-ink);
+	font-size: clamp(2rem, 2.7vw, 2.75rem);
+	font-weight: 400;
+	line-height: 0.98;
+	text-wrap: balance;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__copy {
+	margin: 1.45rem 0 0;
+	color: var(--vvm-bedroom-levels-muted);
+	font-size: 1rem;
+	line-height: 1.9;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__room-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin: 1.7rem 0 0;
+	min-height: 2.35rem;
+	padding: 0.6rem 1.15rem;
+	border: 1px solid var(--vvm-bedroom-levels-rule);
+	background: #ffffff;
+	color: var(--vvm-bedroom-levels-muted);
+	font-size: 0.72rem;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__divider {
+	margin-block: clamp(1.7rem, 3vw, 2.25rem) 1.25rem;
+	border: 0;
+	height: 1px;
+	background: var(--vvm-bedroom-levels-rule);
+	color: transparent;
+	opacity: 1;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__hint {
+	max-width: 28ch;
+	margin: 0;
+	color: rgb(23 53 40 / 0.54);
+	font-size: 0.68rem;
+	line-height: 1.7;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__badge {
+	position: absolute;
+	top: clamp(1.35rem, 2vw, 1.65rem);
+	right: clamp(1.35rem, 2vw, 1.65rem);
+	display: inline-flex;
+	align-items: center;
+	min-height: 2.15rem;
+	margin: 0;
+	padding: 0.55rem 1rem;
+	border: 1px solid var(--vvm-bedroom-levels-rule);
+	border-radius: 999px;
+	background: #ffffff;
+	color: var(--vvm-bedroom-levels-muted);
+	font-size: 0.65rem;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.55rem;
+	margin-block-start: 1.15rem;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__chip {
+	display: inline-flex;
+	align-items: center;
+	margin: 0;
+	min-height: 1.9rem;
+	padding: 0.5rem 0.85rem;
+	border: 1px solid var(--vvm-bedroom-levels-rule);
+	border-radius: 999px;
+	background: var(--vvm-bedroom-levels-soft);
+	color: rgb(23 53 40 / 0.58);
+	font-size: 0.65rem;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__chip--bed {
+	border-color: var(--vvm-bedroom-levels-ink);
+	background: var(--vvm-bedroom-levels-ink);
+	color: #f7f1e7;
+}
+
+@media (max-width: 1180px) {
+	.wp-site-blocks .vvm-bedroom-levels__grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.wp-site-blocks .vvm-bedroom-levels__intro-card {
+		grid-column: 1 / -1;
+		min-height: auto;
+	}
+}
+
+@media (max-width: 700px) {
+	.wp-site-blocks .vvm-bedroom-levels {
+		margin-block-start: 2rem;
+		padding-block: 1.25rem;
+	}
+
+	.wp-site-blocks .vvm-bedroom-levels__nav {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+
+	.wp-site-blocks .vvm-bedroom-levels__nav::-webkit-scrollbar {
+		display: none;
+	}
+
+	.wp-site-blocks .vvm-bedroom-levels__nav .wp-block-button__link {
+		min-height: 2.75rem;
+		padding-inline: 1rem;
+		font-size: 0.66rem;
+	}
+
+	.wp-site-blocks .vvm-bedroom-levels__grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.wp-site-blocks .vvm-bedroom-levels__card {
+		min-height: auto;
+		padding: 1.35rem;
+	}
+
+	.wp-site-blocks .vvm-bedroom-levels__badge {
+		position: static;
+		width: max-content;
+		margin-bottom: 1rem;
+	}
 }
 
 /*
