@@ -16,6 +16,7 @@ require_once __DIR__ . '/includes/package-rendering.php';
 require_once __DIR__ . '/includes/peeking-carousel.php';
 require_once __DIR__ . '/includes/site-messages.php';
 require_once __DIR__ . '/includes/villas.php';
+require_once __DIR__ . '/includes/mcp-abilities.php';
 
 /**
  * Registers rewrite-dependent content types before flushing plugin rules.
