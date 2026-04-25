@@ -192,6 +192,102 @@ body {
 	margin: 0;
 }
 
+/*
+ * Mirror the front-end travel-times table utility inside the editor iframe.
+ * These selectors stay explicit so they override Gutenberg core's default cell
+ * border rule and remove the full grid from the authoring view.
+ */
+.editor-styles-wrapper figure.wp-block-table.table-singe-border-bottom,
+.editor-styles-wrapper figure.wp-block-table.table-single-border-bottom {
+	margin-block: 0;
+}
+
+.editor-styles-wrapper figure.wp-block-table.table-singe-border-bottom table,
+.editor-styles-wrapper figure.wp-block-table.table-single-border-bottom table,
+.editor-styles-wrapper table.table-singe-border-bottom,
+.editor-styles-wrapper table.table-single-border-bottom {
+	width: 100%;
+	margin: 0;
+	border: 0;
+	border-collapse: collapse;
+	border-spacing: 0;
+	table-layout: auto;
+	background: transparent;
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.55;
+	color: rgb(30 61 47 / 0.88);
+}
+
+.editor-styles-wrapper figure.wp-block-table.table-singe-border-bottom td,
+.editor-styles-wrapper figure.wp-block-table.table-singe-border-bottom th,
+.editor-styles-wrapper figure.wp-block-table.table-single-border-bottom td,
+.editor-styles-wrapper figure.wp-block-table.table-single-border-bottom th,
+.editor-styles-wrapper table.table-singe-border-bottom td,
+.editor-styles-wrapper table.table-singe-border-bottom th,
+.editor-styles-wrapper table.table-single-border-bottom td,
+.editor-styles-wrapper table.table-single-border-bottom th {
+	padding: 1.125rem 0;
+	border: 0;
+	background: transparent;
+	vertical-align: middle;
+}
+
+.editor-styles-wrapper figure.wp-block-table.table-singe-border-bottom tr > *,
+.editor-styles-wrapper figure.wp-block-table.table-single-border-bottom tr > *,
+.editor-styles-wrapper table.table-singe-border-bottom tr > *,
+.editor-styles-wrapper table.table-single-border-bottom tr > * {
+	border-bottom: 1px solid rgb(30 61 47 / 0.12);
+}
+
+.editor-styles-wrapper figure.wp-block-table.table-singe-border-bottom table > :last-child > tr:last-child > *,
+.editor-styles-wrapper figure.wp-block-table.table-single-border-bottom table > :last-child > tr:last-child > *,
+.editor-styles-wrapper table.table-singe-border-bottom > :last-child > tr:last-child > *,
+.editor-styles-wrapper table.table-single-border-bottom > :last-child > tr:last-child > * {
+	border-bottom: 0;
+}
+
+.editor-styles-wrapper figure.wp-block-table.table-singe-border-bottom th,
+.editor-styles-wrapper figure.wp-block-table.table-single-border-bottom th,
+.editor-styles-wrapper table.table-singe-border-bottom th,
+.editor-styles-wrapper table.table-single-border-bottom th {
+	font-weight: 400;
+	text-align: left;
+	color: inherit;
+}
+
+.editor-styles-wrapper figure.wp-block-table.table-singe-border-bottom tr > :first-child,
+.editor-styles-wrapper figure.wp-block-table.table-single-border-bottom tr > :first-child,
+.editor-styles-wrapper table.table-singe-border-bottom tr > :first-child,
+.editor-styles-wrapper table.table-single-border-bottom tr > :first-child {
+	padding-right: 1.5rem;
+}
+
+.editor-styles-wrapper figure.wp-block-table.table-singe-border-bottom tr > :last-child:not(:first-child),
+.editor-styles-wrapper figure.wp-block-table.table-single-border-bottom tr > :last-child:not(:first-child),
+.editor-styles-wrapper table.table-singe-border-bottom tr > :last-child:not(:first-child),
+.editor-styles-wrapper table.table-single-border-bottom tr > :last-child:not(:first-child) {
+	width: 7.5rem;
+	min-width: 7.5rem;
+	padding-left: 1.5rem;
+	text-align: right;
+	white-space: nowrap;
+	font-size: 0.875rem;
+	letter-spacing: 0.34em;
+	text-transform: uppercase;
+	color: rgb(196 146 42 / 0.88);
+}
+
+.editor-styles-wrapper figure.wp-block-table.table-singe-border-bottom tr > :last-child:not(:first-child) .block-editor-rich-text__editable,
+.editor-styles-wrapper figure.wp-block-table.table-single-border-bottom tr > :last-child:not(:first-child) .block-editor-rich-text__editable,
+.editor-styles-wrapper table.table-singe-border-bottom tr > :last-child:not(:first-child) .block-editor-rich-text__editable,
+.editor-styles-wrapper table.table-single-border-bottom tr > :last-child:not(:first-child) .block-editor-rich-text__editable {
+	white-space: nowrap !important;
+	word-break: normal;
+	overflow-wrap: normal;
+}
+
 /* Shared button variants live in `assets/css/buttons.css`. */
 
 .editor-styles-wrapper .vvm-packages-archive-promo.wp-block-gutenberg-lab-blocks-split-content.split-content--layout-overlap {

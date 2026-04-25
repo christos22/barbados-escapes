@@ -219,6 +219,9 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render' ) ) {
 		$has_multiple_slides = count( $slide_blocks ) > 1;
 		$slides_markup       = '';
 		$transition_style    = 'slide' === ( $attributes['transitionStyle'] ?? '' ) ? 'slide' : 'fade';
+		$accent_border       = in_array( $attributes['accentBorder'] ?? 'none', array( 'top', 'bottom', 'both' ), true )
+			? $attributes['accentBorder']
+			: 'none';
 
 		foreach ( $slide_blocks as $index => $slide_block ) {
 			$slides_markup .= gutenberg_lab_peeking_carousel_render_slide(
@@ -236,6 +239,8 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render' ) ) {
 						array(
 							$config['wrapper_class'],
 							$config['wrapper_class'] . '--transition-' . sanitize_html_class( $transition_style ),
+							// Keep this class parallel to Media Panel's accent border API.
+							'none' !== $accent_border ? $config['wrapper_class'] . '--accent-border-' . sanitize_html_class( $accent_border ) : '',
 							empty( $attributes['align'] ) ? 'alignfull' : '',
 						)
 					)

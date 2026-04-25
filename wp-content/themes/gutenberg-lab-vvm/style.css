@@ -19,6 +19,14 @@ body {
 	background: #ffffff;
 }
 
+/*
+ * Single villa pages sit on a warmer canvas so transparent sections and block
+ * gaps inherit the Barbados Escapes detail-page background instead of white.
+ */
+body.single-villa {
+	background: #f6f0e6;
+}
+
 .wp-site-blocks {
 	padding-top: 0;
 	--wp--style--block-gap: 0;
@@ -242,6 +250,92 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 .wp-site-blocks :where(.list-numbered-light, .list-numbered-dark) > li > p {
 	margin: 0;
+}
+
+/*
+ * Table utility that mirrors the villa detail travel-times treatment. Use
+ * explicit selectors here because Gutenberg core ships a stronger `.wp-block-
+ * table td, .wp-block-table th` border rule that `:where()` will not beat.
+ */
+.wp-site-blocks figure.wp-block-table.table-singe-border-bottom,
+.wp-site-blocks figure.wp-block-table.table-single-border-bottom {
+	margin-block: 0;
+}
+
+.wp-site-blocks figure.wp-block-table.table-singe-border-bottom table,
+.wp-site-blocks figure.wp-block-table.table-single-border-bottom table,
+.wp-site-blocks table.table-singe-border-bottom,
+.wp-site-blocks table.table-single-border-bottom {
+	width: 100%;
+	margin: 0;
+	border: 0;
+	border-collapse: collapse;
+	border-spacing: 0;
+	table-layout: auto;
+	background: transparent;
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.55;
+	color: rgb(30 61 47 / 0.88);
+}
+
+.wp-site-blocks figure.wp-block-table.table-singe-border-bottom td,
+.wp-site-blocks figure.wp-block-table.table-singe-border-bottom th,
+.wp-site-blocks figure.wp-block-table.table-single-border-bottom td,
+.wp-site-blocks figure.wp-block-table.table-single-border-bottom th,
+.wp-site-blocks table.table-singe-border-bottom td,
+.wp-site-blocks table.table-singe-border-bottom th,
+.wp-site-blocks table.table-single-border-bottom td,
+.wp-site-blocks table.table-single-border-bottom th {
+	padding: 1.125rem 0;
+	border: 0;
+	background: transparent;
+	vertical-align: middle;
+}
+
+.wp-site-blocks figure.wp-block-table.table-singe-border-bottom tr > *,
+.wp-site-blocks figure.wp-block-table.table-single-border-bottom tr > *,
+.wp-site-blocks table.table-singe-border-bottom tr > *,
+.wp-site-blocks table.table-single-border-bottom tr > * {
+	border-bottom: 1px solid rgb(30 61 47 / 0.12);
+}
+
+.wp-site-blocks figure.wp-block-table.table-singe-border-bottom table > :last-child > tr:last-child > *,
+.wp-site-blocks figure.wp-block-table.table-single-border-bottom table > :last-child > tr:last-child > *,
+.wp-site-blocks table.table-singe-border-bottom > :last-child > tr:last-child > *,
+.wp-site-blocks table.table-single-border-bottom > :last-child > tr:last-child > * {
+	border-bottom: 0;
+}
+
+.wp-site-blocks figure.wp-block-table.table-singe-border-bottom th,
+.wp-site-blocks figure.wp-block-table.table-single-border-bottom th,
+.wp-site-blocks table.table-singe-border-bottom th,
+.wp-site-blocks table.table-single-border-bottom th {
+	font-weight: 400;
+	text-align: left;
+	color: inherit;
+}
+
+.wp-site-blocks figure.wp-block-table.table-singe-border-bottom tr > :first-child,
+.wp-site-blocks figure.wp-block-table.table-single-border-bottom tr > :first-child,
+.wp-site-blocks table.table-singe-border-bottom tr > :first-child,
+.wp-site-blocks table.table-single-border-bottom tr > :first-child {
+	padding-right: 1.5rem;
+}
+
+.wp-site-blocks figure.wp-block-table.table-singe-border-bottom tr > :last-child:not(:first-child),
+.wp-site-blocks figure.wp-block-table.table-single-border-bottom tr > :last-child:not(:first-child),
+.wp-site-blocks table.table-singe-border-bottom tr > :last-child:not(:first-child),
+.wp-site-blocks table.table-single-border-bottom tr > :last-child:not(:first-child) {
+	width: 1%;
+	padding-left: 1.5rem;
+	text-align: right;
+	white-space: nowrap;
+	font-size: 0.875rem;
+	letter-spacing: 0.34em;
+	text-transform: uppercase;
+	color: rgb(196 146 42 / 0.88);
 }
 
 /*

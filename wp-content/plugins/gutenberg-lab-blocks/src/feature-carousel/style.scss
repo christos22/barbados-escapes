@@ -30,6 +30,8 @@
 	--vvm-feature-carousel-fade-ease: cubic-bezier(0.22, 1, 0.36, 1);
 	--vvm-feature-carousel-panel-overscan: 4%;
 	--vvm-feature-carousel-panel-offset-y: -2%;
+	--vvm-feature-carousel-accent-border: 8px solid
+		var(--wp--preset--color--gold, #c4922a);
 
 	width: 100%;
 	margin: 0;
@@ -43,6 +45,20 @@
 	scroll-margin-top: var(--vvm-header-height, 96px);
 	background: var(--vvm-feature-carousel-shell-surface);
 	color: var(--vvm-feature-carousel-ink);
+}
+
+.wp-block-gutenberg-lab-blocks-feature-carousel.vvm-feature-carousel--accent-border-top,
+.wp-block-gutenberg-lab-blocks-feature-carousel.vvm-feature-carousel--accent-border-both,
+.vvm-feature-carousel.vvm-feature-carousel--accent-border-top,
+.vvm-feature-carousel.vvm-feature-carousel--accent-border-both {
+	border-top: var(--vvm-feature-carousel-accent-border);
+}
+
+.wp-block-gutenberg-lab-blocks-feature-carousel.vvm-feature-carousel--accent-border-bottom,
+.wp-block-gutenberg-lab-blocks-feature-carousel.vvm-feature-carousel--accent-border-both,
+.vvm-feature-carousel.vvm-feature-carousel--accent-border-bottom,
+.vvm-feature-carousel.vvm-feature-carousel--accent-border-both {
+	border-bottom: var(--vvm-feature-carousel-accent-border);
 }
 
 .wp-block-gutenberg-lab-blocks-feature-carousel.alignfull,

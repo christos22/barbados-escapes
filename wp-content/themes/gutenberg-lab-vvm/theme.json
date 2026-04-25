@@ -107,6 +107,7 @@
 				{ "slug": "md", "name": "Medium", "size": "0.875rem", "fluid": false },
 				{ "slug": "lg", "name": "Large", "size": "1rem", "fluid": { "min": "1rem", "max": "1.125rem" } },
 				{ "slug": "xl", "name": "XL", "size": "1.375rem", "fluid": { "min": "1.25rem", "max": "1.5rem" } },
+				{ "slug": "heading-sm", "name": "Heading Small", "size": "1.75rem", "fluid": { "min": "1.5rem", "max": "1.75rem" } },
 				{ "slug": "two-xl", "name": "2XL", "size": "1.75rem", "fluid": { "min": "1.5rem", "max": "2rem" } },
 				{ "slug": "three-xl", "name": "3XL", "size": "2rem", "fluid": { "min": "1.75rem", "max": "2.25rem" } },
 				{ "slug": "four-xl", "name": "4XL", "size": "2.25rem", "fluid": { "min": "2rem", "max": "2.8125rem" } },
@@ -119,6 +120,7 @@
 				{ "slug": "dark-green", "name": "Dark Green", "color": "#1E3D2F" },
 				{ "slug": "gold", "name": "Gold", "color": "#C4922A" },
 				{ "slug": "light-gold", "name": "Light Gold", "color": "#F5ECD7" },
+				{ "slug": "ivory", "name": "Ivory", "color": "#FBF8F2" },
 				{ "slug": "forest", "name": "Forest", "color": "#1E3D2F" },
 				{ "slug": "deep-forest", "name": "Deep Forest", "color": "#1E3D2F" },
 				{ "slug": "teal-900", "name": "Teal 900", "color": "#1E3D2F" },
@@ -227,6 +229,11 @@
 					"letterSpacing": "0.34em",
 					"textTransform": "uppercase",
 					"lineHeight": "1rem"
+				}
+			},
+			"h5": {
+				"typography": {
+					"fontSize": "var:preset|font-size|heading-sm"
 				}
 			},
 			"h6": {

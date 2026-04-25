@@ -27,6 +27,13 @@ const TRANSITION_OPTIONS = [
 	},
 ];
 
+const ACCENT_BORDER_OPTIONS = [
+	{ label: __( 'None', 'gutenberg-lab-blocks' ), value: 'none' },
+	{ label: __( 'Top', 'gutenberg-lab-blocks' ), value: 'top' },
+	{ label: __( 'Bottom', 'gutenberg-lab-blocks' ), value: 'bottom' },
+	{ label: __( 'Top and Bottom', 'gutenberg-lab-blocks' ), value: 'both' },
+];
+
 const TEMPLATE = [
 	[ 'gutenberg-lab-blocks/feature-carousel-slide' ],
 	[ 'gutenberg-lab-blocks/feature-carousel-slide' ],
@@ -38,7 +45,7 @@ function normalizeTransitionStyle( transitionStyle ) {
 }
 
 export default function Edit( { attributes, clientId, setAttributes } ) {
-	const { align, transitionStyle = 'fade' } = attributes;
+	const { accentBorder = 'none', align, transitionStyle = 'fade' } = attributes;
 	const normalizedTransitionStyle =
 		normalizeTransitionStyle( transitionStyle );
 	const slideCount = useSelect(
@@ -67,6 +74,10 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 			'vvm-feature-carousel',
 			'vvm-feature-carousel--editor',
 			`vvm-feature-carousel--transition-${ normalizedTransitionStyle }`,
+			// Match the frontend render class so the editor shows the accent rule.
+			'none' !== accentBorder
+				? `vvm-feature-carousel--accent-border-${ accentBorder }`
+				: '',
 			align ? '' : 'alignfull',
 		]
 			.filter( Boolean )
@@ -93,26 +104,40 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 					title={ __( 'Carousel Settings', 'gutenberg-lab-blocks' ) }
 					initialOpen={ true }
 				>
-						<SelectControl
-							label={ __( 'Transition', 'gutenberg-lab-blocks' ) }
-							value={ normalizedTransitionStyle }
-							options={ TRANSITION_OPTIONS }
-							help={
-								'slide' === normalizedTransitionStyle
-									? __(
-											'Slide moves the carousel track while the text panel stays fully visible.',
-											'gutenberg-lab-blocks'
-									  )
-									: __(
-											'Fade crossfades the imagery while the text panel stays fixed.',
-											'gutenberg-lab-blocks'
-									  )
-							}
+					<SelectControl
+						label={ __( 'Transition', 'gutenberg-lab-blocks' ) }
+						value={ normalizedTransitionStyle }
+						options={ TRANSITION_OPTIONS }
+						help={
+							'slide' === normalizedTransitionStyle
+								? __(
+										'Slide moves the carousel track while the text panel stays fully visible.',
+										'gutenberg-lab-blocks'
+								  )
+								: __(
+										'Fade crossfades the imagery while the text panel stays fixed.',
+										'gutenberg-lab-blocks'
+								  )
+						}
 						onChange={ ( value ) =>
 							setAttributes( {
 								transitionStyle: value,
 							} )
 						}
+					/>
+					<SelectControl
+						label={ __( 'Accent Border', 'gutenberg-lab-blocks' ) }
+						value={ accentBorder }
+						options={ ACCENT_BORDER_OPTIONS }
+						onChange={ ( value ) =>
+							setAttributes( {
+								accentBorder: value,
+							} )
+						}
+						help={ __(
+							'Adds an 8px gold rule at the top, bottom, or both edges of the carousel.',
+							'gutenberg-lab-blocks'
+						) }
 					/>
 				</PanelBody>
 				{ slideCount > 1 ? (
