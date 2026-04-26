@@ -10,6 +10,13 @@ body {
 	background: #ffffff;
 }
 
+body.post-type-villa.editor-styles-wrapper
+	.wp-block-post-content
+	> :where(:not(.alignfull)) {
+	max-inline-size: min(100%, 1280px);
+	margin-inline: auto;
+}
+
 .editor-styles-wrapper {
 	background: #ffffff;
 }
