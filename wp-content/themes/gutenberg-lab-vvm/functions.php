@@ -1222,3 +1222,65 @@ function gutenberg_lab_vvm_enqueue_assets() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'gutenberg_lab_vvm_enqueue_assets' );
+
+/**
+ * Parses the ISO date string emitted by native date inputs.
+ *
+ * @param string $value Raw submitted date value.
+ * @return DateTimeImmutable|null
+ */
+function gutenberg_lab_vvm_parse_cf7_date_value( $value ) {
+	$value = trim( (string) $value );
+
+	if ( '' === $value ) {
+		return null;
+	}
+
+	$date   = DateTimeImmutable::createFromFormat( '!Y-m-d', $value );
+	$errors = DateTimeImmutable::getLastErrors();
+
+	if (
+		false === $date ||
+		( is_array( $errors ) && ( $errors['warning_count'] > 0 || $errors['error_count'] > 0 ) )
+	) {
+		return null;
+	}
+
+	return $date;
+}
+
+/**
+ * Ensures the villa availability departure date is not before arrival.
+ *
+ * Browser date controls improve the authoring experience, but CF7 validation
+ * remains the hard rule so direct POST requests cannot submit an invalid range.
+ *
+ * @param WPCF7_Validation $result Current validation result.
+ * @param WPCF7_FormTag    $tag    Current form tag.
+ * @return WPCF7_Validation
+ */
+function gutenberg_lab_vvm_validate_villa_availability_date_range( $result, $tag ) {
+	if ( ! $tag instanceof WPCF7_FormTag && class_exists( 'WPCF7_FormTag' ) ) {
+		$tag = new WPCF7_FormTag( $tag );
+	}
+
+	if ( ! $tag instanceof WPCF7_FormTag || 'preferred-departure' !== $tag->name ) {
+		return $result;
+	}
+
+	$arrival_value   = isset( $_POST['preferred-arrival'] ) ? sanitize_text_field( wp_unslash( $_POST['preferred-arrival'] ) ) : '';
+	$departure_value = isset( $_POST['preferred-departure'] ) ? sanitize_text_field( wp_unslash( $_POST['preferred-departure'] ) ) : '';
+	$arrival_date    = gutenberg_lab_vvm_parse_cf7_date_value( $arrival_value );
+	$departure_date  = gutenberg_lab_vvm_parse_cf7_date_value( $departure_value );
+
+	if ( null !== $arrival_date && null !== $departure_date && $departure_date < $arrival_date ) {
+		$result->invalidate(
+			$tag,
+			__( 'Departure date cannot be before arrival date.', 'gutenberg-lab-vvm' )
+		);
+	}
+
+	return $result;
+}
+add_filter( 'wpcf7_validate_date', 'gutenberg_lab_vvm_validate_villa_availability_date_range', 20, 2 );
+add_filter( 'wpcf7_validate_date*', 'gutenberg_lab_vvm_validate_villa_availability_date_range', 20, 2 );

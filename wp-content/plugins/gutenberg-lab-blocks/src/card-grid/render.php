@@ -40,16 +40,22 @@ if ( ! function_exists( 'gutenberg_lab_card_grid_resolve_block_gap_value' ) ) {
 	}
 }
 
-$content_source = 'villas' === ( $attributes['contentSource'] ?? 'manual' ) ? 'villas' : 'manual';
-$villa_count    = max( 1, (int) ( $attributes['villaCount'] ?? 3 ) );
-$villa_presentation = 'standard' === ( $attributes['villaPresentation'] ?? 'cinematic' ) ? 'standard' : 'cinematic';
-$columns        = $attributes['columns'] ?? '2';
+$content_source     = 'villas' === ( $attributes['contentSource'] ?? 'manual' ) ? 'villas' : 'manual';
+$villa_count        = max( 1, (int) ( $attributes['villaCount'] ?? 3 ) );
+$villa_presentation = $attributes['villaPresentation'] ?? 'cinematic';
+$exclude_current    = ! empty( $attributes['excludeCurrent'] );
+$columns            = $attributes['columns'] ?? '2';
 $is_villa_cinematic = 'villas' === $content_source && 'cinematic' === $villa_presentation;
 $enable_carousel = ! empty( $attributes['enableCarousel'] );
 $media_ratio = $attributes['mediaRatio'] ?? 'landscape';
 $block_gap   = $attributes['style']['spacing']['blockGap'] ?? '';
 
 $allowed_columns = array( '2', '3' );
+$allowed_villa_presentations = array(
+	'cinematic',
+	'standard',
+	'collection',
+);
 $allowed_ratios  = array(
 	'landscape',
 	'widescreen',
@@ -60,6 +66,10 @@ $allowed_ratios  = array(
 
 if ( ! in_array( $columns, $allowed_columns, true ) ) {
 	$columns = '2';
+}
+
+if ( ! in_array( $villa_presentation, $allowed_villa_presentations, true ) ) {
+	$villa_presentation = 'cinematic';
 }
 
 if ( ! in_array( $media_ratio, $allowed_ratios, true ) ) {
@@ -79,17 +89,32 @@ $card_markup = '';
 $card_count  = 0;
 
 if ( 'villas' === $content_source ) {
+	$query_args = array(
+		'post_type'           => 'villa',
+		'post_status'         => 'publish',
+		'posts_per_page'      => $villa_count,
+		'ignore_sticky_posts' => true,
+		'orderby'             => array(
+			'menu_order' => 'ASC',
+			'title'      => 'ASC',
+		),
+	);
+
+	if ( $exclude_current && is_singular( 'villa' ) ) {
+		$query_args['post__not_in'] = array( get_queried_object_id() );
+	}
+
+	if (
+		$exclude_current &&
+		empty( $query_args['post__not_in'] ) &&
+		isset( $block->context['postId'], $block->context['postType'] ) &&
+		'villa' === $block->context['postType']
+	) {
+		$query_args['post__not_in'] = array( (int) $block->context['postId'] );
+	}
+
 	$villas_query = new WP_Query(
-		array(
-			'post_type'           => 'villa',
-			'post_status'         => 'publish',
-			'posts_per_page'      => $villa_count,
-			'ignore_sticky_posts' => true,
-			'orderby'             => array(
-				'menu_order' => 'ASC',
-				'title'      => 'ASC',
-			),
-		)
+		$query_args
 	);
 
 	if ( $villas_query->have_posts() ) {
@@ -101,6 +126,7 @@ if ( 'villas' === $content_source ) {
 					'cta_label_override' => $is_villa_cinematic
 						? __( 'Enquire', 'gutenberg-lab-blocks' )
 						: '',
+					'presentation'       => $villa_presentation,
 				)
 			);
 		}

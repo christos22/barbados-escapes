@@ -8,6 +8,7 @@
 	"icon": "screenoptions",
 	"description": "A card grid that can be authored manually or populated from villa posts.",
 	"keywords": [ "cards", "grid", "layout", "villas" ],
+	"usesContext": [ "postId", "postType" ],
 	"attributes": {
 		"contentSource": {
 			"type": "string",
@@ -20,6 +21,10 @@
 		"villaPresentation": {
 			"type": "string",
 			"default": "cinematic"
+		},
+		"excludeCurrent": {
+			"type": "boolean",
+			"default": false
 		},
 		"columns": {
 			"type": "string",

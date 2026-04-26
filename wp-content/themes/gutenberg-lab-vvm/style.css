@@ -876,6 +876,260 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	color: var(--vvm-villa-amenities-muted);
 }
 
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact {
+	grid-template-columns: minmax(0, 1.08fr) minmax(24rem, 0.92fr);
+	align-items: stretch;
+	margin-top: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__location-card {
+	display: grid;
+	grid-template-rows: minmax(18rem, 0.72fr) auto;
+	min-width: 0;
+	margin: 0;
+	background: #ffffff;
+	border: 1px solid var(--vvm-villa-amenities-rule);
+	box-shadow: 0 18px 40px rgb(23 53 40 / 0.04);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot {
+	display: grid;
+	align-items: stretch;
+	min-height: clamp(18rem, 34vw, 30rem);
+	margin: 0;
+	background:
+		linear-gradient(rgb(23 53 40 / 0.055) 1px, transparent 1px),
+		linear-gradient(90deg, rgb(23 53 40 / 0.055) 1px, transparent 1px),
+		#dcebe7;
+	background-size: 4.5rem 4.5rem;
+	overflow: hidden;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot > * {
+	width: 100%;
+	height: 100%;
+	min-height: inherit;
+	margin: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot :where(img, iframe) {
+	display: block;
+	width: 100%;
+	height: 100%;
+	min-height: inherit;
+	border: 0;
+	object-fit: cover;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__location {
+	display: grid;
+	gap: 0.8rem;
+	align-content: start;
+	min-height: clamp(8rem, 15vw, 14rem);
+	margin: 0;
+	padding: clamp(1.5rem, 2vw, 2rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__location > * {
+	margin: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__form-card {
+	display: grid;
+	grid-template-columns: auto auto minmax(0, 1fr);
+	grid-template-areas:
+		"intro intro intro"
+		"form form form"
+		"submit whatsapp ."
+		"response response response";
+	column-gap: 0.75rem;
+	min-width: 0;
+	padding: clamp(2rem, 3.2vw, 3.2rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__intro {
+	grid-area: intro;
+	display: grid;
+	gap: clamp(1rem, 1.8vw, 1.35rem);
+	margin: 0 0 clamp(1.5rem, 2.5vw, 2rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__intro > * {
+	margin: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__intro .wp-block-heading {
+	max-width: 13ch;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__form-card .wp-block-contact-form-7-contact-form-selector {
+	display: contents;
+	margin: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__form-card .wpcf7,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form {
+	display: contents;
+	margin: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form .hidden-fields-container {
+	display: none;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form p {
+	margin: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__grid {
+	grid-area: form;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.8rem;
+	margin: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__wide {
+	grid-column: 1 / -1;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form .wpcf7-form-control-wrap {
+	display: block;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form :where(input:not([type="submit"]), textarea, select) {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 3.35rem;
+	margin: 0;
+	padding: 0.95rem 1rem;
+	border: 1px solid rgb(247 241 231 / 0.1);
+	border-radius: 0;
+	background: rgb(247 241 231 / 0.08);
+	color: #f7f1e7;
+	color-scheme: dark;
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 0.82rem;
+	line-height: 1.45;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form :where(input, textarea, select)::placeholder {
+	color: rgb(247 241 231 / 0.45);
+	opacity: 1;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form :where(input, textarea, select):focus {
+	border-color: rgb(196 146 42 / 0.68);
+	outline: 2px solid rgb(196 146 42 / 0.18);
+	outline-offset: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__actions,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp-row {
+	margin-top: clamp(1.25rem, 2vw, 1.6rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__actions {
+	grid-area: submit;
+	position: relative;
+	width: max-content;
+	padding-top: clamp(1.15rem, 2vw, 1.55rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp-row {
+	grid-area: whatsapp;
+	align-self: start;
+	margin-top: 0;
+	padding-top: clamp(1.15rem, 2vw, 1.55rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	min-height: 3rem;
+	min-width: min(100%, 12.5rem);
+	padding: 0.85rem 1.35rem;
+	border-radius: 0;
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 0.62rem;
+	font-weight: 400;
+	letter-spacing: 0.24em;
+	line-height: 1.15;
+	text-transform: uppercase;
+	text-decoration: none;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit {
+	border: 1px solid var(--vvm-villa-amenities-gold);
+	background: var(--vvm-villa-amenities-gold);
+	color: #173528;
+	cursor: pointer;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp-row {
+	display: flex;
+	gap: 0.75rem;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link {
+	margin: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button {
+	border: 1px solid rgb(247 241 231 / 0.16);
+	background: transparent !important;
+	color: rgb(247 241 231 / 0.78) !important;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button::before,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button::after {
+	content: none;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit:hover,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit:focus-visible {
+	background: #d5a23a;
+	border-color: #d5a23a;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button:hover,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button:focus-visible {
+	border-color: rgb(247 241 231 / 0.38);
+	background: rgb(247 241 231 / 0.06) !important;
+	color: #f7f1e7 !important;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form .wpcf7-spinner {
+	position: absolute;
+	top: calc(100% + 0.5rem);
+	left: 50%;
+	margin: 0;
+	transform: translateX(-50%);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form .wpcf7-not-valid-tip,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form .wpcf7-response-output {
+	color: rgb(247 241 231 / 0.72);
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 0.76rem;
+	line-height: 1.45;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form .wpcf7-not-valid-tip {
+	margin-top: 0.35rem;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form .wpcf7-response-output {
+	grid-area: response;
+	margin: 1rem 0 0;
+	padding: 0.85rem 1rem;
+	border-color: rgb(247 241 231 / 0.16);
+}
+
 @media (max-width: 1180px) {
 	.wp-site-blocks .vvm-bedroom-levels__grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -892,6 +1146,10 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules .vvm-villa-amenities__card {
 		max-width: none;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact {
+		grid-template-columns: minmax(0, 1fr);
 	}
 }
 
@@ -973,6 +1231,47 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__terms {
 		padding: 1.25rem;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__location-card {
+		grid-template-rows: minmax(16rem, auto) auto;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot {
+		min-height: 16rem;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__form-card {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas:
+			"intro"
+			"form"
+			"submit"
+			"whatsapp"
+			"response";
+		padding: 1.5rem;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__intro .wp-block-heading {
+		max-width: none;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit,
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link {
+		width: 100%;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp-row,
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp {
+		width: 100%;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp-row {
+		margin-top: 0.75rem;
 	}
 }
 

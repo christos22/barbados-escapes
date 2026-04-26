@@ -5,6 +5,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	const hasHeroHeader = document.body.classList.contains( 'vvm-has-hero-header' );
 	const footer = document.querySelector( '.vvm-footer' );
 	const bedroomLevelSections = document.querySelectorAll( '.vvm-bedroom-levels' );
+	const villaContactForms = document.querySelectorAll( '.vvm-villa-contact-form' );
 
 	// Keep a real pixel scrollbar value available to CSS for edge-to-edge math.
 	const syncScrollbarWidth = () => {
@@ -125,9 +126,44 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		} );
 	};
 
+	const initializeVillaContactDateRanges = () => {
+		villaContactForms.forEach( ( form ) => {
+			const arrival = form.querySelector( '[name="preferred-arrival"]' );
+			const departure = form.querySelector( '[name="preferred-departure"]' );
+
+			if (
+				! arrival ||
+				! departure ||
+				arrival.type !== 'date' ||
+				departure.type !== 'date'
+			) {
+				return;
+			}
+
+			const syncDepartureMinimum = () => {
+				if ( arrival.value ) {
+					departure.min = arrival.value;
+
+					if ( departure.value && departure.value < arrival.value ) {
+						departure.value = '';
+					}
+
+					return;
+				}
+
+				departure.removeAttribute( 'min' );
+			};
+
+			arrival.addEventListener( 'change', syncDepartureMinimum );
+			arrival.addEventListener( 'input', syncDepartureMinimum );
+			syncDepartureMinimum();
+		} );
+	};
+
 	syncScrollbarWidth();
 	initializeFooterReveal();
 	initializeBedroomLevels();
+	initializeVillaContactDateRanges();
 	window.addEventListener( 'resize', syncScrollbarWidth, { passive: true } );
 
 	if ( ! header ) {

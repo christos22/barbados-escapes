@@ -13,6 +13,10 @@
     "layout",
     "villas"
   ],
+  "usesContext": [
+    "postId",
+    "postType"
+  ],
   "attributes": {
     "contentSource": {
       "type": "string",
@@ -25,6 +29,10 @@
     "villaPresentation": {
       "type": "string",
       "default": "cinematic"
+    },
+    "excludeCurrent": {
+      "type": "boolean",
+      "default": false
     },
     "columns": {
       "type": "string",

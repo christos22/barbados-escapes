@@ -78,6 +78,16 @@ add_action( 'init', 'gutenberg_lab_blocks_register_villas_post_type' );
  */
 function gutenberg_lab_blocks_get_villa_meta_schema() {
 	return array(
+		'villa_card_descriptor' => array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
+		'villa_card_facts'      => array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
 		'villa_card_cta_label' => array(
 			'type'              => 'string',
 			'default'           => '',
@@ -116,6 +126,15 @@ add_action( 'init', 'gutenberg_lab_blocks_register_villa_meta' );
  */
 function gutenberg_lab_blocks_add_villa_meta_boxes() {
 	add_meta_box(
+		'gutenberg-lab-villa-card-content',
+		__( 'Card Content', 'gutenberg-lab-blocks' ),
+		'gutenberg_lab_blocks_render_villa_card_content_meta_box',
+		'villa',
+		'normal',
+		'default'
+	);
+
+	add_meta_box(
 		'gutenberg-lab-villa-card-cta',
 		__( 'Card CTA', 'gutenberg-lab-blocks' ),
 		'gutenberg_lab_blocks_render_villa_card_cta_meta_box',
@@ -125,6 +144,56 @@ function gutenberg_lab_blocks_add_villa_meta_boxes() {
 	);
 }
 add_action( 'add_meta_boxes_villa', 'gutenberg_lab_blocks_add_villa_meta_boxes' );
+
+/**
+ * Renders the reusable card text fields.
+ *
+ * These fields keep post-driven card grids editable without hardcoding copy in
+ * the block instance that happens to display the villa.
+ *
+ * @param WP_Post $post Current villa post object.
+ */
+function gutenberg_lab_blocks_render_villa_card_content_meta_box( $post ) {
+	$descriptor = get_post_meta( $post->ID, 'villa_card_descriptor', true );
+	$facts      = get_post_meta( $post->ID, 'villa_card_facts', true );
+
+	wp_nonce_field( 'gutenberg_lab_blocks_save_villa_fields', 'gutenberg_lab_blocks_villa_fields_nonce' );
+	?>
+	<p>
+		<label for="gutenberg-lab-villa-card-descriptor">
+			<?php esc_html_e( 'Card descriptor', 'gutenberg-lab-blocks' ); ?>
+		</label>
+	</p>
+	<input
+		type="text"
+		id="gutenberg-lab-villa-card-descriptor"
+		name="gutenberg_lab_villa_card_descriptor"
+		class="widefat"
+		value="<?php echo esc_attr( $descriptor ); ?>"
+		placeholder="<?php echo esc_attr__( 'Luxury Oceanfront Estate - West Coast, St James', 'gutenberg-lab-blocks' ); ?>"
+	/>
+	<p class="description">
+		<?php esc_html_e( 'Short location or positioning line. Leave blank to use the villa excerpt.', 'gutenberg-lab-blocks' ); ?>
+	</p>
+
+	<p>
+		<label for="gutenberg-lab-villa-card-facts">
+			<?php esc_html_e( 'Card facts', 'gutenberg-lab-blocks' ); ?>
+		</label>
+	</p>
+	<input
+		type="text"
+		id="gutenberg-lab-villa-card-facts"
+		name="gutenberg_lab_villa_card_facts"
+		class="widefat"
+		value="<?php echo esc_attr( $facts ); ?>"
+		placeholder="<?php echo esc_attr__( '7 Bedrooms - Sleeps 12 - From $1,300/night', 'gutenberg-lab-blocks' ); ?>"
+	/>
+	<p class="description">
+		<?php esc_html_e( 'Compact facts line used by collection-style villa cards.', 'gutenberg-lab-blocks' ); ?>
+	</p>
+	<?php
+}
 
 /**
  * Renders the villa CTA meta fields.
@@ -202,8 +271,10 @@ function gutenberg_lab_blocks_save_villa_meta( $post_id ) {
 	}
 
 	$field_map = array(
-		'villa_card_cta_label' => 'gutenberg_lab_villa_card_cta_label',
-		'villa_card_cta_url'   => 'gutenberg_lab_villa_card_cta_url',
+		'villa_card_descriptor' => 'gutenberg_lab_villa_card_descriptor',
+		'villa_card_facts'      => 'gutenberg_lab_villa_card_facts',
+		'villa_card_cta_label'  => 'gutenberg_lab_villa_card_cta_label',
+		'villa_card_cta_url'    => 'gutenberg_lab_villa_card_cta_url',
 	);
 	$meta_schema = gutenberg_lab_blocks_get_villa_meta_schema();
 
@@ -370,9 +441,15 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 	$image_url = $image_id ? get_the_post_thumbnail_url( $villa_id, 'large' ) : '';
 	$image_alt = $image_id ? get_post_meta( $image_id, '_wp_attachment_image_alt', true ) : '';
 	$excerpt   = get_the_excerpt( $villa_id );
+	$descriptor = get_post_meta( $villa_id, 'villa_card_descriptor', true );
+	$facts      = get_post_meta( $villa_id, 'villa_card_facts', true );
 
 	if ( '' === $excerpt ) {
 		$excerpt = wp_trim_words( wp_strip_all_tags( $villa->post_content ), 24 );
+	}
+
+	if ( '' === $descriptor ) {
+		$descriptor = $excerpt;
 	}
 
 	if ( '' === $image_alt && $image_id ) {
@@ -384,6 +461,8 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 		'title'     => get_the_title( $villa_id ),
 		'permalink' => get_permalink( $villa_id ),
 		'excerpt'   => $excerpt,
+		'descriptor' => $descriptor,
+		'facts'     => $facts,
 		'image_url' => $image_url,
 		'image_alt' => $image_alt,
 		'cta'       => gutenberg_lab_blocks_get_villa_card_cta( $villa_id ),
@@ -411,6 +490,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		$args,
 		array(
 			'cta_label_override' => '',
+			'presentation'       => 'standard',
 		)
 	);
 
@@ -418,6 +498,10 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 	// honoring the villa-level CTA destination override.
 	if ( '' !== $args['cta_label_override'] ) {
 		$villa_data['cta']['label'] = $args['cta_label_override'];
+	}
+
+	if ( 'collection' === $args['presentation'] ) {
+		$villa_data['cta']['label'] = __( 'Explore Villa', 'gutenberg-lab-blocks' );
 	}
 
 	$media_classes = array(
@@ -454,14 +538,26 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		</a>
 
 		<div class="vvm-card-grid__card-content">
+			<?php if ( 'collection' === $args['presentation'] ) : ?>
+				<p class="vvm-card-grid__card-eyebrow">
+					<?php esc_html_e( 'Curated Villa', 'gutenberg-lab-blocks' ); ?>
+				</p>
+			<?php endif; ?>
+
 			<h3 class="wp-block-heading">
 				<a href="<?php echo esc_url( $villa_data['permalink'] ); ?>">
 					<?php echo esc_html( $villa_data['title'] ); ?>
 				</a>
 			</h3>
 
-			<?php if ( '' !== $villa_data['excerpt'] ) : ?>
+			<?php if ( 'collection' === $args['presentation'] && '' !== $villa_data['descriptor'] ) : ?>
+				<p class="vvm-card-grid__card-descriptor"><?php echo esc_html( $villa_data['descriptor'] ); ?></p>
+			<?php elseif ( '' !== $villa_data['excerpt'] ) : ?>
 				<p><?php echo esc_html( $villa_data['excerpt'] ); ?></p>
+			<?php endif; ?>
+
+			<?php if ( 'collection' === $args['presentation'] && '' !== $villa_data['facts'] ) : ?>
+				<p class="vvm-card-grid__card-facts"><?php echo esc_html( $villa_data['facts'] ); ?></p>
 			<?php endif; ?>
 
 			<?php if ( ! empty( $villa_data['cta']['url'] ) && ! empty( $villa_data['cta']['label'] ) ) : ?>

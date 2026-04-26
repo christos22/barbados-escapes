@@ -202,6 +202,102 @@
 	}
 }
 
+.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-collection.vvm-card-grid--source-villas {
+	--vvm-card-grid-card-gap: 1.25rem;
+	--vvm-card-grid-card-padding: 2.5rem;
+
+	.vvm-card-grid__items {
+		gap: var(--wp--style--block-gap, var(--wp--preset--spacing--lg));
+	}
+
+	.vvm-card-grid__card--villa {
+		background: var(--wp--preset--color--white, #ffffff);
+		box-shadow: 0 18px 50px rgb(30 61 47 / 0.06);
+	}
+
+	.vvm-card-grid__card-media {
+		transition: filter 260ms ease;
+	}
+
+	.vvm-card-grid__card--villa:focus-within .vvm-card-grid__card-media,
+	.vvm-card-grid__card--villa:hover .vvm-card-grid__card-media {
+		filter: saturate(1.04) contrast(1.03);
+	}
+
+	.vvm-card-grid__card-content {
+		gap: 1.25rem;
+		padding: var(--vvm-card-grid-card-padding);
+	}
+
+	.vvm-card-grid__card-eyebrow,
+	.vvm-card-grid__card-descriptor,
+	.vvm-card-grid__card-facts {
+		font-family: var(--wp--preset--font-family--refined-sans);
+	}
+
+	.vvm-card-grid__card-eyebrow {
+		color: var(--wp--preset--color--gold, #c4922a);
+		font-size: var(--wp--preset--font-size--xs);
+		letter-spacing: 0.34em;
+		line-height: 1.4;
+		text-transform: uppercase;
+	}
+
+	.vvm-card-grid__card-content .wp-block-heading {
+		color: var(--wp--preset--color--dark-green, #1e3d2f);
+	}
+
+	.vvm-card-grid__card-descriptor,
+	.vvm-card-grid__card-facts {
+		color: rgb(30 61 47 / 0.72);
+		font-size: var(--wp--preset--font-size--lg);
+		line-height: 1.45;
+	}
+
+	.vvm-card-grid__card-content > .wp-block-buttons:last-child {
+		margin-top: auto;
+		padding-top: 0.75rem;
+	}
+
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link {
+		display: inline-flex;
+		min-block-size: auto;
+		padding: 0 0 0.3125rem;
+		border: 0;
+		border-bottom: 1px solid currentcolor;
+		background: transparent !important;
+		box-shadow: none;
+		color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
+		font-family: var(--wp--preset--font-family--refined-sans);
+		font-size: var(--wp--preset--font-size--xs);
+		font-weight: 400;
+		letter-spacing: 0.34em;
+		line-height: 1.4;
+		text-decoration: none !important;
+		text-transform: uppercase;
+		transform: none;
+		transition:
+			color 200ms ease,
+			border-color 200ms ease;
+	}
+
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link::before,
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link::after {
+		content: none;
+	}
+
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link:hover,
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link:focus-visible {
+		color: var(--wp--preset--color--gold, #c4922a) !important;
+	}
+}
+
+@media (max-width: 781px) {
+	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-collection.vvm-card-grid--source-villas {
+		--vvm-card-grid-card-padding: 1.5rem;
+	}
+}
+
 .wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-cinematic.vvm-card-grid--source-villas {
 	box-sizing: border-box;
 	padding-inline: var(--wp--custom--layout--gutter-current, clamp(1.5rem, 4vw, 3rem));

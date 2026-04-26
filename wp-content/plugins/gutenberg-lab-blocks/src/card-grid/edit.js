@@ -41,6 +41,7 @@ const CONTENT_SOURCE_OPTIONS = [
 const VILLA_PRESENTATION_OPTIONS = [
 	{ label: __( 'Cinematic', 'gutenberg-lab-blocks' ), value: 'cinematic' },
 	{ label: __( 'Standard', 'gutenberg-lab-blocks' ), value: 'standard' },
+	{ label: __( 'Collection', 'gutenberg-lab-blocks' ), value: 'collection' },
 ];
 
 const MEDIA_RATIO_OPTIONS = [
@@ -85,6 +86,7 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 		contentSource,
 		villaCount,
 		villaPresentation,
+		excludeCurrent,
 		columns,
 		enableCarousel,
 		mediaRatio,
@@ -92,6 +94,20 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 	} = attributes;
 	const isVillaCinematicStyle =
 		'villas' === contentSource && 'cinematic' === villaPresentation;
+	const presentationHelp = {
+		cinematic: __(
+			'Uses the premium square editorial card layout from the mock.',
+			'gutenberg-lab-blocks'
+		),
+		standard: __(
+			'Uses the standard card-grid card treatment.',
+			'gutenberg-lab-blocks'
+		),
+		collection: __(
+			'Uses the related-villa collection card with descriptor and facts meta.',
+			'gutenberg-lab-blocks'
+		),
+	};
 	const blockGap = resolveBlockGapPreviewValue( style?.spacing?.blockGap );
 	const manualCardCount = useSelect(
 		( select ) =>
@@ -182,17 +198,18 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 								onChange={ ( value ) =>
 									setAttributes( { villaPresentation: value } )
 								}
-								help={
-									'cinematic' === villaPresentation
-										? __(
-												'Uses the premium square editorial card layout from the mock.',
-												'gutenberg-lab-blocks'
-										  )
-										: __(
-												'Uses the standard card-grid card treatment.',
-												'gutenberg-lab-blocks'
-										  )
+								help={ presentationHelp[ villaPresentation ] }
+							/>
+							<ToggleControl
+								label={ __( 'Exclude current villa', 'gutenberg-lab-blocks' ) }
+								checked={ !! excludeCurrent }
+								onChange={ ( value ) =>
+									setAttributes( { excludeCurrent: value } )
 								}
+								help={ __(
+									'Useful for related-villa sections on single villa pages.',
+									'gutenberg-lab-blocks'
+								) }
 							/>
 						</>
 					) : null }
