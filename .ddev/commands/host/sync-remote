@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ## Description: Refresh local DB/uploads from the live InMotion WordPress site
-## Usage: sync-remote [--db-only] [--uploads-only] [--mirror-uploads] [--skip-snapshot] [--dry-run]
-## Example: "ddev sync-remote --db-only"
+## Usage: sync-remote [--db-only] [--uploads-only] [--mirror-uploads] [--skip-snapshot] [--preserve-post=ID] [--dry-run]
+## Example: "ddev sync-remote --db-only --preserve-post=92"
 
 set -euo pipefail
 
@@ -24,6 +24,8 @@ skip_snapshot=0
 dry_run=0
 snapshot_name=""
 temp_dump=""
+preserve_post_ids=()
+preserve_post_content_files=()
 
 log() {
 	printf '\n==> %s\n' "$*"
@@ -104,6 +106,11 @@ require_set_var() {
 	[[ "${!var_name+x}" ]] || fail "Missing ${var_name} in ${ENV_FILE}"
 }
 
+validate_post_id() {
+	local post_id="$1"
+	[[ "${post_id}" =~ ^[1-9][0-9]*$ ]] || fail "--preserve-post expects a numeric post ID, got '${post_id}'"
+}
+
 detect_imported_table_prefix() {
 	local options_table
 	options_table="$(ddev mysql -N -e "SHOW TABLES" | awk '/_options$/ { print; exit }')"
@@ -174,6 +181,36 @@ EOF
 	log "Patched local wp-config-ddev.php to load wp-config-ddev-local.php"
 }
 
+preserve_local_post_content() {
+	local post_id
+	local temp_content
+
+	for post_id in "${preserve_post_ids[@]}"; do
+		temp_content="$(mktemp "${TMPDIR:-/tmp}/barbados-preserve-post-${post_id}.XXXXXX.html")"
+		log "Preserving local post_content for post ${post_id}"
+		if ! ddev wp post get "${post_id}" --field=post_content "${WP_CLI_MAINTENANCE_ARGS[@]}" > "${temp_content}"; then
+			rm -f "${temp_content}"
+			fail "Could not preserve local post_content for post ${post_id}."
+		fi
+
+		preserve_post_content_files+=("${temp_content}")
+	done
+}
+
+restore_preserved_post_content() {
+	local index
+	local post_id
+	local temp_content
+
+	for index in "${!preserve_post_ids[@]}"; do
+		post_id="${preserve_post_ids[${index}]}"
+		temp_content="${preserve_post_content_files[${index}]}"
+
+		log "Restoring preserved post_content for post ${post_id}"
+		ddev wp post update "${post_id}" --post_content="$(< "${temp_content}")" "${WP_CLI_MAINTENANCE_ARGS[@]}"
+	done
+}
+
 usage() {
 	cat <<'EOF'
 Refresh the local DDEV database and uploads from the live InMotion WordPress site.
@@ -186,6 +223,8 @@ Flags:
   --uploads-only     Refresh only uploads
   --mirror-uploads   Mirror uploads exactly with rsync --delete
   --skip-snapshot    Skip the pre-import DDEV database snapshot
+  --preserve-post=ID Preserve a local post's post_content across DB import
+                     May be repeated for multiple posts
   --dry-run          Validate SSH and remote paths without importing data
   -h, --help         Show this help text
 
@@ -201,6 +240,13 @@ cleanup() {
 	if [[ -n "${temp_dump}" && -f "${temp_dump}" ]]; then
 		rm -f "${temp_dump}"
 	fi
+
+	local preserved_file
+	for preserved_file in "${preserve_post_content_files[@]}"; do
+		if [[ -n "${preserved_file}" && -f "${preserved_file}" ]]; then
+			rm -f "${preserved_file}"
+		fi
+	done
 }
 trap cleanup EXIT
 
@@ -220,6 +266,17 @@ while [[ $# -gt 0 ]]; do
 		--skip-snapshot)
 			skip_snapshot=1
 			;;
+		--preserve-post=*)
+			preserve_post_id="${1#*=}"
+			validate_post_id "${preserve_post_id}"
+			preserve_post_ids+=("${preserve_post_id}")
+			;;
+		--preserve-post)
+			shift
+			[[ $# -gt 0 ]] || fail "--preserve-post requires a numeric post ID"
+			validate_post_id "$1"
+			preserve_post_ids+=("$1")
+			;;
 		--dry-run)
 			dry_run=1
 			;;
@@ -236,6 +293,10 @@ done
 
 if (( sync_db == 0 && sync_uploads == 0 )); then
 	fail "Nothing to do. Choose either DB sync, uploads sync, or both."
+fi
+
+if (( ${#preserve_post_ids[@]} > 0 && sync_db == 0 )); then
+	fail "--preserve-post requires a database refresh. Use it with ddev sync-remote or ddev sync-remote --db-only."
 fi
 
 for required_command in ddev ssh rsync gzip mktemp; do
@@ -292,6 +353,10 @@ fi
 if (( dry_run )); then
 	log "Dry run succeeded. SSH and remote paths look good."
 	exit 0
+fi
+
+if (( sync_db && ${#preserve_post_ids[@]} > 0 )); then
+	preserve_local_post_content
 fi
 
 if (( sync_db && skip_snapshot == 0 )); then
@@ -355,6 +420,10 @@ if (( sync_db )); then
 	fi
 	ddev wp option update home "${LOCAL_SITE_URL}" "${WP_CLI_MAINTENANCE_ARGS[@]}"
 	ddev wp option update siteurl "${LOCAL_SITE_URL}" "${WP_CLI_MAINTENANCE_ARGS[@]}"
+
+	if (( ${#preserve_post_ids[@]} > 0 )); then
+		restore_preserved_post_content
+	fi
 
 	permalink_structure="$(ddev wp option get permalink_structure "${WP_CLI_MAINTENANCE_ARGS[@]}" 2>/dev/null || true)"
 	if [[ -n "${permalink_structure}" ]]; then
