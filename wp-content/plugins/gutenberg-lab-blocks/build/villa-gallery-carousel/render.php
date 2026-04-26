@@ -109,6 +109,7 @@ $first_slide = $slide_blocks[0]['attrs'] ?? array();
 $first_title = trim( (string) ( $first_slide['title'] ?? '' ) );
 $first_detail = trim( (string) ( $first_slide['detail'] ?? '' ) );
 $is_card_interactive = false !== ( $attributes['isCardInteractive'] ?? true );
+$show_caption = false !== ( $attributes['showCaption'] ?? true );
 $wrapper_class = 'vvm-villa-gallery-carousel' . ( $is_card_interactive ? '' : ' vvm-villa-gallery-carousel--noninteractive' );
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
@@ -218,25 +219,27 @@ $wrapper_attributes = get_block_wrapper_attributes(
 			</div>
 		</div>
 
-		<p class="vvm-villa-gallery-carousel__caption" data-villa-gallery-carousel-caption aria-live="polite">
-			<span class="vvm-villa-gallery-carousel__caption-title" data-villa-gallery-carousel-caption-title>
-				<?php echo esc_html( '' !== $first_title ? $first_title : __( 'Gallery image', 'gutenberg-lab-blocks' ) ); ?>
-			</span>
-			<span
-				class="vvm-villa-gallery-carousel__caption-separator"
-				data-villa-gallery-carousel-caption-separator
-				<?php echo '' === $first_detail ? 'hidden' : ''; ?>
-				aria-hidden="true"
-			>
-				&mdash;
-			</span>
-			<span
-				class="vvm-villa-gallery-carousel__caption-detail"
-				data-villa-gallery-carousel-caption-detail
-				<?php echo '' === $first_detail ? 'hidden' : ''; ?>
-			>
-				<?php echo esc_html( $first_detail ); ?>
-			</span>
-		</p>
+		<?php if ( $show_caption ) : ?>
+			<p class="vvm-villa-gallery-carousel__caption" data-villa-gallery-carousel-caption aria-live="polite">
+				<span class="vvm-villa-gallery-carousel__caption-title" data-villa-gallery-carousel-caption-title>
+					<?php echo esc_html( '' !== $first_title ? $first_title : __( 'Gallery image', 'gutenberg-lab-blocks' ) ); ?>
+				</span>
+				<span
+					class="vvm-villa-gallery-carousel__caption-separator"
+					data-villa-gallery-carousel-caption-separator
+					<?php echo '' === $first_detail ? 'hidden' : ''; ?>
+					aria-hidden="true"
+				>
+					&mdash;
+				</span>
+				<span
+					class="vvm-villa-gallery-carousel__caption-detail"
+					data-villa-gallery-carousel-caption-detail
+					<?php echo '' === $first_detail ? 'hidden' : ''; ?>
+				>
+					<?php echo esc_html( $first_detail ); ?>
+				</span>
+			</p>
+		<?php endif; ?>
 	</div>
 </section>

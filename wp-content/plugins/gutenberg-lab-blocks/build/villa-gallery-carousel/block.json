@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "gutenberg-lab-blocks/villa-gallery-carousel",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "title": "Villa Gallery Carousel",
   "category": "design",
   "icon": "images-alt2",
@@ -27,6 +27,10 @@
       "default": 0
     },
     "isCardInteractive": {
+      "type": "boolean",
+      "default": true
+    },
+    "showCaption": {
       "type": "boolean",
       "default": true
     }

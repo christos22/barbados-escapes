@@ -52,7 +52,7 @@ function renderCaption( title, detail ) {
 }
 
 export default function Edit( { attributes, clientId, setAttributes } ) {
-	const { isCardInteractive = true } = attributes;
+	const { isCardInteractive = true, showCaption = true } = attributes;
 	const slideBlocks = useSelect(
 		( select ) =>
 			(
@@ -117,6 +117,17 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 								setAttributes( { isCardInteractive: value } )
 							}
 						/>
+						<ToggleControl
+							label={ __( 'Show caption', 'gutenberg-lab-blocks' ) }
+							help={ __(
+								'Displays the active slide caption beneath the gallery rail.',
+								'gutenberg-lab-blocks'
+							) }
+							checked={ showCaption }
+							onChange={ ( value ) =>
+								setAttributes( { showCaption: value } )
+							}
+						/>
 						<p className="components-base-control__help">
 							{ __(
 								'Adjust the shared arrow placement for this villa gallery rail.',
@@ -143,9 +154,11 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						<div { ...innerBlocksProps } />
 					</div>
 
-					<p className="vvm-villa-gallery-carousel__caption">
-						{ renderCaption( captionTitle, captionDetail ) }
-					</p>
+					{ showCaption ? (
+						<p className="vvm-villa-gallery-carousel__caption">
+							{ renderCaption( captionTitle, captionDetail ) }
+						</p>
+					) : null }
 
 					{ 0 === slideBlocks.length ? (
 						<p className="vvm-villa-gallery-carousel__editor-note">
