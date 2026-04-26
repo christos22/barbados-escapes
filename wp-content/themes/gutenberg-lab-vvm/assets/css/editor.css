@@ -357,6 +357,16 @@ body.post-type-villa.editor-styles-wrapper
 	margin: 0;
 }
 
+.editor-styles-wrapper .vvm-bedroom-levels__panel {
+	display: grid !important;
+}
+
+.editor-styles-wrapper .vvm-bedroom-levels__panel + .vvm-bedroom-levels__panel {
+	margin-top: clamp(1.5rem, 3vw, 2rem);
+	padding-top: clamp(1.5rem, 3vw, 2rem);
+	border-top: 1px dashed var(--vvm-bedroom-levels-rule);
+}
+
 .editor-styles-wrapper .vvm-bedroom-levels__card {
 	position: relative;
 	box-sizing: border-box;
