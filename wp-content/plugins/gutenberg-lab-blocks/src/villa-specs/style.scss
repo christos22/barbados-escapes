@@ -4,8 +4,9 @@
 }
 
 .vvm-villa-specs__shell {
+	box-sizing: border-box;
 	margin-inline: auto;
-	max-width: var(--wp--style--global--wide-size, 1760px);
+	max-inline-size: min(100%, 1280px);
 	padding: clamp(1.5rem, 3vw, 2.5rem) var(--wp--custom--layout--gutter-current);
 }
 
