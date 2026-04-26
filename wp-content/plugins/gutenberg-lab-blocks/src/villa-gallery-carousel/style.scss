@@ -232,6 +232,13 @@
 	z-index: 4;
 }
 
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel
+	.vvm-villa-gallery-carousel__rail-button[hidden],
+.vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__rail-button[hidden] {
+	// The view script toggles `hidden` when the rail fits without scrolling.
+	display: none !important;
+}
+
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel .vvm-villa-gallery-carousel__eyebrow,
 .vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__eyebrow {
 	margin: 0;
