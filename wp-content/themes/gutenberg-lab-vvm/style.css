@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.6
+Version: 0.1.7
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -366,6 +366,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 .wp-site-blocks .vvm-bedroom-levels__nav .wp-block-button__link {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	min-height: 2.875rem;
 	padding: 0.875rem clamp(1.1rem, 1.45vw, 1.35rem);
 	border: 1px solid transparent !important;
@@ -380,6 +381,20 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	text-transform: uppercase;
 	text-decoration: none;
 	white-space: nowrap;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__nav .wp-block-button__link::before,
+.wp-site-blocks .vvm-bedroom-levels__nav .wp-block-button__link::after {
+	/* These tabs reuse core Button blocks, but should not inherit the global
+	 * branded button gradient layer. */
+	content: none !important;
+	display: none !important;
+}
+
+.wp-site-blocks .vvm-bedroom-levels__nav .wp-block-button__link:hover,
+.wp-site-blocks .vvm-bedroom-levels__nav .wp-block-button__link:focus-visible {
+	box-shadow: none !important;
+	transform: none !important;
 }
 
 .wp-site-blocks .vvm-bedroom-levels__nav-button.is-active .wp-block-button__link {
