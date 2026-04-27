@@ -41,7 +41,15 @@
 	);
 	--vvm-villa-gallery-hero-overlay-copy-width: 48rem;
 	--vvm-villa-gallery-hero-rail-gap: 1px;
-	--vvm-villa-gallery-hero-thumb-width: clamp(12rem, 30vw, 18rem);
+	--vvm-villa-gallery-hero-thumb-visible-count: 5;
+	--vvm-villa-gallery-hero-thumb-visible-gap-total: 4px;
+	--vvm-villa-gallery-hero-thumb-width: calc(
+		(
+			100% -
+			var(--vvm-villa-gallery-hero-thumb-visible-gap-total)
+		) /
+		var(--vvm-villa-gallery-hero-thumb-visible-count)
+	);
 	--vvm-villa-gallery-hero-thumb-aspect-ratio: 1.58;
 
 	position: relative;
@@ -368,11 +376,14 @@
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__list,
 .vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__list {
+	display: flex;
+	flex-wrap: nowrap;
 	gap: var(--vvm-villa-gallery-hero-rail-gap);
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide,
 .vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide {
+	flex: 0 0 var(--vvm-villa-gallery-hero-thumb-width);
 	width: var(--vvm-villa-gallery-hero-thumb-width);
 	cursor: pointer;
 	outline: none;
@@ -539,19 +550,11 @@
 	display: none;
 }
 
-@media (max-width: 1023px) {
-	.wp-block-gutenberg-lab-blocks-villa-gallery-hero,
-	.vvm-villa-gallery-hero {
-		--vvm-villa-gallery-hero-thumb-width: clamp(12rem, 56vw, 16rem);
-	}
-}
-
 @media (max-width: 781px) {
 	.wp-block-gutenberg-lab-blocks-villa-gallery-hero,
 	.vvm-villa-gallery-hero {
 		--vvm-villa-gallery-hero-stage-preferred-height: 46rem;
 		--vvm-villa-gallery-hero-stage-min-readable-height: 26rem;
-		--vvm-villa-gallery-hero-thumb-width: clamp(12rem, 72vw, 16rem);
 	}
 
 	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content,

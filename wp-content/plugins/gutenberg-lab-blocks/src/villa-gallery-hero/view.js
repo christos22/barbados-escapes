@@ -12,7 +12,7 @@ import {
 
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 const THUMB_ACTIVE_CLASS = 'vvm-villa-gallery-hero__thumb-slide--active';
-const FULL_WIDTH_THUMB_MAX = 5;
+const MAX_VISIBLE_THUMBNAILS = 5;
 const PAGE_INTENT_EVENTS = [
 	'focusin',
 	'keydown',
@@ -312,6 +312,45 @@ function syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion ) {
 	revealActiveThumbIfNeeded( thumbsElement, activeIndex, prefersReducedMotion );
 }
 
+function getThumbRailGapPixels( thumbsElement ) {
+	const listElement = thumbsElement?.querySelector( '.splide__list' );
+	const listStyles = listElement ? getComputedStyle( listElement ) : null;
+	const gap = parseFloat(
+		listStyles?.columnGap || listStyles?.gap || '0'
+	);
+
+	return Number.isFinite( gap ) ? gap : 0;
+}
+
+function syncThumbRailLayout( thumbsElement, thumbCount ) {
+	if ( ! thumbsElement ) {
+		return;
+	}
+
+	const visibleThumbCount = Math.min(
+		Math.max( thumbCount, 1 ),
+		MAX_VISIBLE_THUMBNAILS
+	);
+	const visibleGapCount = Math.max( 0, visibleThumbCount - 1 );
+	const visibleGapWidth =
+		visibleGapCount * getThumbRailGapPixels( thumbsElement );
+
+	// The CSS uses these two values to keep the visible rail capped at five
+	// thumbnails while allowing smaller galleries to fill the available width.
+	thumbsElement.style.setProperty(
+		'--vvm-villa-gallery-hero-thumb-visible-count',
+		visibleThumbCount
+	);
+	thumbsElement.style.setProperty(
+		'--vvm-villa-gallery-hero-thumb-visible-gap-total',
+		`${ visibleGapWidth }px`
+	);
+	thumbsElement.classList.toggle(
+		'vvm-villa-gallery-hero__thumbs--full-width',
+		thumbCount <= MAX_VISIBLE_THUMBNAILS
+	);
+}
+
 function syncActiveGalleryState(
 	stageElement,
 	thumbsElement,
@@ -413,8 +452,11 @@ function initializeVillaGalleryHero( rootElement ) {
 		syncRailButtons(
 			thumbTrack,
 			previousThumbRailButton,
-			nextThumbRailButton
+			nextThumbRailButton,
+			{ hideAtEdges: true }
 		);
+
+	syncThumbRailLayout( thumbsElement, thumbCount );
 
 	if ( thumbCount <= 1 ) {
 		const syncStaticState = () => {
@@ -436,11 +478,6 @@ function initializeVillaGalleryHero( rootElement ) {
 		bindReducedMotionPreference( reducedMotionMediaQuery, syncStaticState );
 		return;
 	}
-
-	thumbsElement.classList.toggle(
-		'vvm-villa-gallery-hero__thumbs--full-width',
-		thumbCount <= FULL_WIDTH_THUMB_MAX
-	);
 
 	const stage = new Splide( stageElement, {
 		arrows: false,

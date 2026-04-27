@@ -30,13 +30,20 @@ function getRailItemTargetScrollLeft( track, item ) {
 	);
 }
 
-export function syncRailButtons( track, previousButton, nextButton ) {
+export function syncRailButtons(
+	track,
+	previousButton,
+	nextButton,
+	{ hideAtEdges = false } = {}
+) {
 	if ( ! track ) {
 		return;
 	}
 
 	const maxScrollLeft = getRailMaxScroll( track );
 	const canScroll = maxScrollLeft > RAIL_MIN_SCROLLABLE_DISTANCE;
+	const isAtStart = track.scrollLeft <= RAIL_SCROLL_TOLERANCE;
+	const isAtEnd = track.scrollLeft >= maxScrollLeft - RAIL_SCROLL_TOLERANCE;
 
 	[ previousButton, nextButton ].forEach( ( button ) => {
 		if ( button ) {
@@ -45,14 +52,13 @@ export function syncRailButtons( track, previousButton, nextButton ) {
 	} );
 
 	if ( previousButton ) {
-		previousButton.disabled =
-			! canScroll || track.scrollLeft <= RAIL_SCROLL_TOLERANCE;
+		previousButton.hidden = ! canScroll || ( hideAtEdges && isAtStart );
+		previousButton.disabled = ! canScroll || isAtStart;
 	}
 
 	if ( nextButton ) {
-		nextButton.disabled =
-			! canScroll ||
-			track.scrollLeft >= maxScrollLeft - RAIL_SCROLL_TOLERANCE;
+		nextButton.hidden = ! canScroll || ( hideAtEdges && isAtEnd );
+		nextButton.disabled = ! canScroll || isAtEnd;
 	}
 }
 
