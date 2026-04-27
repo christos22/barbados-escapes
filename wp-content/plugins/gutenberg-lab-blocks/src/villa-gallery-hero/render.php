@@ -412,7 +412,7 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 			>
 				<div class="splide__track">
 					<ul class="splide__list">
-						<?php foreach ( $slides as $slide ) : ?>
+						<?php foreach ( $slides as $slide_index => $slide ) : ?>
 							<li class="splide__slide">
 								<figure class="vvm-villa-gallery-hero__stage-slide">
 									<?php if ( 'video' === $slide['media_type'] ) : ?>
@@ -423,16 +423,24 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 														'autoplay_url'     => gutenberg_lab_blocks_get_vimeo_embed_url( $slide['vimeo_id'], 'autoplay' ),
 														'manual_url'       => gutenberg_lab_blocks_get_vimeo_embed_url( $slide['vimeo_id'], 'manual' ),
 														'iframe_class'     => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--video',
+														'lazy_load'        => true,
 														'poster_alt'       => $slide['poster_alt'],
+														'poster_attrs'     => array_filter(
+															array(
+																'decoding'      => 'async',
+																'fetchpriority' => 0 === $slide_index ? 'high' : '',
+																'loading'       => 0 === $slide_index ? 'eager' : 'lazy',
+															)
+														),
 														'poster_class'     => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
-													'poster_url'       => $slide['poster_url'],
-													'shell_class'      => 'vvm-villa-gallery-hero__stage-media-shell',
-													'title'            => __( 'Villa gallery Vimeo video', 'gutenberg-lab-blocks' ),
-													'wrapper_attrs'    => array(
-														'data-villa-gallery-vimeo' => '',
-													),
-												)
-											); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+														'poster_url'       => $slide['poster_url'],
+														'shell_class'      => 'vvm-villa-gallery-hero__stage-media-shell',
+														'title'            => __( 'Villa gallery Vimeo video', 'gutenberg-lab-blocks' ),
+														'wrapper_attrs'    => array(
+															'data-villa-gallery-vimeo' => '',
+														),
+													)
+												); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 											?>
 										<?php else : ?>
 											<video
@@ -441,10 +449,11 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 												<?php if ( '' !== $slide['poster_url'] ) : ?>
 													poster="<?php echo esc_url( $slide['poster_url'] ); ?>"
 												<?php endif; ?>
+												autoplay
 												muted
 												loop
 												playsinline
-												preload="metadata"
+												preload="auto"
 												data-villa-gallery-video
 											></video>
 											<button
@@ -518,16 +527,22 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 											'autoplay_url'     => gutenberg_lab_blocks_get_vimeo_embed_url( $slide['vimeo_id'], 'autoplay' ),
 											'manual_url'       => gutenberg_lab_blocks_get_vimeo_embed_url( $slide['vimeo_id'], 'manual' ),
 											'iframe_class'     => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--video',
+											'lazy_load'        => true,
 											'poster_alt'       => $slide['poster_alt'],
+											'poster_attrs'     => array(
+												'decoding'      => 'async',
+												'fetchpriority' => 'high',
+												'loading'       => 'eager',
+											),
 											'poster_class'     => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
-										'poster_url'       => $slide['poster_url'],
-										'shell_class'      => 'vvm-villa-gallery-hero__stage-media-shell',
-										'title'            => __( 'Villa gallery Vimeo video', 'gutenberg-lab-blocks' ),
-										'wrapper_attrs'    => array(
-											'data-villa-gallery-vimeo' => '',
-										),
-									)
-								); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+											'poster_url'       => $slide['poster_url'],
+											'shell_class'      => 'vvm-villa-gallery-hero__stage-media-shell',
+											'title'            => __( 'Villa gallery Vimeo video', 'gutenberg-lab-blocks' ),
+											'wrapper_attrs'    => array(
+												'data-villa-gallery-vimeo' => '',
+											),
+										)
+									); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								?>
 							<?php else : ?>
 								<video
@@ -536,10 +551,11 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 									<?php if ( '' !== $slide['poster_url'] ) : ?>
 										poster="<?php echo esc_url( $slide['poster_url'] ); ?>"
 									<?php endif; ?>
+									autoplay
 									muted
 									loop
 									playsinline
-									preload="metadata"
+									preload="auto"
 									data-villa-gallery-static-video
 								></video>
 								<button

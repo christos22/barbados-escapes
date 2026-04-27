@@ -1,4 +1,6 @@
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
+const MIN_AUTOPLAY_POSTER_MS = 900;
+const POSTER_FADE_MS = 350;
 const VIMEO_SHELL_STATE = new WeakMap();
 
 let vimeoPlayerConstructorPromise;
@@ -51,15 +53,41 @@ function setPosterVisibility( shell, isVisible ) {
 		return;
 	}
 
-	if ( parts.posterShell ) {
-		parts.posterShell.hidden = ! isVisible;
-	}
-
 	if ( parts.frameShell ) {
 		parts.frameShell.hidden = isVisible;
 	}
 
 	shell.dataset.vimeoVisibleState = isVisible ? 'poster' : 'player';
+
+	if ( parts.posterShell ) {
+		parts.posterShell.hidden = false;
+
+		if ( ! isVisible ) {
+			window.setTimeout( () => {
+				if ( 'player' === shell.dataset.vimeoVisibleState ) {
+					parts.posterShell.hidden = true;
+				}
+			}, POSTER_FADE_MS );
+		}
+	}
+}
+
+function setAutoplayLoadingVisibility( shell ) {
+	const parts = getShellParts( shell );
+
+	if ( ! parts ) {
+		return;
+	}
+
+	if ( parts.posterShell ) {
+		parts.posterShell.hidden = false;
+	}
+
+	if ( parts.frameShell ) {
+		parts.frameShell.hidden = false;
+	}
+
+	shell.dataset.vimeoVisibleState = 'loading';
 }
 
 function setShellBusy( shell, isBusy ) {
@@ -216,16 +244,20 @@ async function ensureShellPlayer( shell, mode ) {
 		return state;
 	}
 
-	const VimeoPlayer = await loadVimeoPlayerConstructor();
 	const nextIframe = parts.iframe.cloneNode( false );
+	const previousPlayer = state.player;
 
 	nextIframe.src = targetUrl;
 	parts.iframe.replaceWith( nextIframe );
 
-	await destroyShellPlayer( state );
-
 	state.iframe = nextIframe;
 	state.mode = mode;
+	state.player = null;
+
+	await destroyShellPlayer( { player: previousPlayer } );
+
+	const VimeoPlayer = await loadVimeoPlayerConstructor();
+
 	state.player = new VimeoPlayer( nextIframe );
 
 	bindShellResizeObserver( shell );
@@ -243,6 +275,12 @@ async function waitForPlayerReady( player, timeoutMs ) {
 	} );
 
 	return Promise.race( [ readyPromise, timeoutPromise ] );
+}
+
+function wait( timeoutMs ) {
+	return new Promise( ( resolve ) => {
+		window.setTimeout( resolve, timeoutMs );
+	} );
 }
 
 async function playPlayerInstance( player, isMuted ) {
@@ -321,14 +359,26 @@ export async function attemptVimeoShellAutoplay( shell ) {
 		return false;
 	}
 
-	const readyInTime = await waitForPlayerReady(
-		state.player,
-		getShellTimeout( shell )
-	);
+	// Keep the poster visible while the muted iframe preloads underneath it.
+	// This avoids a blank hero, but still lets the Vimeo embed start on load.
+	if ( ! state.aspectRatio ) {
+		state.aspectRatio = 16 / 9;
+	}
+
+	updateShellFrameFit( shell );
+	setAutoplayLoadingVisibility( shell );
+
+	const [ readyInTime ] = await Promise.all( [
+		waitForPlayerReady( state.player, getShellTimeout( shell ) ),
+		wait( MIN_AUTOPLAY_POSTER_MS ),
+	] );
 
 	if ( ! readyInTime || ! isActiveRequest( shell, requestId ) ) {
-		setPosterVisibility( shell, true );
-		return false;
+		if ( isActiveRequest( shell, requestId ) ) {
+			setPosterVisibility( shell, false );
+		}
+
+		return readyInTime;
 	}
 
 	await ensureShellAspectRatio( shell, state );

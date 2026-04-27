@@ -13,6 +13,15 @@ import {
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 const THUMB_ACTIVE_CLASS = 'vvm-villa-gallery-hero__thumb-slide--active';
 const FULL_WIDTH_THUMB_MAX = 5;
+const PAGE_INTENT_EVENTS = [
+	'focusin',
+	'keydown',
+	'pointerdown',
+	'pointermove',
+	'scroll',
+	'touchstart',
+	'wheel',
+];
 
 function getManagedVideoToggle( video ) {
 	return (
@@ -77,6 +86,13 @@ function attemptManagedVideoAutoplay( video ) {
 		return;
 	}
 
+	// Browser autoplay policies allow silent inline media. Set the properties
+	// before play() so JS-created retries match the PHP-rendered attributes.
+	video.muted = true;
+	video.defaultMuted = true;
+	video.autoplay = true;
+	video.playsInline = true;
+	video.preload = 'auto';
 	video.controls = false;
 	hideManagedVideoFallback( video );
 
@@ -140,6 +156,43 @@ function bindReducedMotionPreference( mediaQuery, syncCallback ) {
 	if ( 'function' === typeof mediaQuery.addListener ) {
 		mediaQuery.addListener( syncCallback );
 	}
+}
+
+function isSaveDataEnabled() {
+	return Boolean( window.navigator?.connection?.saveData );
+}
+
+function hasVillaGalleryVimeoShells( rootElement ) {
+	return Boolean( rootElement.querySelector( '[data-villa-gallery-vimeo]' ) );
+}
+
+function bindPageIntentAutoplay( callback ) {
+	let didRun = false;
+
+	const removeListeners = () => {
+		PAGE_INTENT_EVENTS.forEach( ( eventName ) => {
+			window.removeEventListener( eventName, handleIntent, true );
+		} );
+	};
+
+	const handleIntent = ( event ) => {
+		if ( didRun || false === event?.isTrusted ) {
+			return;
+		}
+
+		didRun = true;
+		removeListeners();
+		callback();
+	};
+
+	PAGE_INTENT_EVENTS.forEach( ( eventName ) => {
+		window.addEventListener( eventName, handleIntent, {
+			capture: true,
+			passive: true,
+		} );
+	} );
+
+	return removeListeners;
 }
 
 function syncStageNativeVideos( stageElement, shouldAutoplay ) {
@@ -263,11 +316,12 @@ function syncActiveGalleryState(
 	stageElement,
 	thumbsElement,
 	activeIndex,
-	shouldAutoplay,
+	shouldAutoplayNativeVideo,
+	shouldAutoplayVimeo,
 	prefersReducedMotion
 ) {
-	syncStageNativeVideos( stageElement, shouldAutoplay );
-	syncStageVimeoShells( stageElement, shouldAutoplay );
+	syncStageNativeVideos( stageElement, shouldAutoplayNativeVideo );
+	syncStageVimeoShells( stageElement, shouldAutoplayVimeo );
 	syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion );
 }
 
@@ -312,18 +366,33 @@ function initializeVillaGalleryHero( rootElement ) {
 	const reducedMotionMediaQuery = window.matchMedia(
 		REDUCED_MOTION_MEDIA_QUERY
 	);
-	const shouldAutoplayVideos = () => ! reducedMotionMediaQuery.matches;
+	let hasPageVideoIntent = false;
+	const shouldAutoplayNativeVideos = () => ! reducedMotionMediaQuery.matches;
+	const canAutoplayVimeoAfterIntent = () =>
+		hasPageVideoIntent &&
+		! reducedMotionMediaQuery.matches &&
+		! isSaveDataEnabled();
 
 	bindManagedVideoControls( rootElement );
 	bindVimeoShellPlayButtons( rootElement );
 
 	if ( ! stageElement || ! thumbsElement ) {
 		const syncStaticState = () => {
-			syncStaticNativeVideo( rootElement, shouldAutoplayVideos() );
-			syncStaticVimeoShell( rootElement, shouldAutoplayVideos() );
+			syncStaticNativeVideo( rootElement, shouldAutoplayNativeVideos() );
+			syncStaticVimeoShell( rootElement, canAutoplayVimeoAfterIntent() );
 		};
 
 		syncStaticState();
+		if (
+			hasVillaGalleryVimeoShells( rootElement ) &&
+			! reducedMotionMediaQuery.matches &&
+			! isSaveDataEnabled()
+		) {
+			bindPageIntentAutoplay( () => {
+				hasPageVideoIntent = true;
+				syncStaticState();
+			} );
+		}
 		bindReducedMotionPreference( reducedMotionMediaQuery, syncStaticState );
 		return;
 	}
@@ -349,11 +418,21 @@ function initializeVillaGalleryHero( rootElement ) {
 
 	if ( thumbCount <= 1 ) {
 		const syncStaticState = () => {
-			syncStaticNativeVideo( rootElement, shouldAutoplayVideos() );
-			syncStaticVimeoShell( rootElement, shouldAutoplayVideos() );
+			syncStaticNativeVideo( rootElement, shouldAutoplayNativeVideos() );
+			syncStaticVimeoShell( rootElement, canAutoplayVimeoAfterIntent() );
 		};
 
 		syncStaticState();
+		if (
+			hasVillaGalleryVimeoShells( rootElement ) &&
+			! reducedMotionMediaQuery.matches &&
+			! isSaveDataEnabled()
+		) {
+			bindPageIntentAutoplay( () => {
+				hasPageVideoIntent = true;
+				syncStaticState();
+			} );
+		}
 		bindReducedMotionPreference( reducedMotionMediaQuery, syncStaticState );
 		return;
 	}
@@ -380,10 +459,22 @@ function initializeVillaGalleryHero( rootElement ) {
 			stageElement,
 			thumbsElement,
 			stage.index,
-			shouldAutoplayVideos(),
+			shouldAutoplayNativeVideos(),
+			canAutoplayVimeoAfterIntent(),
 			prefersReducedMotion
 		);
 	};
+
+	if (
+		hasVillaGalleryVimeoShells( rootElement ) &&
+		! reducedMotionMediaQuery.matches &&
+		! isSaveDataEnabled()
+	) {
+		bindPageIntentAutoplay( () => {
+			hasPageVideoIntent = true;
+			syncActiveState();
+		} );
+	}
 
 	previousThumbRailButton?.addEventListener( 'click', () => {
 		scrollRailByStep( thumbTrack, thumbSlides, -1, prefersReducedMotion );

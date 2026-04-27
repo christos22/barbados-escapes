@@ -164,6 +164,25 @@
 .vvm-vimeo-shell__poster-shell {
 	position: absolute;
 	inset: 0;
+	transition: opacity 0.35s ease;
+}
+
+.vvm-vimeo-shell__player {
+	opacity: 0;
+}
+
+.vvm-vimeo-shell__poster-shell {
+	opacity: 1;
+}
+
+.vvm-vimeo-shell[data-vimeo-visible-state="loading"] .vvm-vimeo-shell__player,
+.vvm-vimeo-shell[data-vimeo-visible-state="player"] .vvm-vimeo-shell__player {
+	opacity: 1;
+}
+
+.vvm-vimeo-shell[data-vimeo-visible-state="player"] .vvm-vimeo-shell__poster-shell {
+	opacity: 0;
+	pointer-events: none;
 }
 
 .vvm-vimeo-shell__poster-shell[data-vimeo-play-trigger] {

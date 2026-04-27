@@ -96,11 +96,12 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_vimeo_embed_url' ) ) {
 			$query_args = array_merge(
 				$query_args,
 				array(
-					'autoplay'  => '1',
-					'muted'     => '1',
-					'loop'      => '1',
-					'autopause' => '0',
-					'controls'  => '0',
+					'autoplay'   => '1',
+					'background' => '1',
+					'muted'      => '1',
+					'loop'       => '1',
+					'autopause'  => '0',
+					'controls'   => '0',
 				)
 			);
 		} else {
@@ -170,9 +171,9 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 	/**
 	 * Renders the shared poster-first Vimeo shell used by the custom blocks.
 	 *
-		 * The iframe starts hidden behind the poster. Frontend JS decides whether to
-		 * reveal autoplay or keep the poster/manual-start state when the player is
-		 * slow.
+	 * The iframe starts hidden behind the poster. Frontend JS decides whether to
+	 * reveal autoplay or keep the poster/manual-start state when the player is
+	 * slow.
 	 *
 	 * @param array $args Render configuration.
 	 * @return string
@@ -180,13 +181,15 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 	function gutenberg_lab_blocks_render_vimeo_shell( $args = array() ) {
 		$args = wp_parse_args(
 			$args,
-				array(
-					'autoplay_url'   => '',
-					'manual_url'     => '',
-					'button_label'   => __( 'Play video', 'gutenberg-lab-blocks' ),
-					'iframe_class'   => '',
-					'poster_alt'     => '',
+			array(
+				'autoplay_url'   => '',
+				'manual_url'     => '',
+				'button_label'   => __( 'Play video', 'gutenberg-lab-blocks' ),
+				'iframe_class'   => '',
+				'lazy_load'      => false,
+				'poster_alt'     => '',
 				'poster_class'   => '',
+				'poster_attrs'   => array(),
 				'poster_url'     => '',
 				'shell_class'    => '',
 				'title'          => __( 'Vimeo video', 'gutenberg-lab-blocks' ),
@@ -228,13 +231,49 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 			);
 		}
 
+		$poster_attributes = array_merge(
+			array(
+				'class' => trim( 'vvm-vimeo-shell__poster ' . $args['poster_class'] ),
+				'src'   => $args['poster_url'],
+				'alt'   => $args['poster_alt'],
+			),
+			array_diff_key(
+				(array) $args['poster_attrs'],
+				array(
+					'class' => true,
+					'src'   => true,
+					'alt'   => true,
+				)
+			)
+		);
+		$poster_markup     = '';
+
+		foreach ( $poster_attributes as $attribute_name => $attribute_value ) {
+			if ( ! is_string( $attribute_name ) || '' === trim( $attribute_name ) || null === $attribute_value || false === $attribute_value ) {
+				continue;
+			}
+
+			if ( '' === $attribute_value || true === $attribute_value ) {
+				$poster_markup .= ' ' . sanitize_key( $attribute_name );
+				continue;
+			}
+
+			$poster_markup .= sprintf(
+				' %1$s="%2$s"',
+				sanitize_key( $attribute_name ),
+				esc_attr( (string) $attribute_value )
+			);
+		}
+
 		ob_start();
 		?>
 		<div<?php echo $wrapper_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="vvm-vimeo-shell__player" data-vimeo-frame-shell hidden>
 				<iframe
 					class="<?php echo esc_attr( trim( 'vvm-vimeo-shell__iframe ' . $args['iframe_class'] ) ); ?>"
-					src="<?php echo esc_url( $args['autoplay_url'] ); ?>"
+					<?php if ( ! $args['lazy_load'] ) : ?>
+						src="<?php echo esc_url( $args['autoplay_url'] ); ?>"
+					<?php endif; ?>
 					title="<?php echo esc_attr( $args['title'] ); ?>"
 					allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
 					allowfullscreen
@@ -251,11 +290,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 					tabindex="0"
 					aria-label="<?php echo esc_attr( $args['button_label'] ); ?>"
 				>
-					<img
-						class="<?php echo esc_attr( trim( 'vvm-vimeo-shell__poster ' . $args['poster_class'] ) ); ?>"
-						src="<?php echo esc_url( $args['poster_url'] ); ?>"
-						alt="<?php echo esc_attr( $args['poster_alt'] ); ?>"
-					/>
+					<img<?php echo $poster_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 					<span class="screen-reader-text"><?php echo esc_html( $args['button_label'] ); ?></span>
 				</div>
 		</div>
