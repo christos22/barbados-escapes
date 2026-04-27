@@ -1,0 +1,310 @@
+#!/usr/bin/env bash
+## Description: Push the local DDEV database to the live InMotion WordPress site
+## Usage: push-remote --db-only --yes [--dry-run] [--no-preserve-ai1wm-gdrive]
+## Example: "ddev push-remote --db-only --yes"
+
+set -euo pipefail
+
+APPROOT="${DDEV_APPROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+ENV_FILE="${APPROOT}/.ddev/.env.sync-remote"
+ENV_EXAMPLE_FILE="${APPROOT}/.ddev/.env.sync-remote.example"
+SSH_KEY_PATH="/home/Quester/Nextcloud/Documents/Development/Server/SSH-Keys/inmotion"
+WP_CLI_MAINTENANCE_ARGS=(--skip-plugins --skip-themes)
+SSH_COMMON_ARGS=(-o BatchMode=yes -o ConnectTimeout=10)
+SCP_COMMON_ARGS=(-o BatchMode=yes -o ConnectTimeout=10)
+SSH_RETRY_COUNT=3
+SSH_RETRY_DELAY=3
+
+db_only=0
+confirmed=0
+dry_run=0
+preserve_ai1wm_gdrive=1
+temp_dump=""
+remote_temp_dump=""
+remote_preserved_options=""
+
+AI1WM_PRESERVE_WHERE="option_name LIKE 'ai1wmge_gdrive\\_%' OR option_name IN ('ai1wmge_plugin_key','ai1wm_auth_header','ai1wm_secret_key','ai1wm_updater','ai1wm_sites_links','ai1wm_status','ai1wm_messages','ai1wm_backups_labels')"
+
+log() {
+	printf '\n==> %s\n' "$*"
+}
+
+fail() {
+	printf 'Error: %s\n' "$*" >&2
+	exit 1
+}
+
+run_with_retries() {
+	local max_attempts="$1"
+	local delay_seconds="$2"
+	local attempt=1
+	local exit_code=0
+	shift 2
+
+	while true; do
+		"$@"
+		exit_code=$?
+		if (( exit_code == 0 )); then
+			return 0
+		fi
+		if (( attempt >= max_attempts )); then
+			return "${exit_code}"
+		fi
+
+		printf 'Warning: command failed with exit code %s. Retrying in %ss (%s/%s)...\n' \
+			"${exit_code}" "${delay_seconds}" "${attempt}" "${max_attempts}" >&2
+		sleep "${delay_seconds}"
+		attempt=$(( attempt + 1 ))
+	done
+}
+
+ssh_run() {
+	run_with_retries "${SSH_RETRY_COUNT}" "${SSH_RETRY_DELAY}" \
+		ssh "${SSH_COMMON_ARGS[@]}" "$@"
+}
+
+remote_bash() {
+	local remote_command="$1"
+
+	ssh_run "${REMOTE_SSH_HOST}" "bash -lc $(printf '%q' "${remote_command}")"
+}
+
+scp_to_remote() {
+	local local_file="$1"
+	local remote_file="$2"
+
+	run_with_retries "${SSH_RETRY_COUNT}" "${SSH_RETRY_DELAY}" \
+		scp "${SCP_COMMON_ARGS[@]}" "${local_file}" "${REMOTE_SSH_HOST}:${remote_file}"
+}
+
+require_nonempty_var() {
+	local var_name="$1"
+	[[ -n "${!var_name:-}" ]] || fail "Missing ${var_name} in ${ENV_FILE}"
+}
+
+require_set_var() {
+	local var_name="$1"
+	[[ "${!var_name+x}" ]] || fail "Missing ${var_name} in ${ENV_FILE}"
+}
+
+usage() {
+	cat <<'EOF'
+Push the local DDEV database to the live InMotion WordPress site.
+
+Usage:
+  ddev push-remote --db-only --yes [flags]
+
+Flags:
+  --db-only                    Push only the database. This is currently required.
+  --yes                        Required confirmation for the destructive remote import.
+  --dry-run                    Validate SSH, remote WordPress path, and DB access only.
+  --preserve-ai1wm-gdrive      Preserve remote All-in-One WP Migration Google Drive settings. Default.
+  --no-preserve-ai1wm-gdrive   Allow local AI1WM/Google Drive settings to overwrite remote values.
+  -h, --help                   Show this help text
+
+Safety:
+  - The command creates a remote DB backup before importing the local dump.
+  - By default, it preserves remote ai1wmge_gdrive_* and related AI1WM option rows.
+  - It rewrites local URLs to the configured remote URL after import.
+
+Before running:
+  1. Confirm .ddev/.env.sync-remote contains the live database credentials.
+  2. Load the SSH key into ssh-agent:
+     ssh-add /home/Quester/Nextcloud/Documents/Development/Server/SSH-Keys/inmotion
+EOF
+}
+
+cleanup() {
+	if [[ -n "${temp_dump}" && -f "${temp_dump}" ]]; then
+		rm -f "${temp_dump}"
+	fi
+
+	if [[ -n "${REMOTE_SSH_HOST:-}" ]]; then
+		if [[ -n "${remote_temp_dump}" ]]; then
+			ssh "${SSH_COMMON_ARGS[@]}" "${REMOTE_SSH_HOST}" "rm -f $(printf '%q' "${remote_temp_dump}")" >/dev/null 2>&1 || true
+		fi
+
+		if [[ -n "${remote_preserved_options}" ]]; then
+			ssh "${SSH_COMMON_ARGS[@]}" "${REMOTE_SSH_HOST}" "rm -f $(printf '%q' "${remote_preserved_options}")" >/dev/null 2>&1 || true
+		fi
+	fi
+}
+trap cleanup EXIT
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--db-only)
+			db_only=1
+			;;
+		--yes)
+			confirmed=1
+			;;
+		--dry-run)
+			dry_run=1
+			;;
+		--preserve-ai1wm-gdrive)
+			preserve_ai1wm_gdrive=1
+			;;
+		--no-preserve-ai1wm-gdrive)
+			preserve_ai1wm_gdrive=0
+			;;
+		-h|--help)
+			usage
+			exit 0
+			;;
+		*)
+			fail "Unknown argument: $1"
+			;;
+	esac
+	shift
+done
+
+if (( db_only == 0 )); then
+	fail "Only database push is supported right now. Use --db-only."
+fi
+
+if (( dry_run == 0 && confirmed == 0 )); then
+	fail "Refusing to overwrite the remote database without --yes."
+fi
+
+for required_command in ddev ssh scp gzip mktemp; do
+	command -v "${required_command}" >/dev/null 2>&1 || fail "Missing required command: ${required_command}"
+done
+
+[[ -f "${ENV_FILE}" ]] || fail "Missing ${ENV_FILE}. Copy ${ENV_EXAMPLE_FILE} and fill in the real remote DB credentials."
+
+# shellcheck disable=SC1090
+set -a
+source "${ENV_FILE}"
+set +a
+
+for required_var in REMOTE_SSH_HOST REMOTE_WP_PATH REMOTE_DB_HOST REMOTE_DB_NAME REMOTE_DB_USER REMOTE_SITE_URL LOCAL_SITE_URL; do
+	require_nonempty_var "${required_var}"
+done
+require_set_var "REMOTE_DB_PASSWORD"
+
+REMOTE_SITE_URL="${REMOTE_SITE_URL%/}"
+LOCAL_SITE_URL="${LOCAL_SITE_URL%/}"
+REMOTE_DB_BACKUP_DIR="${REMOTE_DB_BACKUP_DIR:-${REMOTE_WP_PATH%/}/../barbados-db-backups}"
+
+if ! ssh_run "${REMOTE_SSH_HOST}" 'echo ok' >/dev/null 2>&1; then
+	fail "SSH authentication failed for ${REMOTE_SSH_HOST}. Unlock the key first with: ssh-add ${SSH_KEY_PATH}"
+fi
+
+quoted_remote_wp_path=$(printf '%q' "${REMOTE_WP_PATH}")
+
+log "Validating remote WordPress path"
+remote_bash "test -d ${quoted_remote_wp_path}"
+
+remote_db_host="${REMOTE_DB_HOST}"
+remote_db_port=""
+remote_db_socket=""
+
+# WordPress often stores DB_HOST as host:port. mysql and mysqldump need those split.
+if [[ "${remote_db_host}" == *:* && "${remote_db_host}" != /* ]]; then
+	remote_db_port="${remote_db_host##*:}"
+	remote_db_host="${remote_db_host%:*}"
+fi
+
+# Support socket-style DB_HOST values as well.
+if [[ "${remote_db_host}" == /* ]]; then
+	remote_db_socket="${remote_db_host}"
+	remote_db_host="localhost"
+fi
+
+quoted_remote_db_host=$(printf '%q' "${remote_db_host}")
+quoted_remote_db_port=$(printf '%q' "${remote_db_port}")
+quoted_remote_db_socket=$(printf '%q' "${remote_db_socket}")
+quoted_remote_db_name=$(printf '%q' "${REMOTE_DB_NAME}")
+quoted_remote_db_user=$(printf '%q' "${REMOTE_DB_USER}")
+quoted_remote_db_password=$(printf '%q' "${REMOTE_DB_PASSWORD}")
+connection_args="-h ${quoted_remote_db_host}"
+
+if [[ -n "${remote_db_port}" ]]; then
+	connection_args="${connection_args} -P ${quoted_remote_db_port}"
+fi
+
+if [[ -n "${remote_db_socket}" ]]; then
+	connection_args="${connection_args} --socket=${quoted_remote_db_socket}"
+fi
+
+log "Validating remote WordPress and database access"
+remote_bash "cd ${quoted_remote_wp_path} && wp core is-installed ${WP_CLI_MAINTENANCE_ARGS[*]} >/dev/null"
+remote_bash "MYSQL_PWD=${quoted_remote_db_password} mysql ${connection_args} -u ${quoted_remote_db_user} ${quoted_remote_db_name} -e 'SELECT 1' >/dev/null"
+
+remote_table_prefix="$(remote_bash "cd ${quoted_remote_wp_path} && wp db prefix ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+[[ -n "${remote_table_prefix}" && "${remote_table_prefix}" == *_ ]] || fail "Could not detect the remote WordPress table prefix."
+remote_options_table="${remote_table_prefix}options"
+
+if (( dry_run )); then
+	log "Dry run succeeded. Remote SSH, WordPress, and database access look good."
+	if (( preserve_ai1wm_gdrive )); then
+		quoted_count_sql=$(printf '%q' "SELECT COUNT(*) FROM \`${remote_options_table}\` WHERE ${AI1WM_PRESERVE_WHERE};")
+		preserved_option_count="$(remote_bash "MYSQL_PWD=${quoted_remote_db_password} mysql ${connection_args} -u ${quoted_remote_db_user} --batch --skip-column-names --default-character-set=utf8mb4 ${quoted_remote_db_name} -e ${quoted_count_sql}" | tr -d '\r' | tail -n 1)"
+		log "AI1WM Google Drive preservation would protect ${preserved_option_count} remote option rows in ${remote_options_table}."
+	fi
+	exit 0
+fi
+
+log "Exporting local DDEV database"
+temp_dump="$(mktemp "${TMPDIR:-/tmp}/barbados-push-remote.XXXXXX.sql.gz")"
+ddev export-db --file="${temp_dump}"
+[[ -s "${temp_dump}" ]] || fail "Local database dump was empty."
+gzip -t "${temp_dump}" || fail "Local database dump was not a valid gzip archive."
+
+remote_temp_dump="$(remote_bash "mktemp /tmp/barbados-push-remote.XXXXXX.sql.gz" | tr -d '\r' | tail -n 1)"
+[[ -n "${remote_temp_dump}" ]] || fail "Could not create a remote temporary dump path."
+
+log "Uploading local database dump to remote server"
+scp_to_remote "${temp_dump}" "${remote_temp_dump}"
+
+timestamp="$(date +%Y%m%d-%H%M%S)"
+remote_backup_file="${REMOTE_DB_BACKUP_DIR%/}/pre-push-remote-${timestamp}.sql.gz"
+quoted_remote_backup_dir=$(printf '%q' "${REMOTE_DB_BACKUP_DIR}")
+quoted_remote_backup_file=$(printf '%q' "${remote_backup_file}")
+
+log "Creating remote database backup ${remote_backup_file}"
+remote_bash "set -o pipefail; mkdir -p ${quoted_remote_backup_dir}; MYSQL_PWD=${quoted_remote_db_password} mysqldump ${connection_args} -u ${quoted_remote_db_user} --single-transaction --quick --default-character-set=utf8mb4 ${quoted_remote_db_name} | gzip -c > ${quoted_remote_backup_file}; test -s ${quoted_remote_backup_file}"
+
+if (( preserve_ai1wm_gdrive )); then
+	remote_preserved_options="$(remote_bash "mktemp /tmp/barbados-ai1wm-preserve.XXXXXX.sql.gz" | tr -d '\r' | tail -n 1)"
+	[[ -n "${remote_preserved_options}" ]] || fail "Could not create a remote temporary AI1WM options dump path."
+
+	quoted_remote_preserved_options=$(printf '%q' "${remote_preserved_options}")
+	quoted_remote_options_table=$(printf '%q' "${remote_options_table}")
+	quoted_ai1wm_preserve_where=$(printf '%q' "${AI1WM_PRESERVE_WHERE}")
+
+	log "Preserving remote All-in-One WP Migration Google Drive settings"
+	remote_bash "set -o pipefail; MYSQL_PWD=${quoted_remote_db_password} mysqldump ${connection_args} -u ${quoted_remote_db_user} --single-transaction --quick --default-character-set=utf8mb4 --skip-add-drop-table --no-create-info --replace --where=${quoted_ai1wm_preserve_where} ${quoted_remote_db_name} ${quoted_remote_options_table} | gzip -c > ${quoted_remote_preserved_options}; test -s ${quoted_remote_preserved_options}"
+fi
+
+quoted_remote_temp_dump=$(printf '%q' "${remote_temp_dump}")
+
+log "Importing local database into remote"
+remote_bash "set -o pipefail; gunzip -c ${quoted_remote_temp_dump} | MYSQL_PWD=${quoted_remote_db_password} mysql ${connection_args} -u ${quoted_remote_db_user} --default-character-set=utf8mb4 ${quoted_remote_db_name}"
+
+log "Updating remote WordPress URLs"
+remote_bash "cd ${quoted_remote_wp_path} && wp core is-installed ${WP_CLI_MAINTENANCE_ARGS[*]} >/dev/null && wp search-replace $(printf '%q' "${LOCAL_SITE_URL}") $(printf '%q' "${REMOTE_SITE_URL}") ${WP_CLI_MAINTENANCE_ARGS[*]} --skip-columns=guid --all-tables"
+if [[ "${LOCAL_SITE_URL}" == https://* ]]; then
+	remote_bash "cd ${quoted_remote_wp_path} && wp search-replace $(printf '%q' "http://${LOCAL_SITE_URL#https://}") $(printf '%q' "${REMOTE_SITE_URL}") ${WP_CLI_MAINTENANCE_ARGS[*]} --skip-columns=guid --all-tables"
+fi
+remote_bash "cd ${quoted_remote_wp_path} && wp option update home $(printf '%q' "${REMOTE_SITE_URL}") ${WP_CLI_MAINTENANCE_ARGS[*]} && wp option update siteurl $(printf '%q' "${REMOTE_SITE_URL}") ${WP_CLI_MAINTENANCE_ARGS[*]}"
+
+if (( preserve_ai1wm_gdrive )); then
+	imported_table_prefix="$(remote_bash "cd ${quoted_remote_wp_path} && wp db prefix ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+	[[ "${imported_table_prefix}" == "${remote_table_prefix}" ]] || fail "Imported table prefix '${imported_table_prefix}' differs from preserved remote prefix '${remote_table_prefix}'. Remote backup remains available at ${remote_backup_file}."
+
+	quoted_delete_sql=$(printf '%q' "DELETE FROM \`${remote_options_table}\` WHERE ${AI1WM_PRESERVE_WHERE};")
+
+	log "Restoring preserved All-in-One WP Migration Google Drive settings"
+	remote_bash "MYSQL_PWD=${quoted_remote_db_password} mysql ${connection_args} -u ${quoted_remote_db_user} --default-character-set=utf8mb4 ${quoted_remote_db_name} -e ${quoted_delete_sql}"
+	remote_bash "set -o pipefail; gunzip -c ${quoted_remote_preserved_options} | MYSQL_PWD=${quoted_remote_db_password} mysql ${connection_args} -u ${quoted_remote_db_user} --default-character-set=utf8mb4 ${quoted_remote_db_name}"
+fi
+
+log "Flushing remote rewrite rules"
+# This intentionally loads plugins and the active theme. CPTs and taxonomies
+# register their rewrite rules during normal bootstrap, so skipping the site
+# stack can leave remote permalinks incomplete until someone saves Permalinks.
+remote_bash "cd ${quoted_remote_wp_path} && wp rewrite flush --hard"
+
+log "Remote database push complete. Backup retained at ${remote_backup_file}"
