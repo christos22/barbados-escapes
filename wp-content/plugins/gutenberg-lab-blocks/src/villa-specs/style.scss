@@ -5,18 +5,21 @@
 
 .vvm-villa-specs__shell {
 	box-sizing: border-box;
-	margin-inline: auto;
-	max-inline-size: min(100%, 1280px);
-	padding: clamp(1.5rem, 3vw, 2.5rem) var(--wp--custom--layout--gutter-current);
+	inline-size: 100%;
+	padding: clamp(1.5rem, 3vw, 2.5rem) clamp(1.25rem, 3.15vw, 3.125rem);
 }
 
 .vvm-villa-specs__items {
 	display: grid;
 	gap: 1.25rem 1.5rem;
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	inline-size: 100%;
+	margin-inline: auto;
+	max-inline-size: 80rem;
 }
 
 .vvm-villa-specs__item {
+	box-sizing: border-box;
 	min-width: 0;
 	position: relative;
 }
@@ -60,8 +63,7 @@
 	}
 
 	.vvm-villa-specs__item + .vvm-villa-specs__item {
-		margin-inline-start: clamp(1rem, 1.5vw, 1.5rem);
-		padding-inline-start: clamp(1rem, 1.75vw, 1.75rem);
+		padding-inline-start: clamp(1rem, 1.1vw, 1.125rem);
 	}
 
 	.vvm-villa-specs__item + .vvm-villa-specs__item::before {
