@@ -18,6 +18,10 @@
       "type": "string",
       "default": "slide"
     },
+    "textMode": {
+      "type": "string",
+      "default": "per-slide"
+    },
     "arrowPositionPreset": {
       "type": "string",
       "default": "bottom-center"

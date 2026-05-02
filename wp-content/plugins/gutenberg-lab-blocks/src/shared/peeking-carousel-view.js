@@ -61,41 +61,57 @@ function syncContentInteractivity( contentPanel, isActive ) {
 	contentPanel.classList.toggle( 'is-active', isActive );
 	contentPanel.setAttribute( 'aria-hidden', isActive ? 'false' : 'true' );
 
-	contentPanel.querySelectorAll( FOCUSABLE_SELECTOR ).forEach( ( element ) => {
-		if ( isActive ) {
-			const savedTabIndex = element.dataset[ TABINDEX_DATA_KEY ];
+	contentPanel
+		.querySelectorAll( FOCUSABLE_SELECTOR )
+		.forEach( ( element ) => {
+			if ( isActive ) {
+				const savedTabIndex = element.dataset[ TABINDEX_DATA_KEY ];
 
-			if ( undefined === savedTabIndex || '' === savedTabIndex ) {
-				element.removeAttribute( 'tabindex' );
-			} else {
-				element.setAttribute( 'tabindex', savedTabIndex );
+				if ( undefined === savedTabIndex || '' === savedTabIndex ) {
+					element.removeAttribute( 'tabindex' );
+				} else {
+					element.setAttribute( 'tabindex', savedTabIndex );
+				}
+
+				delete element.dataset[ TABINDEX_DATA_KEY ];
+				return;
 			}
 
-			delete element.dataset[ TABINDEX_DATA_KEY ];
-			return;
-		}
+			if ( undefined === element.dataset[ TABINDEX_DATA_KEY ] ) {
+				element.dataset[ TABINDEX_DATA_KEY ] =
+					element.getAttribute( 'tabindex' ) ?? '';
+			}
 
-		if ( undefined === element.dataset[ TABINDEX_DATA_KEY ] ) {
-			element.dataset[ TABINDEX_DATA_KEY ] =
-				element.getAttribute( 'tabindex' ) ?? '';
-		}
-
-		element.setAttribute( 'tabindex', '-1' );
-	} );
+			element.setAttribute( 'tabindex', '-1' );
+		} );
 }
 
-function syncActiveState( rootElement, splide, realSlideSelector, contentSelector ) {
+function syncActiveState(
+	rootElement,
+	splide,
+	realSlideSelector,
+	contentSelector
+) {
 	// Ignore Splide loop clones so only the authored slides own focus state.
-	rootElement.querySelectorAll( realSlideSelector ).forEach( ( slide, index ) => {
-		syncSlideInteractivity( slide, index === splide.index );
-	} );
+	rootElement
+		.querySelectorAll( realSlideSelector )
+		.forEach( ( slide, index ) => {
+			syncSlideInteractivity( slide, index === splide.index );
+		} );
 
 	if ( contentSelector ) {
+		const usesStaticText =
+			'static' === rootElement.dataset.carouselTextMode;
+
 		rootElement
 			.querySelectorAll( contentSelector )
 			.forEach( ( contentPanel, index ) => {
-				// The content panel is static; only its matching child swaps.
-				syncContentInteractivity( contentPanel, index === splide.index );
+				// Static text mode keeps the one authored panel visible while
+				// Splide continues moving through unlimited image slides.
+				syncContentInteractivity(
+					contentPanel,
+					usesStaticText || index === splide.index
+				);
 			} );
 	}
 }
@@ -145,18 +161,17 @@ function initializePeekingCarousel( rootElement, config ) {
 		slideSelector,
 	} = config;
 	const carouselElement = rootElement.querySelector( carouselSelector );
-	const previousButton = rootElement.querySelector( previousButtonSelector );
-	const nextButton = rootElement.querySelector( nextButtonSelector );
-	const reducedMotionMediaQuery = window.matchMedia(
-		REDUCED_MOTION_MEDIA_QUERY
-	);
-	const transitionMode = getTransitionMode( rootElement );
 	const slideCount =
 		carouselElement?.querySelectorAll( slideSelector ).length ?? 0;
 
 	if ( ! carouselElement || 0 === slideCount ) {
 		return;
 	}
+
+	const reducedMotionMediaQuery = window.matchMedia(
+		REDUCED_MOTION_MEDIA_QUERY
+	);
+	const transitionMode = getTransitionMode( rootElement );
 
 	if ( 1 === slideCount ) {
 		syncMotionPreference(
@@ -178,6 +193,9 @@ function initializePeekingCarousel( rootElement, config ) {
 		}
 		return;
 	}
+
+	const previousButton = rootElement.querySelector( previousButtonSelector );
+	const nextButton = rootElement.querySelector( nextButtonSelector );
 
 	// The paired layout keeps neighboring slides visible, so CSS owns the fade
 	// state in fade mode. Slide mode turns the track animation back on.

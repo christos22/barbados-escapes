@@ -27,6 +27,17 @@ const TRANSITION_OPTIONS = [
 	},
 ];
 
+const TEXT_MODE_OPTIONS = [
+	{
+		label: __( 'Text changes per slide', 'gutenberg-lab-blocks' ),
+		value: 'per-slide',
+	},
+	{
+		label: __( 'One static text panel', 'gutenberg-lab-blocks' ),
+		value: 'static',
+	},
+];
+
 const ACCENT_BORDER_OPTIONS = [
 	{ label: __( 'None', 'gutenberg-lab-blocks' ), value: 'none' },
 	{ label: __( 'Top', 'gutenberg-lab-blocks' ), value: 'top' },
@@ -44,14 +55,25 @@ function normalizeTransitionStyle( transitionStyle ) {
 	return 'fade' === transitionStyle ? 'fade' : 'slide';
 }
 
+function normalizeTextMode( textMode ) {
+	return 'static' === textMode ? 'static' : 'per-slide';
+}
+
 export default function Edit( { attributes, clientId, setAttributes } ) {
-	const { accentBorder = 'none', align, transitionStyle = 'slide' } = attributes;
+	const {
+		accentBorder = 'none',
+		align,
+		textMode = 'per-slide',
+		transitionStyle = 'slide',
+	} = attributes;
 	const normalizedTransitionStyle =
 		normalizeTransitionStyle( transitionStyle );
+	const normalizedTextMode = normalizeTextMode( textMode );
 	const slideCount = useSelect(
 		( select ) =>
 			(
-				select( 'core/block-editor' ).getBlock( clientId )?.innerBlocks ?? []
+				select( 'core/block-editor' ).getBlock( clientId )
+					?.innerBlocks ?? []
 			).filter(
 				( innerBlock ) =>
 					'gutenberg-lab-blocks/feature-carousel-slide' ===
@@ -67,13 +89,25 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 				transitionStyle: normalizedTransitionStyle,
 			} );
 		}
-	}, [ normalizedTransitionStyle, setAttributes, transitionStyle ] );
+		if ( textMode !== normalizedTextMode ) {
+			setAttributes( {
+				textMode: normalizedTextMode,
+			} );
+		}
+	}, [
+		normalizedTextMode,
+		normalizedTransitionStyle,
+		setAttributes,
+		textMode,
+		transitionStyle,
+	] );
 
 	const blockProps = useBlockProps( {
 		className: [
 			'vvm-feature-carousel',
 			'vvm-feature-carousel--editor',
 			`vvm-feature-carousel--transition-${ normalizedTransitionStyle }`,
+			`vvm-feature-carousel--text-${ normalizedTextMode }`,
 			// Match the frontend render class so the editor shows the accent rule.
 			'none' !== accentBorder
 				? `vvm-feature-carousel--accent-border-${ accentBorder }`
@@ -126,6 +160,27 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						}
 					/>
 					<SelectControl
+						label={ __( 'Text mode', 'gutenberg-lab-blocks' ) }
+						value={ normalizedTextMode }
+						options={ TEXT_MODE_OPTIONS }
+						onChange={ ( value ) =>
+							setAttributes( {
+								textMode: value,
+							} )
+						}
+						help={
+							'static' === normalizedTextMode
+								? __(
+										'Only the first slide text is rendered; all slides can keep changing images.',
+										'gutenberg-lab-blocks'
+								  )
+								: __(
+										'Each slide renders its own image and matching text panel.',
+										'gutenberg-lab-blocks'
+								  )
+						}
+					/>
+					<SelectControl
 						label={ __( 'Accent Border', 'gutenberg-lab-blocks' ) }
 						value={ accentBorder }
 						options={ ACCENT_BORDER_OPTIONS }
@@ -164,17 +219,29 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 							  ) }
 					</p>
 
-						<p className="vvm-feature-carousel__editor-note">
-							{ 'slide' === normalizedTransitionStyle
-								? __(
-										'Transition style: Slide. Images move while the text panel stays in place.',
-										'gutenberg-lab-blocks'
-								  )
-								: __(
-										'Transition style: Fade. Images crossfade while the text panel stays in place.',
-										'gutenberg-lab-blocks'
-								  ) }
-						</p>
+					<p className="vvm-feature-carousel__editor-note">
+						{ 'static' === normalizedTextMode
+							? __(
+									'Static text mode: edit the shared text on the first slide. Additional slides contribute images only.',
+									'gutenberg-lab-blocks'
+							  )
+							: __(
+									'Per-slide text mode: each slide image has its own matching text panel.',
+									'gutenberg-lab-blocks'
+							  ) }
+					</p>
+
+					<p className="vvm-feature-carousel__editor-note">
+						{ 'slide' === normalizedTransitionStyle
+							? __(
+									'Transition style: Slide. Images move while the text panel stays in place.',
+									'gutenberg-lab-blocks'
+							  )
+							: __(
+									'Transition style: Fade. Images crossfade while the text panel stays in place.',
+									'gutenberg-lab-blocks'
+							  ) }
+					</p>
 
 					<div className="vvm-feature-carousel__editor-viewport vvm-slider-surface">
 						<div { ...innerBlocksProps } />

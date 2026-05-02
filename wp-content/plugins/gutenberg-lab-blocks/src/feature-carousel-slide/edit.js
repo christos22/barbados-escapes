@@ -7,6 +7,7 @@ import {
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { Button, PanelBody } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 
 import './editor.scss';
 
@@ -47,8 +48,30 @@ const TEMPLATE = [
 	],
 ];
 
-export default function Edit( { attributes, setAttributes } ) {
+export default function Edit( { attributes, clientId, setAttributes } ) {
 	const { imageAlt, imageId, imageUrl } = attributes;
+	const { isFirstSlide, parentTextMode } = useSelect(
+		( select ) => {
+			const blockEditor = select( 'core/block-editor' );
+			const parentClientId = blockEditor.getBlockRootClientId( clientId );
+			const parentBlock = parentClientId
+				? blockEditor.getBlock( parentClientId )
+				: null;
+			const siblingIds = parentClientId
+				? blockEditor.getBlockOrder( parentClientId )
+				: [];
+
+			return {
+				// In static mode the first child owns the one shared text panel.
+				isFirstSlide: siblingIds[ 0 ] === clientId,
+				parentTextMode:
+					parentBlock?.attributes?.textMode ?? 'per-slide',
+			};
+		},
+		[ clientId ]
+	);
+	const usesStaticText = 'static' === parentTextMode;
+	const shouldShowTextPanel = ! usesStaticText || isFirstSlide;
 
 	const blockProps = useBlockProps( {
 		className: 'vvm-feature-carousel__slide-editor',
@@ -88,8 +111,8 @@ export default function Edit( { attributes, setAttributes } ) {
 					title={ __( 'Slide media', 'gutenberg-lab-blocks' ) }
 					initialOpen={ true }
 				>
-					{/* Keep the media as lean attributes while native inner blocks
-						handle the actual copy and CTA authoring. */}
+					{ /* Keep the media as lean attributes while native inner blocks
+						handle the actual copy and CTA authoring. */ }
 					<MediaUploadCheck>
 						<MediaUpload
 							onSelect={ onSelectImage }
@@ -102,14 +125,21 @@ export default function Edit( { attributes, setAttributes } ) {
 												'Replace image',
 												'gutenberg-lab-blocks'
 										  )
-										: __( 'Select image', 'gutenberg-lab-blocks' ) }
+										: __(
+												'Select image',
+												'gutenberg-lab-blocks'
+										  ) }
 								</Button>
 							) }
 						/>
 					</MediaUploadCheck>
 
 					{ imageUrl ? (
-						<Button variant="link" isDestructive onClick={ removeImage }>
+						<Button
+							variant="link"
+							isDestructive
+							onClick={ removeImage }
+						>
 							{ __( 'Remove image', 'gutenberg-lab-blocks' ) }
 						</Button>
 					) : null }
@@ -138,8 +168,14 @@ export default function Edit( { attributes, setAttributes } ) {
 								value={ imageId }
 								render={ ( { open } ) => (
 									<div className="vvm-feature-carousel__slide-editor-placeholder">
-										<Button variant="secondary" onClick={ open }>
-											{ __( 'Select slide image', 'gutenberg-lab-blocks' ) }
+										<Button
+											variant="secondary"
+											onClick={ open }
+										>
+											{ __(
+												'Select slide image',
+												'gutenberg-lab-blocks'
+											) }
 										</Button>
 									</div>
 								) }
@@ -148,9 +184,20 @@ export default function Edit( { attributes, setAttributes } ) {
 					) }
 				</div>
 
-				<div className="vvm-feature-carousel__slide-editor-panel">
-					<div { ...innerBlocksProps } />
-				</div>
+				{ shouldShowTextPanel ? (
+					<div className="vvm-feature-carousel__slide-editor-panel">
+						<div { ...innerBlocksProps } />
+					</div>
+				) : (
+					<div className="vvm-feature-carousel__slide-editor-panel vvm-feature-carousel__slide-editor-panel--static-hidden">
+						<p className="vvm-feature-carousel__slide-editor-static-note">
+							{ __(
+								'Static text mode uses the first slide for the shared text panel.',
+								'gutenberg-lab-blocks'
+							) }
+						</p>
+					</div>
+				) }
 			</article>
 		</>
 	);

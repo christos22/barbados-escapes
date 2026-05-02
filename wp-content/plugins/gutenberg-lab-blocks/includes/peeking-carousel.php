@@ -184,6 +184,26 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render_content_slide' ) 
 	}
 }
 
+if ( ! function_exists( 'gutenberg_lab_peeking_carousel_get_static_content_slide' ) ) {
+	/**
+	 * Returns the first slide with authored panel content for static text mode.
+	 *
+	 * @param array<int, array> $slide_blocks Parsed child slide blocks.
+	 * @return array|null
+	 */
+	function gutenberg_lab_peeking_carousel_get_static_content_slide( $slide_blocks ) {
+		foreach ( $slide_blocks as $slide_block ) {
+			$content = gutenberg_lab_peeking_carousel_render_nested_blocks( $slide_block['innerBlocks'] ?? array() );
+
+			if ( '' !== trim( wp_strip_all_tags( $content ) ) ) {
+				return $slide_block;
+			}
+		}
+
+		return $slide_blocks[0] ?? null;
+	}
+}
+
 if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render' ) ) {
 	/**
 	 * Renders one peeking carousel block instance.
@@ -241,26 +261,62 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render' ) ) {
 		}
 
 		$carousel_id         = wp_unique_id( $config['id_prefix'] );
-		$has_multiple_slides = count( $slide_blocks ) > 1;
 		$media_slides_markup = '';
 		$content_markup      = '';
 		$transition_style    = 'fade' === ( $attributes['transitionStyle'] ?? '' ) ? 'fade' : 'slide';
+		$text_mode           = 'static' === ( $attributes['textMode'] ?? '' ) ? 'static' : 'per-slide';
 		$accent_border       = in_array( $attributes['accentBorder'] ?? 'none', array( 'top', 'bottom', 'both' ), true )
 			? $attributes['accentBorder']
 			: 'none';
+		$media_slide_blocks  = $slide_blocks;
 
-		foreach ( $slide_blocks as $index => $slide_block ) {
+		if ( 'static' === $text_mode ) {
+			// In static mode, text-only child slides should not become extra
+			// placeholder media slides. They can still provide the shared panel.
+			$image_slide_blocks = array_values(
+				array_filter(
+					$slide_blocks,
+					static function ( $slide_block ) {
+						return '' !== trim( (string) ( $slide_block['attrs']['imageUrl'] ?? '' ) );
+					}
+				)
+			);
+
+			if ( ! empty( $image_slide_blocks ) ) {
+				$media_slide_blocks = $image_slide_blocks;
+			}
+		}
+
+		$has_multiple_slides = count( $media_slide_blocks ) > 1;
+
+		foreach ( $media_slide_blocks as $index => $slide_block ) {
 			// The media belongs to the moving rail; the copy belongs to the fixed panel.
 			$media_slides_markup .= gutenberg_lab_peeking_carousel_render_media_slide(
 				$slide_block,
 				$index,
 				$config['slide_data_attribute']
 			);
-			$content_markup      .= gutenberg_lab_peeking_carousel_render_content_slide(
-				$slide_block,
-				$index,
-				$config['content_data_attribute']
-			);
+			if ( 'per-slide' === $text_mode ) {
+				$content_markup .= gutenberg_lab_peeking_carousel_render_content_slide(
+					$slide_block,
+					$index,
+					$config['content_data_attribute']
+				);
+			}
+		}
+
+		if ( 'static' === $text_mode ) {
+			// Static text mode lets all child slides contribute images while one
+			// authored panel stays visible for the whole carousel.
+			$static_content_slide = gutenberg_lab_peeking_carousel_get_static_content_slide( $slide_blocks );
+
+			if ( null !== $static_content_slide ) {
+				$content_markup = gutenberg_lab_peeking_carousel_render_content_slide(
+					$static_content_slide,
+					0,
+					$config['content_data_attribute']
+				);
+			}
 		}
 
 		$wrapper_attributes = get_block_wrapper_attributes(
@@ -271,6 +327,7 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render' ) ) {
 						array(
 							$config['wrapper_class'],
 							$config['wrapper_class'] . '--transition-' . sanitize_html_class( $transition_style ),
+							$config['wrapper_class'] . '--text-' . sanitize_html_class( $text_mode ),
 							// Keep this class parallel to Media Panel's accent border API.
 							'none' !== $accent_border ? $config['wrapper_class'] . '--accent-border-' . sanitize_html_class( $accent_border ) : '',
 							empty( $attributes['align'] ) ? 'alignfull' : '',
@@ -279,6 +336,7 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render' ) ) {
 				),
 				$config['root_data_attribute']   => '',
 				'data-carousel-transition'       => $transition_style,
+				'data-carousel-text-mode'        => $text_mode,
 			)
 		);
 
