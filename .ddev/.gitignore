@@ -27,8 +27,6 @@
 /sequelpro.spf
 /share-providers/cloudflared.sh
 /share-providers/ngrok.sh
-/traefik/config/barbados-escapes.yaml
-/traefik/certs/barbados-escapes.crt
-/traefik/certs/barbados-escapes.key
+/traefik/
 /xhprof/xhprof_prepend.php
 /**/README.*
