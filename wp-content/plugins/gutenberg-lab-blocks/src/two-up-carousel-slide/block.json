@@ -19,6 +19,10 @@
 		"imageAlt": {
 			"type": "string",
 			"default": ""
+		},
+		"villaId": {
+			"type": "number",
+			"default": 0
 		}
 	},
 	"supports": {

@@ -61,12 +61,184 @@ function gutenberg_lab_blocks_register_villas_post_type() {
 				'page-attributes',
 			),
 			'taxonomies'   => array(
+				'villa_amenity',
 				'villa_location',
 			),
 		)
 	);
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_villas_post_type' );
+
+/**
+ * Returns the fixed placeholder icon choices for villa amenity terms.
+ *
+ * The selected icon belongs to the term, not the block instance. That keeps the
+ * same amenity visually consistent everywhere it is reused.
+ *
+ * @return array<string, string>
+ */
+function gutenberg_lab_blocks_get_villa_amenity_icon_choices() {
+	return array(
+		'default'  => __( 'Default', 'gutenberg-lab-blocks' ),
+		'view'     => __( 'View', 'gutenberg-lab-blocks' ),
+		'bed'      => __( 'Bed', 'gutenberg-lab-blocks' ),
+		'people'   => __( 'People', 'gutenberg-lab-blocks' ),
+		'shower'   => __( 'Shower', 'gutenberg-lab-blocks' ),
+		'golf'     => __( 'Golf', 'gutenberg-lab-blocks' ),
+		'wellness' => __( 'Wellness', 'gutenberg-lab-blocks' ),
+	);
+}
+
+/**
+ * Sanitizes amenity icon keys against the fixed placeholder icon map.
+ *
+ * @param string $icon_key Raw icon key.
+ * @return string
+ */
+function gutenberg_lab_blocks_sanitize_villa_amenity_icon_key( $icon_key ) {
+	$icon_key = sanitize_key( $icon_key );
+	$choices  = gutenberg_lab_blocks_get_villa_amenity_icon_choices();
+
+	return isset( $choices[ $icon_key ] ) ? $icon_key : 'default';
+}
+
+/**
+ * Registers the reusable Amenity taxonomy for villa posts.
+ */
+function gutenberg_lab_blocks_register_villa_amenity_taxonomy() {
+	register_taxonomy(
+		'villa_amenity',
+		array( 'villa' ),
+		array(
+			'labels'            => array(
+				'name'                       => __( 'Villa Amenities', 'gutenberg-lab-blocks' ),
+				'singular_name'              => __( 'Villa Amenity', 'gutenberg-lab-blocks' ),
+				'search_items'               => __( 'Search Villa Amenities', 'gutenberg-lab-blocks' ),
+				'popular_items'              => __( 'Popular Villa Amenities', 'gutenberg-lab-blocks' ),
+				'all_items'                  => __( 'All Villa Amenities', 'gutenberg-lab-blocks' ),
+				'edit_item'                  => __( 'Edit Villa Amenity', 'gutenberg-lab-blocks' ),
+				'update_item'                => __( 'Update Villa Amenity', 'gutenberg-lab-blocks' ),
+				'add_new_item'               => __( 'Add New Villa Amenity', 'gutenberg-lab-blocks' ),
+				'new_item_name'              => __( 'New Villa Amenity Name', 'gutenberg-lab-blocks' ),
+				'separate_items_with_commas' => __( 'Separate amenities with commas', 'gutenberg-lab-blocks' ),
+				'add_or_remove_items'        => __( 'Add or remove amenities', 'gutenberg-lab-blocks' ),
+				'choose_from_most_used'      => __( 'Choose from the most used amenities', 'gutenberg-lab-blocks' ),
+				'not_found'                  => __( 'No amenities found.', 'gutenberg-lab-blocks' ),
+				'menu_name'                  => __( 'Amenities', 'gutenberg-lab-blocks' ),
+			),
+			'public'            => true,
+			'hierarchical'      => false,
+			'show_in_rest'      => true,
+			'show_admin_column' => true,
+			'query_var'         => 'villa_amenity',
+			'rewrite'           => array(
+				'slug' => 'villa-amenity',
+			),
+		)
+	);
+}
+add_action( 'init', 'gutenberg_lab_blocks_register_villa_amenity_taxonomy' );
+
+/**
+ * Registers the icon key stored on each amenity term.
+ */
+function gutenberg_lab_blocks_register_villa_amenity_meta() {
+	register_term_meta(
+		'villa_amenity',
+		'villa_amenity_icon',
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'default'           => 'default',
+			'sanitize_callback' => 'gutenberg_lab_blocks_sanitize_villa_amenity_icon_key',
+			'show_in_rest'      => true,
+		)
+	);
+}
+add_action( 'init', 'gutenberg_lab_blocks_register_villa_amenity_meta' );
+
+/**
+ * Renders the amenity icon picker field on the add-term screen.
+ */
+function gutenberg_lab_blocks_render_villa_amenity_add_icon_field() {
+	?>
+	<div class="form-field term-villa-amenity-icon-wrap">
+		<label for="gutenberg-lab-villa-amenity-icon">
+			<?php esc_html_e( 'Amenity icon', 'gutenberg-lab-blocks' ); ?>
+		</label>
+		<select id="gutenberg-lab-villa-amenity-icon" name="gutenberg_lab_villa_amenity_icon">
+			<?php foreach ( gutenberg_lab_blocks_get_villa_amenity_icon_choices() as $icon_key => $icon_label ) : ?>
+				<option value="<?php echo esc_attr( $icon_key ); ?>">
+					<?php echo esc_html( $icon_label ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+		<p>
+			<?php esc_html_e( 'The term name is the label visitors see; this icon is reused anywhere the amenity appears.', 'gutenberg-lab-blocks' ); ?>
+		</p>
+	</div>
+	<?php
+}
+add_action( 'villa_amenity_add_form_fields', 'gutenberg_lab_blocks_render_villa_amenity_add_icon_field' );
+
+/**
+ * Renders the amenity icon picker field on the edit-term screen.
+ *
+ * @param WP_Term $term Current amenity term.
+ */
+function gutenberg_lab_blocks_render_villa_amenity_edit_icon_field( $term ) {
+	$selected_icon = gutenberg_lab_blocks_sanitize_villa_amenity_icon_key(
+		(string) get_term_meta( $term->term_id, 'villa_amenity_icon', true )
+	);
+	?>
+	<tr class="form-field term-villa-amenity-icon-wrap">
+		<th scope="row">
+			<label for="gutenberg-lab-villa-amenity-icon">
+				<?php esc_html_e( 'Amenity icon', 'gutenberg-lab-blocks' ); ?>
+			</label>
+		</th>
+		<td>
+			<select id="gutenberg-lab-villa-amenity-icon" name="gutenberg_lab_villa_amenity_icon">
+				<?php foreach ( gutenberg_lab_blocks_get_villa_amenity_icon_choices() as $icon_key => $icon_label ) : ?>
+					<option
+						value="<?php echo esc_attr( $icon_key ); ?>"
+						<?php selected( $selected_icon, $icon_key ); ?>
+					>
+						<?php echo esc_html( $icon_label ); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+			<p class="description">
+				<?php esc_html_e( 'The term name is the label visitors see; this icon is reused anywhere the amenity appears.', 'gutenberg-lab-blocks' ); ?>
+			</p>
+		</td>
+	</tr>
+	<?php
+}
+add_action( 'villa_amenity_edit_form_fields', 'gutenberg_lab_blocks_render_villa_amenity_edit_icon_field' );
+
+/**
+ * Saves the selected icon on amenity term create/update.
+ *
+ * @param int $term_id Current amenity term ID.
+ */
+function gutenberg_lab_blocks_save_villa_amenity_icon_field( $term_id ) {
+	if ( ! isset( $_POST['gutenberg_lab_villa_amenity_icon'] ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'manage_categories' ) ) {
+		return;
+	}
+
+	$icon_key = gutenberg_lab_blocks_sanitize_villa_amenity_icon_key(
+		wp_unslash( $_POST['gutenberg_lab_villa_amenity_icon'] )
+	);
+
+	update_term_meta( $term_id, 'villa_amenity_icon', $icon_key );
+}
+add_action( 'created_villa_amenity', 'gutenberg_lab_blocks_save_villa_amenity_icon_field' );
+add_action( 'edited_villa_amenity', 'gutenberg_lab_blocks_save_villa_amenity_icon_field' );
 
 /**
  * Returns the registered villa meta schema.
@@ -425,6 +597,141 @@ function gutenberg_lab_blocks_get_villa_card_cta( $villa_id ) {
 }
 
 /**
+ * Returns the normalized amenities assigned to one villa.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return array<int, array<string, string>>
+ */
+function gutenberg_lab_blocks_get_villa_amenities( $villa_id ) {
+	$terms = wp_get_object_terms(
+		$villa_id,
+		'villa_amenity',
+		array(
+			'orderby' => 'name',
+			'order'   => 'ASC',
+		)
+	);
+
+	if ( is_wp_error( $terms ) || empty( $terms ) ) {
+		return array();
+	}
+
+	$amenities = array();
+	$icon_order = array_flip(
+		array(
+			'view',
+			'bed',
+			'people',
+			'shower',
+			'golf',
+			'wellness',
+			'default',
+		)
+	);
+
+	foreach ( $terms as $term ) {
+		if ( ! $term instanceof WP_Term ) {
+			continue;
+		}
+
+		$amenities[] = array(
+			'id'       => (string) $term->term_id,
+			'name'     => $term->name,
+			'slug'     => $term->slug,
+			'icon_key' => gutenberg_lab_blocks_sanitize_villa_amenity_icon_key(
+				(string) get_term_meta( $term->term_id, 'villa_amenity_icon', true )
+			),
+			);
+	}
+
+	usort(
+		$amenities,
+		static function ( $first, $second ) use ( $icon_order ) {
+			$first_order  = $icon_order[ $first['icon_key'] ] ?? PHP_INT_MAX;
+			$second_order = $icon_order[ $second['icon_key'] ] ?? PHP_INT_MAX;
+
+			if ( $first_order === $second_order ) {
+				return strcasecmp( $first['name'], $second['name'] );
+			}
+
+			return $first_order <=> $second_order;
+		}
+	);
+
+	return $amenities;
+}
+
+/**
+ * Returns a placeholder SVG for a villa amenity icon key.
+ *
+ * These dummy icons give the frontend a stable markup contract now. Later, the
+ * term meta can point to a richer picker without changing block attributes.
+ *
+ * @param string $icon_key Amenity icon key.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_villa_amenity_icon_svg( $icon_key ) {
+	$icon_key = gutenberg_lab_blocks_sanitize_villa_amenity_icon_key( $icon_key );
+	$paths    = array(
+		'default'  => '<circle cx="12" cy="12" r="6.5"></circle><path d="M12 5.5v13M5.5 12h13"></path>',
+		'view'     => '<path d="M3.5 13c2.2-4.1 5-6.2 8.5-6.2s6.3 2.1 8.5 6.2"></path><path d="M5.8 14.5c1.7 1.8 3.8 2.7 6.2 2.7s4.5-.9 6.2-2.7"></path><path d="M8.5 12.8c.9.7 2.1 1.1 3.5 1.1s2.6-.4 3.5-1.1"></path>',
+		'bed'      => '<path d="M4 11.5V7.8c0-.9.7-1.6 1.6-1.6h4.1c1 0 1.8.8 1.8 1.8v3.5"></path><path d="M11.5 11.5V9.2h5.3c1.8 0 3.2 1.4 3.2 3.2v4.1"></path><path d="M4 16.5h16"></path><path d="M4 18.5v-7"></path><path d="M20 18.5v-2"></path>',
+		'people'   => '<circle cx="12" cy="7.5" r="3"></circle><path d="M7.2 18.8c.7-3 2.3-4.5 4.8-4.5s4.1 1.5 4.8 4.5"></path><circle cx="5.8" cy="10" r="2.1"></circle><path d="M2.8 18.2c.3-2 1.3-3.2 3-3.7"></path><circle cx="18.2" cy="10" r="2.1"></circle><path d="M21.2 18.2c-.3-2-1.3-3.2-3-3.7"></path>',
+		'shower'   => '<path d="M8 5.5c1.1-1.5 2.5-2.2 4.1-2.2 2.7 0 4.9 2.2 4.9 4.9v1.1"></path><path d="M12 9.5h8"></path><path d="M13.2 12.8l-1 1.7"></path><path d="M16 12.8l-1 1.7"></path><path d="M18.8 12.8l-1 1.7"></path><path d="M12 18.2l-1 1.7"></path><path d="M14.8 18.2l-1 1.7"></path><path d="M17.6 18.2l-1 1.7"></path>',
+		'golf'     => '<path d="M10 21V4"></path><path d="M10 4l8 2.3-8 2.4"></path><ellipse cx="10" cy="21" rx="6.5" ry="1.7"></ellipse><circle cx="17.5" cy="18.8" r="1"></circle>',
+		'wellness' => '<path d="M12 19.5c-3.8-2-5.7-4.6-5.7-7.8 0-2.3 1.5-4.1 3.5-4.1 1.1 0 1.9.4 2.2 1.1.3-.7 1.1-1.1 2.2-1.1 2 0 3.5 1.8 3.5 4.1 0 3.2-1.9 5.8-5.7 7.8Z"></path><path d="M4.5 11.2c-1.3.8-2 2-2 3.6 0 2.1 1.8 3.8 4.1 3.8"></path><path d="M19.5 11.2c1.3.8 2 2 2 3.6 0 2.1-1.8 3.8-4.1 3.8"></path>',
+	);
+
+	return sprintf(
+		'<svg class="vvm-villa-amenity-icon vvm-villa-amenity-icon--%1$s" viewBox="0 0 24 24" aria-hidden="true" focusable="false">%2$s</svg>',
+		esc_attr( $icon_key ),
+		$paths[ $icon_key ] ?? $paths['default']
+	);
+}
+
+/**
+ * Renders a reusable amenity list for villa cards and future villa blocks.
+ *
+ * @param array $amenities Normalized amenities from `gutenberg_lab_blocks_get_villa_amenities()`.
+ * @param array $args      Rendering options.
+ * @return string
+ */
+function gutenberg_lab_blocks_render_villa_amenities( $amenities, $args = array() ) {
+	if ( empty( $amenities ) ) {
+		return '';
+	}
+
+	$args = wp_parse_args(
+		$args,
+		array(
+			'class_name' => 'vvm-villa-amenities',
+			'limit'      => 4,
+		)
+	);
+
+	$limit     = max( 1, (int) $args['limit'] );
+	$amenities = array_slice( $amenities, 0, $limit );
+
+	ob_start();
+	?>
+	<ul class="<?php echo esc_attr( $args['class_name'] ); ?>">
+		<?php foreach ( $amenities as $amenity ) : ?>
+			<li class="<?php echo esc_attr( $args['class_name'] . '__item' ); ?>">
+				<span class="<?php echo esc_attr( $args['class_name'] . '__icon' ); ?>">
+					<?php echo gutenberg_lab_blocks_get_villa_amenity_icon_svg( $amenity['icon_key'] ?? 'default' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</span>
+				<span class="<?php echo esc_attr( $args['class_name'] . '__label' ); ?>">
+					<?php echo esc_html( $amenity['name'] ?? '' ); ?>
+				</span>
+			</li>
+		<?php endforeach; ?>
+	</ul>
+	<?php
+
+	return trim( (string) ob_get_clean() );
+}
+
+/**
  * Returns the structured data used by the villa-driven card grid.
  *
  * @param int $villa_id Villa post ID.
@@ -463,6 +770,7 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 		'excerpt'   => $excerpt,
 		'descriptor' => $descriptor,
 		'facts'     => $facts,
+		'amenities' => gutenberg_lab_blocks_get_villa_amenities( $villa_id ),
 		'image_url' => $image_url,
 		'image_alt' => $image_alt,
 		'cta'       => gutenberg_lab_blocks_get_villa_card_cta( $villa_id ),

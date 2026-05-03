@@ -214,14 +214,19 @@
 .wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__slide-content,
 .vvm-two-up-carousel .vvm-two-up-carousel__slide-content {
 	position: absolute;
+	top: 0;
 	right: 0;
 	bottom: 0;
 	left: 0;
 	z-index: 3;
-	display: grid;
-	gap: 0.65rem;
-	padding: clamp(1rem, 2vw, 1.5rem);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: clamp(0.8rem, 1.45vw, 1.15rem);
+	justify-content: flex-end;
+	padding: clamp(1.25rem, 2.4vw, 2rem);
 	color: var(--vvm-two-up-carousel-card-foreground);
+	text-align: center;
 }
 
 .wp-block-gutenberg-lab-blocks-two-up-carousel
@@ -235,6 +240,7 @@
 	.vvm-two-up-carousel__slide-content
 	.wp-block-heading,
 .vvm-two-up-carousel .vvm-two-up-carousel__slide-content .wp-block-heading {
+	order: 3;
 	margin: 0;
 	color: var(--vvm-two-up-carousel-card-foreground);
 	font-family: var(--wp--preset--font-family--refined-sans);
@@ -243,6 +249,15 @@
 	letter-spacing: 0.08em;
 	line-height: 1.2;
 	text-transform: uppercase;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.vvm-two-up-carousel__slide-title,
+.vvm-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.vvm-two-up-carousel__slide-title {
+	order: 1;
 }
 
 .wp-block-gutenberg-lab-blocks-two-up-carousel
@@ -258,7 +273,9 @@
 	.vvm-two-up-carousel__slide-content
 	p,
 .vvm-two-up-carousel .vvm-two-up-carousel__slide-content p {
+	order: 3;
 	margin: 0;
+	max-inline-size: min(100%, 42rem);
 	color: var(--vvm-two-up-carousel-card-muted);
 	font-size: 0.94rem;
 	line-height: 1.6;
@@ -268,7 +285,65 @@
 	.vvm-two-up-carousel__slide-content
 	.wp-block-buttons,
 .vvm-two-up-carousel .vvm-two-up-carousel__slide-content .wp-block-buttons {
+	order: 4;
 	margin-top: 0.25rem;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__amenities,
+.vvm-two-up-carousel .vvm-two-up-carousel__amenities {
+	order: 2;
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: clamp(0.55rem, 1.2vw, 0.9rem);
+	align-items: start;
+	inline-size: min(100%, 42rem);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__amenities__item,
+.vvm-two-up-carousel .vvm-two-up-carousel__amenities__item {
+	display: grid;
+	justify-items: center;
+	gap: 0.35rem;
+	min-width: 0;
+	text-align: center;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__amenities__icon,
+.vvm-two-up-carousel .vvm-two-up-carousel__amenities__icon {
+	display: grid;
+	place-items: center;
+	inline-size: clamp(1.8rem, 3vw, 2.5rem);
+	block-size: clamp(1.8rem, 3vw, 2.5rem);
+	color: var(--vvm-two-up-carousel-card-foreground);
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-villa-amenity-icon,
+.vvm-two-up-carousel .vvm-villa-amenity-icon {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	fill: none;
+	stroke: currentColor;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 1.35;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__amenities__label,
+.vvm-two-up-carousel .vvm-two-up-carousel__amenities__label {
+	color: var(--vvm-two-up-carousel-card-foreground);
+	font-size: clamp(0.62rem, 1.15vw, 0.75rem);
+	font-weight: 400;
+	letter-spacing: 0.08em;
+	line-height: 1.35;
+	text-transform: uppercase;
+	overflow-wrap: anywhere;
 }
 
 .wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__controls,
@@ -298,5 +373,12 @@
 			100%,
 			var(--vvm-two-up-carousel-slide-width-by-height)
 		);
+	}
+}
+
+@media (max-width: 640px) {
+	.wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__amenities,
+	.vvm-two-up-carousel .vvm-two-up-carousel__amenities {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }

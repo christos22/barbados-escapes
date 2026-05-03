@@ -30,10 +30,31 @@ if ( ! function_exists( 'gutenberg_lab_two_up_carousel_render_slide' ) ) {
 
 		$image_url = trim( (string) ( $slide_block['attrs']['imageUrl'] ?? '' ) );
 		$image_alt = trim( (string) ( $slide_block['attrs']['imageAlt'] ?? '' ) );
+		$villa_id  = (int) ( $slide_block['attrs']['villaId'] ?? 0 );
 		$has_image = '' !== $image_url;
 		$loading   = $args['is_active'] ? 'eager' : 'lazy';
 		$content   = gutenberg_lab_peeking_carousel_render_nested_blocks( $slide_block['innerBlocks'] ?? array() );
+		$content   = preg_replace(
+			'/class="([^"]*\bwp-block-heading\b[^"]*)"/',
+			'class="$1 vvm-two-up-carousel__slide-title"',
+			$content,
+			1
+		);
+		$content   = is_string( $content ) ? $content : '';
 		$has_copy  = '' !== trim( wp_strip_all_tags( $content ) );
+		$amenities = $villa_id > 0 && function_exists( 'gutenberg_lab_blocks_get_villa_amenities' )
+			? gutenberg_lab_blocks_get_villa_amenities( $villa_id )
+			: array();
+		$amenities_markup = function_exists( 'gutenberg_lab_blocks_render_villa_amenities' )
+			? gutenberg_lab_blocks_render_villa_amenities(
+				$amenities,
+				array(
+					'class_name' => 'vvm-two-up-carousel__amenities',
+					'limit'      => 4,
+				)
+			)
+			: '';
+		$has_amenities = '' !== $amenities_markup;
 		$classes   = array( 'vvm-two-up-carousel__slide' );
 
 		if ( $args['is_active'] ) {
@@ -71,9 +92,15 @@ if ( ! function_exists( 'gutenberg_lab_two_up_carousel_render_slide' ) ) {
 				<?php endif; ?>
 			</div>
 
-			<?php if ( $has_copy ) : ?>
+			<?php if ( $has_copy || $has_amenities ) : ?>
 				<div class="vvm-two-up-carousel__slide-content">
-					<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php if ( $has_copy ) : ?>
+						<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php endif; ?>
+
+					<?php if ( $has_amenities ) : ?>
+						<?php echo $amenities_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php endif; ?>
 				</div>
 			<?php endif; ?>
 		</article>

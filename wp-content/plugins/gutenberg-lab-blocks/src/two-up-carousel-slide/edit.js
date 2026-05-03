@@ -7,7 +7,9 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
-import { Button, PanelBody } from '@wordpress/components';
+import { Button, ComboboxControl, PanelBody } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
+import { decodeEntities } from '@wordpress/html-entities';
 
 import './editor.scss';
 
@@ -20,7 +22,24 @@ const ALLOWED_INNER_BLOCKS = [
 const TEMPLATE = [];
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { imageAlt, imageId, imageUrl } = attributes;
+	const { imageAlt, imageId, imageUrl, villaId = 0 } = attributes;
+	const villas = useSelect(
+		( select ) =>
+			select( 'core' ).getEntityRecords( 'postType', 'villa', {
+				per_page: -1,
+				orderby: 'title',
+				order: 'asc',
+				_fields: 'id,title',
+			} ),
+		[]
+	);
+	const villaOptions = ( villas ?? [] ).map( ( villa ) => ( {
+		value: String( villa.id ),
+		label: decodeEntities(
+			villa.title?.rendered ||
+				__( '(Untitled villa)', 'gutenberg-lab-blocks' )
+		),
+	} ) );
 
 	const blockProps = useBlockProps( {
 		className: 'vvm-two-up-carousel__slide-editor',
@@ -84,6 +103,37 @@ export default function Edit( { attributes, setAttributes } ) {
 					{ imageUrl ? (
 						<Button variant="link" isDestructive onClick={ removeImage }>
 							{ __( 'Remove image', 'gutenberg-lab-blocks' ) }
+						</Button>
+					) : null }
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Villa amenities', 'gutenberg-lab-blocks' ) }
+					initialOpen={ true }
+				>
+					<ComboboxControl
+						label={ __( 'Related villa', 'gutenberg-lab-blocks' ) }
+						help={ __(
+							'The slide pulls amenity labels and icons from the selected villa post.',
+							'gutenberg-lab-blocks'
+						) }
+						options={ villaOptions }
+						value={ villaId ? String( villaId ) : '' }
+						onChange={ ( selectedVillaId ) =>
+							setAttributes( {
+								villaId: selectedVillaId
+									? Number( selectedVillaId )
+									: 0,
+							} )
+						}
+					/>
+
+					{ villaId ? (
+						<Button
+							variant="link"
+							isDestructive
+							onClick={ () => setAttributes( { villaId: 0 } ) }
+						>
+							{ __( 'Remove villa link', 'gutenberg-lab-blocks' ) }
 						</Button>
 					) : null }
 				</PanelBody>
