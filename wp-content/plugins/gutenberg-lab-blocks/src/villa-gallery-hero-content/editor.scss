@@ -59,12 +59,24 @@
 	}
 
 	.wp-block-post-title,
-	.wp-block-heading {
+	:is(h1, h2, h3).wp-block-heading {
 		margin: 0;
 		font-family: var(--wp--preset--font-family--display-serif);
 		font-size: clamp(2.5rem, 5vw, 4.5rem);
 		line-height: 0.96;
 		text-align: left;
+	}
+
+	h4.wp-block-heading,
+	.h4 {
+		margin: 0;
+		font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
+		font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
+		font-weight: 400;
+		letter-spacing: 0.34em;
+		line-height: 1rem;
+		text-align: left;
+		text-transform: uppercase;
 	}
 
 	.wp-block-post-excerpt,
