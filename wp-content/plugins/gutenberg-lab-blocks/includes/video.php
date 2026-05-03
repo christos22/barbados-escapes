@@ -70,16 +70,84 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_vimeo_video_id' ) ) {
 	}
 }
 
+if ( ! function_exists( 'gutenberg_lab_blocks_get_vimeo_video_hash' ) ) {
+	/**
+	 * Extracts Vimeo's private/unlisted hash from supported URL formats.
+	 *
+	 * Vimeo unlisted links need this value forwarded as `h` on the player URL.
+	 * Without it, Vimeo can render a sign-in prompt even when the numeric ID is
+	 * valid.
+	 *
+	 * @param mixed $vimeo_url Raw author-entered Vimeo URL.
+	 * @return string
+	 */
+	function gutenberg_lab_blocks_get_vimeo_video_hash( $vimeo_url ) {
+		$vimeo_url = is_string( $vimeo_url ) ? trim( $vimeo_url ) : '';
+
+		if ( '' === $vimeo_url ) {
+			return '';
+		}
+
+		$parsed_url = wp_parse_url( $vimeo_url );
+
+		if ( empty( $parsed_url['host'] ) ) {
+			return '';
+		}
+
+		$host          = strtolower( $parsed_url['host'] );
+		$allowed_hosts = array(
+			'vimeo.com',
+			'www.vimeo.com',
+			'player.vimeo.com',
+			'www.player.vimeo.com',
+		);
+
+		if ( ! in_array( $host, $allowed_hosts, true ) ) {
+			return '';
+		}
+
+		if ( ! empty( $parsed_url['query'] ) ) {
+			$query_args = array();
+			wp_parse_str( $parsed_url['query'], $query_args );
+
+			if ( ! empty( $query_args['h'] ) && is_scalar( $query_args['h'] ) ) {
+				return preg_replace( '/[^a-zA-Z0-9]/', '', (string) $query_args['h'] );
+			}
+		}
+
+		$path_parts = array_values(
+			array_filter(
+				explode( '/', trim( $parsed_url['path'] ?? '', '/' ) ),
+				static fn( $part ) => '' !== $part
+			)
+		);
+
+		foreach ( $path_parts as $index => $part ) {
+			if ( ! preg_match( '/^\d+$/', $part ) || empty( $path_parts[ $index + 1 ] ) ) {
+				continue;
+			}
+
+			$hash = preg_replace( '/[^a-zA-Z0-9]/', '', (string) $path_parts[ $index + 1 ] );
+
+			return $hash ?: '';
+		}
+
+		return '';
+	}
+}
+
 if ( ! function_exists( 'gutenberg_lab_blocks_get_vimeo_embed_url' ) ) {
 	/**
 	 * Builds a player.vimeo.com embed URL for the given mode.
 	 *
 	 * @param string $video_id Vimeo video ID.
 	 * @param string $mode     Either `autoplay` or `manual`.
+	 * @param string $hash     Optional Vimeo private/unlisted hash.
 	 * @return string
 	 */
-	function gutenberg_lab_blocks_get_vimeo_embed_url( $video_id, $mode = 'manual' ) {
+	function gutenberg_lab_blocks_get_vimeo_embed_url( $video_id, $mode = 'manual', $hash = '' ) {
 		$video_id = is_string( $video_id ) ? trim( $video_id ) : '';
+		$hash     = is_string( $hash ) ? preg_replace( '/[^a-zA-Z0-9]/', '', $hash ) : '';
 
 		if ( '' === $video_id ) {
 			return '';
@@ -91,6 +159,10 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_vimeo_embed_url' ) ) {
 			'dnt'         => '1',
 			'playsinline' => '1',
 		);
+
+		if ( '' !== $hash ) {
+			$query_args['h'] = $hash;
+		}
 
 		if ( 'autoplay' === $mode ) {
 			$query_args = array_merge(
@@ -149,6 +221,9 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_video_data' ) ) {
 		$vimeo_id     = 'vimeo' === $video_source
 			? gutenberg_lab_blocks_get_vimeo_video_id( $vimeo_url )
 			: '';
+		$vimeo_hash   = 'vimeo' === $video_source
+			? gutenberg_lab_blocks_get_vimeo_video_hash( $vimeo_url )
+			: '';
 		$has_poster   = '' !== $poster_url || ! $args['poster_required'];
 
 		return array(
@@ -156,6 +231,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_video_data' ) ) {
 			'uploaded_video_url' => esc_url_raw( $video_url ),
 			'vimeo_url'          => esc_url_raw( $vimeo_url ),
 			'vimeo_id'           => sanitize_text_field( $vimeo_id ),
+			'vimeo_hash'         => sanitize_text_field( $vimeo_hash ),
 			'poster_url'         => esc_url_raw( $poster_url ),
 			'poster_alt'         => sanitize_text_field( $poster_alt ),
 			'has_uploaded_video' => 'uploaded' === $video_source && '' !== $video_url,

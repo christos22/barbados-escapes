@@ -88,8 +88,16 @@ $gallery_images = array_values(
 					<?php
 					echo gutenberg_lab_blocks_render_vimeo_shell(
 						array(
-							'autoplay_url'  => gutenberg_lab_blocks_get_vimeo_embed_url( $video_data['vimeo_id'], 'autoplay' ),
-							'manual_url'    => gutenberg_lab_blocks_get_vimeo_embed_url( $video_data['vimeo_id'], 'manual' ),
+							'autoplay_url'  => gutenberg_lab_blocks_get_vimeo_embed_url(
+								$video_data['vimeo_id'],
+								'autoplay',
+								$video_data['vimeo_hash'] ?? ''
+							),
+							'manual_url'    => gutenberg_lab_blocks_get_vimeo_embed_url(
+								$video_data['vimeo_id'],
+								'manual',
+								$video_data['vimeo_hash'] ?? ''
+							),
 							'iframe_class'  => 'split-content__media-asset',
 							'poster_alt'    => $video_data['poster_alt'],
 							'poster_class'  => 'split-content__media-asset',

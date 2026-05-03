@@ -196,6 +196,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_normalize_slide
 			'video_url'       => $video_data['uploaded_video_url'],
 			'vimeo_url'       => $video_data['vimeo_url'],
 			'vimeo_id'        => $video_data['vimeo_id'],
+			'vimeo_hash'      => $video_data['vimeo_hash'] ?? '',
 			'poster_url'      => $video_data['poster_url'],
 			'poster_alt'      => $video_data['poster_alt'],
 			'thumb_media_url' => esc_url_raw( $thumb_media_url ),
@@ -420,8 +421,16 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 											<?php
 												echo gutenberg_lab_blocks_render_vimeo_shell(
 													array(
-														'autoplay_url'     => gutenberg_lab_blocks_get_vimeo_embed_url( $slide['vimeo_id'], 'autoplay' ),
-														'manual_url'       => gutenberg_lab_blocks_get_vimeo_embed_url( $slide['vimeo_id'], 'manual' ),
+														'autoplay_url'     => gutenberg_lab_blocks_get_vimeo_embed_url(
+															$slide['vimeo_id'],
+															'autoplay',
+															$slide['vimeo_hash'] ?? ''
+														),
+														'manual_url'       => gutenberg_lab_blocks_get_vimeo_embed_url(
+															$slide['vimeo_id'],
+															'manual',
+															$slide['vimeo_hash'] ?? ''
+														),
 														'iframe_class'     => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--video',
 														'lazy_load'        => true,
 														'poster_alt'       => $slide['poster_alt'],
@@ -524,8 +533,16 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 								<?php
 									echo gutenberg_lab_blocks_render_vimeo_shell(
 										array(
-											'autoplay_url'     => gutenberg_lab_blocks_get_vimeo_embed_url( $slide['vimeo_id'], 'autoplay' ),
-											'manual_url'       => gutenberg_lab_blocks_get_vimeo_embed_url( $slide['vimeo_id'], 'manual' ),
+											'autoplay_url'     => gutenberg_lab_blocks_get_vimeo_embed_url(
+												$slide['vimeo_id'],
+												'autoplay',
+												$slide['vimeo_hash'] ?? ''
+											),
+											'manual_url'       => gutenberg_lab_blocks_get_vimeo_embed_url(
+												$slide['vimeo_id'],
+												'manual',
+												$slide['vimeo_hash'] ?? ''
+											),
 											'iframe_class'     => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--video',
 											'lazy_load'        => true,
 											'poster_alt'       => $slide['poster_alt'],

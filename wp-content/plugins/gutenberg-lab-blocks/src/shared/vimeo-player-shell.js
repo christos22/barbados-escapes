@@ -1,6 +1,15 @@
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 const MIN_AUTOPLAY_POSTER_MS = 900;
 const POSTER_FADE_MS = 350;
+const PAGE_INTENT_EVENTS = [
+	'focusin',
+	'keydown',
+	'pointerdown',
+	'pointermove',
+	'scroll',
+	'touchstart',
+	'wheel',
+];
 const VIMEO_SHELL_STATE = new WeakMap();
 
 let vimeoPlayerConstructorPromise;
@@ -288,6 +297,15 @@ async function playPlayerInstance( player, isMuted ) {
 		return false;
 	}
 
+	if ( 'boolean' === typeof isMuted && 'function' === typeof player.setMuted ) {
+		try {
+			await player.setMuted( isMuted );
+		} catch ( error ) {
+			// Some Vimeo embeds reject mute state changes. Playback is still worth
+			// attempting because the URL may already include the correct policy.
+		}
+	}
+
 	if ( 'boolean' === typeof isMuted && 'function' === typeof player.setVolume ) {
 		try {
 			await player.setVolume( isMuted ? 0 : 1 );
@@ -307,6 +325,39 @@ async function playPlayerInstance( player, isMuted ) {
 
 function prefersReducedMotion() {
 	return window.matchMedia( REDUCED_MOTION_MEDIA_QUERY ).matches;
+}
+
+function isSaveDataEnabled() {
+	return Boolean( window.navigator?.connection?.saveData );
+}
+
+function bindPageIntent( callback ) {
+	let didRun = false;
+
+	const removeListeners = () => {
+		PAGE_INTENT_EVENTS.forEach( ( eventName ) => {
+			window.removeEventListener( eventName, handleIntent, true );
+		} );
+	};
+
+	const handleIntent = ( event ) => {
+		if ( didRun || false === event?.isTrusted ) {
+			return;
+		}
+
+		didRun = true;
+		removeListeners();
+		callback();
+	};
+
+	PAGE_INTENT_EVENTS.forEach( ( eventName ) => {
+		window.addEventListener( eventName, handleIntent, {
+			capture: true,
+			passive: true,
+		} );
+	} );
+
+	return removeListeners;
 }
 
 export function hasVimeoShells( root = document ) {
@@ -425,7 +476,11 @@ export async function playVimeoShellFromUserAction( shell ) {
 
 	await ensureShellAspectRatio( shell, state );
 
-	const didPlay = await playPlayerInstance( state.player, false );
+	let didPlay = await playPlayerInstance( state.player, false );
+
+	if ( ! didPlay ) {
+		didPlay = await playPlayerInstance( state.player, true );
+	}
 
 	setShellBusy( shell, false );
 
@@ -473,16 +528,28 @@ export async function resetVimeoShell(
 	}
 }
 
-export function initializeStandaloneVimeoShells( root = document ) {
+export function initializeStandaloneVimeoShells(
+	root = document,
+	{ autoplayStrategy = 'eager' } = {}
+) {
 	const shells = root.querySelectorAll(
 		'[data-vimeo-shell][data-vimeo-autoplay-enabled="true"]'
 	);
 
 	bindVimeoShellPlayButtons( root );
 
-	if ( prefersReducedMotion() ) {
+	if ( prefersReducedMotion() || isSaveDataEnabled() ) {
 		shells.forEach( ( shell ) => {
 			setPosterVisibility( shell, true );
+		} );
+		return;
+	}
+
+	if ( 'intent' === autoplayStrategy ) {
+		bindPageIntent( () => {
+			shells.forEach( ( shell ) => {
+				attemptVimeoShellAutoplay( shell );
+			} );
 		} );
 		return;
 	}

@@ -116,10 +116,24 @@ $wrapper_attributes = get_block_wrapper_attributes(
 				<?php
 				echo gutenberg_lab_blocks_render_vimeo_shell(
 					array(
-						'autoplay_url'  => gutenberg_lab_blocks_get_vimeo_embed_url( $video_data['vimeo_id'], 'autoplay' ),
-						'manual_url'    => gutenberg_lab_blocks_get_vimeo_embed_url( $video_data['vimeo_id'], 'manual' ),
+						'autoplay_url'  => gutenberg_lab_blocks_get_vimeo_embed_url(
+							$video_data['vimeo_id'],
+							'autoplay',
+							$video_data['vimeo_hash'] ?? ''
+						),
+						'manual_url'    => gutenberg_lab_blocks_get_vimeo_embed_url(
+							$video_data['vimeo_id'],
+							'manual',
+							$video_data['vimeo_hash'] ?? ''
+						),
 						'iframe_class'  => 'media-panel__video',
+						'lazy_load'     => true,
 						'poster_alt'    => $video_data['poster_alt'],
+						'poster_attrs'  => array(
+							'decoding'      => 'async',
+							'fetchpriority' => 'high',
+							'loading'       => 'eager',
+						),
 						'poster_class'  => 'media-panel__image',
 						'poster_url'    => $video_data['poster_url'],
 						'shell_class'   => 'media-panel__vimeo-shell',
