@@ -6,8 +6,10 @@ import {
 } from '../shared/rail-navigation';
 import {
 	attemptVimeoShellAutoplay,
-	bindVimeoShellPlayButtons,
+	bindNativeVideoControls,
+	bindVimeoShellTransportControls,
 	resetVimeoShell,
+	setNativeVideoControlState,
 } from '../shared/vimeo-player-shell';
 
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
@@ -23,42 +25,7 @@ const PAGE_INTENT_EVENTS = [
 	'wheel',
 ];
 
-function getManagedVideoToggle( video ) {
-	return (
-		video?.parentElement?.querySelector( '[data-villa-gallery-video-toggle]' ) ??
-		null
-	);
-}
-
-function setManagedVideoToggleVisibility( video, isVisible ) {
-	const toggle = getManagedVideoToggle( video );
-
-	if ( ! toggle ) {
-		return;
-	}
-
-	toggle.hidden = ! isVisible;
-	toggle.setAttribute( 'aria-hidden', isVisible ? 'false' : 'true' );
-}
-
-function showManagedVideoFallback( video ) {
-	if ( ! video ) {
-		return;
-	}
-
-	video.controls = false;
-	setManagedVideoToggleVisibility( video, true );
-}
-
-function hideManagedVideoFallback( video ) {
-	if ( ! video ) {
-		return;
-	}
-
-	setManagedVideoToggleVisibility( video, false );
-}
-
-function resetManagedVideo( video, { showFallback = false } = {} ) {
+function resetManagedVideo( video ) {
 	if ( ! video ) {
 		return;
 	}
@@ -72,13 +39,7 @@ function resetManagedVideo( video, { showFallback = false } = {} ) {
 	}
 
 	video.controls = false;
-
-	if ( showFallback ) {
-		showManagedVideoFallback( video );
-		return;
-	}
-
-	hideManagedVideoFallback( video );
+	setNativeVideoControlState( video, 'paused' );
 }
 
 function attemptManagedVideoAutoplay( video ) {
@@ -94,57 +55,19 @@ function attemptManagedVideoAutoplay( video ) {
 	video.playsInline = true;
 	video.preload = 'auto';
 	video.controls = false;
-	hideManagedVideoFallback( video );
+	setNativeVideoControlState( video, 'playing' );
 
 	const playPromise = video.play?.();
 
 	if ( playPromise && 'function' === typeof playPromise.catch ) {
-		playPromise.catch( () => {
-			showManagedVideoFallback( video );
-		} );
-	}
-}
-
-function playManagedVideoFromUserAction( video ) {
-	if ( ! video ) {
-		return;
-	}
-
-	hideManagedVideoFallback( video );
-	video.controls = true;
-
-	const playPromise = video.play?.();
-
-	if ( playPromise && 'function' === typeof playPromise.catch ) {
-		playPromise.catch( () => {
-			showManagedVideoFallback( video );
-		} );
-	}
-
-	window.requestAnimationFrame( () => {
-		video.focus?.();
-	} );
-}
-
-function bindManagedVideoControls( rootElement ) {
-	rootElement
-		.querySelectorAll( '[data-villa-gallery-video-toggle]' )
-		.forEach( ( button ) => {
-			if ( 'true' === button.dataset.villaGalleryVideoBound ) {
-				return;
-			}
-
-			button.dataset.villaGalleryVideoBound = 'true';
-
-			button.addEventListener( 'click', () => {
-				const video =
-					button.parentElement?.querySelector(
-						'[data-villa-gallery-video], [data-villa-gallery-static-video]'
-					) ?? null;
-
-				playManagedVideoFromUserAction( video );
+		playPromise
+			.then( () => {
+				setNativeVideoControlState( video, 'playing' );
+			} )
+			.catch( () => {
+				setNativeVideoControlState( video, 'paused' );
 			} );
-		} );
+	}
 }
 
 function bindReducedMotionPreference( mediaQuery, syncCallback ) {
@@ -216,7 +139,7 @@ function syncStageNativeVideos( stageElement, shouldAutoplay ) {
 			return;
 		}
 
-		resetManagedVideo( video, { showFallback: true } );
+		resetManagedVideo( video );
 	} );
 }
 
@@ -232,7 +155,7 @@ function syncStaticNativeVideo( rootElement, shouldAutoplay ) {
 		return;
 	}
 
-	resetManagedVideo( video, { showFallback: true } );
+	resetManagedVideo( video );
 }
 
 function syncStageVimeoShells( stageElement, shouldAutoplay ) {
@@ -412,8 +335,8 @@ function initializeVillaGalleryHero( rootElement ) {
 		! reducedMotionMediaQuery.matches &&
 		! isSaveDataEnabled();
 
-	bindManagedVideoControls( rootElement );
-	bindVimeoShellPlayButtons( rootElement );
+	bindNativeVideoControls( rootElement );
+	bindVimeoShellTransportControls( rootElement );
 
 	if ( ! stageElement || ! thumbsElement ) {
 		const syncStaticState = () => {

@@ -84,6 +84,9 @@ $gallery_images = array_values(
 						playsinline
 						preload="metadata"
 					></video>
+					<?php
+					echo gutenberg_lab_blocks_get_native_video_control_button(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				<?php elseif ( 'video' === $media_type && $video_data['has_vimeo_video'] ) : ?>
 					<?php
 					echo gutenberg_lab_blocks_render_vimeo_shell(

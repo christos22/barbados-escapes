@@ -1,4 +1,7 @@
-import { initializeStandaloneVimeoShells } from '../shared/vimeo-player-shell';
+import {
+	bindNativeVideoControls,
+	initializeStandaloneVimeoShells,
+} from '../shared/vimeo-player-shell';
 
 function initializeSplitContentSlider( slider ) {
 	const track = slider.querySelector( '.split-content__slides' );
@@ -89,6 +92,7 @@ window.addEventListener( 'DOMContentLoaded', () => {
 		.querySelectorAll( '.wp-block-gutenberg-lab-blocks-split-content' )
 		.forEach( ( block ) => {
 			initializeSplitContentSizing( block );
+			bindNativeVideoControls( block );
 			initializeStandaloneVimeoShells( block );
 		} );
 

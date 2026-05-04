@@ -76,6 +76,148 @@ function gutenberg_lab_blocks_get_slider_arrow_icon() {
 }
 
 /**
+ * Serializes a flat array of HTML attributes.
+ *
+ * Empty strings and true values become boolean attributes; false and null are
+ * skipped. This keeps custom block markup helpers consistent.
+ *
+ * @param array $attributes Attribute map.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_html_attributes( $attributes ) {
+	$markup = '';
+
+	foreach ( (array) $attributes as $attribute_name => $attribute_value ) {
+		if ( ! is_string( $attribute_name ) || '' === trim( $attribute_name ) ) {
+			continue;
+		}
+
+		if ( false === $attribute_value || null === $attribute_value ) {
+			continue;
+		}
+
+		if ( '' === $attribute_value || true === $attribute_value ) {
+			$markup .= ' ' . sanitize_key( $attribute_name );
+			continue;
+		}
+
+		$markup .= sprintf(
+			' %1$s="%2$s"',
+			sanitize_key( $attribute_name ),
+			esc_attr( (string) $attribute_value )
+		);
+	}
+
+	return $markup;
+}
+
+/**
+ * Shared play/pause icons used by custom video controls.
+ *
+ * These are inline SVGs like the slider arrows above, which keeps small UI
+ * artwork reusable without adding another asset loading path.
+ *
+ * @param string $state Icon state: play or pause.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_video_control_icon( $state ) {
+	$state = 'pause' === $state ? 'pause' : 'play';
+
+	if ( 'pause' === $state ) {
+		return '<svg class="vvm-video-control__icon vvm-video-control__icon--pause" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>';
+	}
+
+	return '<svg class="vvm-video-control__icon vvm-video-control__icon--play" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5v14l11-7z" /></svg>';
+}
+
+/**
+ * Returns the shared round play/pause button for block-managed videos.
+ *
+ * @param array $args Button configuration.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_video_control_button( $args = array() ) {
+	$args = wp_parse_args(
+		$args,
+		array(
+			'class_name'  => '',
+			'data_attrs'  => array(),
+			'state'       => 'playing',
+			'play_label'  => __( 'Play video', 'gutenberg-lab-blocks' ),
+			'pause_label' => __( 'Pause video', 'gutenberg-lab-blocks' ),
+		)
+	);
+
+	$state = 'paused' === $args['state'] ? 'paused' : 'playing';
+	$label = 'playing' === $state ? $args['pause_label'] : $args['play_label'];
+	$class = trim( 'vvm-video-control ' . (string) $args['class_name'] );
+	$markup = gutenberg_lab_blocks_get_html_attributes(
+		array_merge(
+			array(
+				'class'                        => $class,
+				'type'                         => 'button',
+				'data-vvm-video-control'       => '',
+				'data-vvm-video-control-state' => $state,
+				'data-vvm-video-play-label'    => $args['play_label'],
+				'data-vvm-video-pause-label'   => $args['pause_label'],
+				'aria-label'                   => $label,
+			),
+			(array) $args['data_attrs']
+		),
+	);
+
+	return sprintf(
+		'<button%1$s>%2$s%3$s<span class="screen-reader-text" data-vvm-video-control-label>%4$s</span></button>',
+		$markup,
+		gutenberg_lab_blocks_get_video_control_icon( 'play' ),
+		gutenberg_lab_blocks_get_video_control_icon( 'pause' ),
+		esc_html( $label )
+	);
+}
+
+/**
+ * Returns the shared control button wired to a native HTML video element.
+ *
+ * @param array $args Button configuration.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_native_video_control_button( $args = array() ) {
+	$args               = wp_parse_args( $args, array( 'data_attrs' => array() ) );
+	$args['data_attrs'] = array_merge(
+		array(
+			'data-vvm-native-video-control' => '',
+		),
+		(array) $args['data_attrs']
+	);
+
+	return gutenberg_lab_blocks_get_video_control_button( $args );
+}
+
+/**
+ * Returns the shared control button wired to the Vimeo shell transport layer.
+ *
+ * @param array $args Button configuration.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_vimeo_video_control_button( $args = array() ) {
+	$args               = wp_parse_args(
+		$args,
+		array(
+			'data_attrs' => array(),
+			'state'      => 'paused',
+		)
+	);
+	$args['data_attrs'] = array_merge(
+		array(
+			'data-vimeo-transport-control' => '',
+		),
+		(array) $args['data_attrs']
+	);
+
+	return gutenberg_lab_blocks_get_video_control_button( $args );
+}
+
+/**
  * Normalizes one slider arrow preset to the supported shared CSS modifiers.
  *
  * @param string $preset Shared preset slug from block attributes.

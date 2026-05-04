@@ -35,6 +35,44 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_render_nested_b
 	}
 }
 
+if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_get_spacing_css_value' ) ) {
+	/**
+	 * Converts a Gutenberg spacing support value into the matching CSS value.
+	 *
+	 * @param mixed $spacing_value Raw spacing support value.
+	 * @return string
+	 */
+	function gutenberg_lab_blocks_villa_gallery_hero_get_spacing_css_value( $spacing_value ) {
+		if ( ! is_string( $spacing_value ) ) {
+			return '';
+		}
+
+		$spacing_value = trim( $spacing_value );
+
+		if ( '' === $spacing_value ) {
+			return '';
+		}
+
+		if ( str_starts_with( $spacing_value, 'var:preset|spacing|' ) ) {
+			$spacing_slug = substr( $spacing_value, strlen( 'var:preset|spacing|' ) );
+			$spacing_slug = preg_replace( '/(?<=[0-9])(?=[a-zA-Z])/', '-', $spacing_slug );
+			$spacing_slug = sanitize_title( $spacing_slug );
+
+			return $spacing_slug ? sprintf( 'var(--wp--preset--spacing--%s)', $spacing_slug ) : '';
+		}
+
+		if (
+			'0' === $spacing_value ||
+			preg_match( '/^-?(?:\d+|\d*\.\d+)(?:px|rem|em|vh|vw|dvh|svh|lvh|%)?$/', $spacing_value ) ||
+			preg_match( '/^(?:var|calc|clamp|min|max)\(/', $spacing_value )
+		) {
+			return $spacing_value;
+		}
+
+		return '';
+	}
+}
+
 if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_get_current_post_id' ) ) {
 	/**
 	 * Returns the current singular post ID when the hero sits inside a template.
@@ -394,13 +432,20 @@ $classes             = array(
 	empty( $attributes['align'] ) ? 'alignfull' : '',
 	$has_thumb_navigation ? 'vvm-villa-gallery-hero--has-navigation' : 'vvm-villa-gallery-hero--static',
 );
-$wrapper_attributes  = get_block_wrapper_attributes(
-	array(
-		'class'                  => implode( ' ', array_filter( $classes ) ),
-		'data-villa-gallery-hero' => '',
-		'data-villa-gallery-id'  => $hero_id_base,
-	)
+$block_start_reserve = gutenberg_lab_blocks_villa_gallery_hero_get_spacing_css_value(
+	$attributes['style']['spacing']['padding']['top'] ?? ''
 );
+$wrapper_args        = array(
+	'class'                   => implode( ' ', array_filter( $classes ) ),
+	'data-villa-gallery-hero' => '',
+	'data-villa-gallery-id'   => $hero_id_base,
+);
+
+if ( '' !== $block_start_reserve && '0' !== $block_start_reserve ) {
+	$wrapper_args['style'] = '--vvm-villa-gallery-hero-block-start-reserve:' . $block_start_reserve . ';';
+}
+
+$wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 ?>
 
 <section <?php echo $wrapper_attributes; ?>>
@@ -465,21 +510,9 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 												preload="auto"
 												data-villa-gallery-video
 											></video>
-											<button
-												type="button"
-												class="vvm-villa-gallery-hero__video-toggle"
-												data-villa-gallery-video-toggle
-												hidden
-												aria-label="<?php esc_attr_e( 'Play video', 'gutenberg-lab-blocks' ); ?>"
-											>
-												<span
-													class="vvm-villa-gallery-hero__video-toggle-icon"
-													aria-hidden="true"
-												>▶</span>
-												<span class="screen-reader-text">
-													<?php esc_html_e( 'Play video', 'gutenberg-lab-blocks' ); ?>
-												</span>
-											</button>
+											<?php
+											echo gutenberg_lab_blocks_get_native_video_control_button(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+											?>
 										<?php endif; ?>
 									<?php else : ?>
 										<img
@@ -575,21 +608,9 @@ $wrapper_attributes  = get_block_wrapper_attributes(
 									preload="auto"
 									data-villa-gallery-static-video
 								></video>
-								<button
-									type="button"
-									class="vvm-villa-gallery-hero__video-toggle"
-									data-villa-gallery-video-toggle
-									hidden
-									aria-label="<?php esc_attr_e( 'Play video', 'gutenberg-lab-blocks' ); ?>"
-								>
-									<span
-										class="vvm-villa-gallery-hero__video-toggle-icon"
-										aria-hidden="true"
-									>▶</span>
-									<span class="screen-reader-text">
-										<?php esc_html_e( 'Play video', 'gutenberg-lab-blocks' ); ?>
-									</span>
-								</button>
+								<?php
+								echo gutenberg_lab_blocks_get_native_video_control_button(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								?>
 							<?php endif; ?>
 						<?php else : ?>
 							<img

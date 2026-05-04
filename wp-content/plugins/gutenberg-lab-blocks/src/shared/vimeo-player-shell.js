@@ -42,7 +42,6 @@ function getShellParts( shell ) {
 	}
 
 	return {
-		trigger: shell.querySelector( '[data-vimeo-play-trigger]' ),
 		frameShell: shell.querySelector( '[data-vimeo-frame-shell]' ),
 		iframe: shell.querySelector( '[data-vimeo-iframe]' ),
 		posterShell: shell.querySelector( '[data-vimeo-poster-shell]' ),
@@ -53,6 +52,19 @@ function getShellTimeout( shell ) {
 	const timeout = Number.parseInt( shell?.dataset?.vimeoTimeout ?? '', 10 );
 
 	return Number.isNaN( timeout ) || timeout < 0 ? 2000 : timeout;
+}
+
+function prepareShellIframe( iframe ) {
+	if ( ! iframe ) {
+		return;
+	}
+
+	// Vimeo is the visual media layer here; our real button owns transport
+	// controls and must be the keyboard target.
+	iframe.tabIndex = -1;
+	iframe.setAttribute( 'aria-hidden', 'true' );
+	iframe.setAttribute( 'inert', '' );
+	iframe.setAttribute( 'tabindex', '-1' );
 }
 
 function setPosterVisibility( shell, isVisible ) {
@@ -100,13 +112,84 @@ function setAutoplayLoadingVisibility( shell ) {
 }
 
 function setShellBusy( shell, isBusy ) {
-	const trigger = shell?.querySelector( '[data-vimeo-play-trigger]' );
+	const control = shell?.querySelector( '[data-vimeo-transport-control]' );
 
-	if ( trigger ) {
-		trigger.setAttribute( 'aria-disabled', isBusy ? 'true' : 'false' );
+	if ( control ) {
+		control.setAttribute( 'aria-disabled', isBusy ? 'true' : 'false' );
 	}
 
 	shell.dataset.vimeoBusy = isBusy ? 'true' : 'false';
+}
+
+function getVideoControlLabel( control, state ) {
+	const labelKey =
+		'playing' === state ? 'vvmVideoPauseLabel' : 'vvmVideoPlayLabel';
+
+	return control?.dataset?.[ labelKey ] || '';
+}
+
+function setVideoControlElementState( control, state ) {
+	if ( ! control ) {
+		return;
+	}
+
+	const nextState = 'playing' === state ? 'playing' : 'paused';
+	const label = getVideoControlLabel( control, nextState );
+	const labelElement = control.querySelector( '[data-vvm-video-control-label]' );
+
+	control.dataset.vvmVideoControlState = nextState;
+
+	if ( label ) {
+		control.setAttribute( 'aria-label', label );
+	}
+
+	if ( labelElement && label ) {
+		labelElement.textContent = label;
+	}
+}
+
+function getNativeVideoForControl( control ) {
+	return (
+		control?.parentElement?.querySelector( 'video' ) ??
+		control?.closest( '[data-vvm-video-frame]' )?.querySelector( 'video' ) ??
+		null
+	);
+}
+
+function getNativeVideoControlsForVideo( video ) {
+	if ( ! video ) {
+		return [];
+	}
+
+	const scopes = [
+		video.parentElement,
+		video.closest( '[data-vvm-video-frame]' ),
+	].filter( Boolean );
+	const controls = [];
+
+	scopes.forEach( ( scope ) => {
+		scope
+			.querySelectorAll( '[data-vvm-native-video-control]' )
+			.forEach( ( control ) => {
+				if ( getNativeVideoForControl( control ) === video ) {
+					controls.push( control );
+				}
+			} );
+	} );
+
+	return Array.from( new Set( controls ) );
+}
+
+export function setNativeVideoControlState( video, state ) {
+	getNativeVideoControlsForVideo( video ).forEach( ( control ) => {
+		setVideoControlElementState( control, state );
+	} );
+}
+
+function setVimeoTransportControlState( shell, state ) {
+	const control = shell?.querySelector( '[data-vimeo-transport-control]' );
+
+	setVideoControlElementState( control, state );
 }
 
 function beginShellRequest( shell ) {
@@ -256,6 +339,9 @@ async function ensureShellPlayer( shell, mode ) {
 	const nextIframe = parts.iframe.cloneNode( false );
 	const previousPlayer = state.player;
 
+	prepareShellIframe( parts.iframe );
+	prepareShellIframe( nextIframe );
+
 	nextIframe.src = targetUrl;
 	parts.iframe.replaceWith( nextIframe );
 
@@ -364,34 +450,128 @@ export function hasVimeoShells( root = document ) {
 	return Boolean( root?.querySelector?.( '[data-vimeo-shell]' ) );
 }
 
-export function bindVimeoShellPlayButtons( root = document ) {
+export function bindVimeoShellTransportControls( root = document ) {
 	root.querySelectorAll( '[data-vimeo-shell]' ).forEach( ( shell ) => {
-		const trigger = shell.querySelector( '[data-vimeo-play-trigger]' );
+		const control = shell.querySelector( '[data-vimeo-transport-control]' );
 
-		if ( ! trigger || 'true' === trigger.dataset.vimeoShellBound ) {
+		if ( ! control || 'true' === control.dataset.vimeoTransportBound ) {
 			return;
 		}
 
-		const handleTrigger = ( event ) => {
+		prepareShellIframe( getShellParts( shell )?.iframe );
+
+		control.dataset.vimeoTransportBound = 'true';
+		control.setAttribute( 'aria-disabled', 'false' );
+		setVimeoTransportControlState(
+			shell,
+			'player' === shell.dataset.vimeoVisibleState ? 'playing' : 'paused'
+		);
+
+		control.addEventListener( 'click', () => {
 			if ( 'true' === shell.dataset.vimeoBusy ) {
-				event.preventDefault();
 				return;
 			}
 
-			playVimeoShellFromUserAction( shell );
-		};
-
-		trigger.dataset.vimeoShellBound = 'true';
-		trigger.addEventListener( 'click', handleTrigger );
-		trigger.addEventListener( 'keydown', ( event ) => {
-			if ( 'Enter' !== event.key && ' ' !== event.key ) {
+			if ( 'playing' === control.dataset.vvmVideoControlState ) {
+				pauseVimeoShellFromUserAction( shell );
 				return;
 			}
 
-			event.preventDefault();
-			handleTrigger( event );
+			playVimeoShellFromTransportControl( shell );
 		} );
 	} );
+}
+
+async function playVimeoShellFromTransportControl( shell ) {
+	const state = getShellState( shell );
+
+	if (
+		state.player &&
+		state.iframe?.isConnected &&
+		'player' === shell.dataset.vimeoVisibleState
+	) {
+		setShellBusy( shell, true );
+
+		try {
+			await state.player.play();
+			setVimeoTransportControlState( shell, 'playing' );
+		} catch ( error ) {
+			setVimeoTransportControlState( shell, 'paused' );
+		}
+
+		setShellBusy( shell, false );
+		return;
+	}
+
+	await playVimeoShellFromUserAction( shell );
+}
+
+async function pauseVimeoShellFromUserAction( shell ) {
+	const state = getShellState( shell );
+
+	if ( state.player ) {
+		try {
+			await state.player.pause();
+		} catch ( error ) {
+			// Vimeo can reject pause while an iframe is still initializing.
+		}
+	}
+
+	setVimeoTransportControlState( shell, 'paused' );
+}
+
+export function bindNativeVideoControls( root = document ) {
+	root.querySelectorAll( '[data-vvm-native-video-control]' ).forEach(
+		( control ) => {
+			if ( 'true' === control.dataset.vvmNativeVideoControlBound ) {
+				return;
+			}
+
+			const video = getNativeVideoForControl( control );
+
+			if ( ! video ) {
+				return;
+			}
+
+			const syncState = ( { optimisticAutoplay = false } = {} ) => {
+				const shouldTreatAsPlaying =
+					! video.paused ||
+					( optimisticAutoplay && video.autoplay && ! video.ended );
+
+				setVideoControlElementState(
+					control,
+					shouldTreatAsPlaying ? 'playing' : 'paused'
+				);
+			};
+
+			control.dataset.vvmNativeVideoControlBound = 'true';
+			syncState( { optimisticAutoplay: true } );
+
+			video.addEventListener( 'play', syncState );
+			video.addEventListener( 'playing', syncState );
+			video.addEventListener( 'pause', syncState );
+			video.addEventListener( 'ended', syncState );
+
+			control.addEventListener( 'click', () => {
+				if ( video.paused || video.ended ) {
+					const playPromise = video.play?.();
+
+					if ( playPromise && 'function' === typeof playPromise.then ) {
+						playPromise
+							.then( () => syncState() )
+							.catch( () => syncState() );
+						return;
+					}
+
+					syncState();
+					return;
+				}
+
+				video.pause?.();
+				syncState();
+			} );
+		}
+	);
 }
 
 export async function attemptVimeoShellAutoplay( shell ) {
@@ -427,6 +607,7 @@ export async function attemptVimeoShellAutoplay( shell ) {
 	if ( ! readyInTime || ! isActiveRequest( shell, requestId ) ) {
 		if ( isActiveRequest( shell, requestId ) ) {
 			setPosterVisibility( shell, false );
+			setVimeoTransportControlState( shell, 'playing' );
 		}
 
 		return readyInTime;
@@ -438,15 +619,17 @@ export async function attemptVimeoShellAutoplay( shell ) {
 
 	if ( ! didPlay || ! isActiveRequest( shell, requestId ) ) {
 		setPosterVisibility( shell, true );
+		setVimeoTransportControlState( shell, 'paused' );
 		return false;
 	}
 
 	setPosterVisibility( shell, false );
+	setVimeoTransportControlState( shell, 'playing' );
 
 	return true;
 }
 
-export async function playVimeoShellFromUserAction( shell ) {
+async function playVimeoShellFromUserAction( shell ) {
 	if ( ! shell ) {
 		return false;
 	}
@@ -460,6 +643,7 @@ export async function playVimeoShellFromUserAction( shell ) {
 
 	if ( ! state || ! isActiveRequest( shell, requestId ) ) {
 		setShellBusy( shell, false );
+		setVimeoTransportControlState( shell, 'paused' );
 		return false;
 	}
 
@@ -471,6 +655,7 @@ export async function playVimeoShellFromUserAction( shell ) {
 	if ( ! readyInTime || ! isActiveRequest( shell, requestId ) ) {
 		setShellBusy( shell, false );
 		setPosterVisibility( shell, true );
+		setVimeoTransportControlState( shell, 'paused' );
 		return false;
 	}
 
@@ -486,10 +671,12 @@ export async function playVimeoShellFromUserAction( shell ) {
 
 	if ( ! didPlay || ! isActiveRequest( shell, requestId ) ) {
 		setPosterVisibility( shell, true );
+		setVimeoTransportControlState( shell, 'paused' );
 		return false;
 	}
 
 	setPosterVisibility( shell, false );
+	setVimeoTransportControlState( shell, 'playing' );
 
 	return true;
 }
@@ -526,6 +713,8 @@ export async function resetVimeoShell(
 	if ( showPoster ) {
 		setPosterVisibility( shell, true );
 	}
+
+	setVimeoTransportControlState( shell, 'paused' );
 }
 
 export function initializeStandaloneVimeoShells(
@@ -536,7 +725,7 @@ export function initializeStandaloneVimeoShells(
 		'[data-vimeo-shell][data-vimeo-autoplay-enabled="true"]'
 	);
 
-	bindVimeoShellPlayButtons( root );
+	bindVimeoShellTransportControls( root );
 
 	if ( prefersReducedMotion() || isSaveDataEnabled() ) {
 		shells.forEach( ( shell ) => {

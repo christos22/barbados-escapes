@@ -260,7 +260,6 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 			array(
 				'autoplay_url'   => '',
 				'manual_url'     => '',
-				'button_label'   => __( 'Play video', 'gutenberg-lab-blocks' ),
 				'iframe_class'   => '',
 				'lazy_load'      => false,
 				'poster_alt'     => '',
@@ -288,24 +287,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 			),
 			(array) $args['wrapper_attrs']
 		);
-		$wrapper_markup = '';
-
-		foreach ( $wrapper_attributes as $attribute_name => $attribute_value ) {
-			if ( ! is_string( $attribute_name ) || '' === trim( $attribute_name ) ) {
-				continue;
-			}
-
-			if ( '' === $attribute_value ) {
-				$wrapper_markup .= ' ' . sanitize_key( $attribute_name );
-				continue;
-			}
-
-			$wrapper_markup .= sprintf(
-				' %1$s="%2$s"',
-				sanitize_key( $attribute_name ),
-				esc_attr( (string) $attribute_value )
-			);
-		}
+		$wrapper_markup     = gutenberg_lab_blocks_get_html_attributes( $wrapper_attributes );
 
 		$poster_attributes = array_merge(
 			array(
@@ -322,24 +304,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 				)
 			)
 		);
-		$poster_markup     = '';
-
-		foreach ( $poster_attributes as $attribute_name => $attribute_value ) {
-			if ( ! is_string( $attribute_name ) || '' === trim( $attribute_name ) || null === $attribute_value || false === $attribute_value ) {
-				continue;
-			}
-
-			if ( '' === $attribute_value || true === $attribute_value ) {
-				$poster_markup .= ' ' . sanitize_key( $attribute_name );
-				continue;
-			}
-
-			$poster_markup .= sprintf(
-				' %1$s="%2$s"',
-				sanitize_key( $attribute_name ),
-				esc_attr( (string) $attribute_value )
-			);
-		}
+		$poster_markup     = gutenberg_lab_blocks_get_html_attributes( $poster_attributes );
 
 		ob_start();
 		?>
@@ -355,20 +320,21 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 					allowfullscreen
 					loading="eager"
 					referrerpolicy="strict-origin-when-cross-origin"
+					aria-hidden="true"
+					inert
+					tabindex="-1"
 					data-vimeo-iframe
 				></iframe>
 			</div>
-				<div
-					class="vvm-vimeo-shell__poster-shell"
-					data-vimeo-poster-shell
-					data-vimeo-play-trigger
-					role="button"
-					tabindex="0"
-					aria-label="<?php echo esc_attr( $args['button_label'] ); ?>"
-				>
-					<img<?php echo $poster_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
-					<span class="screen-reader-text"><?php echo esc_html( $args['button_label'] ); ?></span>
-				</div>
+			<div
+				class="vvm-vimeo-shell__poster-shell"
+				data-vimeo-poster-shell
+			>
+				<img<?php echo $poster_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
+			</div>
+			<?php
+			echo gutenberg_lab_blocks_get_vimeo_video_control_button(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			?>
 		</div>
 		<?php
 
