@@ -501,11 +501,10 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	position: absolute;
 	top: clamp(1.1rem, 1.5vw, 1.35rem);
 	right: clamp(1.1rem, 1.5vw, 1.35rem);
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
+	display: inline-block;
 	box-sizing: border-box;
-	width: max-content;
+	width: 5.7rem;
+	max-width: calc(100% - 2.2rem);
 	min-height: 1.75rem;
 	margin: 0;
 	padding: 0.3rem 0.6rem;
@@ -514,11 +513,19 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	background: #ffffff;
 	color: var(--vvm-bedroom-levels-muted);
 	font-size: 0.56rem;
+	text-align: center;
+	white-space: normal;
 }
 
 .wp-site-blocks .vvm-bedroom-levels__room-card .vvm-bedroom-levels__badge {
 	float: none;
 	margin: 0;
+}
+
+/* Reserve space for the absolute badge so room headings cannot slide beneath it. */
+.wp-site-blocks .vvm-bedroom-levels__room-card .vvm-bedroom-levels__eyebrow,
+.wp-site-blocks .vvm-bedroom-levels__room-card .vvm-bedroom-levels__title {
+	max-width: calc(100% - 6.35rem);
 }
 
 .wp-site-blocks .vvm-bedroom-levels__chips {
@@ -1188,6 +1195,11 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 		position: static;
 		width: max-content;
 		margin-bottom: 1rem;
+	}
+
+	.wp-site-blocks .vvm-bedroom-levels__room-card .vvm-bedroom-levels__eyebrow,
+	.wp-site-blocks .vvm-bedroom-levels__room-card .vvm-bedroom-levels__title {
+		max-width: none;
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__card {
