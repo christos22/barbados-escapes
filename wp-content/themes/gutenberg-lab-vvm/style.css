@@ -501,7 +501,9 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	position: absolute;
 	top: clamp(1.1rem, 1.5vw, 1.35rem);
 	right: clamp(1.1rem, 1.5vw, 1.35rem);
-	display: inline-block;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	box-sizing: border-box;
 	width: 5.7rem;
 	max-width: calc(100% - 2.2rem);
@@ -514,6 +516,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	color: var(--vvm-bedroom-levels-muted);
 	font-size: 0.56rem;
 	text-align: center;
+	text-indent: 0.24em;
 	white-space: normal;
 }
 
@@ -897,6 +900,11 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	background: #ffffff;
 	border: 1px solid var(--vvm-villa-amenities-rule);
 	box-shadow: 0 18px 40px rgb(23 53 40 / 0.04);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__location-card:has(> .vvm-villa-contact__media-slot > .vvm-villa-amenities__eyebrow) {
+	align-self: start;
+	grid-template-rows: auto;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot {

@@ -442,7 +442,9 @@ body.post-type-villa.editor-styles-wrapper
 	position: absolute;
 	top: clamp(1.1rem, 1.5vw, 1.35rem);
 	right: clamp(1.1rem, 1.5vw, 1.35rem);
-	display: inline-block;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	box-sizing: border-box;
 	width: 5.7rem;
 	max-width: calc(100% - 2.2rem);
@@ -455,6 +457,7 @@ body.post-type-villa.editor-styles-wrapper
 	color: var(--vvm-bedroom-levels-muted);
 	font-size: 0.56rem;
 	text-align: center;
+	text-indent: 0.24em;
 	white-space: normal;
 }
 
