@@ -4,31 +4,22 @@
 .vvm-villa-gallery-hero {
 	--vvm-villa-gallery-hero-accent: var(--wp--custom--hero--accent, #c4922a);
 	--vvm-villa-gallery-hero-stage-bg: #0d2a22;
-	--vvm-villa-gallery-hero-block-start-reserve: 0px;
 	/*
-	 * The stage should never exceed the visible viewport. The block-start reserve
-	 * mirrors native Gutenberg top padding so fixed-header spacing does not push
-	 * bottom-positioned controls below the fold.
+	 * The visual stage owns the first viewport. Thumbnail navigation follows in
+	 * normal document flow so it is revealed by scrolling, not by shrinking the
+	 * hero media area.
 	 */
 	--vvm-villa-gallery-hero-viewport-max-height: max(
 		24rem,
-		calc(
-			100vh - var(--vvm-admin-bar-offset, 0px) -
-			var(--vvm-villa-gallery-hero-block-start-reserve)
-		)
+		calc(100vh - var(--vvm-admin-bar-offset, 0px))
 	);
 	--vvm-villa-gallery-hero-stage-preferred-height: 62rem;
 	--vvm-villa-gallery-hero-stage-min-readable-height: 32rem;
-	--vvm-villa-gallery-hero-thumbs-visible-reserve: 0px;
-	--vvm-villa-gallery-hero-stage-height: min(
-		var(--vvm-villa-gallery-hero-viewport-max-height),
-		var(--vvm-villa-gallery-hero-stage-preferred-height),
-		max(
-			var(--vvm-villa-gallery-hero-stage-min-readable-height),
-			calc(
-				var(--vvm-villa-gallery-hero-viewport-max-height) -
-				var(--vvm-villa-gallery-hero-thumbs-visible-reserve)
-			)
+	--vvm-villa-gallery-hero-stage-height: max(
+		var(--vvm-villa-gallery-hero-stage-min-readable-height),
+		min(
+			var(--vvm-villa-gallery-hero-viewport-max-height),
+			var(--vvm-villa-gallery-hero-stage-preferred-height)
 		)
 	);
 	--vvm-villa-gallery-hero-shell-width: min(
@@ -83,9 +74,8 @@ body.vvm-has-hero-header
 body.vvm-has-hero-header
 	.vvm-villa-gallery-hero {
 	/*
-	 * Native top padding is already mirrored into the reserve variable above.
-	 * On fixed transparent-header pages, leaving it as real padding exposes the
-	 * fallback background behind the header before the media starts.
+	 * On fixed transparent-header pages, real top padding exposes the fallback
+	 * background behind the header before the media starts.
 	 */
 	padding-top: 0 !important;
 	padding-block-start: 0 !important;
@@ -96,21 +86,9 @@ body.vvm-has-hero-header
 	.vvm-villa-gallery-hero {
 		--vvm-villa-gallery-hero-viewport-max-height: max(
 			24rem,
-			calc(
-				100dvh - var(--vvm-admin-bar-offset, 0px) -
-				var(--vvm-villa-gallery-hero-block-start-reserve)
-			)
+			calc(100dvh - var(--vvm-admin-bar-offset, 0px))
 		);
 	}
-}
-
-.wp-block-gutenberg-lab-blocks-villa-gallery-hero.vvm-villa-gallery-hero--has-navigation,
-.vvm-villa-gallery-hero.vvm-villa-gallery-hero--has-navigation {
-	/*
-	 * On taller and portrait layouts we reserve room for the thumbnail band so
-	 * the whole hero can land inside the first viewport.
-	 */
-	--vvm-villa-gallery-hero-thumbs-visible-reserve: clamp(7.75rem, 11vw, 10rem);
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero.vvm-villa-gallery-hero--height-large,
@@ -120,7 +98,8 @@ body.vvm-has-hero-header
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero.vvm-villa-gallery-hero--height-full,
 .vvm-villa-gallery-hero.vvm-villa-gallery-hero--height-full {
-	--vvm-villa-gallery-hero-stage-preferred-height: 64rem;
+	/* Let the viewport, not a fixed rem cap, define full-screen villa heroes. */
+	--vvm-villa-gallery-hero-stage-preferred-height: 999rem;
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell,
@@ -289,7 +268,7 @@ body.vvm-has-hero-header
 	width: min(100%, var(--vvm-villa-gallery-hero-overlay-copy-width));
 	color: #f5ecd7;
 	font-family: var(--wp--preset--font-family--display-serif);
-	font-size: clamp(3.5rem, 8vw, 6.75rem);
+	font-size: clamp(2.9rem, 7.6vw, 4.875rem);
 	font-weight: 400;
 	line-height: 0.94;
 	text-align: left;
@@ -326,6 +305,17 @@ body.vvm-has-hero-header
 	display: grid;
 	width: min(100%, var(--vvm-villa-gallery-hero-overlay-copy-width));
 	justify-items: start;
+}
+
+@media (min-width: 1025px) {
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+		> .wp-block-post-title,
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
+		> :is(h1, h2, h3).wp-block-heading,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-post-title,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > :is(h1, h2, h3).wp-block-heading {
+		font-size: 4.875rem;
+	}
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs-shell,
@@ -550,15 +540,6 @@ body.vvm-has-hero-header
 	}
 
 	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
-		> .wp-block-post-title,
-	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
-		> :is(h1, h2, h3).wp-block-heading,
-	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > .wp-block-post-title,
-	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > :is(h1, h2, h3).wp-block-heading {
-		font-size: clamp(2.9rem, 12vw, 4rem);
-	}
-
-	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
 		> .wp-block-post-excerpt,
 	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner
 		> p,
@@ -591,15 +572,4 @@ body.vvm-has-hero-header
 		font-size: 0.62rem;
 	}
 
-}
-
-@media (max-height: 900px) and (orientation: landscape) {
-	.wp-block-gutenberg-lab-blocks-villa-gallery-hero.vvm-villa-gallery-hero--has-navigation,
-	.vvm-villa-gallery-hero.vvm-villa-gallery-hero--has-navigation {
-		/*
-		 * Short landscape viewports prioritise the hero image. The thumb band can
-		 * naturally fall below the fold and reveal itself on scroll.
-		 */
-		--vvm-villa-gallery-hero-thumbs-visible-reserve: 0px;
-	}
 }

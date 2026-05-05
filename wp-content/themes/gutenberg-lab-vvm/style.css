@@ -928,6 +928,37 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	object-fit: cover;
 }
 
+/* When editors add map text directly under the map, treat it as the location panel. */
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) {
+	align-content: start;
+	background: #ffffff;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > :first-child {
+	height: clamp(18rem, 34vw, 30rem);
+	min-height: clamp(18rem, 34vw, 30rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > :where(.vvm-villa-amenities__eyebrow, .vvm-villa-amenities__item) {
+	justify-self: stretch;
+	width: auto;
+	max-width: none;
+	height: auto;
+	min-height: 0;
+	margin-right: clamp(1.5rem, 2vw, 2rem) !important;
+	margin-left: clamp(1.5rem, 2vw, 2rem) !important;
+	text-align: left;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > .vvm-villa-amenities__eyebrow {
+	margin-top: 20px;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > .vvm-villa-amenities__item {
+	margin-top: 0.8rem;
+	margin-bottom: clamp(1.5rem, 2vw, 2rem);
+}
+
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__location {
 	display: grid;
 	gap: 0.8rem;
@@ -1250,6 +1281,11 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot {
+		min-height: 16rem;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > :first-child {
+		height: 16rem;
 		min-height: 16rem;
 	}
 

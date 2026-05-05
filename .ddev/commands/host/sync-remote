@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ## Description: Refresh local DB/uploads from the live InMotion WordPress site
 ## Usage: sync-remote [--db-only] [--uploads-only] [--mirror-uploads] [--skip-snapshot] [--preserve-post=ID] [--dry-run]
-## Example: "ddev sync-remote --db-only --preserve-post=92"
+## Example: "ddev sync-remote --db-only --preserve-post=92 --preserve-post=245"
 
 set -euo pipefail
 
@@ -25,7 +25,9 @@ dry_run=0
 snapshot_name=""
 temp_dump=""
 preserve_post_ids=()
-preserve_post_content_files=()
+preserve_post_dump_file=""
+preserve_post_restore_file=""
+preserve_source_table_prefix=""
 
 log() {
 	printf '\n==> %s\n' "$*"
@@ -111,6 +113,20 @@ validate_post_id() {
 	[[ "${post_id}" =~ ^[1-9][0-9]*$ ]] || fail "--preserve-post expects a numeric post ID, got '${post_id}'"
 }
 
+validate_table_prefix() {
+	local table_prefix="$1"
+	[[ "${table_prefix}" =~ ^[A-Za-z0-9_]+_$ ]] || fail "Detected table prefix '${table_prefix}' was not in the expected format."
+}
+
+current_table_prefix() {
+	local table_prefix
+	table_prefix="$(ddev wp db prefix "${WP_CLI_MAINTENANCE_ARGS[@]}" 2>/dev/null | tr -d '\r' | tail -n 1)"
+	[[ -n "${table_prefix}" ]] || fail "Could not detect the current WordPress table prefix."
+	validate_table_prefix "${table_prefix}"
+
+	printf '%s\n' "${table_prefix}"
+}
+
 detect_imported_table_prefix() {
 	local options_table
 	options_table="$(ddev mysql -N -e "SHOW TABLES" | awk '/_options$/ { print; exit }')"
@@ -122,7 +138,7 @@ detect_imported_table_prefix() {
 write_local_table_prefix_override() {
 	local detected_prefix="$1"
 
-	[[ "${detected_prefix}" == *_ ]] || fail "Detected table prefix '${detected_prefix}' was not in the expected format."
+	validate_table_prefix "${detected_prefix}"
 
 	if [[ "${detected_prefix}" == "wp_" ]]; then
 		rm -f "${LOCAL_WP_CONFIG_OVERRIDE}"
@@ -181,34 +197,121 @@ EOF
 	log "Patched local wp-config-ddev.php to load wp-config-ddev-local.php"
 }
 
-preserve_local_post_content() {
-	local post_id
-	local temp_content
-
-	for post_id in "${preserve_post_ids[@]}"; do
-		temp_content="$(mktemp "${TMPDIR:-/tmp}/barbados-preserve-post-${post_id}.XXXXXX.html")"
-		log "Preserving local post_content for post ${post_id}"
-		if ! ddev wp post get "${post_id}" --field=post_content "${WP_CLI_MAINTENANCE_ARGS[@]}" > "${temp_content}"; then
-			rm -f "${temp_content}"
-			fail "Could not preserve local post_content for post ${post_id}."
-		fi
-
-		preserve_post_content_files+=("${temp_content}")
-	done
+join_csv() {
+	local IFS=,
+	printf '%s' "$*"
 }
 
-restore_preserved_post_content() {
-	local index
-	local post_id
-	local temp_content
+append_preserved_table_dump() {
+	local table_name="$1"
+	local where_clause="$2"
+	local insert_mode="$3"
 
-	for index in "${!preserve_post_ids[@]}"; do
-		post_id="${preserve_post_ids[${index}]}"
-		temp_content="${preserve_post_content_files[${index}]}"
+	if ! ddev exec mysqldump \
+		--no-create-info \
+		--skip-triggers \
+		--skip-lock-tables \
+		--compact \
+		"${insert_mode}" \
+		db \
+		"${preserve_source_table_prefix}${table_name}" \
+		--where="${where_clause}" >> "${preserve_post_dump_file}"; then
+		fail "Could not preserve local rows from ${preserve_source_table_prefix}${table_name}."
+	fi
+}
 
-		log "Restoring preserved post_content for post ${post_id}"
-		ddev wp post update "${post_id}" --post_content="$(< "${temp_content}")" "${WP_CLI_MAINTENANCE_ARGS[@]}"
-	done
+append_preserved_query_output() {
+	local query="$1"
+
+	if ! ddev mysql -N -B -e "${query}" >> "${preserve_post_dump_file}"; then
+		fail "Could not write preserved SQL from the local database."
+	fi
+}
+
+preserve_local_posts() {
+	local ids_csv
+
+	ids_csv="$(join_csv "${preserve_post_ids[@]}")"
+	preserve_source_table_prefix="$(current_table_prefix)"
+	preserve_post_dump_file="$(mktemp "${TMPDIR:-/tmp}/barbados-preserve-posts.XXXXXX.sql")"
+
+	log "Preserving local database rows for posts ${ids_csv}"
+
+	cat > "${preserve_post_dump_file}" <<EOF
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS;
+SET FOREIGN_KEY_CHECKS=0;
+
+DELETE FROM \`__WP_PREFIX__postmeta\` WHERE post_id IN (${ids_csv});
+DELETE FROM \`__WP_PREFIX__term_relationships\` WHERE object_id IN (${ids_csv});
+
+EOF
+
+	# Keep local-only terms used by the preserved posts without overwriting
+	# remote term labels that may be shared elsewhere on the site.
+	append_preserved_table_dump \
+		"terms" \
+		"term_id IN (SELECT term_id FROM ${preserve_source_table_prefix}term_taxonomy WHERE term_taxonomy_id IN (SELECT term_taxonomy_id FROM ${preserve_source_table_prefix}term_relationships WHERE object_id IN (${ids_csv})))" \
+		"--insert-ignore"
+	append_preserved_table_dump \
+		"term_taxonomy" \
+		"term_taxonomy_id IN (SELECT term_taxonomy_id FROM ${preserve_source_table_prefix}term_relationships WHERE object_id IN (${ids_csv}))" \
+		"--insert-ignore"
+
+	# The post row carries title, slug, status, dates, excerpt, content, and type.
+	append_preserved_table_dump "posts" "ID IN (${ids_csv})" "--replace"
+
+	# Recreate post meta without preserving meta_id values, because meta_id is a
+	# global autoincrement key and can collide with unrelated remote metadata.
+	append_preserved_query_output "
+SELECT CONCAT(
+	'INSERT INTO \`__WP_PREFIX__postmeta\` (\`post_id\`, \`meta_key\`, \`meta_value\`) VALUES (',
+	post_id,
+	',',
+	IFNULL(QUOTE(meta_key), 'NULL'),
+	',',
+	IFNULL(QUOTE(meta_value), 'NULL'),
+	');'
+)
+FROM \`${preserve_source_table_prefix}postmeta\`
+WHERE post_id IN (${ids_csv});
+"
+
+	append_preserved_query_output "
+SELECT CONCAT(
+	'INSERT INTO \`__WP_PREFIX__term_relationships\` (\`object_id\`, \`term_taxonomy_id\`, \`term_order\`) VALUES (',
+	object_id,
+	',',
+	term_taxonomy_id,
+	',',
+	term_order,
+	');'
+)
+FROM \`${preserve_source_table_prefix}term_relationships\`
+WHERE object_id IN (${ids_csv});
+"
+
+	cat >> "${preserve_post_dump_file}" <<'EOF'
+
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+EOF
+}
+
+restore_preserved_posts() {
+	local ids_csv
+	local target_table_prefix
+
+	ids_csv="$(join_csv "${preserve_post_ids[@]}")"
+	target_table_prefix="$(current_table_prefix)"
+	preserve_post_restore_file="$(mktemp "${TMPDIR:-/tmp}/barbados-restore-posts.XXXXXX.sql")"
+
+	log "Restoring preserved local database rows for posts ${ids_csv}"
+
+	sed \
+		-e "s/\`${preserve_source_table_prefix}/\`${target_table_prefix}/g" \
+		-e "s/\`__WP_PREFIX__/\`${target_table_prefix}/g" \
+		"${preserve_post_dump_file}" > "${preserve_post_restore_file}"
+
+	ddev mysql < "${preserve_post_restore_file}"
 }
 
 usage() {
@@ -223,7 +326,8 @@ Flags:
   --uploads-only     Refresh only uploads
   --mirror-uploads   Mirror uploads exactly with rsync --delete
   --skip-snapshot    Skip the pre-import DDEV database snapshot
-  --preserve-post=ID Preserve a local post's post_content across DB import
+  --preserve-post=ID Preserve a local post row, post meta, and taxonomy
+                     relationships across DB import
                      May be repeated for multiple posts
   --dry-run          Validate SSH and remote paths without importing data
   -h, --help         Show this help text
@@ -241,12 +345,13 @@ cleanup() {
 		rm -f "${temp_dump}"
 	fi
 
-	local preserved_file
-	for preserved_file in "${preserve_post_content_files[@]}"; do
-		if [[ -n "${preserved_file}" && -f "${preserved_file}" ]]; then
-			rm -f "${preserved_file}"
-		fi
-	done
+	if [[ -n "${preserve_post_dump_file}" && -f "${preserve_post_dump_file}" ]]; then
+		rm -f "${preserve_post_dump_file}"
+	fi
+
+	if [[ -n "${preserve_post_restore_file}" && -f "${preserve_post_restore_file}" ]]; then
+		rm -f "${preserve_post_restore_file}"
+	fi
 }
 trap cleanup EXIT
 
@@ -356,7 +461,7 @@ if (( dry_run )); then
 fi
 
 if (( sync_db && ${#preserve_post_ids[@]} > 0 )); then
-	preserve_local_post_content
+	preserve_local_posts
 fi
 
 if (( sync_db && skip_snapshot == 0 )); then
@@ -422,7 +527,7 @@ if (( sync_db )); then
 	ddev wp option update siteurl "${LOCAL_SITE_URL}" "${WP_CLI_MAINTENANCE_ARGS[@]}"
 
 	if (( ${#preserve_post_ids[@]} > 0 )); then
-		restore_preserved_post_content
+		restore_preserved_posts
 	fi
 
 	permalink_structure="$(ddev wp option get permalink_structure "${WP_CLI_MAINTENANCE_ARGS[@]}" 2>/dev/null || true)"

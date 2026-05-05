@@ -195,9 +195,9 @@ That file is intentionally ignored by Git. It exists so local DDEV can boot impo
   Refresh DB and uploads
 - `ddev sync-remote --db-only`
   Refresh only the database
-- `ddev sync-remote --db-only --preserve-post=92`
-  Refresh the database, then restore local `post_content` for post `92`
-  This keeps the local editable Gutenberg body while title, slug, status, meta, and taxonomy terms still come from the remote database.
+- `ddev sync-remote --db-only --preserve-post=92 --preserve-post=245`
+  Refresh the database, then restore the local post rows, post meta, and taxonomy relationships for Monkey Hill Villa `92` and page `245`.
+  This protects local Gutenberg content, titles, excerpts, slugs, custom fields, featured-image meta, and assigned terms for those IDs.
 - `ddev sync-remote --uploads-only`
   Refresh only uploads
 - `ddev sync-remote --mirror-uploads`
