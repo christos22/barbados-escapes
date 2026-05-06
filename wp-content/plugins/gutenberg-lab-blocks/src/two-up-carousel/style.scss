@@ -338,6 +338,7 @@
 	.vvm-two-up-carousel__amenities__label,
 .vvm-two-up-carousel .vvm-two-up-carousel__amenities__label {
 	color: var(--vvm-two-up-carousel-card-foreground);
+	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: clamp(0.62rem, 1.15vw, 0.75rem);
 	font-weight: 400;
 	letter-spacing: 0.08em;
