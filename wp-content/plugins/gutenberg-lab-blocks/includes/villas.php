@@ -70,7 +70,7 @@ function gutenberg_lab_blocks_register_villas_post_type() {
 add_action( 'init', 'gutenberg_lab_blocks_register_villas_post_type' );
 
 /**
- * Returns the fixed placeholder icon choices for villa amenity terms.
+ * Returns the fixed icon choices for villa amenity terms.
  *
  * The selected icon belongs to the term, not the block instance. That keeps the
  * same amenity visually consistent everywhere it is reused.
@@ -79,18 +79,21 @@ add_action( 'init', 'gutenberg_lab_blocks_register_villas_post_type' );
  */
 function gutenberg_lab_blocks_get_villa_amenity_icon_choices() {
 	return array(
-		'default'  => __( 'Default', 'gutenberg-lab-blocks' ),
-		'view'     => __( 'View', 'gutenberg-lab-blocks' ),
-		'bed'      => __( 'Bed', 'gutenberg-lab-blocks' ),
-		'people'   => __( 'People', 'gutenberg-lab-blocks' ),
-		'shower'   => __( 'Shower', 'gutenberg-lab-blocks' ),
-		'golf'     => __( 'Golf', 'gutenberg-lab-blocks' ),
-		'wellness' => __( 'Wellness', 'gutenberg-lab-blocks' ),
+		'default'          => __( 'Default', 'gutenberg-lab-blocks' ),
+		'view'             => __( 'View', 'gutenberg-lab-blocks' ),
+		'ocean'            => __( 'Ocean View', 'gutenberg-lab-blocks' ),
+		'ocean-front'      => __( 'Ocean Front', 'gutenberg-lab-blocks' ),
+		'hillside-retreat' => __( 'Hillside Retreat', 'gutenberg-lab-blocks' ),
+		'bed'              => __( 'Bed', 'gutenberg-lab-blocks' ),
+		'people'           => __( 'People', 'gutenberg-lab-blocks' ),
+		'shower'           => __( 'Shower', 'gutenberg-lab-blocks' ),
+		'golf'             => __( 'Golf', 'gutenberg-lab-blocks' ),
+		'wellness'         => __( 'Wellness', 'gutenberg-lab-blocks' ),
 	);
 }
 
 /**
- * Sanitizes amenity icon keys against the fixed placeholder icon map.
+ * Sanitizes amenity icon keys against the fixed icon map.
  *
  * @param string $icon_key Raw icon key.
  * @return string
@@ -639,16 +642,109 @@ function gutenberg_lab_blocks_get_villa_amenities( $villa_id ) {
 }
 
 /**
- * Returns a placeholder SVG for a villa amenity icon key.
+ * Returns custom SVG asset paths for villa amenity icons.
  *
- * These dummy icons give the frontend a stable markup contract now. Later, the
- * term meta can point to a richer picker without changing block attributes.
+ * These files live in the block plugin because the amenity taxonomy and icon
+ * selector are plugin-owned, not theme-owned.
+ *
+ * @return array<string, string>
+ */
+function gutenberg_lab_blocks_get_villa_amenity_icon_asset_paths() {
+	return array(
+		'hillside-retreat' => dirname( __DIR__ ) . '/assets/icons/villa-amenities/hillside-retreat.svg',
+		'ocean'            => dirname( __DIR__ ) . '/assets/icons/villa-amenities/ocean.svg',
+		'ocean-front'      => dirname( __DIR__ ) . '/assets/icons/villa-amenities/ocean-front.svg',
+	);
+}
+
+/**
+ * Returns a trusted SVG asset for a villa amenity icon key.
+ *
+ * The source files are committed assets. We normalize them here so they behave
+ * like the path-based icons: no white artboard, inherited text color, and no
+ * accidental strokes from the shared icon CSS.
+ *
+ * @param string $icon_key Amenity icon key.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_villa_amenity_icon_asset_svg( $icon_key ) {
+	$asset_paths = gutenberg_lab_blocks_get_villa_amenity_icon_asset_paths();
+
+	if ( ! isset( $asset_paths[ $icon_key ] ) || ! is_readable( $asset_paths[ $icon_key ] ) ) {
+		return '';
+	}
+
+	$svg = file_get_contents( $asset_paths[ $icon_key ] );
+
+	if ( ! is_string( $svg ) || '' === trim( $svg ) ) {
+		return '';
+	}
+
+	$classes = sprintf(
+		'vvm-villa-amenity-icon vvm-villa-amenity-icon--%s',
+		esc_attr( $icon_key )
+	);
+
+	$replacements = array(
+		'/<\?xml.*?\?>/is'              => '',
+		'/<rect\b[^>]*\/?>/i'           => '',
+		'/\s(?:width|height)="[^"]*"/i' => '',
+		'/\sxmlns:xlink="[^"]*"/i'      => '',
+		'/<path\b(?![^>]*\bstroke=)/i'  => '<path stroke="none"',
+	);
+
+	foreach ( $replacements as $pattern => $replacement ) {
+		$updated_svg = preg_replace( $pattern, $replacement, $svg );
+
+		if ( ! is_string( $updated_svg ) ) {
+			return '';
+		}
+
+		$svg = $updated_svg;
+	}
+
+	$svg = preg_replace(
+		'/<svg\b/i',
+		sprintf(
+			'<svg class="%s" aria-hidden="true" focusable="false"',
+			$classes
+		),
+		$svg,
+		1
+	);
+
+	if ( ! is_string( $svg ) ) {
+		return '';
+	}
+
+	$svg = str_replace(
+		array(
+			'fill="#000000"',
+			'fill="#000"',
+			'fill="black"',
+		),
+		'fill="currentColor"',
+		$svg
+	);
+
+	return trim( $svg );
+}
+
+/**
+ * Returns an SVG for a villa amenity icon key.
  *
  * @param string $icon_key Amenity icon key.
  * @return string
  */
 function gutenberg_lab_blocks_get_villa_amenity_icon_svg( $icon_key ) {
 	$icon_key = gutenberg_lab_blocks_sanitize_villa_amenity_icon_key( $icon_key );
+
+	$asset_svg = gutenberg_lab_blocks_get_villa_amenity_icon_asset_svg( $icon_key );
+
+	if ( '' !== $asset_svg ) {
+		return $asset_svg;
+	}
+
 	$paths    = array(
 		'default'  => '<circle cx="12" cy="12" r="6.5"></circle><path d="M12 5.5v13M5.5 12h13"></path>',
 		'view'     => '<path d="M3.5 13c2.2-4.1 5-6.2 8.5-6.2s6.3 2.1 8.5 6.2"></path><path d="M5.8 14.5c1.7 1.8 3.8 2.7 6.2 2.7s4.5-.9 6.2-2.7"></path><path d="M8.5 12.8c.9.7 2.1 1.1 3.5 1.1s2.6-.4 3.5-1.1"></path>',
