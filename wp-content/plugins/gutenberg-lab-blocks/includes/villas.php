@@ -607,6 +607,8 @@ function gutenberg_lab_blocks_get_villa_amenities( $villa_id ) {
 		$villa_id,
 		'villa_amenity',
 		array(
+			// Keep name as the WordPress fallback; Intuitive Custom Post Order
+			// filters configured villa_amenity terms into the saved admin order.
 			'orderby' => 'name',
 			'order'   => 'ASC',
 		)
@@ -617,17 +619,6 @@ function gutenberg_lab_blocks_get_villa_amenities( $villa_id ) {
 	}
 
 	$amenities = array();
-	$icon_order = array_flip(
-		array(
-			'view',
-			'bed',
-			'people',
-			'shower',
-			'golf',
-			'wellness',
-			'default',
-		)
-	);
 
 	foreach ( $terms as $term ) {
 		if ( ! $term instanceof WP_Term ) {
@@ -641,22 +632,8 @@ function gutenberg_lab_blocks_get_villa_amenities( $villa_id ) {
 			'icon_key' => gutenberg_lab_blocks_sanitize_villa_amenity_icon_key(
 				(string) get_term_meta( $term->term_id, 'villa_amenity_icon', true )
 			),
-			);
+		);
 	}
-
-	usort(
-		$amenities,
-		static function ( $first, $second ) use ( $icon_order ) {
-			$first_order  = $icon_order[ $first['icon_key'] ] ?? PHP_INT_MAX;
-			$second_order = $icon_order[ $second['icon_key'] ] ?? PHP_INT_MAX;
-
-			if ( $first_order === $second_order ) {
-				return strcasecmp( $first['name'], $second['name'] );
-			}
-
-			return $first_order <=> $second_order;
-		}
-	);
 
 	return $amenities;
 }
