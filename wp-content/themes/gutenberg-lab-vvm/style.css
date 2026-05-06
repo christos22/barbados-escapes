@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.10
+Version: 0.1.11
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -903,8 +903,8 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__location-card:has(> .vvm-villa-contact__media-slot > .vvm-villa-amenities__eyebrow) {
-	align-self: start;
-	grid-template-rows: auto;
+	align-self: stretch;
+	grid-template-rows: minmax(0, 1fr);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot {
@@ -939,12 +939,19 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 /* When editors add map text directly under the map, treat it as the location panel. */
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) {
 	align-content: start;
+	grid-template-rows: minmax(18rem, 1fr) auto auto;
+	height: 100%;
 	background: #ffffff;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > :first-child {
-	height: clamp(18rem, 34vw, 30rem);
+	height: 100%;
 	min-height: clamp(18rem, 34vw, 30rem);
+}
+
+/* The map block can save an explicit iframe height; this layout lets the card control it. */
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > .wp-block-gmap-gmap-block iframe {
+	height: 100% !important;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > :where(.vvm-villa-amenities__eyebrow, .vvm-villa-amenities__item) {
@@ -1290,6 +1297,11 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot {
 		min-height: 16rem;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) {
+		grid-template-rows: minmax(16rem, auto) auto auto;
+		height: auto;
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > :first-child {
