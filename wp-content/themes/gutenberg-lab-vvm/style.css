@@ -14,9 +14,28 @@ Text Domain: gutenberg-lab-vvm
 	--vvm-scrollbar-width: 0px;
 }
 
+html.vvm-has-scrollbar {
+	/*
+	 * Core Navigation locks the page by setting `html.has-modal-open` to
+	 * overflow hidden. Keeping a stable gutter prevents the centered header and
+	 * page sections from shifting when the browser scrollbar disappears.
+	 */
+	scrollbar-gutter: stable;
+}
+
 body {
 	margin: 0;
 	background: #ffffff;
+}
+
+@supports not (scrollbar-gutter: stable) {
+	html.has-modal-open.vvm-has-scrollbar body {
+		padding-inline-end: var(--vvm-scrollbar-width);
+	}
+
+	html.has-modal-open.vvm-has-scrollbar .vvm-header {
+		right: var(--vvm-scrollbar-width);
+	}
 }
 
 /*
@@ -1775,7 +1794,7 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	position: fixed;
 	inset: 0;
 	z-index: 45;
-	display: none !important;
+	display: block !important;
 	background: transparent !important;
 	background-color: transparent !important;
 	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
@@ -1787,7 +1806,6 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 
 .vvm-header .wp-block-navigation__responsive-container.has-modal-open,
 .vvm-header .wp-block-navigation__responsive-container.is-menu-open {
-	display: block !important;
 	visibility: visible;
 	pointer-events: auto;
 	transition-delay: 0s;
@@ -1818,6 +1836,11 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 }
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-dialog {
+	/* The drawer header preserves the hamburger/close-button position. */
+	--vvm-drawer-control-size: 2.25rem;
+	--vvm-drawer-header-target: max(var(--vvm-header-height, 96px), calc(var(--vvm-header-logo-width, 220px) * 0.6));
+	--vvm-drawer-header-height: calc((var(--vvm-drawer-header-target) + var(--vvm-drawer-control-size)) / 2 + 1rem);
+	--vvm-drawer-header-bg: #8fa68e;
 	position: fixed;
 	top: 0 !important;
 	left: 0;
@@ -1825,7 +1848,7 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	height: calc(100dvh - var(--vvm-admin-bar-offset)) !important;
 	max-width: none;
 	margin: 0;
-	background: rgba(255, 255, 255, 0.98);
+	background: #fff;
 	border-right: 4px solid rgba(30, 61, 47, 0.18);
 	box-shadow: 22px 0 44px rgba(13, 28, 22, 0.18);
 	overflow: hidden;
@@ -1834,6 +1857,19 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	transition:
 		transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
 		opacity 0.24s ease;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-dialog::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 1;
+	height: var(--vvm-drawer-header-height);
+	background: var(--vvm-drawer-header-bg);
+	border-bottom: 1px solid rgba(30, 61, 47, 0.14);
+	pointer-events: none;
 }
 
 .vvm-header .wp-block-navigation__responsive-container.has-modal-open .wp-block-navigation__responsive-dialog,
@@ -1854,21 +1890,48 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	box-sizing: border-box;
 	height: 100%;
 	overflow-y: auto;
-	padding: calc((max(var(--vvm-header-height, 96px), calc(var(--vvm-header-logo-width, 220px) * 0.6)) + 2.25rem) / 2 + 0.5rem) 0 0;
+	padding: var(--vvm-drawer-header-height) 0 0;
 }
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-container-close {
 	position: absolute;
-	top: calc((max(var(--vvm-header-height, 96px), calc(var(--vvm-header-logo-width, 220px) * 0.6)) - 2.25rem) / 2);
+	top: calc((var(--vvm-drawer-header-target) - var(--vvm-drawer-control-size)) / 2);
 	left: var(--wp--custom--layout--gutter-current, 20px);
 	z-index: 3;
-	width: 2.25rem;
-	height: 2.25rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.65rem;
+	width: auto;
+	min-width: var(--vvm-drawer-control-size);
+	height: var(--vvm-drawer-control-size);
 	padding: 0;
 	border: 0;
 	border-radius: 999px;
 	background: transparent;
 	color: var(--wp--preset--color--dark-green, #1e3d2f);
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 0.68rem;
+	font-weight: 300;
+	letter-spacing: 0.2em;
+	line-height: 1;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-container-close svg {
+	flex: 0 0 auto;
+	margin: calc((var(--vvm-drawer-control-size) - 24px) / 2);
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-container-close::after {
+	content: "Close";
+	transform: translateY(1px);
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-container-close:focus-visible {
+	outline: 2px solid rgba(30, 61, 47, 0.55);
+	outline-offset: 3px;
 }
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item {
@@ -1904,6 +1967,12 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-submenu__toggle:focus-visible {
 	color: var(--wp--preset--color--light-gold, #f5ecd7);
 	background: rgba(30, 61, 47, 0.62);
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item__content:focus-visible,
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-submenu__toggle:focus-visible {
+	outline: 2px solid rgba(245, 236, 215, 0.95);
+	outline-offset: -2px;
 }
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.current-menu-item > .wp-block-navigation-item__content,
@@ -2320,10 +2389,8 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 		height: 34px;
 	}
 
-	.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-container-close {
-		top: calc((max(var(--vvm-header-height, 96px), calc(var(--vvm-header-logo-width, 176px) * 0.6)) - 34px) / 2);
-		width: 34px;
-		height: 34px;
+	.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-dialog {
+		--vvm-drawer-control-size: 34px;
 	}
 
 	.vvm-header .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog {

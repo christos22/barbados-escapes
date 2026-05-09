@@ -9,14 +9,29 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 	// Keep a real pixel scrollbar value available to CSS for edge-to-edge math.
 	const syncScrollbarWidth = () => {
-		const scrollbarWidth = Math.max(
+		const measuredScrollbarWidth = Math.max(
 			window.innerWidth - document.documentElement.clientWidth,
 			0
 		);
+		const storedScrollbarWidth =
+			parseFloat(
+				document.documentElement.style.getPropertyValue(
+					'--vvm-scrollbar-width'
+				)
+			) || 0;
+		const scrollbarWidth =
+			document.documentElement.classList.contains( 'has-modal-open' ) &&
+			storedScrollbarWidth > 0
+				? storedScrollbarWidth
+				: measuredScrollbarWidth;
 
 		document.documentElement.style.setProperty(
 			'--vvm-scrollbar-width',
 			`${ scrollbarWidth }px`
+		);
+		document.documentElement.classList.toggle(
+			'vvm-has-scrollbar',
+			scrollbarWidth > 0
 		);
 	};
 
