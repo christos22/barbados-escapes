@@ -44,6 +44,17 @@ function gutenberg_lab_vvm_setup() {
 add_action( 'after_setup_theme', 'gutenberg_lab_vvm_setup' );
 
 /**
+ * Marks the document as JavaScript-capable before the page body renders.
+ *
+ * CSS can then hide progressive-enhancement content immediately, avoiding a
+ * flash of content before the footer script wires up the interaction.
+ */
+function gutenberg_lab_vvm_add_js_class() {
+	wp_print_inline_script_tag( "document.documentElement.classList.add('js');" );
+}
+add_action( 'wp_head', 'gutenberg_lab_vvm_add_js_class', 0 );
+
+/**
  * Returns the navigation post ID for a stable slug, or zero if missing.
  *
  * @param string $slug Navigation post slug.

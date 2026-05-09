@@ -1,0 +1,117 @@
+.wp-block-gutenberg-lab-blocks-read-more.vvm-read-more {
+	--vvm-read-more-gold: var(--wp--preset--color--gold, #c4922a);
+	--vvm-read-more-text: var(--wp--preset--color--dark-green, #1e3d2f);
+	--vvm-read-more-reveal-gap: var(--wp--preset--spacing--40, 1rem);
+	--vvm-read-more-content-gap: var(--wp--preset--spacing--50, 1.5rem);
+
+	color: var(--vvm-read-more-text);
+
+	.vvm-read-more__control {
+		display: none;
+	}
+
+	.vvm-read-more__button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		box-shadow: none;
+		color: var(--vvm-read-more-gold);
+		cursor: pointer;
+		font-family: "Romely", var(--wp--preset--font-family--display-serif, serif);
+		font-size: 18px;
+		font-weight: 600;
+		letter-spacing: 0.025em;
+		line-height: 1.6;
+		text-align: left;
+		text-decoration: none;
+		transition: color 300ms ease;
+
+		&::after {
+			content: "\2193";
+			display: inline-flex;
+			align-items: center;
+			transform: translateY(0.03em) rotate(0deg);
+			transform-origin: center;
+			transition: transform 300ms ease;
+		}
+
+		&[aria-expanded="true"]::after {
+			transform: translateY(-0.1em) rotate(180deg);
+		}
+
+		&:hover,
+		&:focus-visible {
+			color: var(--vvm-read-more-gold);
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid currentColor;
+			outline-offset: 0.25rem;
+		}
+
+		&:hover::after,
+		&:focus-visible::after {
+			transform: translateY(0.14em) rotate(0deg);
+		}
+
+		&[aria-expanded="true"]:hover::after,
+		&[aria-expanded="true"]:focus-visible::after {
+			transform: translateY(-0.1em) rotate(180deg);
+		}
+	}
+
+	.vvm-read-more__content {
+		display: grid;
+		row-gap: var(--vvm-read-more-content-gap);
+
+		> * {
+			margin-block-start: 0;
+			margin-block-end: 0;
+		}
+	}
+}
+
+.js .wp-block-gutenberg-lab-blocks-read-more.vvm-read-more {
+	.vvm-read-more__control {
+		display: block;
+	}
+
+	.vvm-read-more__content {
+		max-block-size: 0;
+		margin-block-start: 0;
+		overflow: hidden;
+		opacity: 0;
+		visibility: hidden;
+		transition:
+			max-block-size 620ms cubic-bezier(0.22, 1, 0.36, 1),
+			margin-block-start 620ms cubic-bezier(0.22, 1, 0.36, 1),
+			opacity 300ms ease,
+			visibility 0s linear 620ms;
+	}
+
+	&.is-expanded .vvm-read-more__content {
+		margin-block-start: var(--vvm-read-more-reveal-gap);
+		opacity: 1;
+		visibility: visible;
+		transition:
+			max-block-size 620ms cubic-bezier(0.22, 1, 0.36, 1),
+			margin-block-start 620ms cubic-bezier(0.22, 1, 0.36, 1),
+			opacity 360ms ease 120ms,
+			visibility 0s linear 0s;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.js .wp-block-gutenberg-lab-blocks-read-more.vvm-read-more {
+		.vvm-read-more__button,
+		.vvm-read-more__button::after,
+		.vvm-read-more__content,
+		&.is-expanded .vvm-read-more__content {
+			transition: none;
+		}
+	}
+}

@@ -379,6 +379,7 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/related-packages' );
 	register_block_type( __DIR__ . '/build/site-footer-meta' );
 	register_block_type( __DIR__ . '/build/basic-content' );
+	register_block_type( __DIR__ . '/build/read-more' );
 	register_block_type( __DIR__ . '/build/value-pillars' );
 	register_block_type( __DIR__ . '/build/value-pillar' );
 	register_block_type( __DIR__ . '/build/split-content' );

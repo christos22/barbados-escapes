@@ -1,0 +1,37 @@
+.wp-block-gutenberg-lab-blocks-read-more.vvm-read-more--editor {
+	.vvm-read-more__control {
+		display: block;
+		margin-bottom: 1rem;
+	}
+
+	.vvm-read-more__button--editor {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--wp--preset--color--gold, #c4922a);
+		font-family: "Romely", var(--wp--preset--font-family--display-serif, serif);
+		font-size: 18px;
+		font-weight: 600;
+		letter-spacing: 0.025em;
+		line-height: 1.6;
+
+		&::after {
+			content: "\2193";
+			display: inline-flex;
+			align-items: center;
+			transform: translateY(0.03em);
+		}
+	}
+
+	.vvm-read-more__content--editor {
+		display: grid;
+		row-gap: var(--wp--preset--spacing--50, 1.5rem);
+		padding: 1rem 0 0 1rem;
+		border-left: 1px solid rgb(196 146 42 / 0.32);
+
+		> * {
+			margin-block-start: 0;
+			margin-block-end: 0;
+		}
+	}
+}

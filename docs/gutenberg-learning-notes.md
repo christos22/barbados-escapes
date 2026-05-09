@@ -43,3 +43,8 @@
 - Store a semantic icon slug instead of a temporary Dashicon class so the icon artwork can change later without migrating saved block content.
 - When a carousel needs rich per-slide copy but one controlled front-end shell, store the media as child-block attributes and the copy as native inner blocks, then let the dynamic parent rebuild the final Splide markup.
 - When inactive carousel slides still contain links or buttons, disable their focus targets in JavaScript so keyboard users only tab through the active slide's real CTA.
+
+## Read More
+
+- Use a dynamic block when the editor needs normal InnerBlocks content but the frontend needs stricter semantic markup, such as a real expandable `<button>`.
+- Keep hidden/revealed copy in the initial HTML for accessibility and SEO; JavaScript should only enhance the interaction, not fetch the content later.

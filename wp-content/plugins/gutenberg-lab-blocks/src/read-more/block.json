@@ -1,0 +1,36 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/read-more",
+	"version": "0.1.0",
+	"title": "Read More",
+	"category": "design",
+	"icon": "hidden",
+	"description": "An accessible expandable content region with an editable reveal body.",
+	"keywords": [ "read more", "accordion", "reveal", "content" ],
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"spacing": {
+			"margin": [ "top", "bottom" ],
+			"padding": true,
+			"blockGap": true
+		}
+	},
+	"attributes": {
+		"readMoreLabel": {
+			"type": "string",
+			"default": "Read More"
+		},
+		"readLessLabel": {
+			"type": "string",
+			"default": "Read Less"
+		}
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php",
+	"viewScript": "file:./view.js"
+}
