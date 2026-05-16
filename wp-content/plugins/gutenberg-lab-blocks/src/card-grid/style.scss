@@ -69,6 +69,37 @@
 		padding-top: var(--wp--preset--spacing--sm);
 	}
 
+	.vvm-card-grid__card-content > .vvm-card-grid__cta-row:last-child {
+		margin-top: auto;
+		padding-top: var(--wp--preset--spacing--sm);
+	}
+
+	.vvm-card-grid__cta-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: clamp(0.75rem, 1.8vw, 1.25rem);
+	}
+
+	.vvm-card-grid__cta-row > * {
+		margin: 0;
+	}
+
+	.vvm-card-grid__cta-row > .wp-block-buttons {
+		flex: 0 0 auto;
+	}
+
+	.vvm-card-grid__cta-side {
+		flex: 1 1 7rem;
+		max-inline-size: 11rem;
+		font-family: var(--wp--preset--font-family--refined-sans);
+		font-size: var(--wp--preset--font-size--xs);
+		font-weight: 400;
+		letter-spacing: 0.24em;
+		line-height: 1.3;
+		text-transform: uppercase;
+	}
+
 	.vvm-card-grid__card-content .wp-block-heading {
 		color: var(--wp--preset--color--forest);
 	}
@@ -446,6 +477,165 @@
 
 @media (min-width: 1024px) {
 	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-cinematic.vvm-card-grid--source-villas {
+		.vvm-card-grid__items {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+}
+
+.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--manual-cinematic {
+	box-sizing: border-box;
+	padding-inline: var(--wp--custom--layout--gutter-current, clamp(1.5rem, 4vw, 3rem));
+
+	.vvm-card-grid__items {
+		gap: 2rem;
+		grid-template-columns: minmax(0, 1fr);
+		max-inline-size: min(100%, var(--wp--style--global--wide-size, 1320px));
+		margin-inline: auto;
+	}
+
+	.vvm-card-grid__card {
+		position: relative;
+		aspect-ratio: 1 / 1;
+		overflow: hidden;
+		isolation: isolate;
+		background: #111111;
+	}
+
+	.vvm-card-grid__card::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		background: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0.7) 0%,
+			rgba(0, 0, 0, 0.3) 48%,
+			rgba(0, 0, 0, 0) 100%
+		);
+		opacity: 0.8;
+		pointer-events: none;
+		transition: opacity 0.5s ease;
+	}
+
+	.vvm-card-grid__card-media {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		display: block;
+		aspect-ratio: auto;
+		filter: brightness(0.75);
+		transform: scale(1);
+		transform-origin: center;
+		transition:
+			transform 0.7s ease,
+			filter 0.7s ease;
+		will-change: transform, filter;
+	}
+
+	.vvm-card-grid__card-image {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.vvm-card-grid__card-content {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		z-index: 3;
+		padding: 2rem;
+		color: #f5ecd7;
+		background: transparent;
+		gap: 0;
+	}
+
+	.vvm-card-grid__card-content > * {
+		margin: 0;
+	}
+
+	.vvm-card-grid__card-content > .wp-block-heading:not(.vvm-card-grid__cta-side) {
+		margin-bottom: 0.5rem;
+		color: #f5ecd7;
+		font-family: var(--wp--preset--font-family--site-primary);
+		font-size: 1.875rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		line-height: 1.1;
+		text-transform: none;
+	}
+
+	.vvm-card-grid__card-content > .wp-block-heading a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.vvm-card-grid__card-content > p {
+		margin-bottom: 1.5rem;
+		color: rgba(245, 236, 215, 0.9);
+		font-family: var(--wp--preset--font-family--site-primary);
+		font-size: 1rem;
+		font-weight: 400;
+		line-height: 1.45;
+	}
+
+	.vvm-card-grid__card-content > .vvm-card-grid__cta-row:last-child {
+		margin-top: 0;
+		padding-top: 0;
+	}
+
+	.vvm-card-grid__cta-row {
+		display: flex;
+		flex-wrap: nowrap;
+		align-items: center;
+		justify-content: flex-start;
+		gap: clamp(0.625rem, 1.2vw, 1rem);
+	}
+
+	.vvm-card-grid__cta-row > .wp-block-buttons {
+		flex: 0 0 auto;
+	}
+
+	.vvm-card-grid__card-content .vvm-card-grid__cta-side {
+		flex: 0 1 auto;
+		min-inline-size: 0;
+		max-inline-size: 8rem;
+		margin: 0;
+		color: rgba(245, 236, 215, 0.82);
+		font-family: var(--wp--preset--font-family--refined-sans);
+		font-size: clamp(0.5rem, 0.72vw, 0.625rem);
+		font-weight: 400;
+		letter-spacing: 0.08em;
+		line-height: 1.25;
+		overflow-wrap: anywhere;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.vvm-card-grid__card:hover .vvm-card-grid__card-media,
+	.vvm-card-grid__card:focus-within .vvm-card-grid__card-media {
+		filter: brightness(1);
+		transform: scale(1.1);
+	}
+
+	.vvm-card-grid__card:hover::after,
+	.vvm-card-grid__card:focus-within::after {
+		opacity: 0.4;
+	}
+}
+
+@media (min-width: 768px) {
+	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--manual-cinematic {
+		.vvm-card-grid__items {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+}
+
+@media (min-width: 1024px) {
+	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--manual-cinematic {
 		.vvm-card-grid__items {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}

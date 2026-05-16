@@ -12,6 +12,7 @@ const ALLOWED_INNER_BLOCKS = [
 	'core/heading',
 	'core/paragraph',
 	'core/list',
+	'core/group',
 	'core/buttons',
 ];
 
