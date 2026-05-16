@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.12
+Version: 0.1.13
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -49,6 +49,15 @@ body.single-villa {
 body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 	max-inline-size: min(100%, 1280px);
 	margin-inline: auto;
+}
+
+/*
+ * Home - Option 1 uses the image-backed two-up carousel as a hero-like villa
+ * card. Keep the title/action bright, but soften the supporting amenity row.
+ */
+body.page-id-555 .vvm-two-up-carousel .vvm-two-up-carousel__amenities__icon,
+body.page-id-555 .vvm-two-up-carousel .vvm-two-up-carousel__amenities__label {
+	color: rgba(255, 253, 247, 0.72);
 }
 
 .wp-site-blocks {

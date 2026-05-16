@@ -16,6 +16,7 @@ import './editor.scss';
 const ALLOWED_INNER_BLOCKS = [
 	'core/heading',
 	'core/paragraph',
+	'core/group',
 	'core/buttons',
 ];
 
@@ -174,7 +175,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				<div className="vvm-two-up-carousel__slide-editor-overlay">
 					<p className="vvm-two-up-carousel__slide-editor-note">
 						{ __(
-							'Add optional heading, paragraph, or button blocks. Slides start empty by default.',
+							'Add optional heading, paragraph, group, or button blocks. Use a group for CTA rows that need side content.',
 							'gutenberg-lab-blocks'
 						) }
 					</p>

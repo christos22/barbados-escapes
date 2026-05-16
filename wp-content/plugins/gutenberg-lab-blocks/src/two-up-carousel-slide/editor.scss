@@ -97,6 +97,39 @@
 		margin-top: 0.25rem;
 	}
 
+	.vvm-two-up-carousel__slide-editor-content .vvm-two-up-carousel__cta-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		width: 100%;
+		margin-top: 0.25rem;
+	}
+
+	.vvm-two-up-carousel__slide-editor-content
+		.vvm-two-up-carousel__cta-row
+		> * {
+		margin: 0;
+	}
+
+	.vvm-two-up-carousel__slide-editor-content
+		.vvm-two-up-carousel__cta-row
+		> .wp-block-heading {
+		flex: 1 1 7rem;
+		max-width: 11rem;
+		font-size: 0.78rem;
+		line-height: 1.25;
+		text-align: center;
+	}
+
+	.vvm-two-up-carousel__slide-editor-content
+		.vvm-two-up-carousel__cta-row
+		> .wp-block-buttons {
+		flex: 0 0 auto;
+		margin-top: 0;
+	}
+
 	.vvm-two-up-carousel__slide-editor-content
 		.block-editor-button-block-appender,
 	.vvm-two-up-carousel__slide-editor-content .block-list-appender {

@@ -289,6 +289,61 @@
 	margin-top: 0.25rem;
 }
 
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.vvm-two-up-carousel__cta-row,
+.vvm-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.vvm-two-up-carousel__cta-row {
+	order: 4;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: clamp(0.75rem, 1.8vw, 1.4rem);
+	inline-size: min(100%, 42rem);
+	margin-top: 0.25rem;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.vvm-two-up-carousel__cta-row
+	> *,
+.vvm-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.vvm-two-up-carousel__cta-row
+	> * {
+	order: 0;
+	margin: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.vvm-two-up-carousel__cta-row
+	> .wp-block-heading,
+.vvm-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.vvm-two-up-carousel__cta-row
+	> .wp-block-heading {
+	flex: 1 1 7rem;
+	max-inline-size: 11rem;
+	color: var(--vvm-two-up-carousel-card-muted);
+	font-size: clamp(0.68rem, 1vw, 0.78rem);
+	line-height: 1.25;
+}
+
+.wp-block-gutenberg-lab-blocks-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.vvm-two-up-carousel__cta-row
+	> .wp-block-buttons,
+.vvm-two-up-carousel
+	.vvm-two-up-carousel__slide-content
+	.vvm-two-up-carousel__cta-row
+	> .wp-block-buttons {
+	flex: 0 0 auto;
+	margin-top: 0;
+}
+
 .wp-block-gutenberg-lab-blocks-two-up-carousel .vvm-two-up-carousel__amenities,
 .vvm-two-up-carousel .vvm-two-up-carousel__amenities {
 	order: 2;
