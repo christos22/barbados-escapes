@@ -45,7 +45,10 @@
 
 	.vvm-feature-carousel__slide-editor-panel {
 		display: flex;
-		background: var(--wp--preset--color--white, #fff);
+		background: var(
+			--vvm-feature-carousel-panel-surface,
+			var(--wp--preset--color--white, #fff)
+		);
 	}
 
 	.vvm-feature-carousel__slide-editor-panel--static-hidden {
@@ -70,8 +73,18 @@
 		 * Reserve some space for Gutenberg's floating block toolbar so the
 		 * heading stays easy to click and edit inside the slide panel.
 		 */
-		padding: clamp(1.5rem, 2.4vw, 2.25rem);
-		padding-top: clamp(3.75rem, 7vw, 4.75rem);
+		padding-block: var(
+			--vvm-feature-carousel-panel-padding-block,
+			clamp(1.5rem, 2.4vw, 2.25rem)
+		);
+		padding-inline: var(
+			--vvm-feature-carousel-panel-padding-inline,
+			clamp(1.5rem, 2.4vw, 2.25rem)
+		);
+		padding-top: max(
+			var(--vvm-feature-carousel-panel-padding-block, clamp(1.5rem, 2.4vw, 2.25rem)),
+			clamp(3.75rem, 7vw, 4.75rem)
+		);
 		align-content: start;
 	}
 
@@ -80,6 +93,17 @@
 		font-family: var(--wp--preset--font-family--display-serif);
 		font-size: clamp(1.8rem, 3vw, 2.5rem);
 		line-height: 1;
+	}
+
+	/* Match the front-end eyebrow treatment for semantic H4 headings. */
+	.vvm-feature-carousel__slide-editor-panel-flow .wp-block-heading.h4 {
+		color: var(--wp--preset--color--gold, #c4922a);
+		font-family: var(--wp--preset--font-family--refined-sans);
+		font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
+		font-weight: 400;
+		letter-spacing: 0.34em;
+		line-height: 1rem;
+		text-transform: uppercase;
 	}
 
 	.vvm-feature-carousel__slide-editor-panel-flow p {

@@ -5,7 +5,7 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
-import { PanelBody, SelectControl } from '@wordpress/components';
+import { Button, PanelBody, RangeControl, SelectControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 
@@ -45,6 +45,21 @@ const ACCENT_BORDER_OPTIONS = [
 	{ label: __( 'Top and Bottom', 'gutenberg-lab-blocks' ), value: 'both' },
 ];
 
+const PANEL_BACKGROUND_OPTIONS = [
+	{ label: __( 'Default', 'gutenberg-lab-blocks' ), value: '' },
+	{ label: __( 'White', 'gutenberg-lab-blocks' ), value: 'white' },
+	{ label: __( 'Light Gold', 'gutenberg-lab-blocks' ), value: 'light-gold' },
+	{ label: __( 'Ivory', 'gutenberg-lab-blocks' ), value: 'ivory' },
+	{ label: __( 'Dark Green', 'gutenberg-lab-blocks' ), value: 'dark-green' },
+];
+
+const PANEL_BACKGROUND_VALUES = {
+	white: 'var(--wp--preset--color--white, #fff)',
+	'light-gold': 'var(--wp--preset--color--light-gold, #f5ecd7)',
+	ivory: 'var(--wp--preset--color--ivory, #fbf8ef)',
+	'dark-green': 'var(--wp--preset--color--dark-green, #1e3d2f)',
+};
+
 const TEMPLATE = [
 	[ 'gutenberg-lab-blocks/feature-carousel-slide' ],
 	[ 'gutenberg-lab-blocks/feature-carousel-slide' ],
@@ -59,10 +74,34 @@ function normalizeTextMode( textMode ) {
 	return 'static' === textMode ? 'static' : 'per-slide';
 }
 
+function getPanelStyle( {
+	panelBackground,
+	panelPaddingBlock,
+	panelPaddingInline,
+} ) {
+	return Object.fromEntries(
+		Object.entries( {
+			'--vvm-feature-carousel-panel-surface':
+				PANEL_BACKGROUND_VALUES[ panelBackground ],
+			'--vvm-feature-carousel-panel-padding-block':
+				Number.isFinite( panelPaddingBlock )
+					? `${ panelPaddingBlock }rem`
+					: undefined,
+			'--vvm-feature-carousel-panel-padding-inline':
+				Number.isFinite( panelPaddingInline )
+					? `${ panelPaddingInline }rem`
+					: undefined,
+		} ).filter( ( [ , value ] ) => value )
+	);
+}
+
 export default function Edit( { attributes, clientId, setAttributes } ) {
 	const {
 		accentBorder = 'none',
 		align,
+		panelBackground = '',
+		panelPaddingBlock,
+		panelPaddingInline,
 		textMode = 'per-slide',
 		transitionStyle = 'slide',
 	} = attributes;
@@ -116,6 +155,11 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 		]
 			.filter( Boolean )
 			.join( ' ' ),
+		style: getPanelStyle( {
+			panelBackground,
+			panelPaddingBlock,
+			panelPaddingInline,
+		} ),
 	} );
 
 	const innerBlocksProps = useInnerBlocksProps(
@@ -194,6 +238,59 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 							'gutenberg-lab-blocks'
 						) }
 					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Text Panel', 'gutenberg-lab-blocks' ) }
+					initialOpen={ false }
+				>
+					<SelectControl
+						label={ __( 'Panel background', 'gutenberg-lab-blocks' ) }
+						value={ panelBackground }
+						options={ PANEL_BACKGROUND_OPTIONS }
+						onChange={ ( value ) =>
+							setAttributes( {
+								panelBackground: value,
+							} )
+						}
+					/>
+					<RangeControl
+						label={ __( 'Vertical padding', 'gutenberg-lab-blocks' ) }
+						value={ panelPaddingBlock }
+						onChange={ ( value ) =>
+							setAttributes( {
+								panelPaddingBlock: value ?? undefined,
+							} )
+						}
+						min={ 1 }
+						max={ 8 }
+						step={ 0.25 }
+						allowReset
+					/>
+					<RangeControl
+						label={ __( 'Horizontal padding', 'gutenberg-lab-blocks' ) }
+						value={ panelPaddingInline }
+						onChange={ ( value ) =>
+							setAttributes( {
+								panelPaddingInline: value ?? undefined,
+							} )
+						}
+						min={ 1 }
+						max={ 8 }
+						step={ 0.25 }
+						allowReset
+					/>
+					<Button
+						variant="secondary"
+						onClick={ () =>
+							setAttributes( {
+								panelBackground: '',
+								panelPaddingBlock: undefined,
+								panelPaddingInline: undefined,
+							} )
+						}
+					>
+						{ __( 'Reset panel appearance', 'gutenberg-lab-blocks' ) }
+					</Button>
 				</PanelBody>
 				{ slideCount > 1 ? (
 					<SliderArrowControlsPanel

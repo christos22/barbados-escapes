@@ -238,6 +238,21 @@
 	text-wrap: balance;
 }
 
+/* Keep semantic H4 eyebrow blocks from inheriting the large slide heading treatment. */
+.wp-block-gutenberg-lab-blocks-feature-carousel
+	.vvm-feature-carousel__panel-flow
+	.wp-block-heading.h4,
+.vvm-feature-carousel .vvm-feature-carousel__panel-flow .wp-block-heading.h4 {
+	color: var(--wp--preset--color--gold, #c4922a);
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
+	font-weight: 400;
+	letter-spacing: 0.34em;
+	line-height: 1rem;
+	text-transform: uppercase;
+	text-wrap: wrap;
+}
+
 .wp-block-gutenberg-lab-blocks-feature-carousel
 	.vvm-feature-carousel__panel-flow
 	.wp-block-heading

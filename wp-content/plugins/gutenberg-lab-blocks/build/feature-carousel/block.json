@@ -37,6 +37,16 @@
     "accentBorder": {
       "type": "string",
       "default": "none"
+    },
+    "panelBackground": {
+      "type": "string",
+      "default": ""
+    },
+    "panelPaddingBlock": {
+      "type": "number"
+    },
+    "panelPaddingInline": {
+      "type": "number"
     }
   },
   "supports": {
