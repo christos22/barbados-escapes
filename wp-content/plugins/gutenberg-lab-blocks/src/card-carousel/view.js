@@ -1,11 +1,17 @@
 function getCardCarouselMetrics( viewport, track, slides ) {
 	const firstOffset = slides[ 0 ]?.offsetLeft ?? 0;
 	const maxTranslate = Math.max( 0, track.scrollWidth - viewport.clientWidth );
-	const maxIndex = slides.reduce( ( lastVisibleIndex, slide, index ) => {
-		return slide.offsetLeft - firstOffset <= maxTranslate + 1
-			? index
-			: lastVisibleIndex;
-	}, 0 );
+	let maxIndex = 0;
+
+	for ( let index = 0; index < slides.length; index += 1 ) {
+		const slideOffset = slides[ index ].offsetLeft - firstOffset;
+
+		maxIndex = index;
+
+		if ( slideOffset >= maxTranslate - 1 ) {
+			break;
+		}
+	}
 
 	return {
 		firstOffset,
@@ -20,6 +26,7 @@ function initializeCardCarousel( carousel ) {
 	const slides = Array.from( track?.children ?? [] );
 	const previousButton = carousel.querySelector( '[data-card-carousel-prev]' );
 	const nextButton = carousel.querySelector( '[data-card-carousel-next]' );
+	const controls = carousel.querySelector( '.vvm-card-carousel__controls' );
 
 	if ( ! viewport || ! track || slides.length === 0 ) {
 		return;
@@ -55,6 +62,11 @@ function initializeCardCarousel( carousel ) {
 		applyTranslate( activeTranslate );
 
 		carousel.classList.toggle( 'has-overflow', hasOverflow );
+
+		if ( controls ) {
+			controls.hidden = ! hasOverflow;
+			controls.setAttribute( 'aria-hidden', hasOverflow ? 'false' : 'true' );
+		}
 
 		if ( previousButton ) {
 			previousButton.disabled = ! hasOverflow || currentIndex <= 0;

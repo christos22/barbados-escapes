@@ -150,6 +150,15 @@ function gutenberg_lab_vvm_register_block_styles() {
 		)
 	);
 
+	register_block_style(
+		'gutenberg-lab-blocks/card-carousel',
+		array(
+			'name'         => 'editorial-triptych',
+			'label'        => __( 'Editorial Triptych', 'gutenberg-lab-vvm' ),
+			'inline_style' => '',
+		)
+	);
+
 }
 add_action( 'init', 'gutenberg_lab_vvm_register_block_styles' );
 

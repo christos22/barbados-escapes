@@ -52,7 +52,7 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	const innerBlocksProps = useInnerBlocksProps(
 		{
-			className: 'vvm-card-carousel__slide-content',
+			className: 'vvm-card-carousel__slide-content-inner',
 		},
 		{
 			allowedBlocks: ALLOWED_INNER_BLOCKS,
@@ -119,6 +119,9 @@ export default function Edit( { attributes, setAttributes } ) {
 							: 'vvm-card-carousel__slide-media vvm-card-carousel__slide-media--placeholder'
 					}
 				>
+					<span className="vvm-card-carousel__slide-editor-label">
+						{ __( 'Slide image', 'gutenberg-lab-blocks' ) }
+					</span>
 					{ imageUrl ? (
 						<img
 							className="vvm-card-carousel__slide-image"
@@ -142,7 +145,12 @@ export default function Edit( { attributes, setAttributes } ) {
 						</MediaUploadCheck>
 					) }
 				</div>
-				<div { ...innerBlocksProps } />
+				<div className="vvm-card-carousel__slide-content">
+					<span className="vvm-card-carousel__slide-editor-label">
+						{ __( 'Slide content', 'gutenberg-lab-blocks' ) }
+					</span>
+					<div { ...innerBlocksProps } />
+				</div>
 			</article>
 		</>
 	);
