@@ -22,3 +22,40 @@
 		grid-column: 1 / -1;
 	}
 }
+
+.vvm-card-grid__selected-villas {
+	margin-top: 1rem;
+}
+
+.vvm-card-grid__selected-villas-label {
+	margin: 0 0 0.5rem;
+	color: #1e1e1e;
+	font-size: 0.6875rem;
+	font-weight: 500;
+	text-transform: uppercase;
+}
+
+.vvm-card-grid__selected-villas-list {
+	display: grid;
+	gap: 0.5rem;
+	margin: 0 0 0.5rem;
+	padding: 0;
+}
+
+.vvm-card-grid__selected-villa {
+	display: grid;
+	gap: 0.5rem;
+	padding: 0.5rem;
+	border: 1px solid #ddd;
+	background: #fff;
+}
+
+.vvm-card-grid__selected-villa-title {
+	font-weight: 500;
+}
+
+.vvm-card-grid__selected-villa-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+}

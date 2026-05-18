@@ -9,8 +9,8 @@ import metadata from './block.json';
 registerBlockType( metadata.name, {
 	edit: Edit,
 
-	// Save only the nested card blocks. PHP owns the section wrapper so the
-	// future post-driven variant can reuse the same outer markup and classes.
+	// Save only the nested manual cards. PHP owns the shared section wrapper
+	// and the selected-villa rendering path.
 	save() {
 		return <InnerBlocks.Content />;
 	},

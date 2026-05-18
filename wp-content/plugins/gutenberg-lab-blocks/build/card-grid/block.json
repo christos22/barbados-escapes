@@ -13,26 +13,21 @@
     "layout",
     "villas"
   ],
-  "usesContext": [
-    "postId",
-    "postType"
-  ],
   "attributes": {
     "contentSource": {
       "type": "string",
       "default": "manual"
     },
-    "villaCount": {
-      "type": "number",
-      "default": 3
+    "selectedVillaIds": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "number"
+      }
     },
     "villaPresentation": {
       "type": "string",
       "default": "cinematic"
-    },
-    "excludeCurrent": {
-      "type": "boolean",
-      "default": false
     },
     "columns": {
       "type": "string",

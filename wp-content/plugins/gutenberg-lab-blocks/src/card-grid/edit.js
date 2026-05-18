@@ -6,12 +6,14 @@ import {
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import {
+	Button,
+	ComboboxControl,
 	PanelBody,
-	RangeControl,
 	SelectControl,
 	ToggleControl,
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import { decodeEntities } from '@wordpress/html-entities';
 import ServerSideRender from '@wordpress/server-side-render';
 
 import {
@@ -49,7 +51,10 @@ const MEDIA_RATIO_OPTIONS = [
 	{ label: __( 'Widescreen', 'gutenberg-lab-blocks' ), value: 'widescreen' },
 	{ label: __( 'Square', 'gutenberg-lab-blocks' ), value: 'square' },
 	{ label: __( 'Portrait', 'gutenberg-lab-blocks' ), value: 'portrait' },
-	{ label: __( 'Tall Portrait', 'gutenberg-lab-blocks' ), value: 'portrait-tall' },
+	{
+		label: __( 'Tall Portrait', 'gutenberg-lab-blocks' ),
+		value: 'portrait-tall',
+	},
 ];
 
 function normalizeSpacingPresetSlug( spacingSlug ) {
@@ -57,7 +62,10 @@ function normalizeSpacingPresetSlug( spacingSlug ) {
 		return undefined;
 	}
 
-	return spacingSlug.trim().toLowerCase().replace( /^([0-9]+)([a-z])/, '$1-$2' );
+	return spacingSlug
+		.trim()
+		.toLowerCase()
+		.replace( /^([0-9]+)([a-z])/, '$1-$2' );
 }
 
 function resolveBlockGapPreviewValue( blockGap ) {
@@ -81,12 +89,31 @@ function resolveBlockGapPreviewValue( blockGap ) {
 	return blockGap;
 }
 
+function normalizeVillaIds( villaIds ) {
+	if ( ! Array.isArray( villaIds ) ) {
+		return [];
+	}
+
+	return villaIds.reduce( ( normalizedIds, villaId ) => {
+		const parsedVillaId = Number( villaId );
+
+		if (
+			Number.isInteger( parsedVillaId ) &&
+			parsedVillaId > 0 &&
+			! normalizedIds.includes( parsedVillaId )
+		) {
+			normalizedIds.push( parsedVillaId );
+		}
+
+		return normalizedIds;
+	}, [] );
+}
+
 export default function Edit( { attributes, clientId, setAttributes } ) {
 	const {
 		contentSource,
-		villaCount,
+		selectedVillaIds = [],
 		villaPresentation,
-		excludeCurrent,
 		columns,
 		enableCarousel,
 		mediaRatio,
@@ -109,13 +136,53 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 		),
 	};
 	const blockGap = resolveBlockGapPreviewValue( style?.spacing?.blockGap );
+	const sanitizedSelectedVillaIds = normalizeVillaIds( selectedVillaIds );
+	const villas = useSelect(
+		( select ) =>
+			select( 'core' ).getEntityRecords( 'postType', 'villa', {
+				per_page: -1,
+				orderby: 'title',
+				order: 'asc',
+				_fields: 'id,title',
+			} ),
+		[]
+	);
+	const villaOptions = ( villas ?? [] ).map( ( villa ) => ( {
+		value: String( villa.id ),
+		label: decodeEntities(
+			villa.title?.rendered ||
+				__( '(Untitled villa)', 'gutenberg-lab-blocks' )
+		),
+	} ) );
+	const selectedVillaOptions = sanitizedSelectedVillaIds.map( ( villaId ) => {
+		const selectedOption = villaOptions.find(
+			( option ) => Number( option.value ) === villaId
+		);
+
+		return (
+			selectedOption || {
+				value: String( villaId ),
+				label: `${ __(
+					'Villa',
+					'gutenberg-lab-blocks'
+				) } #${ villaId }`,
+			}
+		);
+	} );
+	const availableVillaOptions = villaOptions.filter(
+		( option ) =>
+			! sanitizedSelectedVillaIds.includes( Number( option.value ) )
+	);
 	const manualCardCount = useSelect(
 		( select ) =>
-			select( 'core/block-editor' ).getBlock( clientId )?.innerBlocks?.length ??
-			0,
+			select( 'core/block-editor' ).getBlock( clientId )?.innerBlocks
+				?.length ?? 0,
 		[ clientId ]
 	);
-	const cardCount = 'villas' === contentSource ? villaCount : manualCardCount;
+	const cardCount =
+		'villas' === contentSource
+			? sanitizedSelectedVillaIds.length
+			: manualCardCount;
 	const willUseCarousel =
 		! isVillaCinematicStyle &&
 		enableCarousel &&
@@ -124,19 +191,19 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 	const blockProps = useBlockProps( {
 		className: [
 			'vvm-card-grid',
-				isVillaCinematicStyle ? 'alignfull' : '',
-				enableCarousel ? 'vvm-card-grid--carousel-enabled' : '',
-				`vvm-card-grid--source-${ contentSource }`,
-				'villas' === contentSource
-					? `vvm-card-grid--villa-presentation-${ villaPresentation }`
-					: '',
-				`vvm-card-grid--columns-${ columns }`,
-				`vvm-card-grid--ratio-${ mediaRatio }`,
-			].join( ' ' ),
+			isVillaCinematicStyle ? 'alignfull' : '',
+			enableCarousel ? 'vvm-card-grid--carousel-enabled' : '',
+			`vvm-card-grid--source-${ contentSource }`,
+			'villas' === contentSource
+				? `vvm-card-grid--villa-presentation-${ villaPresentation }`
+				: '',
+			`vvm-card-grid--columns-${ columns }`,
+			`vvm-card-grid--ratio-${ mediaRatio }`,
+		].join( ' ' ),
 		style: blockGap
 			? {
 					'--wp--style--block-gap': blockGap,
-				}
+			  }
 			: undefined,
 	} );
 
@@ -153,6 +220,44 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 		}
 	);
 
+	const setSelectedVillaIds = ( nextVillaIds ) => {
+		setAttributes( {
+			selectedVillaIds: normalizeVillaIds( nextVillaIds ),
+		} );
+	};
+
+	const addSelectedVilla = ( selectedVillaId ) => {
+		const villaId = Number( selectedVillaId );
+
+		if (
+			! Number.isInteger( villaId ) ||
+			villaId <= 0 ||
+			sanitizedSelectedVillaIds.includes( villaId )
+		) {
+			return;
+		}
+
+		setSelectedVillaIds( [ ...sanitizedSelectedVillaIds, villaId ] );
+	};
+
+	const moveSelectedVilla = ( villaId, direction ) => {
+		const currentIndex = sanitizedSelectedVillaIds.indexOf( villaId );
+		const nextIndex = currentIndex + direction;
+
+		if (
+			currentIndex < 0 ||
+			nextIndex < 0 ||
+			nextIndex >= sanitizedSelectedVillaIds.length
+		) {
+			return;
+		}
+
+		const nextVillaIds = [ ...sanitizedSelectedVillaIds ];
+		nextVillaIds[ currentIndex ] = sanitizedSelectedVillaIds[ nextIndex ];
+		nextVillaIds[ nextIndex ] = villaId;
+		setSelectedVillaIds( nextVillaIds );
+	};
+
 	return (
 		<>
 			<InspectorControls>
@@ -161,7 +266,10 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 					initialOpen={ true }
 				>
 					<SelectControl
-						label={ __( 'Populate cards from', 'gutenberg-lab-blocks' ) }
+						label={ __(
+							'Populate cards from',
+							'gutenberg-lab-blocks'
+						) }
 						value={ contentSource }
 						options={ CONTENT_SOURCE_OPTIONS }
 						onChange={ ( value ) =>
@@ -170,7 +278,7 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						help={
 							'villas' === contentSource
 								? __(
-										'Villa mode maps each card to the villa featured image, title, excerpt, and CTA meta fallback.',
+										'Villa mode renders only the villa posts selected below.',
 										'gutenberg-lab-blocks'
 								  )
 								: __(
@@ -182,34 +290,139 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 
 					{ 'villas' === contentSource ? (
 						<>
-							<RangeControl
-								label={ __( 'Villas to show', 'gutenberg-lab-blocks' ) }
-								value={ villaCount }
-								onChange={ ( value ) =>
-									setAttributes( { villaCount: value ?? 3 } )
+							<ComboboxControl
+								label={ __(
+									'Selected villas',
+									'gutenberg-lab-blocks'
+								) }
+								help={
+									sanitizedSelectedVillaIds.length
+										? __(
+												'Selected villas render in the order shown below.',
+												'gutenberg-lab-blocks'
+										  )
+										: __(
+												'Choose the villa posts to show in this grid.',
+												'gutenberg-lab-blocks'
+										  )
 								}
-								min={ 1 }
-								max={ 12 }
+								options={ availableVillaOptions }
+								value=""
+								onChange={ addSelectedVilla }
 							/>
+							{ selectedVillaOptions.length ? (
+								<div className="vvm-card-grid__selected-villas">
+									<p className="vvm-card-grid__selected-villas-label">
+										{ __(
+											'Manual order',
+											'gutenberg-lab-blocks'
+										) }
+									</p>
+									<ol className="vvm-card-grid__selected-villas-list">
+										{ selectedVillaOptions.map(
+											( option, index ) => {
+												const villaId = Number(
+													option.value
+												);
+
+												return (
+													<li
+														className="vvm-card-grid__selected-villa"
+														key={ option.value }
+													>
+														<span className="vvm-card-grid__selected-villa-title">
+															{ option.label }
+														</span>
+														<span className="vvm-card-grid__selected-villa-actions">
+															<Button
+																variant="tertiary"
+																disabled={
+																	0 === index
+																}
+																onClick={ () =>
+																	moveSelectedVilla(
+																		villaId,
+																		-1
+																	)
+																}
+															>
+																{ __(
+																	'Up',
+																	'gutenberg-lab-blocks'
+																) }
+															</Button>
+															<Button
+																variant="tertiary"
+																disabled={
+																	index ===
+																	selectedVillaOptions.length -
+																		1
+																}
+																onClick={ () =>
+																	moveSelectedVilla(
+																		villaId,
+																		1
+																	)
+																}
+															>
+																{ __(
+																	'Down',
+																	'gutenberg-lab-blocks'
+																) }
+															</Button>
+															<Button
+																variant="tertiary"
+																isDestructive
+																onClick={ () =>
+																	setSelectedVillaIds(
+																		sanitizedSelectedVillaIds.filter(
+																			(
+																				selectedVillaId
+																			) =>
+																				selectedVillaId !==
+																				villaId
+																		)
+																	)
+																}
+															>
+																{ __(
+																	'Remove',
+																	'gutenberg-lab-blocks'
+																) }
+															</Button>
+														</span>
+													</li>
+												);
+											}
+										) }
+									</ol>
+									<Button
+										variant="link"
+										isDestructive
+										onClick={ () =>
+											setSelectedVillaIds( [] )
+										}
+									>
+										{ __(
+											'Clear selected villas',
+											'gutenberg-lab-blocks'
+										) }
+									</Button>
+								</div>
+							) : null }
 							<SelectControl
-								label={ __( 'Villa presentation', 'gutenberg-lab-blocks' ) }
+								label={ __(
+									'Villa presentation',
+									'gutenberg-lab-blocks'
+								) }
 								value={ villaPresentation }
 								options={ VILLA_PRESENTATION_OPTIONS }
 								onChange={ ( value ) =>
-									setAttributes( { villaPresentation: value } )
+									setAttributes( {
+										villaPresentation: value,
+									} )
 								}
 								help={ presentationHelp[ villaPresentation ] }
-							/>
-							<ToggleControl
-								label={ __( 'Exclude current villa', 'gutenberg-lab-blocks' ) }
-								checked={ !! excludeCurrent }
-								onChange={ ( value ) =>
-									setAttributes( { excludeCurrent: value } )
-								}
-								help={ __(
-									'Useful for related-villa sections on single villa pages.',
-									'gutenberg-lab-blocks'
-								) }
 							/>
 						</>
 					) : null }
@@ -223,10 +436,15 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						label={ __( 'Columns', 'gutenberg-lab-blocks' ) }
 						value={ columns }
 						options={ COLUMN_OPTIONS }
-						onChange={ ( value ) => setAttributes( { columns: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { columns: value } )
+						}
 					/>
 					<ToggleControl
-						label={ __( 'Enable carousel overflow', 'gutenberg-lab-blocks' ) }
+						label={ __(
+							'Enable carousel overflow',
+							'gutenberg-lab-blocks'
+						) }
 						checked={ enableCarousel }
 						onChange={ ( value ) =>
 							setAttributes( { enableCarousel: value } )
@@ -304,12 +522,14 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						) : null }
 						<div
 							className={
-								willUseCarousel ? 'vvm-card-grid__viewport' : undefined
+								willUseCarousel
+									? 'vvm-card-grid__viewport'
+									: undefined
 							}
 						>
-							{/* Keep the parent focused on layout. Each child owns its own
+							{ /* Keep the parent focused on layout. Each child owns its own
 								media and native content blocks so typography and button
-								styles stay global. */}
+								styles stay global. */ }
 							<div { ...innerBlocksProps } />
 						</div>
 					</div>
