@@ -137,6 +137,29 @@ function gutenberg_lab_blocks_normalize_iso_date( $value ) {
 }
 
 /**
+ * Normalizes an iCal URL before storing or fetching it.
+ *
+ * Many calendar exports use webcal:// links in the UI. WordPress' HTTP API
+ * expects http(s), so we convert webcal to https and reject non-web protocols.
+ *
+ * @param string $url Raw iCal URL.
+ * @return string
+ */
+function gutenberg_lab_blocks_normalize_ical_url( $url ) {
+	$url = is_string( $url ) ? trim( $url ) : '';
+
+	if ( '' === $url ) {
+		return '';
+	}
+
+	if ( 0 === stripos( $url, 'webcal://' ) ) {
+		$url = 'https://' . substr( $url, 9 );
+	}
+
+	return esc_url_raw( $url, array( 'http', 'https' ) );
+}
+
+/**
  * Returns every unavailable night between start and end.
  *
  * End is exclusive, mirroring iCal checkout semantics.
@@ -187,7 +210,7 @@ function gutenberg_lab_blocks_get_villa_ical_feeds( $villa_id ) {
 			continue;
 		}
 
-		$url = esc_url_raw( $feed['url'] );
+		$url = gutenberg_lab_blocks_normalize_ical_url( $feed['url'] );
 
 		if ( '' === $url ) {
 			continue;
@@ -457,9 +480,10 @@ function gutenberg_lab_blocks_sync_villa_availability( $villa_id ) {
 		$response = wp_remote_get(
 			$feed['url'],
 			array(
-				'timeout'     => 15,
-				'redirection' => 3,
-				'user-agent'  => 'Barbados Escapes Villa Availability; ' . home_url( '/' ),
+				'timeout'             => 15,
+				'redirection'         => 3,
+				'limit_response_size' => 2 * MB_IN_BYTES,
+				'user-agent'          => 'Barbados Escapes Villa Availability; ' . home_url( '/' ),
 			)
 		);
 
@@ -526,6 +550,9 @@ function gutenberg_lab_blocks_sync_villa_availability( $villa_id ) {
 function gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $start_date = '', $end_date = '' ) {
 	global $wpdb;
 
+	// Frontend renders may run before an admin_init upgrade path after deploy.
+	gutenberg_lab_blocks_maybe_install_villa_availability();
+
 	$table_name = gutenberg_lab_blocks_get_villa_availability_table_name();
 	$villa_id   = absint( $villa_id );
 
@@ -570,6 +597,9 @@ function gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $start_dat
  */
 function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival_date, $departure_date ) {
 	global $wpdb;
+
+	// CF7 validation can run on frontend requests, so do not rely on admin_init.
+	gutenberg_lab_blocks_maybe_install_villa_availability();
 
 	$villa_id        = absint( $villa_id );
 	$arrival_date    = gutenberg_lab_blocks_normalize_iso_date( $arrival_date );
@@ -890,7 +920,7 @@ function gutenberg_lab_blocks_save_villa_availability_meta( $post_id ) {
 			continue;
 		}
 
-		$url = isset( $feed['url'] ) ? esc_url_raw( $feed['url'] ) : '';
+		$url = isset( $feed['url'] ) ? gutenberg_lab_blocks_normalize_ical_url( $feed['url'] ) : '';
 
 		if ( '' === $url || isset( $seen_urls[ $url ] ) ) {
 			continue;

@@ -1,0 +1,3 @@
+# Deny direct browser access to bundled Composer packages.
+# The plugin loads these files from PHP; they do not need public URLs.
+Require all denied

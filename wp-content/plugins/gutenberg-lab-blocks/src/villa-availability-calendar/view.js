@@ -52,7 +52,14 @@ const findForm = ( selector ) => {
 		return null;
 	}
 
-	const target = document.querySelector( selector );
+	let target;
+
+	// The selector is block-configurable, so invalid CSS should fail softly.
+	try {
+		target = document.querySelector( selector );
+	} catch ( error ) {
+		return null;
+	}
 
 	if ( ! target ) {
 		return null;
