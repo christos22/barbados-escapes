@@ -18,7 +18,7 @@
 }
 
 .vvm-villa-availability-calendar__header {
-	align-items: end;
+	align-items: baseline;
 	display: flex;
 	gap: 1rem;
 	justify-content: space-between;
@@ -78,6 +78,22 @@
 .vvm-villa-availability-calendar__status-cta:focus-visible {
 	outline: 2px solid currentColor;
 	outline-offset: 3px;
+}
+
+.vvm-villa-availability-calendar__navigation {
+	--vvm-slider-button-icon-size: clamp(1rem, 1.2vw, 1.15rem);
+	--vvm-slider-button-size: clamp(2.6rem, 3vw, 3rem);
+
+	align-items: center;
+	display: flex;
+	gap: clamp(0.45rem, 0.8vw, 0.7rem);
+	justify-content: flex-end;
+	margin-block: 0 0.9rem;
+}
+
+.vvm-villa-availability-calendar.is-loading .vvm-villa-availability-calendar__months {
+	opacity: 0.55;
+	pointer-events: none;
 }
 
 .vvm-villa-availability-calendar__months {
@@ -212,12 +228,20 @@
 		text-align: left;
 	}
 
+	.vvm-villa-availability-calendar__navigation {
+		justify-content: flex-start;
+	}
+
 	.vvm-villa-availability-calendar__months {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
 
 @media (max-width: 520px) {
+	.vvm-villa-availability-calendar__navigation {
+		justify-content: flex-start;
+	}
+
 	.vvm-villa-availability-calendar__months {
 		grid-template-columns: 1fr;
 	}

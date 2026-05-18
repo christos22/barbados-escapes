@@ -47,6 +47,22 @@ const formatNights = ( nights ) => {
 	return `${ nights } nights`;
 };
 
+const shiftMonthStart = ( value, monthOffset ) => {
+	const parts = String( value || '' )
+		.split( '-' )
+		.map( ( part ) => Number( part ) );
+
+	if ( parts.length !== 3 || parts.some( Number.isNaN ) ) {
+		return value;
+	}
+
+	const date = new Date( parts[ 0 ], parts[ 1 ] - 1 + monthOffset, 1 );
+	const year = date.getFullYear();
+	const month = String( date.getMonth() + 1 ).padStart( 2, '0' );
+
+	return `${ year }-${ month }-01`;
+};
+
 const findForm = ( selector ) => {
 	if ( ! selector ) {
 		return null;
@@ -122,9 +138,12 @@ const setFieldValue = ( form, name, value, type = 'hidden' ) => {
 const initializeCalendar = ( root ) => {
 	const dataNode = root.querySelector( '[data-vvm-calendar-data]' );
 	const statusNode = root.querySelector( '[data-vvm-calendar-status]' );
-	const dayButtons = Array.from( root.querySelectorAll( '[data-vvm-calendar-day]' ) );
+	const calendarNode = root.querySelector( '[data-vvm-calendar]' );
+	const rangeNode = root.querySelector( '[data-vvm-calendar-range]' );
+	const previousButton = root.querySelector( '[data-vvm-calendar-prev]' );
+	const nextButton = root.querySelector( '[data-vvm-calendar-next]' );
 
-	if ( ! dataNode || dayButtons.length === 0 ) {
+	if ( ! dataNode || ! calendarNode ) {
 		return;
 	}
 
@@ -137,14 +156,32 @@ const initializeCalendar = ( root ) => {
 	}
 
 	const unavailableDates = new Set( data.unavailableDates || [] );
+	const monthsToShow = Number( data.monthsToShow || 12 );
+	const minimumStart = data.minimumStart || data.windowStart;
+	let dayButtons = Array.from( root.querySelectorAll( '[data-vvm-calendar-day]' ) );
 	let selectedArrival = '';
 	let selectedDeparture = '';
+	let windowStart = data.windowStart || minimumStart;
+	let isLoading = false;
 
 	const setStatus = ( message ) => {
 		if ( statusNode ) {
 			statusNode.classList.remove( 'has-selection' );
 			statusNode.textContent = message;
 		}
+	};
+
+	const setNavigationState = () => {
+		if ( previousButton ) {
+			previousButton.disabled = isLoading || windowStart <= minimumStart;
+		}
+
+		if ( nextButton ) {
+			nextButton.disabled = isLoading;
+		}
+
+		root.classList.toggle( 'is-loading', isLoading );
+		root.setAttribute( 'aria-busy', isLoading ? 'true' : 'false' );
 	};
 
 	const renderSelectedStatus = () => {
@@ -226,6 +263,97 @@ const initializeCalendar = ( root ) => {
 		} );
 	};
 
+	const bindDayButtons = () => {
+		dayButtons.forEach( ( button ) => {
+			button.addEventListener( 'click', () => {
+				const date = button.dataset.date;
+				const isUnavailable = unavailableDates.has( date );
+
+				if ( ! selectedArrival || selectedDeparture || date <= selectedArrival ) {
+					if ( isUnavailable ) {
+						setStatus( data.messages?.selectArrival || 'Choose an available check-in date.' );
+						return;
+					}
+
+					selectedArrival = date;
+					selectedDeparture = '';
+					setStatus( data.messages?.selectDeparture || 'Choose a check-out date.' );
+					syncButtons();
+					return;
+				}
+
+				if ( ! rangeIsAvailable( selectedArrival, date ) ) {
+					setStatus( data.messages?.unavailable || 'Those dates include unavailable nights.' );
+					syncButtons();
+					return;
+				}
+
+				selectedDeparture = date;
+				syncButtons();
+				fillEnquiryForm();
+				renderSelectedStatus();
+			} );
+		} );
+	};
+
+	const updateWindow = ( windowData ) => {
+		if ( ! windowData || ! windowData.html ) {
+			return;
+		}
+
+		calendarNode.innerHTML = windowData.html;
+		windowStart = windowData.start || windowStart;
+		dayButtons = Array.from( root.querySelectorAll( '[data-vvm-calendar-day]' ) );
+
+		if ( rangeNode && windowData.rangeLabel ) {
+			rangeNode.textContent = windowData.rangeLabel;
+		}
+
+		( windowData.unavailableDates || [] ).forEach( ( date ) => {
+			unavailableDates.add( date );
+		} );
+
+		bindDayButtons();
+		syncButtons();
+	};
+
+	const loadWindow = async ( nextStart ) => {
+		if ( isLoading || ! data.endpoint || ! nextStart ) {
+			return;
+		}
+
+		isLoading = true;
+		setNavigationState();
+
+		try {
+			const url = new URL( data.endpoint, window.location.origin );
+
+			url.searchParams.set( 'start', nextStart );
+			url.searchParams.set( 'months', String( monthsToShow ) );
+
+			const response = await fetch( url.toString(), {
+				credentials: 'same-origin',
+				headers: {
+					Accept: 'application/json',
+				},
+			} );
+
+			if ( ! response.ok ) {
+				throw new Error( `Availability request failed: ${ response.status }` );
+			}
+
+			updateWindow( await response.json() );
+		} catch ( error ) {
+			setStatus(
+				data.messages?.loadError ||
+					'Availability could not be loaded. Please try again.'
+			);
+		} finally {
+			isLoading = false;
+			setNavigationState();
+		}
+	};
+
 	const fillEnquiryForm = () => {
 		const form = findForm( data.formSelector );
 
@@ -247,38 +375,23 @@ const initializeCalendar = ( root ) => {
 		setFieldValue( form, fields.dateSummary, summary );
 	};
 
-	dayButtons.forEach( ( button ) => {
-		button.addEventListener( 'click', () => {
-			const date = button.dataset.date;
-			const isUnavailable = unavailableDates.has( date );
+	if ( previousButton ) {
+		previousButton.addEventListener( 'click', () => {
+			const nextStart = shiftMonthStart( windowStart, -monthsToShow );
 
-			if ( ! selectedArrival || selectedDeparture || date <= selectedArrival ) {
-				if ( isUnavailable ) {
-					setStatus( data.messages?.selectArrival || 'Choose an available check-in date.' );
-					return;
-				}
-
-				selectedArrival = date;
-				selectedDeparture = '';
-				setStatus( data.messages?.selectDeparture || 'Choose a check-out date.' );
-				syncButtons();
-				return;
-			}
-
-			if ( ! rangeIsAvailable( selectedArrival, date ) ) {
-				setStatus( data.messages?.unavailable || 'Those dates include unavailable nights.' );
-				syncButtons();
-				return;
-			}
-
-			selectedDeparture = date;
-			syncButtons();
-			fillEnquiryForm();
-			renderSelectedStatus();
+			loadWindow( nextStart < minimumStart ? minimumStart : nextStart );
 		} );
-	} );
+	}
 
+	if ( nextButton ) {
+		nextButton.addEventListener( 'click', () => {
+			loadWindow( shiftMonthStart( windowStart, monthsToShow ) );
+		} );
+	}
+
+	bindDayButtons();
 	syncButtons();
+	setNavigationState();
 };
 
 document.addEventListener( 'DOMContentLoaded', () => {

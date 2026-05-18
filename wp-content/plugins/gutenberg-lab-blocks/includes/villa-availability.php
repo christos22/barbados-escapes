@@ -1033,6 +1033,141 @@ function gutenberg_lab_blocks_render_villa_availability_admin_notice() {
 add_action( 'admin_notices', 'gutenberg_lab_blocks_render_villa_availability_admin_notice' );
 
 /**
+ * Normalizes a requested date to the first day of its month.
+ *
+ * @param string $date Date in Y-m-d format.
+ * @return DateTimeImmutable|null
+ */
+function gutenberg_lab_blocks_normalize_villa_availability_month_start( $date ) {
+	$timezone = wp_timezone();
+
+	if ( '' === trim( (string) $date ) ) {
+		return new DateTimeImmutable( 'first day of this month 00:00:00', $timezone );
+	}
+
+	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $date ) ) {
+		return null;
+	}
+
+	$parsed = DateTimeImmutable::createFromFormat( '!Y-m-d', (string) $date, $timezone );
+
+	if ( ! $parsed || $parsed->format( 'Y-m-d' ) !== $date ) {
+		return null;
+	}
+
+	return $parsed->modify( 'first day of this month 00:00:00' );
+}
+
+/**
+ * Formats the label for the visible calendar window.
+ *
+ * @param DateTimeImmutable $month_start    First visible month.
+ * @param int               $months_to_show Number of visible months.
+ * @return string
+ */
+function gutenberg_lab_blocks_format_villa_availability_window_label( DateTimeImmutable $month_start, $months_to_show ) {
+	$window_end = $month_start->modify( '+' . max( 0, $months_to_show - 1 ) . ' months' );
+
+	return sprintf(
+		/* translators: 1: first visible month. 2: last visible month. */
+		__( '%1$s - %2$s', 'gutenberg-lab-blocks' ),
+		$month_start->format( 'F Y' ),
+		$window_end->format( 'F Y' )
+	);
+}
+
+/**
+ * Builds the HTML and data for one visible availability window.
+ *
+ * @param int               $villa_id       Villa post ID.
+ * @param DateTimeImmutable $month_start    First visible month.
+ * @param int               $months_to_show Number of visible months.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, DateTimeImmutable $month_start, $months_to_show ) {
+	$months_to_show = min( 18, max( 1, absint( $months_to_show ) ) );
+	$range_end      = $month_start->modify( '+' . $months_to_show . ' months' );
+	$unavailable    = gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $month_start->format( 'Y-m-d' ), $range_end->format( 'Y-m-d' ) );
+	$lookup         = array_fill_keys( $unavailable, true );
+
+	ob_start();
+
+	for ( $month_index = 0; $month_index < $months_to_show; ++$month_index ) {
+		echo gutenberg_lab_blocks_render_villa_availability_month( $month_start->modify( '+' . $month_index . ' months' ), $lookup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	return array(
+		'start'            => $month_start->format( 'Y-m-d' ),
+		'monthsToShow'     => $months_to_show,
+		'rangeLabel'       => gutenberg_lab_blocks_format_villa_availability_window_label( $month_start, $months_to_show ),
+		'html'             => ob_get_clean(),
+		'unavailableDates' => $unavailable,
+	);
+}
+
+/**
+ * Registers the public endpoint used to page through availability windows.
+ */
+function gutenberg_lab_blocks_register_villa_availability_rest_routes() {
+	register_rest_route(
+		'gutenberg-lab-blocks/v1',
+		'/villa-availability/(?P<villa_id>\d+)',
+		array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => 'gutenberg_lab_blocks_get_villa_availability_window_rest',
+			'permission_callback' => '__return_true',
+			'args'                => array(
+				'villa_id' => array(
+					'type'              => 'integer',
+					'sanitize_callback' => 'absint',
+				),
+				'start'    => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'months'   => array(
+					'type'              => 'integer',
+					'sanitize_callback' => 'absint',
+				),
+			),
+		)
+	);
+}
+add_action( 'rest_api_init', 'gutenberg_lab_blocks_register_villa_availability_rest_routes' );
+
+/**
+ * Returns one availability window for frontend year paging.
+ *
+ * @param WP_REST_Request $request REST request.
+ * @return WP_REST_Response|WP_Error
+ */
+function gutenberg_lab_blocks_get_villa_availability_window_rest( WP_REST_Request $request ) {
+	$villa_id = absint( $request['villa_id'] );
+
+	if ( ! $villa_id || 'villa' !== get_post_type( $villa_id ) || 'publish' !== get_post_status( $villa_id ) ) {
+		return new WP_Error( 'gutenberg_lab_blocks_invalid_villa', __( 'Villa not found.', 'gutenberg-lab-blocks' ), array( 'status' => 404 ) );
+	}
+
+	$months_to_show = $request->get_param( 'months' ) ? absint( $request->get_param( 'months' ) ) : 12;
+	$month_start    = gutenberg_lab_blocks_normalize_villa_availability_month_start( (string) $request->get_param( 'start' ) );
+
+	if ( ! $month_start ) {
+		return new WP_Error( 'gutenberg_lab_blocks_invalid_calendar_start', __( 'Invalid calendar start date.', 'gutenberg-lab-blocks' ), array( 'status' => 400 ) );
+	}
+
+	$minimum_start = new DateTimeImmutable( 'first day of this month 00:00:00', wp_timezone() );
+
+	if ( $month_start < $minimum_start ) {
+		$month_start = $minimum_start;
+	}
+
+	$response                 = gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, $month_start, $months_to_show );
+	$response['minimumStart'] = $minimum_start->format( 'Y-m-d' );
+
+	return rest_ensure_response( $response );
+}
+
+/**
  * Renders the front-end availability calendar block.
  *
  * @param array<string, mixed> $attributes         Block attributes.
@@ -1071,16 +1206,18 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 	$form_selector  = isset( $attributes['formSelector'] ) && '' !== trim( (string) $attributes['formSelector'] )
 		? sanitize_text_field( $attributes['formSelector'] )
 		: '.vvm-villa-contact-form';
-	$month_start    = new DateTimeImmutable( 'first day of this month 00:00:00', wp_timezone() );
-	$range_end      = $month_start->modify( '+' . $months_to_show . ' months' );
-	$unavailable    = gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $month_start->format( 'Y-m-d' ), $range_end->format( 'Y-m-d' ) );
-	$lookup         = array_fill_keys( $unavailable, true );
+	$month_start    = gutenberg_lab_blocks_normalize_villa_availability_month_start( '' );
+	$window         = gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, $month_start, $months_to_show );
 	$payload        = array(
 		'villaId'          => $villa_id,
 		'villaTitle'       => get_the_title( $villa_id ),
 		'villaUrl'         => get_permalink( $villa_id ),
 		'formSelector'     => $form_selector,
-		'unavailableDates' => $unavailable,
+		'endpoint'         => rest_url( 'gutenberg-lab-blocks/v1/villa-availability/' . $villa_id ),
+		'windowStart'      => $window['start'],
+		'minimumStart'     => $window['start'],
+		'monthsToShow'     => $months_to_show,
+		'unavailableDates' => $window['unavailableDates'],
 		'fields'           => array(
 			'arrival'      => 'preferred-arrival',
 			'departure'    => 'preferred-departure',
@@ -1096,6 +1233,9 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 			'unavailable'  => __( 'Those dates include unavailable nights.', 'gutenberg-lab-blocks' ),
 			'selected'     => __( 'Selected dates have been added to the enquiry form.', 'gutenberg-lab-blocks' ),
 			'completeEnquiry' => __( 'Enquire', 'gutenberg-lab-blocks' ),
+			'previousYear' => __( 'Previous year', 'gutenberg-lab-blocks' ),
+			'nextYear'     => __( 'Next year', 'gutenberg-lab-blocks' ),
+			'loadError'    => __( 'Availability could not be loaded. Please try again.', 'gutenberg-lab-blocks' ),
 		),
 	);
 
@@ -1108,10 +1248,27 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 				<?php esc_html_e( 'Choose your check-in date.', 'gutenberg-lab-blocks' ); ?>
 			</p>
 		</div>
+		<nav class="vvm-villa-availability-calendar__navigation" aria-label="<?php esc_attr_e( 'Availability calendar navigation', 'gutenberg-lab-blocks' ); ?>">
+			<button
+				type="button"
+				class="vvm-villa-availability-calendar__nav-button vvm-slider-button vvm-slider-button--prev"
+				data-vvm-calendar-prev
+				aria-label="<?php esc_attr_e( 'Previous year', 'gutenberg-lab-blocks' ); ?>"
+				disabled
+			>
+				<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</button>
+			<button
+				type="button"
+				class="vvm-villa-availability-calendar__nav-button vvm-slider-button vvm-slider-button--next"
+				data-vvm-calendar-next
+				aria-label="<?php esc_attr_e( 'Next year', 'gutenberg-lab-blocks' ); ?>"
+			>
+				<?php echo gutenberg_lab_blocks_get_slider_arrow_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</button>
+		</nav>
 		<div class="vvm-villa-availability-calendar__months" data-vvm-calendar>
-			<?php for ( $month_index = 0; $month_index < $months_to_show; ++$month_index ) : ?>
-				<?php echo gutenberg_lab_blocks_render_villa_availability_month( $month_start->modify( '+' . $month_index . ' months' ), $lookup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			<?php endfor; ?>
+			<?php echo $window['html']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 		<p class="vvm-villa-availability-calendar__legend">
 			<span class="vvm-villa-availability-calendar__legend-swatch" aria-hidden="true"></span>
