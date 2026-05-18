@@ -1037,13 +1037,26 @@ add_action( 'admin_notices', 'gutenberg_lab_blocks_render_villa_availability_adm
  *
  * @param array<string, mixed> $attributes         Block attributes.
  * @param string              $wrapper_attributes Block wrapper attributes.
+ * @param WP_Block|null       $block              Rendered block instance with post context.
  * @return string
  */
-function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $wrapper_attributes = '' ) {
+function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $wrapper_attributes = '', $block = null ) {
 	$villa_id = isset( $attributes['villaId'] ) ? absint( $attributes['villaId'] ) : 0;
 
+	if ( ! $villa_id && is_a( $block, 'WP_Block' ) && isset( $block->context['postId'] ) ) {
+		$context_post_id = absint( $block->context['postId'] );
+
+		if ( $context_post_id && 'villa' === get_post_type( $context_post_id ) ) {
+			$villa_id = $context_post_id;
+		}
+	}
+
 	if ( ! $villa_id && is_singular( 'villa' ) ) {
-		$villa_id = get_the_ID();
+		$villa_id = get_queried_object_id() ?: get_the_ID();
+	}
+
+	if ( ! $villa_id && isset( $GLOBALS['post']->ID ) && 'villa' === get_post_type( $GLOBALS['post']->ID ) ) {
+		$villa_id = absint( $GLOBALS['post']->ID );
 	}
 
 	if ( ! $villa_id || 'villa' !== get_post_type( $villa_id ) ) {

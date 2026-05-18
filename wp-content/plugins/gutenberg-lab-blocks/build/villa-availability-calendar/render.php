@@ -11,4 +11,4 @@ $wrapper_attributes = get_block_wrapper_attributes(
 	)
 );
 
-echo gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+echo gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $wrapper_attributes, isset( $block ) ? $block : null ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped

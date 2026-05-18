@@ -25,6 +25,10 @@
       "default": ".vvm-villa-contact-form"
     }
   },
+  "usesContext": [
+    "postId",
+    "postType"
+  ],
   "supports": {
     "align": [
       "wide",
