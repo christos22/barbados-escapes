@@ -1,0 +1,42 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/villa-availability-calendar",
+	"version": "0.1.0",
+	"title": "Villa Availability Calendar",
+	"category": "widgets",
+	"icon": "calendar-alt",
+	"description": "Renders a villa availability calendar with iCal/manual blocked dates and enquiry-form date selection.",
+	"attributes": {
+		"villaId": {
+			"type": "number",
+			"default": 0
+		},
+		"monthsToShow": {
+			"type": "number",
+			"default": 12
+		},
+		"heading": {
+			"type": "string",
+			"default": "Latest Availability"
+		},
+		"formSelector": {
+			"type": "string",
+			"default": ".vvm-villa-contact-form"
+		}
+	},
+	"supports": {
+		"align": [
+			"wide",
+			"full"
+		],
+		"html": false,
+		"reusable": true
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php"
+}

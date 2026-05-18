@@ -40,3 +40,5 @@ wp-content/uploads/
 
 # Optional future dependency dirs.
 vendor/
+!wp-content/plugins/gutenberg-lab-blocks/vendor/
+!wp-content/plugins/gutenberg-lab-blocks/vendor/**

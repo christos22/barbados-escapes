@@ -48,3 +48,9 @@
 
 - Use a dynamic block when the editor needs normal InnerBlocks content but the frontend needs stricter semantic markup, such as a real expandable `<button>`.
 - Keep hidden/revealed copy in the initial HTML for accessibility and SEO; JavaScript should only enhance the interaction, not fetch the content later.
+
+## Villa Availability
+
+- Use PHP for availability storage, iCal sync, and final calendar markup so date rules are enforced outside the browser.
+- Use a dynamic block when the editor needs a pluggable calendar but the frontend data comes from villa meta, cron sync, and a custom lookup table.
+- Keep the frontend script small: it should only select dates, validate the visible range against the rendered unavailable dates, and fill the enquiry form.

@@ -1,0 +1,8 @@
+{
+    "name": "verse-vision/gutenberg-lab-blocks",
+    "description": "Custom Gutenberg blocks and villa availability tools for Barbados Escapes.",
+    "license": "proprietary",
+    "require": {
+        "sabre/vobject": "^4.5"
+    }
+}

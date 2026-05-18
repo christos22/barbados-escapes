@@ -10,12 +10,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$gutenberg_lab_blocks_autoload = __DIR__ . '/vendor/autoload.php';
+
+if ( file_exists( $gutenberg_lab_blocks_autoload ) ) {
+	require_once $gutenberg_lab_blocks_autoload;
+}
+
 require_once __DIR__ . '/includes/video.php';
 require_once __DIR__ . '/includes/packages.php';
 require_once __DIR__ . '/includes/package-rendering.php';
 require_once __DIR__ . '/includes/peeking-carousel.php';
 require_once __DIR__ . '/includes/site-messages.php';
 require_once __DIR__ . '/includes/villas.php';
+require_once __DIR__ . '/includes/villa-availability.php';
 require_once __DIR__ . '/includes/mcp-abilities.php';
 
 /**
@@ -37,6 +44,8 @@ function gutenberg_lab_blocks_register_rewrite_content_types() {
  */
 function gutenberg_lab_blocks_activate() {
 	gutenberg_lab_blocks_register_rewrite_content_types();
+	gutenberg_lab_blocks_install_villa_availability();
+	gutenberg_lab_blocks_schedule_villa_availability_sync();
 	flush_rewrite_rules();
 }
 register_activation_hook( __FILE__, 'gutenberg_lab_blocks_activate' );
@@ -46,6 +55,7 @@ register_activation_hook( __FILE__, 'gutenberg_lab_blocks_activate' );
  */
 function gutenberg_lab_blocks_deactivate() {
 	gutenberg_lab_blocks_register_rewrite_content_types();
+	gutenberg_lab_blocks_unschedule_villa_availability_sync();
 	flush_rewrite_rules();
 }
 register_deactivation_hook( __FILE__, 'gutenberg_lab_blocks_deactivate' );
@@ -396,6 +406,7 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/stack-tab-item' );
 	register_block_type( __DIR__ . '/build/site-alerts' );
 	register_block_type( __DIR__ . '/build/villa-hero-search' );
+	register_block_type( __DIR__ . '/build/villa-availability-calendar' );
 	register_block_type( __DIR__ . '/build/villa-gallery-hero' );
 	register_block_type( __DIR__ . '/build/villa-gallery-hero-media' );
 	register_block_type( __DIR__ . '/build/villa-gallery-hero-content' );
