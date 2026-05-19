@@ -86,9 +86,32 @@
 
 	align-items: center;
 	display: flex;
-	gap: clamp(0.45rem, 0.8vw, 0.7rem);
+	gap: 0.2rem;
 	justify-content: flex-end;
 	margin-block: 0 0.9rem;
+}
+
+.vvm-villa-availability-calendar__nav-button.vvm-slider-button {
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+	color: #013223;
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+}
+
+.vvm-villa-availability-calendar__nav-button.vvm-slider-button:hover:not(:disabled),
+.vvm-villa-availability-calendar__nav-button.vvm-slider-button:focus-visible:not(:disabled) {
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+	color: #013223;
+	transform: none;
+}
+
+.vvm-villa-availability-calendar__nav-button.vvm-slider-button:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
 }
 
 .vvm-villa-availability-calendar.is-loading .vvm-villa-availability-calendar__months {
