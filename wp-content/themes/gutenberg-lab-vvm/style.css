@@ -1273,6 +1273,15 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	border-color: rgb(247 241 231 / 0.16);
 }
 
+/*
+ * Contact Form 7 renders the response container before it has a message.
+ * Hide that empty state so the styled response border does not appear as a
+ * stray line under the form controls.
+ */
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form .wpcf7-response-output:empty {
+	display: none;
+}
+
 @media (max-width: 1299px) {
 	body.single-villa .wp-site-blocks .wp-block-post-content h2.wp-block-heading {
 		font-size: 2rem;
