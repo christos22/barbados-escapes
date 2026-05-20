@@ -1,3 +1,5 @@
+@import "flatpickr/dist/flatpickr.css";
+
 .vvm-villa-availability-calendar {
 	--vvm-calendar-surface: #f7f1e7;
 	--vvm-calendar-wrap: #fff;
@@ -7,6 +9,8 @@
 	--vvm-calendar-unavailable: #d8d4cd;
 	--vvm-calendar-selected: #84ad9f;
 	--vvm-calendar-range: rgba(132, 173, 159, 0.18);
+	--vvm-calendar-invalid-range: rgba(190, 87, 70, 0.2);
+	--vvm-calendar-invalid-text: #7c3a31;
 
 	background: var(--vvm-calendar-wrap);
 	border: 1px solid rgba(23, 53, 40, 0.12);
@@ -39,50 +43,6 @@
 
 .vvm-villa-availability-calendar__status.has-selection {
 	font-weight: 700;
-}
-
-.vvm-villa-availability-calendar__status-cta {
-	align-items: center;
-	background: transparent;
-	border: 0;
-	border-bottom: 1px solid currentColor;
-	color: #c4922a;
-	cursor: pointer;
-	display: inline-flex;
-	font: inherit;
-	font-weight: 600;
-	gap: 0.35rem;
-	margin-inline-start: 1rem;
-	padding: 0;
-}
-
-.vvm-villa-availability-calendar__status-cta::after {
-	border-block-end: 1px solid currentColor;
-	border-inline-end: 1px solid currentColor;
-	content: "";
-	display: inline-block;
-	height: 0.42em;
-	transform: translateY(-0.12em) rotate(45deg);
-	transition: transform 180ms ease;
-	width: 0.42em;
-}
-
-.vvm-villa-availability-calendar__status-cta:hover,
-.vvm-villa-availability-calendar__status-cta:active,
-.vvm-villa-availability-calendar__status-cta:focus-visible {
-	color: #9f741d;
-	outline: none;
-}
-
-.vvm-villa-availability-calendar__status-cta:hover::after,
-.vvm-villa-availability-calendar__status-cta:active::after,
-.vvm-villa-availability-calendar__status-cta:focus-visible::after {
-	transform: translateY(0.08em) rotate(45deg);
-}
-
-.vvm-villa-availability-calendar__status-cta:focus-visible {
-	outline: 2px solid currentColor;
-	outline-offset: 3px;
 }
 
 .vvm-villa-availability-calendar__navigation {
@@ -212,20 +172,22 @@
 	cursor: pointer;
 }
 
-.vvm-villa-availability-calendar__day.is-checkout-candidate.is-unavailable {
-	border-color: var(--vvm-calendar-selected);
-}
-
 .vvm-villa-availability-calendar__day.is-in-range,
-.vvm-villa-availability-calendar__day.is-checkout-candidate:not(.is-unavailable) {
+.vvm-villa-availability-calendar__day.is-preview-in-range {
 	background: var(--vvm-calendar-range);
 	color: #3f5f55;
 }
 
 .vvm-villa-availability-calendar__day.is-selected-start,
-.vvm-villa-availability-calendar__day.is-selected-end {
+.vvm-villa-availability-calendar__day.is-selected-end,
+.vvm-villa-availability-calendar__day.is-preview-end {
 	background: var(--vvm-calendar-selected);
 	color: #fff;
+}
+
+.vvm-villa-availability-calendar__day.is-preview-invalid {
+	background: var(--vvm-calendar-invalid-range);
+	color: var(--vvm-calendar-invalid-text);
 }
 
 .vvm-villa-availability-calendar__legend {
@@ -243,6 +205,182 @@
 	display: inline-block;
 	height: 0.7rem;
 	width: 0.7rem;
+}
+
+.vvm-villa-contact-form .vvm-villa-date-picker-input[readonly] {
+	cursor: pointer;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker {
+	--vvm-date-picker-border: rgba(77, 72, 68, 0.14);
+	--vvm-date-picker-hover: rgba(132, 173, 159, 0.16);
+	--vvm-date-picker-muted: #918b85;
+	--vvm-date-picker-selected: #84ad9f;
+	--vvm-date-picker-surface: #f7f1e7;
+	--vvm-date-picker-text: #57524e;
+	--vvm-date-picker-unavailable: #d8d4cd;
+
+	background: var(--vvm-date-picker-surface);
+	border: 1px solid var(--vvm-date-picker-border);
+	border-radius: 6px;
+	box-shadow: 0 18px 40px rgb(23 53 40 / 0.08);
+	box-sizing: border-box;
+	color: var(--vvm-date-picker-text);
+	font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
+	padding: 0.75rem;
+	width: 20rem;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker::before,
+.flatpickr-calendar.vvm-villa-date-picker::after {
+	border-bottom-color: var(--vvm-date-picker-surface);
+}
+
+.flatpickr-calendar.vvm-villa-date-picker.arrowBottom::before,
+.flatpickr-calendar.vvm-villa-date-picker.arrowBottom::after {
+	border-top-color: var(--vvm-date-picker-surface);
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-months {
+	align-items: center;
+	margin-block-end: 0.45rem;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-month {
+	background: transparent;
+	color: var(--vvm-date-picker-text);
+	height: 2.3rem;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-current-month {
+	align-items: center;
+	display: flex;
+	font-size: 1rem;
+	font-weight: 500;
+	height: 2.3rem;
+	justify-content: center;
+	left: 12.5%;
+	padding: 0;
+	width: 75%;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-current-month .cur-month,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-current-month input.cur-year {
+	color: #5d5855;
+	font-family: var(--wp--preset--font-family--serif, Georgia, serif);
+	font-size: 1rem;
+	font-weight: 500;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-current-month input.cur-year {
+	background: transparent;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-prev-month,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-next-month {
+	align-items: center;
+	color: #1e3d2f;
+	display: flex;
+	height: 2.3rem;
+	justify-content: center;
+	padding: 0;
+	top: 0.75rem;
+	width: 2.3rem;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-prev-month:hover,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-next-month:hover {
+	color: var(--vvm-date-picker-selected);
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-prev-month svg,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-next-month svg {
+	fill: currentColor;
+	height: 0.75rem;
+	width: 0.75rem;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-weekdays,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-weekdaycontainer {
+	background: transparent;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker span.flatpickr-weekday {
+	background: transparent;
+	color: var(--vvm-date-picker-muted);
+	font-size: 0.68rem;
+	font-weight: 400;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-days {
+	width: 100%;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .dayContainer {
+	gap: 0.16rem;
+	max-width: none;
+	min-width: 0;
+	width: 100%;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day {
+	align-items: center;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 3px;
+	color: var(--vvm-date-picker-text);
+	display: flex;
+	font-size: 0.72rem;
+	height: 1.9rem;
+	justify-content: center;
+	line-height: initial;
+	margin: 0;
+	max-width: none;
+	padding: 2px 0 0;
+	width: calc((100% - 0.96rem) / 7);
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day:hover,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day:focus {
+	background: var(--vvm-date-picker-hover);
+	border-color: var(--vvm-date-picker-selected);
+	color: #3f5f55;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.today {
+	border-color: var(--vvm-date-picker-border);
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.selected,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.selected:hover,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.selected:focus {
+	background: var(--vvm-date-picker-selected);
+	border-color: var(--vvm-date-picker-selected);
+	color: #fff;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.prevMonthDay,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.nextMonthDay {
+	color: rgb(87 82 78 / 0.42);
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.flatpickr-disabled,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.flatpickr-disabled:hover,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.prevMonthDay.flatpickr-disabled,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.nextMonthDay.flatpickr-disabled {
+	background: var(--vvm-date-picker-unavailable);
+	border-color: var(--vvm-date-picker-unavailable);
+	color: #807970;
+	cursor: not-allowed;
+	opacity: 1;
+	text-decoration: none;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-unavailable,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-unavailable:hover {
+	background: var(--vvm-date-picker-unavailable);
+	border-color: var(--vvm-date-picker-unavailable);
+	color: #807970;
 }
 
 @media (max-width: 1200px) {

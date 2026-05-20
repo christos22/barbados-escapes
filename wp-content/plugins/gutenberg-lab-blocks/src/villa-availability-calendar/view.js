@@ -1,3 +1,5 @@
+import flatpickr from 'flatpickr';
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const parseDateKey = ( value ) => {
@@ -47,6 +49,55 @@ const formatNights = ( nights ) => {
 	return `${ nights } nights`;
 };
 
+const formatDateKey = ( value ) => new Date( value ).toISOString().slice( 0, 10 );
+
+const addDays = ( value, days ) => {
+	const dateKey = parseDateKey( value );
+
+	if ( dateKey === null ) {
+		return '';
+	}
+
+	return formatDateKey( dateKey + days * DAY_MS );
+};
+
+const normalizeDateValue = ( value ) => {
+	const dateKey = parseDateKey( value );
+
+	if ( dateKey === null ) {
+		return '';
+	}
+
+	return formatDateKey( dateKey );
+};
+
+const formatPickerDate = ( date ) => {
+	if ( ! ( date instanceof Date ) || Number.isNaN( date.getTime() ) ) {
+		return '';
+	}
+
+	const year = date.getFullYear();
+	const month = String( date.getMonth() + 1 ).padStart( 2, '0' );
+	const day = String( date.getDate() ).padStart( 2, '0' );
+
+	return `${ year }-${ month }-${ day }`;
+};
+
+const getLaterDate = ( first, second ) => {
+	const firstKey = parseDateKey( first );
+	const secondKey = parseDateKey( second );
+
+	if ( firstKey === null ) {
+		return second || first || '';
+	}
+
+	if ( secondKey === null ) {
+		return first || second || '';
+	}
+
+	return secondKey > firstKey ? second : first;
+};
+
 const shiftMonthStart = ( value, monthOffset ) => {
 	const parts = String( value || '' )
 		.split( '-' )
@@ -88,6 +139,19 @@ const findForm = ( selector ) => {
 	return target.querySelector( 'form' );
 };
 
+const getFieldByName = ( form, name ) => {
+	if ( ! form || ! name ) {
+		return null;
+	}
+
+	const fieldName =
+		typeof window.CSS !== 'undefined' && typeof window.CSS.escape === 'function'
+			? window.CSS.escape( name )
+			: String( name ).replace( /"/g, '\\"' );
+
+	return form.querySelector( `[name="${ fieldName }"]` );
+};
+
 const findEnquiryTarget = ( selector ) => {
 	const form = findForm( selector );
 
@@ -116,12 +180,12 @@ const scrollToElement = ( element ) => {
 	} );
 };
 
-const setFieldValue = ( form, name, value, type = 'hidden' ) => {
+const setFieldValue = ( form, name, value, type = 'hidden', shouldDispatch = true ) => {
 	if ( ! form || ! name ) {
-		return;
+		return null;
 	}
 
-	let field = form.querySelector( `[name="${ name }"]` );
+	let field = getFieldByName( form, name );
 
 	if ( ! field ) {
 		field = document.createElement( 'input' );
@@ -131,8 +195,13 @@ const setFieldValue = ( form, name, value, type = 'hidden' ) => {
 	}
 
 	field.value = value;
-	field.dispatchEvent( new Event( 'input', { bubbles: true } ) );
-	field.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+
+	if ( shouldDispatch ) {
+		field.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+		field.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+	}
+
+	return field;
 };
 
 const initializeCalendar = ( root ) => {
@@ -161,7 +230,13 @@ const initializeCalendar = ( root ) => {
 	let dayButtons = Array.from( root.querySelectorAll( '[data-vvm-calendar-day]' ) );
 	let selectedArrival = '';
 	let selectedDeparture = '';
+	let previewDeparture = '';
 	let windowStart = data.windowStart || minimumStart;
+	let loadedWindowEnd =
+		data.windowEnd || shiftMonthStart( windowStart, monthsToShow );
+	let arrivalPicker = null;
+	let departurePicker = null;
+	let isSyncingPickers = false;
 	let isLoading = false;
 
 	const setStatus = ( message ) => {
@@ -194,21 +269,13 @@ const initializeCalendar = ( root ) => {
 			selectedDeparture
 		) } (${ formatNights( nights ) })`;
 		const message = document.createElement( 'span' );
-		const button = document.createElement( 'button' );
 
 		statusNode.classList.add( 'has-selection' );
 		message.textContent = `${
 			data.messages?.selected || 'Selected dates have been added to the enquiry form.'
-		} ${ summary }. `;
+		} ${ summary }.`;
 
-		button.type = 'button';
-		button.className = 'vvm-villa-availability-calendar__status-cta';
-		button.textContent = data.messages?.completeEnquiry || 'Enquire';
-		button.addEventListener( 'click', () => {
-			scrollToElement( findEnquiryTarget( data.formSelector ) );
-		} );
-
-		statusNode.replaceChildren( message, button );
+		statusNode.replaceChildren( message );
 	};
 
 	const rangeIsAvailable = ( arrival, departure ) => {
@@ -216,6 +283,10 @@ const initializeCalendar = ( root ) => {
 		const departureKey = parseDateKey( departure );
 
 		if ( arrivalKey === null || departureKey === null || departureKey <= arrivalKey ) {
+			return false;
+		}
+
+		if ( unavailableDates.has( departure ) ) {
 			return false;
 		}
 
@@ -233,6 +304,15 @@ const initializeCalendar = ( root ) => {
 	const syncButtons = () => {
 		const arrivalKey = parseDateKey( selectedArrival );
 		const departureKey = parseDateKey( selectedDeparture );
+		const previewDepartureKey = parseDateKey( previewDeparture );
+		const hasPreview =
+			selectedArrival &&
+			! selectedDeparture &&
+			arrivalKey !== null &&
+			previewDepartureKey !== null &&
+			previewDepartureKey > arrivalKey;
+		const previewIsAvailable =
+			hasPreview && rangeIsAvailable( selectedArrival, previewDeparture );
 
 		dayButtons.forEach( ( button ) => {
 			const date = button.dataset.date;
@@ -253,18 +333,67 @@ const initializeCalendar = ( root ) => {
 				arrivalKey !== null &&
 				dateKey > arrivalKey &&
 				rangeIsAvailable( selectedArrival, date );
+			const isPreviewEnd = hasPreview && date === previewDeparture;
+			const isPreviewRange =
+				hasPreview &&
+				dateKey !== null &&
+				dateKey > arrivalKey &&
+				dateKey < previewDepartureKey;
+			const isPreviewInvalid =
+				hasPreview &&
+				! previewIsAvailable &&
+				dateKey !== null &&
+				dateKey > arrivalKey &&
+				dateKey <= previewDepartureKey;
 
 			button.classList.toggle( 'is-selected-start', isArrival );
 			button.classList.toggle( 'is-selected-end', isDeparture );
 			button.classList.toggle( 'is-in-range', isInRange );
 			button.classList.toggle( 'is-checkout-candidate', isCheckoutCandidate );
+			button.classList.toggle(
+				'is-preview-in-range',
+				isPreviewRange && previewIsAvailable
+			);
+			button.classList.toggle( 'is-preview-end', isPreviewEnd && previewIsAvailable );
+			button.classList.toggle( 'is-preview-invalid', isPreviewInvalid );
 			button.classList.toggle( 'is-unavailable', isUnavailable );
 			button.setAttribute( 'aria-pressed', isArrival || isDeparture ? 'true' : 'false' );
 		} );
 	};
 
+	const clearPreview = () => {
+		if ( ! previewDeparture ) {
+			return;
+		}
+
+		previewDeparture = '';
+		syncButtons();
+	};
+
+	const previewRange = ( date ) => {
+		if ( ! selectedArrival || selectedDeparture || date <= selectedArrival ) {
+			clearPreview();
+			return;
+		}
+
+		if ( previewDeparture === date ) {
+			return;
+		}
+
+		previewDeparture = date;
+		syncButtons();
+	};
+
 	const bindDayButtons = () => {
 		dayButtons.forEach( ( button ) => {
+			button.addEventListener( 'pointerenter', () => {
+				previewRange( button.dataset.date );
+			} );
+
+			button.addEventListener( 'focus', () => {
+				previewRange( button.dataset.date );
+			} );
+
 			button.addEventListener( 'click', () => {
 				const date = button.dataset.date;
 				const isUnavailable = unavailableDates.has( date );
@@ -277,6 +406,7 @@ const initializeCalendar = ( root ) => {
 
 					selectedArrival = date;
 					selectedDeparture = '';
+					previewDeparture = '';
 					setStatus( data.messages?.selectDeparture || 'Choose a check-out date.' );
 					syncButtons();
 					return;
@@ -289,12 +419,21 @@ const initializeCalendar = ( root ) => {
 				}
 
 				selectedDeparture = date;
+				previewDeparture = '';
 				syncButtons();
 				fillEnquiryForm();
 				renderSelectedStatus();
+				scrollToElement( findEnquiryTarget( data.formSelector ) );
 			} );
 		} );
 	};
+
+	calendarNode.addEventListener( 'pointerleave', clearPreview );
+	calendarNode.addEventListener( 'focusout', ( event ) => {
+		if ( ! calendarNode.contains( event.relatedTarget ) ) {
+			clearPreview();
+		}
+	} );
 
 	const updateWindow = ( windowData ) => {
 		if ( ! windowData || ! windowData.html ) {
@@ -303,6 +442,7 @@ const initializeCalendar = ( root ) => {
 
 		calendarNode.innerHTML = windowData.html;
 		windowStart = windowData.start || windowStart;
+		loadedWindowEnd = getLaterDate( loadedWindowEnd, windowData.end );
 		dayButtons = Array.from( root.querySelectorAll( '[data-vvm-calendar-day]' ) );
 
 		if ( rangeNode && windowData.rangeLabel ) {
@@ -314,6 +454,7 @@ const initializeCalendar = ( root ) => {
 		} );
 
 		bindDayButtons();
+		refreshFormDatePickers();
 		syncButtons();
 	};
 
@@ -366,13 +507,299 @@ const initializeCalendar = ( root ) => {
 		const summary = `${ formatDate( selectedArrival ) } - ${ formatDate(
 			selectedDeparture
 		) } (${ formatNights( nights ) })`;
+		const arrivalField = getFieldByName( form, fields.arrival );
+		const departureField = getFieldByName( form, fields.departure );
 
-		setFieldValue( form, fields.arrival, selectedArrival, 'date' );
-		setFieldValue( form, fields.departure, selectedDeparture, 'date' );
+		isSyncingPickers = true;
+		arrivalPicker?.setDate( selectedArrival, false, 'Y-m-d' );
+		setFieldValue( form, fields.arrival, selectedArrival, 'date', false );
+		refreshFormDatePickers();
+		departurePicker?.setDate( selectedDeparture, false, 'Y-m-d' );
+		setFieldValue( form, fields.departure, selectedDeparture, 'date', false );
+		isSyncingPickers = false;
+
+		setFieldValue( form, fields.villaId, String( data.villaId || '' ), 'hidden', false );
+		setFieldValue( form, fields.villaTitle, data.villaTitle || '', 'hidden', false );
+		setFieldValue( form, fields.villaUrl, data.villaUrl || '', 'hidden', false );
+		setFieldValue( form, fields.dateSummary, summary, 'hidden', false );
+
+		if ( arrivalField && departureField ) {
+			validateFormDateFields( form, arrivalField, departureField );
+		}
+	};
+
+	const getVisibleDateField = ( field ) => field?._flatpickr?.altInput || field;
+
+	const syncVillaFormMetadata = ( form ) => {
+		const fields = data.fields || {};
+
 		setFieldValue( form, fields.villaId, String( data.villaId || '' ) );
 		setFieldValue( form, fields.villaTitle, data.villaTitle || '' );
 		setFieldValue( form, fields.villaUrl, data.villaUrl || '' );
+	};
+
+	const setDateFieldValidity = ( field, message = '' ) => {
+		if ( ! field ) {
+			return;
+		}
+
+		const visibleField = getVisibleDateField( field );
+		const fieldsToUpdate =
+			visibleField && visibleField !== field ? [ field, visibleField ] : [ field ];
+
+		fieldsToUpdate.forEach( ( currentField ) => {
+			if ( typeof currentField.setCustomValidity === 'function' ) {
+				currentField.setCustomValidity( message );
+			}
+
+			currentField.setAttribute( 'aria-invalid', message ? 'true' : 'false' );
+		} );
+		field.setAttribute( 'aria-invalid', message ? 'true' : 'false' );
+	};
+
+	const updateFormDateSummary = ( form, arrival, departure, isValidRange ) => {
+		const fields = data.fields || {};
+
+		if ( ! fields.dateSummary ) {
+			return;
+		}
+
+		if ( ! arrival || ! departure || ! isValidRange ) {
+			setFieldValue( form, fields.dateSummary, '' );
+			return;
+		}
+
+		const nights = getNightsCount( arrival, departure );
+		const summary = `${ formatDate( arrival ) } - ${ formatDate(
+			departure
+		) } (${ formatNights( nights ) })`;
+
 		setFieldValue( form, fields.dateSummary, summary );
+	};
+
+	const validateFormDateFields = ( form, arrivalField, departureField, shouldReport = false ) => {
+		const arrival = normalizeDateValue( arrivalField.value );
+		const departure = normalizeDateValue( departureField.value );
+		let isValid = true;
+		let reportTarget = null;
+
+		setDateFieldValidity( arrivalField );
+		setDateFieldValidity( departureField );
+
+		if ( minimumStart ) {
+			arrivalField.min = minimumStart;
+			departureField.min = arrival ? addDays( arrival, 1 ) : minimumStart;
+		}
+
+		if ( arrival && unavailableDates.has( arrival ) ) {
+			setDateFieldValidity(
+				arrivalField,
+				data.messages?.arrivalUnavailable ||
+					'That check-in date is unavailable. Please choose another date.'
+			);
+			isValid = false;
+			reportTarget = reportTarget || arrivalField;
+		}
+
+		if ( arrival && departure && departure <= arrival ) {
+			setDateFieldValidity(
+				departureField,
+				data.messages?.departureAfterArrival ||
+					'Check-out date must be after check-in date.'
+			);
+			isValid = false;
+			reportTarget = reportTarget || departureField;
+		} else if (
+			arrival &&
+			departure &&
+			! rangeIsAvailable( arrival, departure )
+		) {
+			setDateFieldValidity(
+				departureField,
+				data.messages?.unavailable || 'Those dates include unavailable nights.'
+			);
+			isValid = false;
+			reportTarget = reportTarget || departureField;
+		}
+
+		updateFormDateSummary( form, arrival, departure, isValid );
+
+		const visibleReportTarget = getVisibleDateField( reportTarget );
+
+		if (
+			shouldReport &&
+			visibleReportTarget &&
+			typeof visibleReportTarget.reportValidity === 'function'
+		) {
+			visibleReportTarget.reportValidity();
+		}
+
+		return isValid;
+	};
+
+	const getPickerAppendTarget = ( form ) =>
+		form.closest( '.vvm-villa-contact__form-card' ) ||
+		form.closest( '.vvm-villa-contact' ) ||
+		form.parentElement ||
+		document.body;
+
+	const getArrivalDisableRules = () => [
+		( date ) => unavailableDates.has( formatPickerDate( date ) ),
+	];
+
+	const getDepartureDisableRules = ( arrival ) => [
+		( date ) => {
+			const departure = formatPickerDate( date );
+
+			if ( ! departure ) {
+				return true;
+			}
+
+			if ( ! arrival ) {
+				return unavailableDates.has( departure );
+			}
+
+			return departure <= arrival || ! rangeIsAvailable( arrival, departure );
+		},
+	];
+
+	const refreshFormDatePickers = () => {
+		const arrival = normalizeDateValue( arrivalPicker?.input?.value || '' );
+		const pickerMaxDate = loadedWindowEnd || null;
+
+		if ( arrivalPicker ) {
+			arrivalPicker.set( 'minDate', minimumStart || null );
+			arrivalPicker.set( 'maxDate', pickerMaxDate );
+			arrivalPicker.set( 'disable', getArrivalDisableRules() );
+			arrivalPicker.redraw();
+		}
+
+		if ( departurePicker ) {
+			departurePicker.set( 'minDate', arrival ? addDays( arrival, 1 ) : minimumStart || null );
+			departurePicker.set( 'maxDate', pickerMaxDate );
+			departurePicker.set( 'disable', getDepartureDisableRules( arrival ) );
+			departurePicker.redraw();
+		}
+	};
+
+	const syncCalendarSelectionFromForm = ( form, arrivalField, departureField ) => {
+		const arrival = normalizeDateValue( arrivalField.value );
+		const departure = normalizeDateValue( departureField.value );
+		const isValid = validateFormDateFields( form, arrivalField, departureField, true );
+		const arrivalIsUnavailable = arrival && unavailableDates.has( arrival );
+
+		selectedArrival = arrival && ! arrivalIsUnavailable ? arrival : '';
+		selectedDeparture = arrival && departure && isValid ? departure : '';
+		previewDeparture = '';
+
+		if ( selectedArrival && selectedDeparture ) {
+			renderSelectedStatus();
+		} else if ( selectedArrival ) {
+			setStatus( data.messages?.selectDeparture || 'Choose a check-out date.' );
+		}
+
+		syncButtons();
+	};
+
+	const setupDatePicker = ( field, options ) =>
+		flatpickr( field, {
+			allowInput: false,
+			appendTo: options.appendTo,
+			altFormat: 'M j, Y',
+			altInput: true,
+			altInputClass: `${ field.className || '' } vvm-villa-date-picker-input`.trim(),
+			clickOpens: true,
+			dateFormat: 'Y-m-d',
+			disableMobile: true,
+			maxDate: loadedWindowEnd || null,
+			minDate: options.minDate || minimumStart || null,
+			monthSelectorType: 'static',
+			onChange: options.onChange,
+			onDayCreate: ( _selectedDates, _dateStr, _instance, dayElement ) => {
+				const date = formatPickerDate( dayElement.dateObj );
+
+				if ( unavailableDates.has( date ) ) {
+					dayElement.classList.add( 'vvm-flatpickr-unavailable' );
+					dayElement.setAttribute(
+						'title',
+						data.messages?.arrivalUnavailable || 'Unavailable'
+					);
+				}
+			},
+			onReady: ( _selectedDates, _dateStr, instance ) => {
+				instance.calendarContainer.classList.add( 'vvm-villa-date-picker' );
+				instance.altInput?.setAttribute( 'readonly', 'readonly' );
+			},
+		} );
+
+	const bindFormDateFields = () => {
+		const form = findForm( data.formSelector );
+		const fields = data.fields || {};
+
+		if ( ! form || ! fields.arrival || ! fields.departure ) {
+			return;
+		}
+
+		syncVillaFormMetadata( form );
+
+		const arrivalField = getFieldByName( form, fields.arrival );
+		const departureField = getFieldByName( form, fields.departure );
+
+		if ( ! arrivalField || ! departureField ) {
+			return;
+		}
+
+		const appendTo = getPickerAppendTarget( form );
+
+		const validateWithMessage = () => {
+			validateFormDateFields( form, arrivalField, departureField, true );
+		};
+
+		arrivalPicker = setupDatePicker( arrivalField, {
+			appendTo,
+			onChange: () => {
+				if ( isSyncingPickers ) {
+					return;
+				}
+
+				departurePicker?.clear( false );
+				refreshFormDatePickers();
+				syncCalendarSelectionFromForm( form, arrivalField, departureField );
+			},
+		} );
+
+		departurePicker = setupDatePicker( departureField, {
+			appendTo,
+			minDate: minimumStart,
+			onChange: () => {
+				if ( isSyncingPickers ) {
+					return;
+				}
+
+				syncCalendarSelectionFromForm( form, arrivalField, departureField );
+			},
+		} );
+
+		arrivalField.addEventListener( 'input', validateWithMessage );
+		arrivalField.addEventListener( 'change', validateWithMessage );
+		departureField.addEventListener( 'input', validateWithMessage );
+		departureField.addEventListener( 'change', validateWithMessage );
+
+		form.addEventListener(
+			'submit',
+			( event ) => {
+				if ( validateFormDateFields( form, arrivalField, departureField, true ) ) {
+					return;
+				}
+
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			},
+			true
+		);
+
+		refreshFormDatePickers();
+		validateFormDateFields( form, arrivalField, departureField );
 	};
 
 	if ( previousButton ) {
@@ -389,6 +816,7 @@ const initializeCalendar = ( root ) => {
 		} );
 	}
 
+	bindFormDateFields();
 	bindDayButtons();
 	syncButtons();
 	setNavigationState();

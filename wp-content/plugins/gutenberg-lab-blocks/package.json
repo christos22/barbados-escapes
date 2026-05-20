@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@splidejs/splide": "^4.1.4",
-    "@vimeo/player": "^2.30.3"
+    "@vimeo/player": "^2.30.3",
+    "flatpickr": "^4.6.13"
   }
 }

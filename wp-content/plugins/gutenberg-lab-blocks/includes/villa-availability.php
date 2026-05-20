@@ -588,7 +588,7 @@ function gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $start_dat
 }
 
 /**
- * Checks if a guest stay can occupy every night in a date range.
+ * Checks if a guest stay avoids every unavailable calendar date in a range.
  *
  * @param int    $villa_id       Villa post ID.
  * @param string $arrival_date   Arrival date.
@@ -612,7 +612,7 @@ function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival
 
 	$blocked_count = (int) $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$table_name} WHERE villa_id = %d AND status = %s AND date >= %s AND date < %s",
+			"SELECT COUNT(*) FROM {$table_name} WHERE villa_id = %d AND status = %s AND date >= %s AND date <= %s",
 			$villa_id,
 			'unavailable',
 			$arrival_date,
@@ -1098,6 +1098,7 @@ function gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id,
 
 	return array(
 		'start'            => $month_start->format( 'Y-m-d' ),
+		'end'              => $range_end->format( 'Y-m-d' ),
 		'monthsToShow'     => $months_to_show,
 		'rangeLabel'       => gutenberg_lab_blocks_format_villa_availability_window_label( $month_start, $months_to_show ),
 		'html'             => ob_get_clean(),
@@ -1215,6 +1216,7 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 		'formSelector'     => $form_selector,
 		'endpoint'         => rest_url( 'gutenberg-lab-blocks/v1/villa-availability/' . $villa_id ),
 		'windowStart'      => $window['start'],
+		'windowEnd'        => $window['end'],
 		'minimumStart'     => $window['start'],
 		'monthsToShow'     => $months_to_show,
 		'unavailableDates' => $window['unavailableDates'],
@@ -1230,6 +1232,8 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 		'messages'         => array(
 			'selectArrival' => __( 'Choose an available check-in date.', 'gutenberg-lab-blocks' ),
 			'selectDeparture' => __( 'Choose a check-out date.', 'gutenberg-lab-blocks' ),
+			'arrivalUnavailable' => __( 'That check-in date is unavailable. Please choose another date.', 'gutenberg-lab-blocks' ),
+			'departureAfterArrival' => __( 'Check-out date must be after check-in date.', 'gutenberg-lab-blocks' ),
 			'unavailable'  => __( 'Those dates include unavailable nights.', 'gutenberg-lab-blocks' ),
 			'selected'     => __( 'Selected dates have been added to the enquiry form.', 'gutenberg-lab-blocks' ),
 			'completeEnquiry' => __( 'Enquire', 'gutenberg-lab-blocks' ),

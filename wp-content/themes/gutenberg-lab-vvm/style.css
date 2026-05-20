@@ -867,6 +867,65 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	min-width: 0;
 }
 
+/*
+ * Pair the pricing card with the enquiry form on villa detail pages.
+ * The saved Gutenberg blocks stay editable; this wrapper only controls the
+ * desktop composition requested by the design.
+ */
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact {
+	--vvm-villa-amenities-ink: var(--wp--preset--color--dark-green, #173528);
+	--vvm-villa-amenities-muted: rgb(23 53 40 / 0.66);
+	--vvm-villa-amenities-gold: var(--wp--preset--color--gold, #c4922a);
+	--vvm-villa-amenities-rule: rgb(23 53 40 / 0.12);
+	--vvm-villa-amenities-card: #fffdf8;
+	--vvm-villa-amenities-soft: #f7f1e7;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: clamp(1rem, 2vw, 1.6rem);
+	align-items: stretch;
+	margin-top: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact > :where(.vvm-villa-pricing, .vvm-villa-contact__form-card) {
+	min-width: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact > .vvm-villa-pricing {
+	margin-bottom: 0 !important;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact .vvm-villa-pricing__card,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact > .vvm-villa-contact__form-card {
+	height: 100%;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact .vvm-villa-pricing__header {
+	grid-template-columns: minmax(0, 1fr);
+	align-items: start;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact .vvm-villa-pricing__helper {
+	justify-self: start;
+	max-width: 34rem;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact .vvm-villa-pricing__table table {
+	min-width: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact .vvm-villa-pricing__table th,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact .vvm-villa-pricing__table td {
+	padding: 0.9rem 0.8rem;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact .vvm-villa-pricing__table th {
+	letter-spacing: 0.18em;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact .vvm-villa-pricing__table td {
+	font-size: 0.88rem;
+}
+
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__card {
 	min-width: 0;
 	padding: clamp(2rem, 3vw, 3rem);
@@ -876,7 +935,6 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__header {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.9fr);
-	gap: clamp(1.25rem, 3vw, 2.5rem);
 	align-items: end;
 	margin: 0 0 clamp(1.5rem, 2.5vw, 2.25rem);
 }
@@ -980,6 +1038,11 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	grid-template-columns: minmax(0, 1.08fr) minmax(24rem, 0.92fr);
 	align-items: stretch;
 	margin-top: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+/* Once the enquiry form moves beside pricing, the remaining map card can use the full row. */
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact:not(:has(> .vvm-villa-contact__form-card)) {
+	grid-template-columns: minmax(0, 1fr);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__location-card {
@@ -1101,10 +1164,6 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	margin: 0;
 }
 
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__intro .wp-block-heading {
-	max-width: 13ch;
-}
-
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__form-card .wp-block-contact-form-7-contact-form-selector {
 	display: contents;
 	margin: 0;
@@ -1222,14 +1281,14 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	margin: 0;
 }
 
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button {
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button {
 	border: 1px solid rgb(247 241 231 / 0.16);
 	background: transparent !important;
 	color: rgb(247 241 231 / 0.78) !important;
 }
 
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button::before,
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button::after {
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button::before,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button::after {
 	content: none;
 }
 
@@ -1239,8 +1298,8 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	border-color: #d5a23a;
 }
 
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button:hover,
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button:focus-visible {
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button:hover,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button:focus-visible {
 	border-color: rgb(247 241 231 / 0.38);
 	background: rgb(247 241 231 / 0.06) !important;
 	color: #f7f1e7 !important;
@@ -1335,6 +1394,10 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing-contact {
 		grid-template-columns: minmax(0, 1fr);
 	}
 }
