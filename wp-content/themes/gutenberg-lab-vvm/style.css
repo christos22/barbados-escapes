@@ -718,7 +718,6 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__copy {
-	max-width: 38ch;
 	color: var(--vvm-villa-amenities-muted);
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: 0.95rem;
@@ -1156,7 +1155,6 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__intro {
 	grid-area: intro;
 	display: grid;
-	gap: clamp(1rem, 1.8vw, 1.35rem);
 	margin: 0 0 clamp(1.5rem, 2.5vw, 2rem);
 }
 
