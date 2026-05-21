@@ -253,6 +253,11 @@ add_action( 'edited_villa_amenity', 'gutenberg_lab_blocks_save_villa_amenity_ico
  */
 function gutenberg_lab_blocks_get_villa_meta_schema() {
 	return array(
+		'villa_card_eyebrow'    => array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
 		'villa_card_descriptor' => array(
 			'type'              => 'string',
 			'default'           => '',
@@ -329,11 +334,29 @@ add_action( 'add_meta_boxes_villa', 'gutenberg_lab_blocks_add_villa_meta_boxes' 
  * @param WP_Post $post Current villa post object.
  */
 function gutenberg_lab_blocks_render_villa_card_content_meta_box( $post ) {
+	$eyebrow    = get_post_meta( $post->ID, 'villa_card_eyebrow', true );
 	$descriptor = get_post_meta( $post->ID, 'villa_card_descriptor', true );
 	$facts      = get_post_meta( $post->ID, 'villa_card_facts', true );
 
 	wp_nonce_field( 'gutenberg_lab_blocks_save_villa_fields', 'gutenberg_lab_blocks_villa_fields_nonce' );
 	?>
+	<p>
+		<label for="gutenberg-lab-villa-card-eyebrow">
+			<?php esc_html_e( 'Card eyebrow', 'gutenberg-lab-blocks' ); ?>
+		</label>
+	</p>
+	<input
+		type="text"
+		id="gutenberg-lab-villa-card-eyebrow"
+		name="gutenberg_lab_villa_card_eyebrow"
+		class="widefat"
+		value="<?php echo esc_attr( $eyebrow ); ?>"
+		placeholder="<?php echo esc_attr( gutenberg_lab_blocks_get_villa_card_default_eyebrow() ); ?>"
+	/>
+	<p class="description">
+		<?php esc_html_e( 'Small label above the villa title on collection-style cards. Leave blank to use the default.', 'gutenberg-lab-blocks' ); ?>
+	</p>
+
 	<p>
 		<label for="gutenberg-lab-villa-card-descriptor">
 			<?php esc_html_e( 'Card descriptor', 'gutenberg-lab-blocks' ); ?>
@@ -446,6 +469,7 @@ function gutenberg_lab_blocks_save_villa_meta( $post_id ) {
 	}
 
 	$field_map = array(
+		'villa_card_eyebrow'    => 'gutenberg_lab_villa_card_eyebrow',
 		'villa_card_descriptor' => 'gutenberg_lab_villa_card_descriptor',
 		'villa_card_facts'      => 'gutenberg_lab_villa_card_facts',
 		'villa_card_cta_label'  => 'gutenberg_lab_villa_card_cta_label',
@@ -563,6 +587,15 @@ function gutenberg_lab_blocks_get_villa_location_terms() {
 	}
 
 	return $terms;
+}
+
+/**
+ * Returns the default eyebrow label used by collection-style villa cards.
+ *
+ * @return string
+ */
+function gutenberg_lab_blocks_get_villa_card_default_eyebrow() {
+	return __( 'Curated Villa', 'gutenberg-lab-blocks' );
 }
 
 /**
@@ -821,6 +854,7 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 	$image_url = $image_id ? get_the_post_thumbnail_url( $villa_id, 'large' ) : '';
 	$image_alt = $image_id ? get_post_meta( $image_id, '_wp_attachment_image_alt', true ) : '';
 	$excerpt   = get_the_excerpt( $villa_id );
+	$eyebrow   = get_post_meta( $villa_id, 'villa_card_eyebrow', true );
 	$descriptor = get_post_meta( $villa_id, 'villa_card_descriptor', true );
 	$facts      = get_post_meta( $villa_id, 'villa_card_facts', true );
 
@@ -832,6 +866,10 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 		$descriptor = $excerpt;
 	}
 
+	if ( '' === $eyebrow ) {
+		$eyebrow = gutenberg_lab_blocks_get_villa_card_default_eyebrow();
+	}
+
 	if ( '' === $image_alt && $image_id ) {
 		$image_alt = get_the_title( $image_id );
 	}
@@ -841,6 +879,7 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 		'title'     => get_the_title( $villa_id ),
 		'permalink' => get_permalink( $villa_id ),
 		'excerpt'   => $excerpt,
+		'eyebrow'   => $eyebrow,
 		'descriptor' => $descriptor,
 		'facts'     => $facts,
 		'amenities' => gutenberg_lab_blocks_get_villa_amenities( $villa_id ),
@@ -919,9 +958,9 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		</a>
 
 		<div class="vvm-card-grid__card-content">
-			<?php if ( 'collection' === $args['presentation'] ) : ?>
+			<?php if ( 'collection' === $args['presentation'] && '' !== $villa_data['eyebrow'] ) : ?>
 				<p class="vvm-card-grid__card-eyebrow">
-					<?php esc_html_e( 'Curated Villa', 'gutenberg-lab-blocks' ); ?>
+					<?php echo esc_html( $villa_data['eyebrow'] ); ?>
 				</p>
 			<?php endif; ?>
 

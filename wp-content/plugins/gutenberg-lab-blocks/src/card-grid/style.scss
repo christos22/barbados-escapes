@@ -6,6 +6,13 @@
 	--vvm-card-grid-card-width: 100%;
 	--vvm-card-grid-media-ratio-width: 3;
 	--vvm-card-grid-media-ratio-height: 2;
+	--vvm-card-grid-carousel-control-outset: clamp(4.5rem, 10vw, 8rem);
+	--vvm-card-grid-carousel-control-screen-inset: clamp(0.5rem, 1vw, 0.75rem);
+	--vvm-card-grid-carousel-side-reserve: clamp(4rem, 5.5vw, 5rem);
+	--vvm-card-grid-carousel-controls-width: min(
+		calc(100vw - (var(--vvm-card-grid-carousel-control-screen-inset) * 2)),
+		calc(100% + (var(--vvm-card-grid-carousel-control-outset) * 2))
+	);
 
 	.vvm-card-grid__items {
 		display: grid;
@@ -21,7 +28,19 @@
 	}
 
 	.vvm-card-grid__carousel-controls {
-		--vvm-slider-controls-inset-inline: 0.5rem;
+		--vvm-slider-controls-inset-inline: 0px;
+	}
+
+	.vvm-card-grid__carousel-controls.vvm-slider-controls--preset-center {
+		left: 50%;
+		right: auto;
+		width: var(--vvm-card-grid-carousel-controls-width);
+		max-width: calc(100vw - (var(--vvm-card-grid-carousel-control-screen-inset) * 2));
+		padding-inline: 0;
+		transform: translate(
+			calc(-50% + var(--vvm-slider-controls-offset-x)),
+			calc(-50% + var(--vvm-slider-controls-offset-y))
+		);
 	}
 
 	.vvm-card-grid__viewport {
@@ -219,6 +238,18 @@
 			 */
 			flex: 0 0 var(--vvm-card-grid-card-width);
 			max-width: var(--vvm-card-grid-card-width);
+		}
+	}
+}
+
+@media (min-width: 900px) {
+	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--display-carousel {
+		.vvm-card-grid__carousel {
+			max-inline-size: min(
+				100%,
+				calc(100vw - (var(--vvm-card-grid-carousel-side-reserve) * 2)),
+				1280px
+			);
 		}
 	}
 }
