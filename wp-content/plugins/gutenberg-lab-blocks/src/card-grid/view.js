@@ -10,20 +10,50 @@ function getVisibleColumns( carousel ) {
 		: visibleColumns;
 }
 
+function getTrackGap( track ) {
+	const trackStyles = window.getComputedStyle( track );
+	const gap = Number.parseFloat( trackStyles.columnGap || trackStyles.gap );
+
+	return Number.isNaN( gap ) ? 0 : gap;
+}
+
+function syncCarouselCardWidth( carousel, viewport, track ) {
+	const visibleColumns = getVisibleColumns( carousel );
+	const totalGap = getTrackGap( track ) * ( visibleColumns - 1 );
+	const rawCardWidth = ( viewport.clientWidth - totalGap ) / visibleColumns;
+	const cardWidth = Math.ceil( Math.max( 0, rawCardWidth ) );
+
+	// CSS alone cannot divide a dynamic gap value reliably, so JS writes the
+	// exact pixel width that the existing carousel controls should slide by.
+	carousel.style.setProperty(
+		'--vvm-card-grid-card-width',
+		`${ cardWidth }px`
+	);
+
+	return visibleColumns;
+}
+
 function initializeCardGridCarousel( carousel ) {
+	const viewport = carousel.querySelector( '[data-card-grid-viewport]' );
 	const track = carousel.querySelector( '[data-card-grid-track]' );
 	const cards = Array.from( track?.children ?? [] );
 	const previousButton = carousel.querySelector( '[data-card-grid-prev]' );
 	const nextButton = carousel.querySelector( '[data-card-grid-next]' );
 
-	if ( ! track || cards.length < 2 || ! previousButton || ! nextButton ) {
+	if (
+		! viewport ||
+		! track ||
+		cards.length < 2 ||
+		! previousButton ||
+		! nextButton
+	) {
 		return;
 	}
 
 	let currentIndex = 0;
 
 	const syncCarouselState = () => {
-		const visibleColumns = getVisibleColumns( carousel );
+		const visibleColumns = syncCarouselCardWidth( carousel, viewport, track );
 		const maxIndex = Math.max( 0, cards.length - visibleColumns );
 
 		currentIndex = Math.min( currentIndex, maxIndex );

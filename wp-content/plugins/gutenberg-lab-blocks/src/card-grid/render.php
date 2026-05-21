@@ -76,13 +76,18 @@ if ( ! in_array( $media_ratio, $allowed_ratios, true ) ) {
 	$media_ratio = 'landscape';
 }
 
-$styles = array();
+$styles = array(
+	// The theme sets the page-level block gap to zero. Card grids need their
+	// own default so an unset block gap still renders like the normal grid.
+	'--vvm-card-grid-gap:var(--wp--preset--spacing--lg);',
+);
 
 if ( is_string( $block_gap ) && '' !== $block_gap ) {
 	$block_gap = gutenberg_lab_card_grid_resolve_block_gap_value( $block_gap );
 	// Keep a trailing semicolon so WordPress can safely append native support
 	// styles like padding/margin without producing an invalid style attribute.
 	$styles[] = '--wp--style--block-gap:' . esc_attr( $block_gap ) . ';';
+	$styles[] = '--vvm-card-grid-gap:' . esc_attr( $block_gap ) . ';';
 }
 
 $card_markup = '';
