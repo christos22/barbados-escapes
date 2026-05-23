@@ -686,9 +686,9 @@ body.post-type-site_message.editor-styles-wrapper .wp-block-button:not([class*='
 }
 
 .editor-styles-wrapper .vvm-header .wp-block-site-logo img {
-	width: min(220px, 100%) !important;
+	width: min(150px, 100%) !important;
 	height: auto !important;
-	max-width: 220px;
+	max-width: 150px;
 	max-height: none;
 	object-fit: contain;
 }

@@ -175,10 +175,38 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		} );
 	};
 
+	const initializeVillaContactTextareas = () => {
+		villaContactForms.forEach( ( form ) => {
+			const textarea = form.querySelector(
+				'textarea[name="villa-escape-details"]'
+			);
+
+			if ( ! textarea ) {
+				return;
+			}
+
+			const syncTextareaHeight = () => {
+				textarea.style.height = 'auto';
+				textarea.style.height = `${ textarea.scrollHeight }px`;
+			};
+
+			// Start compact, then grow with the visitor's message.
+			textarea.rows = 1;
+			textarea.style.overflowY = 'hidden';
+			textarea.style.resize = 'none';
+			textarea.addEventListener( 'input', syncTextareaHeight );
+			window.addEventListener( 'resize', syncTextareaHeight, {
+				passive: true,
+			} );
+			syncTextareaHeight();
+		} );
+	};
+
 	syncScrollbarWidth();
 	initializeFooterReveal();
 	initializeBedroomLevels();
 	initializeVillaContactDateRanges();
+	initializeVillaContactTextareas();
 	window.addEventListener( 'resize', syncScrollbarWidth, { passive: true } );
 
 	if ( ! header ) {
