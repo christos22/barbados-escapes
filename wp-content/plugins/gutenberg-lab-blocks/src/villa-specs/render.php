@@ -12,9 +12,18 @@ if ( '' === trim( wp_strip_all_tags( $content ) ) ) {
 	return;
 }
 
+$align              = $attributes['align'] ?? '';
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
-		'class' => 'vvm-villa-specs',
+		'class' => implode(
+			' ',
+			array_filter(
+				array(
+					'vvm-villa-specs',
+					'' === $align ? 'alignfull' : '',
+				)
+			)
+		),
 	)
 );
 ?>
