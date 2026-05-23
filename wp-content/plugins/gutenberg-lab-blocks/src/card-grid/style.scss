@@ -87,16 +87,6 @@
 		margin: 0;
 	}
 
-	.vvm-card-grid__card-content > .wp-block-buttons:last-child {
-		margin-top: auto;
-		padding-top: var(--wp--preset--spacing--sm);
-	}
-
-	.vvm-card-grid__card-content > .vvm-card-grid__cta-row:last-child {
-		margin-top: auto;
-		padding-top: var(--wp--preset--spacing--sm);
-	}
-
 	.vvm-card-grid__cta-row {
 		display: flex;
 		flex-wrap: wrap;
@@ -329,11 +319,6 @@
 		color: rgb(30 61 47 / 0.72);
 		font-size: var(--wp--preset--font-size--lg);
 		line-height: 1.45;
-	}
-
-	.vvm-card-grid__card-content > .wp-block-buttons:last-child {
-		margin-top: auto;
-		padding-top: 0.75rem;
 	}
 
 	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link {
