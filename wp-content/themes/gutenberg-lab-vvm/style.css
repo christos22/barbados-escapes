@@ -725,7 +725,8 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__chips {
-	display: grid;
+	/* display: grid; */
+	display: none;
 	grid-template-columns: repeat(2, min-content);
 	gap: 0.45rem;
 	justify-content: end;
@@ -765,8 +766,6 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	gap: 1.1rem;
 	align-items: center;
 	margin: 0;
-	padding: 1.05rem 0;
-	border-bottom: 1px solid var(--vvm-villa-amenities-rule);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__row:last-child {
