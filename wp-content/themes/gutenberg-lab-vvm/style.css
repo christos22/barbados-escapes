@@ -1215,6 +1215,58 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	object-fit: cover;
 }
 
+.js :where(.wp-site-blocks) .vvm-lazy-map {
+	position: relative;
+	isolation: isolate;
+	cursor: pointer;
+	min-height: 20rem;
+}
+
+.js :where(.wp-site-blocks) .vvm-lazy-map iframe:not([src]) {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.js :where(.wp-site-blocks) .vvm-lazy-map:not(.is-loaded)::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background:
+		linear-gradient(rgb(23 53 40 / 0.08) 1px, transparent 1px),
+		linear-gradient(90deg, rgb(23 53 40 / 0.08) 1px, transparent 1px),
+		#dcebe7;
+	background-size: 4.5rem 4.5rem;
+}
+
+.js :where(.wp-site-blocks) .vvm-lazy-map:not(.is-loaded)::after {
+	content: "View map";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2.75rem;
+	padding: 0.85rem 1.2rem;
+	border: 1px solid rgb(23 53 40 / 0.18);
+	background: #fbf8f2;
+	color: var(--wp--preset--color--dark-green);
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 0.68rem;
+	font-weight: 400;
+	letter-spacing: 0.24em;
+	line-height: 1;
+	text-transform: uppercase;
+	transform: translate(-50%, -50%);
+}
+
+.js :where(.wp-site-blocks) .vvm-lazy-map:focus-visible {
+	outline: 2px solid var(--wp--preset--color--gold);
+	outline-offset: 4px;
+}
+
 /* When editors add map text directly under the map, treat it as the location panel. */
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) {
 	align-content: start;

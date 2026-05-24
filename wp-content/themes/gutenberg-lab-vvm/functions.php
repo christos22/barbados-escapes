@@ -1244,6 +1244,82 @@ function gutenberg_lab_vvm_enqueue_assets() {
 add_action( 'wp_enqueue_scripts', 'gutenberg_lab_vvm_enqueue_assets' );
 
 /**
+ * Defers Google Map iframe loading for the saved gmap block.
+ *
+ * The important performance detail is that we remove the iframe `src` during
+ * PHP render. If we waited until JavaScript runs, the browser could already
+ * start downloading Google Maps before our lazy-loader gets a chance to act.
+ *
+ * @param string $block_content Rendered block HTML.
+ * @param array  $block         Parsed block data.
+ * @return string
+ */
+function gutenberg_lab_vvm_lazy_load_gmap_block( $block_content, $block ) {
+	if (
+		is_admin() ||
+		empty( $block['blockName'] ) ||
+		'gmap/gmap-block' !== $block['blockName'] ||
+		! class_exists( 'WP_HTML_Tag_Processor' )
+	) {
+		return $block_content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	if ( ! $processor->next_tag( array( 'class_name' => 'wp-block-gmap-gmap-block' ) ) ) {
+		return $block_content;
+	}
+
+	$wrapper_classes = trim( (string) $processor->get_attribute( 'class' ) );
+	$processor->set_attribute( 'class', trim( $wrapper_classes . ' vvm-lazy-map' ) );
+	$processor->set_attribute( 'data-vvm-lazy-map', '' );
+
+	if ( ! $processor->next_tag( 'iframe' ) ) {
+		return $block_content;
+	}
+
+	$map_src = $processor->get_attribute( 'src' );
+	$map_host = is_string( $map_src ) ? wp_parse_url( $map_src, PHP_URL_HOST ) : '';
+
+	if (
+		! is_string( $map_src ) ||
+		'' === trim( $map_src ) ||
+		! is_string( $map_host ) ||
+		( ! str_starts_with( $map_host, 'maps.google.' ) && 'www.google.com' !== $map_host )
+	) {
+		return $block_content;
+	}
+
+	$map_title = $processor->get_attribute( 'title' );
+	$map_title = is_string( $map_title ) && '' !== trim( $map_title )
+		? $map_title
+		: __( 'Google map', 'gutenberg-lab-vvm' );
+
+	$processor->set_attribute( 'data-src', $map_src );
+	$processor->set_attribute( 'data-vvm-lazy-map-frame', '' );
+	$processor->set_attribute( 'loading', 'lazy' );
+	$processor->set_attribute( 'aria-hidden', 'true' );
+	$processor->set_attribute( 'tabindex', '-1' );
+	$processor->set_attribute( 'hidden', '' );
+	$processor->remove_attribute( 'src' );
+
+	$updated_content = $processor->get_updated_html();
+	$noscript_map    = sprintf(
+		'<noscript><iframe src="%1$s" class="embd-map" title="%2$s" loading="lazy"></iframe></noscript>',
+		esc_url( $map_src ),
+		esc_attr( $map_title )
+	);
+	$insert_at       = strrpos( $updated_content, '</div>' );
+
+	if ( false === $insert_at ) {
+		return $updated_content . $noscript_map;
+	}
+
+	return substr_replace( $updated_content, $noscript_map, $insert_at, 0 );
+}
+add_filter( 'render_block', 'gutenberg_lab_vvm_lazy_load_gmap_block', 10, 2 );
+
+/**
  * Parses the ISO date string emitted by native date inputs.
  *
  * @param string $value Raw submitted date value.

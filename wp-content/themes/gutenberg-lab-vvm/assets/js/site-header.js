@@ -6,6 +6,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	const footer = document.querySelector( '.vvm-footer' );
 	const bedroomLevelSections = document.querySelectorAll( '.vvm-bedroom-levels' );
 	const villaContactForms = document.querySelectorAll( '.vvm-villa-contact-form' );
+	const lazyMaps = document.querySelectorAll( '[data-vvm-lazy-map]' );
 
 	// Keep a real pixel scrollbar value available to CSS for edge-to-edge math.
 	const syncScrollbarWidth = () => {
@@ -202,11 +203,89 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		} );
 	};
 
+	const initializeLazyMaps = () => {
+		if ( ! lazyMaps.length ) {
+			return;
+		}
+
+		let observer;
+
+		const loadMap = ( map ) => {
+			if ( map.classList.contains( 'is-loaded' ) ) {
+				return;
+			}
+
+			const iframe = map.querySelector( '[data-vvm-lazy-map-frame]' );
+			const src = iframe?.dataset.src;
+
+			if ( ! iframe || ! src ) {
+				return;
+			}
+
+			// Restoring `src` is the point where Google Maps is allowed to load.
+			iframe.src = src;
+			iframe.removeAttribute( 'data-src' );
+			iframe.removeAttribute( 'aria-hidden' );
+			iframe.removeAttribute( 'tabindex' );
+			iframe.removeAttribute( 'hidden' );
+
+			map.classList.add( 'is-loaded' );
+			map.removeAttribute( 'role' );
+			map.removeAttribute( 'tabindex' );
+			map.removeAttribute( 'aria-label' );
+			observer?.unobserve( map );
+		};
+
+		const handleMapKeydown = ( event ) => {
+			if ( event.key !== 'Enter' && event.key !== ' ' ) {
+				return;
+			}
+
+			event.preventDefault();
+			loadMap( event.currentTarget );
+		};
+
+		if ( 'IntersectionObserver' in window ) {
+			observer = new IntersectionObserver(
+				( entries ) => {
+					entries.forEach( ( entry ) => {
+						if ( entry.isIntersecting ) {
+							loadMap( entry.target );
+						}
+					} );
+				},
+				{
+					// Start loading shortly before the map scrolls into view.
+					rootMargin: '240px 0px',
+					threshold: 0.01,
+				}
+			);
+		}
+
+		lazyMaps.forEach( ( map ) => {
+			map.setAttribute( 'role', 'button' );
+			map.setAttribute( 'tabindex', '0' );
+			map.setAttribute( 'aria-label', 'View interactive map' );
+
+			map.addEventListener( 'click', () => loadMap( map ) );
+			map.addEventListener( 'focusin', () => loadMap( map ) );
+			map.addEventListener( 'keydown', handleMapKeydown );
+
+			if ( observer ) {
+				observer.observe( map );
+				return;
+			}
+
+			loadMap( map );
+		} );
+	};
+
 	syncScrollbarWidth();
 	initializeFooterReveal();
 	initializeBedroomLevels();
 	initializeVillaContactDateRanges();
 	initializeVillaContactTextareas();
+	initializeLazyMaps();
 	window.addEventListener( 'resize', syncScrollbarWidth, { passive: true } );
 
 	if ( ! header ) {
