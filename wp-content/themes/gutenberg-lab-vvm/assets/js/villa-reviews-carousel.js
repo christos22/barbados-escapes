@@ -130,9 +130,31 @@ function initializeVillaReviewsCarousel( reviews ) {
 		};
 	};
 
+	const syncViewportHeight = ( firstVisible, lastVisible ) => {
+		const visibleHeight = slides
+			.slice( firstVisible, lastVisible + 1 )
+			.reduce(
+				( tallestHeight, slide ) =>
+					Math.max( tallestHeight, slide.offsetHeight ),
+				0
+			);
+
+		if ( ! visibleHeight ) {
+			viewport.style.removeProperty( 'height' );
+			return;
+		}
+
+		const nextHeight = `${ Math.ceil( visibleHeight ) }px`;
+
+		if ( viewport.style.height !== nextHeight ) {
+			viewport.style.height = nextHeight;
+		}
+	};
+
 	const syncCarouselState = () => {
 		if ( viewport.clientWidth <= 0 ) {
 			reviews.classList.remove( 'has-carousel-overflow' );
+			viewport.style.removeProperty( 'height' );
 			controls.hidden = true;
 			controls.setAttribute( 'aria-hidden', 'true' );
 			previousButton.disabled = true;
@@ -160,6 +182,7 @@ function initializeVillaReviewsCarousel( reviews ) {
 		nextButton.disabled = ! hasOverflow || currentIndex >= maxIndex;
 
 		const { firstVisible, lastVisible } = getVisibleRange();
+		syncViewportHeight( firstVisible, lastVisible );
 		status.textContent =
 			firstVisible === lastVisible
 				? `Showing review ${ firstVisible + 1 } of ${ slides.length }`

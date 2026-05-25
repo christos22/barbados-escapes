@@ -1023,11 +1023,19 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 :where(.wp-site-blocks) .vvm-villa-reviews.is-carousel .vvm-villa-reviews__viewport {
 	overflow: hidden;
 	touch-action: pan-y;
+	transition: height 0.28s ease;
+}
+
+:where(.wp-site-blocks) .vvm-villa-reviews.is-carousel .vvm-villa-reviews__viewport,
+:where(.wp-site-blocks) .vvm-villa-reviews.is-carousel .vvm-villa-reviews__controls,
+:where(.wp-site-blocks) .vvm-villa-reviews.is-carousel .vvm-villa-reviews__status {
+	margin: 0;
 }
 
 :where(.wp-site-blocks) .vvm-villa-reviews.is-carousel .vvm-villa-reviews__track {
 	display: flex;
 	gap: var(--vvm-villa-reviews-slide-gap);
+	align-items: flex-start;
 	transition: transform 0.28s ease;
 	will-change: transform;
 }
@@ -1036,6 +1044,8 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	flex: 0 0 var(--vvm-villa-reviews-slide-width);
 	inline-size: var(--vvm-villa-reviews-slide-width);
 	min-width: 0;
+	align-content: start;
+	gap: clamp(0.75rem, 1.2vw, 1rem);
 	padding: 0;
 	border-bottom: 0;
 }
