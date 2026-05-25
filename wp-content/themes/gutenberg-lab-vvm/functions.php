@@ -159,6 +159,15 @@ function gutenberg_lab_vvm_register_block_styles() {
 		)
 	);
 
+	register_block_style(
+		'core/group',
+		array(
+			'name'         => 'vvm-reviews-three-up',
+			'label'        => __( 'Reviews: 3 at a time', 'gutenberg-lab-vvm' ),
+			'inline_style' => '',
+		)
+	);
+
 }
 add_action( 'init', 'gutenberg_lab_vvm_register_block_styles' );
 
@@ -1235,6 +1244,17 @@ function gutenberg_lab_vvm_enqueue_assets() {
 		get_theme_file_uri( 'assets/js/site-header.js' ),
 		array(),
 		gutenberg_lab_vvm_asset_version( 'assets/js/site-header.js' ),
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
+
+	wp_enqueue_script(
+		'gutenberg-lab-vvm-villa-reviews-carousel',
+		get_theme_file_uri( 'assets/js/villa-reviews-carousel.js' ),
+		array(),
+		gutenberg_lab_vvm_asset_version( 'assets/js/villa-reviews-carousel.js' ),
 		array(
 			'in_footer' => true,
 			'strategy'  => 'defer',

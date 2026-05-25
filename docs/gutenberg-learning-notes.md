@@ -49,6 +49,12 @@
 - Use a dynamic block when the editor needs normal InnerBlocks content but the frontend needs stricter semantic markup, such as a real expandable `<button>`.
 - Keep hidden/revealed copy in the initial HTML for accessibility and SEO; JavaScript should only enhance the interaction, not fetch the content later.
 
+## Villa Reviews
+
+- When content is simple and editor-managed, keep it as native Group/Paragraph blocks and enhance the frontend markup with JavaScript.
+- Use a block style variation for presentation options, such as showing three reviews at a time, before adding custom Inspector controls.
+- Carousel scripts need to resync when their block starts inside a hidden tab panel, because hidden elements report zero width.
+
 ## Villa Availability
 
 - Use PHP for availability storage, iCal sync, and final calendar markup so date rules are enforced outside the browser.
