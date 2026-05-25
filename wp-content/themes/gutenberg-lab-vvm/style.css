@@ -768,11 +768,6 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	margin: 0;
 }
 
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__row:last-child {
-	border-bottom: 0;
-	padding-bottom: 0;
-}
-
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__index,
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__item {
 	margin: 0;
@@ -938,23 +933,17 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	object-fit: cover;
 }
 
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules__list {
+	margin-top: clamp(1.5rem, 2.5vw, 2.25rem);
+	border: 1px solid var(--vvm-villa-amenities-rule);
+}
+
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules__row {
 	display: block;
 	margin: 0;
 	padding: 0;
-	border-right: 1px solid var(--vvm-villa-amenities-rule);
-	border-bottom: 1px solid var(--vvm-villa-amenities-rule);
-	border-left: 1px solid var(--vvm-villa-amenities-rule);
+	border: 0;
 	background: #fbf8f2;
-}
-
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules__row:first-of-type {
-	margin-top: clamp(1.5rem, 2.5vw, 2.25rem);
-	border-top: 1px solid var(--vvm-villa-amenities-rule);
-}
-
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules__row:last-child {
-	border-bottom: 1px solid var(--vvm-villa-amenities-rule) !important;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules__row .vvm-villa-amenities__item {
@@ -968,8 +957,8 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	column-gap: clamp(1rem, 2vw, 1.35rem);
 	align-items: baseline;
 	margin: 0;
-	/* Paragraph blocks carry saved padding tokens; the table row rhythm should win here. */
-	padding-block: 1rem !important;
+	/* Paragraph blocks carry saved padding tokens; the compact table row rhythm should win here. */
+	padding-block: 0 !important;
 	padding-inline: 1.35rem;
 }
 
