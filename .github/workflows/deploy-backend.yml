@@ -10,37 +10,15 @@ on:
       - 'wp-content/themes/gutenberg-lab-vvm/**'
       - 'wp-content/plugins/gutenberg-lab-blocks/**'
 
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 2222
-          script: |
-            set -e
-
-            cd /home/grapsa5/repositories/barbados-escapes
-            git fetch origin main
-            git checkout main
-            git pull origin main
-
-            # Keep these copy paths aligned with the cPanel deploy config.
-            export THEMEPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm
-            mkdir -p $THEMEPATH
-            cp -R wp-content/themes/gutenberg-lab-vvm/* $THEMEPATH/
-
-            export PLUGINPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks
-            mkdir -p $PLUGINPATH
-            cp -R wp-content/plugins/gutenberg-lab-blocks/* $PLUGINPATH/
-
-            echo "Deployment complete."
-
-      - name: Verify Deployment over SSH
+      - name: Deploy and verify via SSH
         uses: appleboy/ssh-action@v1.0.3
         env:
           GITHUB_SHA: ${{ github.sha }}
@@ -58,12 +36,24 @@ jobs:
             export PLUGINPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks
 
             cd $REPOPATH
+
+            git fetch origin main
+            git checkout main
+            git pull --ff-only origin main
+
             DEPLOYED_SHA=$(git rev-parse HEAD)
 
             if [ "$DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
               echo "Server repo SHA mismatch: expected $GITHUB_SHA, got $DEPLOYED_SHA"
               exit 1
             fi
+
+            # Keep these copy paths aligned with the cPanel deploy config.
+            mkdir -p $THEMEPATH
+            cp -R wp-content/themes/gutenberg-lab-vvm/* $THEMEPATH/
+
+            mkdir -p $PLUGINPATH
+            cp -R wp-content/plugins/gutenberg-lab-blocks/* $PLUGINPATH/
 
             # Check a few sentinel files so we know the copy step reached both targets.
             test -f "$THEMEPATH/style.css"
