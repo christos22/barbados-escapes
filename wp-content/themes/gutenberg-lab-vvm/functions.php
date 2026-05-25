@@ -162,8 +162,9 @@ function gutenberg_lab_vvm_register_block_styles() {
 	register_block_style(
 		'core/group',
 		array(
+			// Keep the original slug so existing saved review groups retain this style.
 			'name'         => 'vvm-reviews-three-up',
-			'label'        => __( 'Reviews: 3 at a time', 'gutenberg-lab-vvm' ),
+			'label'        => __( 'Reviews: 2 at a time', 'gutenberg-lab-vvm' ),
 			'inline_style' => '',
 		)
 	);

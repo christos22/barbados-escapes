@@ -1076,7 +1076,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 @media (min-width: 900px) {
 	:where(.wp-site-blocks) .vvm-villa-reviews.is-style-vvm-reviews-three-up.is-carousel {
 		--vvm-villa-reviews-slide-width: calc(
-			(100% - var(--vvm-villa-reviews-slide-gap) - var(--vvm-villa-reviews-slide-gap)) / 3
+			(100% - var(--vvm-villa-reviews-slide-gap)) / 2
 		);
 	}
 
