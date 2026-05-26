@@ -109,6 +109,12 @@ hostname resolved to `209.182.196.19` from GitHub Actions, and that endpoint
 reset SSH during key exchange. The same deploy key successfully authenticated
 to `209.182.196.26` over port `2222`.
 
+On May 26, 2026, GitHub Actions also saw an intermittent key-exchange reset
+against `209.182.196.26:2222` before any remote deploy commands ran. Local
+OpenSSH could authenticate to the same endpoint, so the workflow now uses the
+runner's native `ssh` client with host-key collection and retry/backoff instead
+of the single-attempt `appleboy/ssh-action` Docker client.
+
 For this project, the same private key used by the VVM deployment worked:
 
 - local file: `~/.ssh/github_deploy_key`

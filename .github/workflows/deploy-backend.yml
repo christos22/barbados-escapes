@@ -18,53 +18,119 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy and verify via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy and verify via OpenSSH
         env:
           GITHUB_SHA: ${{ github.sha }}
-        with:
+          SSH_HOST: 209.182.196.26
+          SSH_PORT: 2222
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+
           # Use the stable InMotion SSH IP. The ecngx362 hostname has resolved
           # to 209.182.196.19, which closes the SSH handshake before login.
-          host: 209.182.196.26
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 2222
-          envs: GITHUB_SHA
-          script: |
-            set -e
+          : "${SSH_USERNAME:?Missing SSH_USERNAME secret}"
+          : "${SSH_PRIVATE_KEY:?Missing SSH_PRIVATE_KEY secret}"
 
-            export REPOPATH=/home/grapsa5/repositories/barbados-escapes
-            export THEMEPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm
-            export PLUGINPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks
+          install -m 700 -d "$HOME/.ssh"
 
-            cd $REPOPATH
+          deploy_key="$HOME/.ssh/inmotion_deploy_key"
+          known_hosts="$HOME/.ssh/known_hosts"
+          remote_script="$RUNNER_TEMP/deploy-backend-remote.sh"
 
-            git fetch origin main
-            git checkout main
-            git pull --ff-only origin main
+          trap 'rm -f "$deploy_key" "$remote_script"' EXIT
 
-            DEPLOYED_SHA=$(git rev-parse HEAD)
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$deploy_key"
+          chmod 600 "$deploy_key"
 
-            if [ "$DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
-              echo "Server repo SHA mismatch: expected $GITHUB_SHA, got $DEPLOYED_SHA"
-              exit 1
+          touch "$known_hosts"
+          chmod 600 "$known_hosts"
+
+          host_key_ready=false
+
+          for attempt in 1 2 3; do
+            echo "Collecting SSH host key, attempt ${attempt}/3..."
+
+            if ssh-keyscan -t ecdsa -p "$SSH_PORT" -T 10 "$SSH_HOST" >> "$known_hosts"; then
+              host_key_ready=true
+              break
             fi
 
-            # Keep these copy paths aligned with the cPanel deploy config.
-            mkdir -p $THEMEPATH
-            cp -R wp-content/themes/gutenberg-lab-vvm/* $THEMEPATH/
+            sleep_seconds=$(( attempt * 10 ))
+            echo "Host key scan failed. Retrying in ${sleep_seconds}s..."
+            sleep "$sleep_seconds"
+          done
 
-            mkdir -p $PLUGINPATH
-            cp -R wp-content/plugins/gutenberg-lab-blocks/* $PLUGINPATH/
+          if [ "$host_key_ready" != true ]; then
+            echo "Could not collect SSH host key for $SSH_HOST:$SSH_PORT"
+            exit 1
+          fi
 
-            # Check a few sentinel files so we know the copy step reached both targets.
-            test -f "$THEMEPATH/style.css"
-            test -f "$THEMEPATH/functions.php"
-            test -f "$PLUGINPATH/gutenberg-lab-blocks.php"
-            test -d "$PLUGINPATH/build"
+          cat > "$remote_script" <<'REMOTE_SCRIPT'
+          set -euo pipefail
 
-            cmp -s "wp-content/themes/gutenberg-lab-vvm/style.css" "$THEMEPATH/style.css"
-            cmp -s "wp-content/themes/gutenberg-lab-vvm/functions.php" "$THEMEPATH/functions.php"
-            cmp -s "wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php" "$PLUGINPATH/gutenberg-lab-blocks.php"
+          export REPOPATH=/home/grapsa5/repositories/barbados-escapes
+          export THEMEPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm
+          export PLUGINPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks
 
-            echo "Deployment verified on server."
+          cd $REPOPATH
+
+          git fetch origin main
+          git checkout main
+          git pull --ff-only origin main
+
+          DEPLOYED_SHA=$(git rev-parse HEAD)
+
+          if [ "$DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
+            echo "Server repo SHA mismatch: expected $GITHUB_SHA, got $DEPLOYED_SHA"
+            exit 1
+          fi
+
+          # Keep these copy paths aligned with the cPanel deploy config.
+          mkdir -p $THEMEPATH
+          cp -R wp-content/themes/gutenberg-lab-vvm/* $THEMEPATH/
+
+          mkdir -p $PLUGINPATH
+          cp -R wp-content/plugins/gutenberg-lab-blocks/* $PLUGINPATH/
+
+          # Check a few sentinel files so we know the copy step reached both targets.
+          test -f "$THEMEPATH/style.css"
+          test -f "$THEMEPATH/functions.php"
+          test -f "$PLUGINPATH/gutenberg-lab-blocks.php"
+          test -d "$PLUGINPATH/build"
+
+          cmp -s "wp-content/themes/gutenberg-lab-vvm/style.css" "$THEMEPATH/style.css"
+          cmp -s "wp-content/themes/gutenberg-lab-vvm/functions.php" "$THEMEPATH/functions.php"
+          cmp -s "wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php" "$PLUGINPATH/gutenberg-lab-blocks.php"
+          REMOTE_SCRIPT
+
+          for attempt in 1 2 3 4 5; do
+            echo "SSH deploy attempt ${attempt}/5..."
+
+            if ssh \
+              -i "$deploy_key" \
+              -p "$SSH_PORT" \
+              -o BatchMode=yes \
+              -o ConnectTimeout=20 \
+              -o IdentitiesOnly=yes \
+              -o ServerAliveInterval=15 \
+              -o ServerAliveCountMax=2 \
+              -o StrictHostKeyChecking=yes \
+              "$SSH_USERNAME@$SSH_HOST" \
+              "GITHUB_SHA=$GITHUB_SHA bash -se" < "$remote_script"; then
+              echo "Deployment verified on server."
+              exit 0
+            fi
+
+            status=$?
+            echo "SSH deploy attempt ${attempt}/5 failed with status $status."
+
+            if [ "$attempt" -eq 5 ]; then
+              exit "$status"
+            fi
+
+            sleep_seconds=$(( attempt * 15 ))
+            echo "Retrying in ${sleep_seconds}s..."
+            sleep "$sleep_seconds"
+          done

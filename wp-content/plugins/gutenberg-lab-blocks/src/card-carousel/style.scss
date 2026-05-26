@@ -43,11 +43,6 @@
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__intro .wp-block-heading {
 	margin: 0;
 	color: var(--vvm-card-carousel-intro-foreground);
-	font-family: var(--wp--preset--font-family--display-serif);
-	font-size: clamp(2.75rem, 4.8vw, 4.5rem);
-	font-weight: 400;
-	line-height: 0.95;
-	text-wrap: balance;
 }
 
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__intro .wp-block-heading a {
@@ -58,8 +53,6 @@
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__intro p {
 	margin: 0;
 	color: var(--vvm-card-carousel-intro-muted);
-	font-size: 1rem;
-	line-height: 1.7;
 }
 
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel .vvm-card-carousel__intro .wp-block-buttons {
@@ -249,15 +242,6 @@
 	.vvm-editorial-triptych__lead {
 	color: inherit;
 	font-family: var(--wp--preset--font-family--display-serif);
-	font-size: clamp(1.5rem, 2vw, 2rem);
-	line-height: 1.55;
-}
-
-.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel.is-style-editorial-triptych
-	.vvm-card-carousel__intro
-	.wp-block-heading {
-	font-size: clamp(2.4rem, 4vw, 4rem);
-	line-height: 1;
 }
 
 .wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel.is-style-editorial-triptych
@@ -299,10 +283,38 @@
 @media (min-width: 1024px) {
 	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel.vvm-card-carousel--has-intro
 		.vvm-card-carousel__shell {
-		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.55fr);
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
 	}
 
 	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel {
+		--vvm-card-carousel-slide-width: clamp(18rem, 23vw, 22.75rem);
+	}
+
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel.vvm-card-carousel--has-intro {
+		--vvm-card-carousel-slide-width: calc(
+			(100% - var(--vvm-card-carousel-slide-gap)) / 2
+		);
+	}
+
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel.is-style-editorial-triptych
+		.vvm-card-carousel__shell {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	}
+
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel.is-style-editorial-triptych {
+		--vvm-card-carousel-slide-width: calc(
+			(100% - var(--vvm-card-carousel-slide-gap)) / 2
+		);
+	}
+}
+
+@media (min-width: 1400px) {
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel.vvm-card-carousel--has-intro
+		.vvm-card-carousel__shell {
+		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.55fr);
+	}
+
+	.wp-block-gutenberg-lab-blocks-card-carousel.vvm-card-carousel.vvm-card-carousel--has-intro {
 		--vvm-card-carousel-slide-width: clamp(18rem, 23vw, 22.75rem);
 	}
 
