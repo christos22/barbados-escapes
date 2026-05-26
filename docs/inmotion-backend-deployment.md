@@ -100,9 +100,14 @@ The repo workflow is [`.github/workflows/deploy-backend.yml`](../.github/workflo
 
 Required GitHub Actions secrets:
 
-- `SSH_HOST=ecngx362.inmotionhosting.com`
 - `SSH_USERNAME=grapsa5`
 - `SSH_PRIVATE_KEY=<private key for server login>`
+
+The workflow intentionally uses `209.182.196.26` directly for `host` instead
+of the old `ecngx362.inmotionhosting.com` hostname. On May 25, 2026, that
+hostname resolved to `209.182.196.19` from GitHub Actions, and that endpoint
+reset SSH during key exchange. The same deploy key successfully authenticated
+to `209.182.196.26` over port `2222`.
 
 For this project, the same private key used by the VVM deployment worked:
 

@@ -23,7 +23,9 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
         with:
-          host: ${{ secrets.SSH_HOST }}
+          # Use the stable InMotion SSH IP. The ecngx362 hostname has resolved
+          # to 209.182.196.19, which closes the SSH handshake before login.
+          host: 209.182.196.26
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 2222
