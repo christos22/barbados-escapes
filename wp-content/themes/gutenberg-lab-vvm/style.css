@@ -958,7 +958,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	align-items: baseline;
 	margin: 0;
 	/* Paragraph blocks carry saved padding tokens; the compact table row rhythm should win here. */
-	padding-block: 0 !important;
+	padding-block: 10px !important;
 	padding-inline: 1.35rem;
 }
 
