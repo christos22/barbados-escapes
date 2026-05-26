@@ -934,7 +934,6 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules__list {
-	margin-top: clamp(1.5rem, 2.5vw, 2.25rem);
 	border: 1px solid var(--vvm-villa-amenities-rule);
 }
 
