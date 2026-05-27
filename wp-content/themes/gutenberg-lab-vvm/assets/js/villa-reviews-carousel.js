@@ -20,6 +20,130 @@ function getVillaReviewsCarouselMetrics( viewport, track, slides ) {
 	};
 }
 
+const villaReviewsLayoutEvent = 'vvm-villa-reviews:layout-change';
+const villaReviewsCopyClampedClass = 'vvm-villa-reviews__copy--clamped';
+const villaReviewsExpandedClass = 'is-review-expanded';
+let villaReviewsReadMoreId = 0;
+
+function setVillaReviewExpanded( review, copy, button, isExpanded ) {
+	review.classList.toggle( villaReviewsExpandedClass, isExpanded );
+	copy.classList.toggle( villaReviewsCopyClampedClass, ! isExpanded );
+	button.setAttribute( 'aria-expanded', isExpanded ? 'true' : 'false' );
+	button.textContent = isExpanded ? 'Show less' : 'Read more';
+}
+
+function createVillaReviewsReadMoreButton( review, copy ) {
+	const button = document.createElement( 'button' );
+
+	if ( ! copy.id ) {
+		villaReviewsReadMoreId += 1;
+		copy.id = `vvm-villa-review-copy-${ villaReviewsReadMoreId }`;
+	}
+
+	button.type = 'button';
+	button.className = 'vvm-villa-reviews__read-more';
+	button.setAttribute( 'aria-controls', copy.id );
+
+	button.addEventListener( 'click', () => {
+		const isExpanded = ! review.classList.contains(
+			villaReviewsExpandedClass
+		);
+
+		setVillaReviewExpanded( review, copy, button, isExpanded );
+		review.dispatchEvent(
+			new CustomEvent( villaReviewsLayoutEvent, {
+				bubbles: true,
+			} )
+		);
+	} );
+
+	return button;
+}
+
+function syncVillaReviewReadMore( review ) {
+	const copy = review.querySelector( ':scope > .vvm-villa-reviews__copy' );
+
+	if ( ! copy || ! copy.getClientRects().length ) {
+		return;
+	}
+
+	let button = review.querySelector(
+		':scope > .vvm-villa-reviews__read-more'
+	);
+	const wasExpanded = review.classList.contains( villaReviewsExpandedClass );
+
+	review.classList.remove( villaReviewsExpandedClass );
+	copy.classList.add( villaReviewsCopyClampedClass );
+
+	const hasOverflow = copy.scrollHeight > copy.clientHeight + 1;
+
+	if ( ! hasOverflow ) {
+		copy.classList.remove( villaReviewsCopyClampedClass );
+		button?.remove();
+		return;
+	}
+
+	if ( ! button ) {
+		button = createVillaReviewsReadMoreButton( review, copy );
+		copy.after( button );
+	}
+
+	setVillaReviewExpanded( review, copy, button, wasExpanded );
+}
+
+function syncVillaReviewsReadMore( reviews ) {
+	if ( ! reviews.getClientRects().length ) {
+		return;
+	}
+
+	reviews
+		.querySelectorAll( '.vvm-villa-reviews__review' )
+		.forEach( syncVillaReviewReadMore );
+
+	reviews.dispatchEvent(
+		new CustomEvent( villaReviewsLayoutEvent, {
+			bubbles: true,
+		} )
+	);
+}
+
+function initializeVillaReviewsReadMore( reviews ) {
+	if ( reviews.dataset.vvmReadMoreInitialized === 'true' ) {
+		return;
+	}
+
+	reviews.dataset.vvmReadMoreInitialized = 'true';
+
+	const scheduleReadMoreSync = () => {
+		window.requestAnimationFrame( () => syncVillaReviewsReadMore( reviews ) );
+	};
+
+	window.addEventListener( 'resize', scheduleReadMoreSync, { passive: true } );
+
+	if ( 'MutationObserver' in window ) {
+		const stackPanel = reviews.closest( '[data-stack-tabs-panel]' );
+
+		if ( stackPanel ) {
+			const mutationObserver = new MutationObserver( scheduleReadMoreSync );
+
+			mutationObserver.observe( stackPanel, {
+				attributes: true,
+				attributeFilter: [ 'hidden', 'class' ],
+			} );
+		}
+	}
+
+	reviews
+		.closest( '[data-stack-tabs-root]' )
+		?.addEventListener( 'click', ( event ) => {
+			if ( event.target.closest( '[data-stack-tabs-tab-button]' ) ) {
+				scheduleReadMoreSync();
+			}
+		} );
+
+	scheduleReadMoreSync();
+}
+
 function createVillaReviewsArrowIcon() {
 	const icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
 	const path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
@@ -341,11 +465,16 @@ function initializeVillaReviewsCarousel( reviews ) {
 			}
 		} );
 
+	reviews.addEventListener( villaReviewsLayoutEvent, scheduleCarouselSync );
+
 	syncCarouselState();
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
 	document
 		.querySelectorAll( '.vvm-villa-reviews' )
-		.forEach( initializeVillaReviewsCarousel );
+		.forEach( ( reviews ) => {
+			initializeVillaReviewsReadMore( reviews );
+			initializeVillaReviewsCarousel( reviews );
+		} );
 } );
