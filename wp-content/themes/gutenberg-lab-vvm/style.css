@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.20
+Version: 0.1.21
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -1034,7 +1034,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-reviews__read-more {
 	justify-self: start;
 	margin: -0.55rem 0 0;
-	padding: 0;
+	padding: 0 0 0 var(--wp--preset--spacing--lg);
 	border: 0;
 	background: transparent;
 	color: #d2a31f;
