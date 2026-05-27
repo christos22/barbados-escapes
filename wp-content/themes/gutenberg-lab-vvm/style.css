@@ -672,12 +672,11 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__card--dark {
-	/* Keep the modifier for outdoor icon mapping, but use the standard light card treatment. */
-	--vvm-villa-amenities-muted: rgb(23 53 40 / 0.66);
-	--vvm-villa-amenities-rule: rgb(23 53 40 / 0.12);
-	background: var(--vvm-villa-amenities-card);
-	box-shadow: 0 18px 40px rgb(23 53 40 / 0.04);
-	color: var(--vvm-villa-amenities-ink);
+	--vvm-villa-amenities-muted: rgb(247 241 231 / 0.68);
+	--vvm-villa-amenities-rule: rgb(247 241 231 / 0.12);
+	background: linear-gradient(180deg, #153c2c 0%, #082319 100%);
+	box-shadow: none;
+	color: #f7f1e7;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__header {
@@ -716,7 +715,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__card--dark .wp-block-heading {
-	color: var(--vvm-villa-amenities-ink);
+	color: #f7f1e7;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__copy {
@@ -753,8 +752,8 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__card--dark .vvm-villa-amenities__chip {
-	background: rgb(255 255 255 / 0.42);
-	color: var(--vvm-villa-amenities-muted);
+	background: rgb(255 255 255 / 0.06);
+	color: rgb(247 241 231 / 0.72);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__list {
@@ -902,7 +901,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__card--dark .vvm-villa-amenities__item {
-	color: var(--vvm-villa-amenities-muted);
+	color: rgb(247 241 231 / 0.72);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules {
