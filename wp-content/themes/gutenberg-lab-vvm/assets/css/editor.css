@@ -139,7 +139,8 @@ body.post-type-villa.editor-styles-wrapper
 	display: block;
 	width: 0.5rem;
 	height: 0.5rem;
-	margin-top: 0.25rem;
+	/* Half the 1.75 line box minus half the dot keeps the marker centered. */
+	margin-top: calc(0.875em - 0.25rem);
 	border-radius: 999px;
 	background: var(--wp--preset--color--gold, #c4922a);
 	flex: 0 0 0.5rem;
