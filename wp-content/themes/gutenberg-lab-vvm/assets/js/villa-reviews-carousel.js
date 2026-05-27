@@ -368,6 +368,14 @@ function initializeVillaReviewsCarousel( reviews ) {
 			return;
 		}
 
+		if (
+			event.target.closest(
+				'a, button, input, textarea, select, summary, [role="button"], [contenteditable="true"]'
+			)
+		) {
+			return;
+		}
+
 		const { maxTranslate } = getVillaReviewsCarouselMetrics(
 			viewport,
 			track,
