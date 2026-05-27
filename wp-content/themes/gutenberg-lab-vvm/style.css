@@ -991,6 +991,14 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	border-bottom: 1px solid var(--vvm-villa-amenities-rule);
 }
 
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-reviews__review::before {
+	content: "\2605\2605\2605\2605\2605";
+	color: #d2a31f;
+	font-size: 0.9rem;
+	line-height: 1;
+	letter-spacing: 0.1em;
+}
+
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-reviews__review + .vvm-villa-reviews__review {
 	padding-top: clamp(1.8rem, 3vw, 2.4rem);
 }
