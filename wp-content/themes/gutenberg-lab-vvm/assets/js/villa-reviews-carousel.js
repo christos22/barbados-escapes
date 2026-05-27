@@ -197,6 +197,7 @@ function initializeVillaReviewsCarousel( reviews ) {
 	let activeTranslate = 0;
 	let dragStartX = 0;
 	let dragDelta = 0;
+	let dragStep = 1;
 	let startTranslate = 0;
 	let isDragging = false;
 	let suppressClick = false;
@@ -252,6 +253,12 @@ function initializeVillaReviewsCarousel( reviews ) {
 			firstVisible,
 			lastVisible,
 		};
+	};
+
+	const getSlideStepSize = () => {
+		const { firstVisible, lastVisible } = getVisibleRange();
+
+		return Math.max( 1, lastVisible - firstVisible + 1 );
 	};
 
 	const syncViewportHeight = ( firstVisible, lastVisible ) => {
@@ -337,18 +344,19 @@ function initializeVillaReviewsCarousel( reviews ) {
 		track.style.removeProperty( 'transition' );
 
 		if ( dragDelta <= -threshold ) {
-			currentIndex = Math.min( maxIndex, currentIndex + 1 );
+			currentIndex = Math.min( maxIndex, currentIndex + dragStep );
 		} else if ( dragDelta >= threshold ) {
-			currentIndex = Math.max( 0, currentIndex - 1 );
+			currentIndex = Math.max( 0, currentIndex - dragStep );
 		}
 
 		dragDelta = 0;
+		dragStep = 1;
 		syncCarouselState();
 		viewport.releasePointerCapture?.( pointerId );
 	};
 
 	previousButton.addEventListener( 'click', () => {
-		currentIndex = Math.max( 0, currentIndex - 1 );
+		currentIndex = Math.max( 0, currentIndex - getSlideStepSize() );
 		syncCarouselState();
 	} );
 
@@ -359,7 +367,7 @@ function initializeVillaReviewsCarousel( reviews ) {
 			slides
 		);
 
-		currentIndex = Math.min( maxIndex, currentIndex + 1 );
+		currentIndex = Math.min( maxIndex, currentIndex + getSlideStepSize() );
 		syncCarouselState();
 	} );
 
@@ -390,6 +398,7 @@ function initializeVillaReviewsCarousel( reviews ) {
 		suppressClick = false;
 		dragStartX = event.clientX;
 		dragDelta = 0;
+		dragStep = getSlideStepSize();
 		startTranslate = activeTranslate;
 		reviews.classList.add( 'is-dragging' );
 		track.style.transition = 'none';
