@@ -1207,7 +1207,16 @@ function gutenberg_lab_vvm_enqueue_block_editor_script() {
 	wp_enqueue_script(
 		'gutenberg-lab-vvm-block-editor',
 		get_theme_file_uri( 'assets/js/block-editor.js' ),
-		array( 'wp-blocks', 'wp-dom-ready' ),
+		array(
+			'wp-block-editor',
+			'wp-blocks',
+			'wp-components',
+			'wp-compose',
+			'wp-dom-ready',
+			'wp-element',
+			'wp-hooks',
+			'wp-i18n',
+		),
 		gutenberg_lab_vvm_asset_version( 'assets/js/block-editor.js' ),
 		array(
 			'in_footer' => true,

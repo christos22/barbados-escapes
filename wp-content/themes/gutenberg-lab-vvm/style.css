@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.26
+Version: 0.1.27
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -779,7 +779,37 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-size: 0.62rem;
 }
 
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities:not(.vvm-villa-contact):not(.vvm-villa-pricing):not(.vvm-villa-reviews):not(.vvm-villa-rules) .vvm-villa-amenities__index {
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities--show-numbers .vvm-villa-amenities__list {
+	counter-reset: vvm-villa-amenity-number;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities--show-numbers .vvm-villa-amenities__row {
+	counter-increment: vvm-villa-amenity-number;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities--show-numbers .vvm-villa-amenities__index {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	color: transparent;
+	font-size: 0;
+	line-height: 1;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities--show-numbers .vvm-villa-amenities__index::before {
+	content: counter(vvm-villa-amenity-number, decimal-leading-zero);
+	color: var(--vvm-villa-amenities-gold);
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 0.94rem;
+	font-weight: 400;
+	letter-spacing: 0.24em;
+	line-height: 1.55;
+	text-transform: uppercase;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities:not(.vvm-villa-contact):not(.vvm-villa-pricing):not(.vvm-villa-reviews):not(.vvm-villa-rules):not(.vvm-villa-amenities--show-numbers) .vvm-villa-amenities__index {
 	--vvm-villa-amenity-icon: none;
 	display: inline-flex;
 	align-items: center;
@@ -791,7 +821,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	line-height: 1;
 }
 
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities:not(.vvm-villa-contact):not(.vvm-villa-pricing):not(.vvm-villa-reviews):not(.vvm-villa-rules) .vvm-villa-amenities__index::before {
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities:not(.vvm-villa-contact):not(.vvm-villa-pricing):not(.vvm-villa-reviews):not(.vvm-villa-rules):not(.vvm-villa-amenities--show-numbers) .vvm-villa-amenities__index::before {
 	content: "";
 	display: block;
 	width: 100%;
@@ -1804,9 +1834,15 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 		padding-block: 0.9rem;
 	}
 
-	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities:not(.vvm-villa-contact):not(.vvm-villa-pricing):not(.vvm-villa-reviews):not(.vvm-villa-rules) .vvm-villa-amenities__index {
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities:not(.vvm-villa-contact):not(.vvm-villa-pricing):not(.vvm-villa-reviews):not(.vvm-villa-rules):not(.vvm-villa-amenities--show-numbers) .vvm-villa-amenities__index,
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities--show-numbers .vvm-villa-amenities__index {
 		width: 2.45rem;
 		height: 2.45rem;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities--show-numbers .vvm-villa-amenities__index {
+		width: 2rem;
+		height: 2rem;
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-reviews .vvm-villa-amenities__card {
