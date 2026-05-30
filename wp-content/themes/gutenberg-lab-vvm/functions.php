@@ -55,6 +55,30 @@ function gutenberg_lab_vvm_add_js_class() {
 add_action( 'wp_head', 'gutenberg_lab_vvm_add_js_class', 0 );
 
 /**
+ * Adds the villa slug to body classes for page-specific styling hooks.
+ *
+ * WordPress gives us `postid-*` by default, but slugs are safer across local,
+ * staging, and production databases where numeric IDs may not match.
+ *
+ * @param array $classes Existing body classes.
+ * @return array
+ */
+function gutenberg_lab_vvm_add_villa_slug_body_class( $classes ) {
+	if ( ! is_singular( 'villa' ) ) {
+		return $classes;
+	}
+
+	$villa = get_queried_object();
+
+	if ( $villa instanceof WP_Post && ! empty( $villa->post_name ) ) {
+		$classes[] = 'villa-' . sanitize_html_class( $villa->post_name );
+	}
+
+	return $classes;
+}
+add_filter( 'body_class', 'gutenberg_lab_vvm_add_villa_slug_body_class' );
+
+/**
  * Returns the navigation post ID for a stable slug, or zero if missing.
  *
  * @param string $slug Navigation post slug.
