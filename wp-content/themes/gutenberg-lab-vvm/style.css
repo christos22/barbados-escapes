@@ -1017,20 +1017,20 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-family: var(--wp--preset--font-family--refined-sans);
 }
 
-body.single-villa.villa-monkey-hill-amenities-numbers #vvm-stack-tabs-4-panel-4 {
-	/* One-page review override: only the saved tab panel gets the dark outer surface. */
+body.single-villa .vvm-stack-tabs__panel:has(.vvm-villa-reviews) {
+	/* Global villa review treatment: only the outer tab panel gets the dark surface. */
 	background: var(--wp--preset--color--dark-green);
 	border-color: rgb(196 146 42 / 0.35);
 	color: var(--wp--preset--color--light-gold);
 	box-shadow: 0 24px 56px rgb(23 53 40 / 0.12);
 }
 
-body.single-villa.villa-monkey-hill-amenities-numbers #vvm-stack-tabs-4-panel-4 > .vvm-stack-tabs__tab-content {
+body.single-villa .vvm-stack-tabs__panel:has(.vvm-villa-reviews) > .vvm-stack-tabs__tab-content {
 	background: var(--wp--preset--color--white);
 	color: var(--wp--preset--color--dark-green);
 }
 
-body.single-villa.villa-monkey-hill-amenities-numbers #vvm-stack-tabs-4-panel-4 .vvm-villa-reviews {
+body.single-villa .vvm-stack-tabs__panel:has(.vvm-villa-reviews) .vvm-villa-reviews {
 	background-color: var(--wp--preset--color--white) !important;
 }
 
