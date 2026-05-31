@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.32
+Version: 0.1.33
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -1017,7 +1017,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-family: var(--wp--preset--font-family--refined-sans);
 }
 
-body.single-villa .vvm-stack-tabs__panel:has(.vvm-villa-reviews) {
+.vvm-stack-tabs__panel:has(.vvm-villa-reviews) {
 	/* Global villa review treatment: only the outer tab panel gets the dark surface. */
 	background: var(--wp--preset--color--dark-green);
 	border-color: rgb(196 146 42 / 0.35);
@@ -1025,12 +1025,12 @@ body.single-villa .vvm-stack-tabs__panel:has(.vvm-villa-reviews) {
 	box-shadow: 0 24px 56px rgb(23 53 40 / 0.12);
 }
 
-body.single-villa .vvm-stack-tabs__panel:has(.vvm-villa-reviews) > .vvm-stack-tabs__tab-content {
+.vvm-stack-tabs__panel:has(.vvm-villa-reviews) > .vvm-stack-tabs__tab-content {
 	background: var(--wp--preset--color--white);
 	color: var(--wp--preset--color--dark-green);
 }
 
-body.single-villa .vvm-stack-tabs__panel:has(.vvm-villa-reviews) .vvm-villa-reviews {
+.vvm-stack-tabs__panel:has(.vvm-villa-reviews) .vvm-villa-reviews {
 	background-color: var(--wp--preset--color--white) !important;
 }
 
