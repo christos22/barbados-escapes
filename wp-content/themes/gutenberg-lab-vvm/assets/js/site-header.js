@@ -280,6 +280,55 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		} );
 	};
 
+	const initializeHeaderDrawer = () => {
+		const containers = header.querySelectorAll(
+			'.wp-block-navigation__responsive-container'
+		);
+
+		containers.forEach( ( container ) => {
+			const dialog = container.querySelector(
+				'.wp-block-navigation__responsive-dialog'
+			);
+			const closeButton = container.querySelector(
+				'.wp-block-navigation__responsive-container-close'
+			);
+
+			if ( ! dialog || ! closeButton ) {
+				return;
+			}
+
+			const isOpen = () =>
+				container.classList.contains( 'is-menu-open' ) ||
+				container.classList.contains( 'has-modal-open' );
+
+			container.addEventListener(
+				'focusout',
+				( event ) => {
+					if ( ! isOpen() || event.relatedTarget !== null ) {
+						return;
+					}
+
+					// DevTools can move focus outside the document without a real user close intent.
+					event.stopImmediatePropagation();
+				},
+				true
+			);
+
+			container.addEventListener(
+				'pointerdown',
+				( event ) => {
+					if ( ! isOpen() || dialog.contains( event.target ) ) {
+						return;
+					}
+
+					event.preventDefault();
+					closeButton.click();
+				},
+				true
+			);
+		} );
+	};
+
 	syncScrollbarWidth();
 	initializeFooterReveal();
 	initializeBedroomLevels();
@@ -291,6 +340,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	if ( ! header ) {
 		return;
 	}
+
+	initializeHeaderDrawer();
 
 	// Pages without a hero keep the header in normal document flow.
 	if ( ! hasHeroHeader ) {
