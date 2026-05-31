@@ -553,17 +553,18 @@ function gutenberg_lab_vvm_get_footer_villas_navigation_content() {
  */
 function gutenberg_lab_vvm_get_footer_explore_navigation_content() {
 	$villa_archive_url = get_post_type_archive_link( 'villa' );
+	$links             = array();
 
-	if ( ! $villa_archive_url ) {
-		$villa_archive_url = '/villas/';
+	if ( $villa_archive_url ) {
+		$links[] = array(
+			'label' => 'Our Villas',
+			'url'   => $villa_archive_url,
+		);
 	}
 
-	return gutenberg_lab_vvm_custom_navigation_links_markup(
+	$links = array_merge(
+		$links,
 		array(
-			array(
-				'label' => 'Our Villas',
-				'url'   => $villa_archive_url,
-			),
 			array(
 				'label' => 'Private Experiences',
 				'url'   => '/private-experiences/',
@@ -578,6 +579,8 @@ function gutenberg_lab_vvm_get_footer_explore_navigation_content() {
 			),
 		)
 	);
+
+	return gutenberg_lab_vvm_custom_navigation_links_markup( $links );
 }
 
 /**

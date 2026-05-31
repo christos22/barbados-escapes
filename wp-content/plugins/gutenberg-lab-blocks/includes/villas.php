@@ -13,8 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Registers the Villas content type used by the homepage hero search.
  *
  * We keep the first version intentionally small: a real CPT plus a structured
- * location taxonomy. That gives us a native archive target for the GET form
- * now, while leaving room to extend the search contract later.
+ * location taxonomy. Single villa URLs remain public under `/villas/{slug}/`,
+ * but the `/villas/` archive is disabled until the collection/search page is
+ * ready for launch.
  */
 function gutenberg_lab_blocks_register_villas_post_type() {
 	register_post_type(
@@ -48,7 +49,7 @@ function gutenberg_lab_blocks_register_villas_post_type() {
 			),
 			'public'       => true,
 			'show_in_rest' => true,
-			'has_archive'  => true,
+			'has_archive'  => false,
 			'rewrite'      => array(
 				'slug' => 'villas',
 			),
@@ -1137,7 +1138,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 	$empty_state_label    = __( 'Add villa locations to enable search.', 'gutenberg-lab-blocks' );
 
 	if ( ! $archive_url ) {
-		$archive_url = home_url( '/villas/' );
+		return '';
 	}
 
 	ob_start();
