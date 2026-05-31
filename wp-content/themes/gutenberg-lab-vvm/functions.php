@@ -305,6 +305,106 @@ function gutenberg_lab_vvm_custom_navigation_links_markup( $links ) {
 }
 
 /**
+ * Builds a navigation link from a site path and uses the matched post title.
+ *
+ * This keeps header links Gutenberg-native when the path resolves to a page or
+ * CPT entry, while still allowing planned/custom URLs to exist before content
+ * is published in the local database.
+ *
+ * @param string $fallback_label Label to use when the path cannot resolve.
+ * @param string $path           Relative site path, for example `/villas/example/`.
+ * @param array  $extra_attrs    Optional block attributes such as `className`.
+ * @param string $post_type      Optional post type for direct slug lookup.
+ * @return string
+ */
+function gutenberg_lab_vvm_navigation_link_from_path_markup( $fallback_label, $path, $extra_attrs = array(), $post_type = '' ) {
+	$url     = gutenberg_lab_vvm_normalize_navigation_url( $path );
+	$post    = null;
+
+	if ( '' !== $post_type ) {
+		$path_bits = explode( '/', trim( $path, '/' ) );
+		$path_slug = end( $path_bits );
+		$post      = get_page_by_path( $path_slug, OBJECT, $post_type );
+
+		if ( ! $post instanceof WP_Post || 'publish' !== $post->post_status ) {
+			$post = null;
+		}
+	}
+
+	if ( ! $post instanceof WP_Post ) {
+		$post_id = url_to_postid( $url );
+		$post    = $post_id ? get_post( $post_id ) : null;
+	}
+
+	$title   = $post instanceof WP_Post ? get_the_title( $post ) : '';
+	$label   = '' !== $title ? $title : $fallback_label;
+
+	if ( $post instanceof WP_Post ) {
+		$attributes = array(
+			'label' => $label,
+			'type'  => $post->post_type,
+			'id'    => (int) $post->ID,
+			'url'   => $url,
+			'kind'  => 'post-type',
+		);
+	} else {
+		$attributes = array(
+			'label' => $label,
+			'type'  => 'custom',
+			'url'   => $url,
+			'kind'  => 'custom',
+		);
+	}
+
+	$attributes = array_merge( $attributes, $extra_attrs );
+
+	return '<!-- wp:navigation-link ' . wp_json_encode( $attributes ) . ' /-->';
+}
+
+/**
+ * Returns the current header navigation targets.
+ *
+ * The duplicate Westland URL from the supplied list is intentionally stored
+ * once so the visible menu does not repeat the same destination.
+ *
+ * @return array[]
+ */
+function gutenberg_lab_vvm_get_header_navigation_links() {
+	return array(
+		array(
+			'label' => 'Monkey Hill',
+			'path'  => '/villas/monkey-hill/',
+			'type'  => 'villa',
+		),
+		array(
+			'label' => 'Landfall House',
+			'path'  => '/villas/landfall-house/',
+			'type'  => 'villa',
+		),
+		array(
+			'label' => 'Tara House',
+			'path'  => '/villas/tara-house/',
+			'type'  => 'villa',
+		),
+		array(
+			'label' => 'Westland Heights Cool Winds',
+			'path'  => '/villas/westland-heights-cool-winds/',
+			'type'  => 'villa',
+		),
+		array(
+			'label' => 'Ocean Heights',
+			'path'  => '/villas/ocean-heights/',
+			'type'  => 'villa',
+		),
+		array(
+			'label' => 'Experiences',
+			'path'  => '/experiences/',
+			'type'  => 'page',
+		),
+	);
+}
+
+/**
  * Builds serialized navigation-submenu markup from a page slug and children.
  *
  * @param string $label           Human-readable menu label.
@@ -352,52 +452,11 @@ function gutenberg_lab_vvm_navigation_submenu_markup( $label, $slug, $child_link
 function gutenberg_lab_vvm_get_primary_navigation_content() {
 	return implode(
 		"\n\n",
-		array(
-			gutenberg_lab_vvm_navigation_submenu_markup(
-				'About Us',
-				'about-us',
-				array(
-					array(
-						'label' => 'About Us',
-						'slug'  => 'about-us',
-					),
-					array(
-						'label' => 'Test Page 4',
-						'slug'  => 'test-page-4',
-					),
-					array(
-						'label' => 'Test Page 5',
-						'slug'  => 'test-page-5',
-					),
-					array(
-						'label' => 'Test Page 6',
-						'slug'  => 'test-page-6',
-					),
-				)
-			),
-			gutenberg_lab_vvm_navigation_submenu_markup(
-				'Blog',
-				'blog',
-				array(
-					array(
-						'label' => 'Blog',
-						'slug'  => 'blog',
-					),
-					array(
-						'label' => 'Test Page 1',
-						'slug'  => 'test-page-1',
-					),
-					array(
-						'label' => 'Test Page 2',
-						'slug'  => 'test-page-2',
-					),
-					array(
-						'label' => 'Test Page 3',
-						'slug'  => 'test-page-3',
-					),
-				)
-			),
-			gutenberg_lab_vvm_navigation_link_markup( 'Contact Us', 'contact-us' ),
+		array_map(
+			static function ( $link ) {
+				return gutenberg_lab_vvm_navigation_link_from_path_markup( $link['label'], $link['path'], array(), $link['type'] );
+			},
+			gutenberg_lab_vvm_get_header_navigation_links()
 		)
 	);
 }
@@ -413,64 +472,13 @@ function gutenberg_lab_vvm_get_primary_navigation_content() {
  * @return string
  */
 function gutenberg_lab_vvm_get_header_navigation_content() {
-	$links = array(
-		array(
-			'label' => 'About Us',
-			'slug'  => 'about-us',
-		),
-		array(
-			'label' => 'Test Page 4',
-			'slug'  => 'test-page-4',
-			'class' => 'vvm-header-nav__child',
-		),
-		array(
-			'label' => 'Test Page 5',
-			'slug'  => 'test-page-5',
-			'class' => 'vvm-header-nav__child',
-		),
-		array(
-			'label' => 'Test Page 6',
-			'slug'  => 'test-page-6',
-			'class' => 'vvm-header-nav__child',
-		),
-		array(
-			'label' => 'Blog',
-			'slug'  => 'blog',
-		),
-		array(
-			'label' => 'Test Page 1',
-			'slug'  => 'test-page-1',
-			'class' => 'vvm-header-nav__child',
-		),
-		array(
-			'label' => 'Test Page 2',
-			'slug'  => 'test-page-2',
-			'class' => 'vvm-header-nav__child',
-		),
-		array(
-			'label' => 'Test Page 3',
-			'slug'  => 'test-page-3',
-			'class' => 'vvm-header-nav__child',
-		),
-		array(
-			'label' => 'Contact Us',
-			'slug'  => 'contact-us',
-		),
-	);
-
 	return implode(
 		"\n\n",
 		array_map(
 			static function ( $link ) {
-				$attributes = array();
-
-				if ( ! empty( $link['class'] ) ) {
-					$attributes['className'] = $link['class'];
-				}
-
-				return gutenberg_lab_vvm_navigation_link_markup( $link['label'], $link['slug'], $attributes );
+				return gutenberg_lab_vvm_navigation_link_from_path_markup( $link['label'], $link['path'], array(), $link['type'] );
 			},
-			$links
+			gutenberg_lab_vvm_get_header_navigation_links()
 		)
 	);
 }
