@@ -2375,10 +2375,9 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 }
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-dialog {
-	/* The drawer header preserves the hamburger/close-button position. */
+	/* Keep the drawer header compact while leaving room for the icon-only close control. */
 	--vvm-drawer-control-size: 2.25rem;
-	--vvm-drawer-header-target: max(var(--vvm-header-height, 96px), calc(var(--vvm-header-logo-width, 220px) * 0.6));
-	--vvm-drawer-header-height: calc((var(--vvm-drawer-header-target) + var(--vvm-drawer-control-size)) / 2 + 1rem);
+	--vvm-drawer-header-height: 4rem;
 	--vvm-drawer-header-bg: #8fa68e;
 	position: fixed;
 	top: 0 !important;
@@ -2440,15 +2439,16 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-container-close {
 	position: absolute;
-	top: calc((var(--vvm-drawer-header-target) - var(--vvm-drawer-control-size)) / 2);
-	left: var(--wp--custom--layout--gutter-current, 20px);
+	top: calc((var(--vvm-drawer-header-height) - var(--vvm-drawer-control-size)) / 2);
+	right: var(--wp--custom--layout--gutter-current, 20px);
+	left: auto;
 	z-index: 3;
 	display: inline-flex;
 	align-items: center;
-	justify-content: flex-start;
-	gap: 0.65rem;
-	width: auto;
-	min-width: var(--vvm-drawer-control-size);
+	justify-content: center;
+	gap: 0;
+	width: var(--vvm-drawer-control-size);
+	min-width: 0;
 	height: var(--vvm-drawer-control-size);
 	padding: 0;
 	border: 0;
@@ -2470,8 +2470,7 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 }
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-container-close::after {
-	content: "Close";
-	transform: translateY(1px);
+	content: none;
 }
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation__responsive-container-close:focus-visible {
