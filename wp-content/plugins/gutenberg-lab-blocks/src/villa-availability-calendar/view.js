@@ -344,6 +344,12 @@ const initializeCalendar = ( root ) => {
 			const date = button.dataset.date;
 			const dateKey = parseDateKey( date );
 			const isUnavailable = isUnavailableDate( date );
+			const isRangeStart =
+				allowUnavailableEndpoints &&
+				isUnavailable &&
+				isUnavailableRangeStart( date );
+			const isRangeEnd =
+				allowUnavailableEndpoints && isUnavailable && isUnavailableRangeEnd( date );
 			const isArrival = date === selectedArrival;
 			const isDeparture = date === selectedDeparture;
 			const canSelectBoundary =
@@ -389,6 +395,8 @@ const initializeCalendar = ( root ) => {
 			button.classList.toggle( 'is-preview-end', isPreviewEnd && previewIsAvailable );
 			button.classList.toggle( 'is-preview-invalid', isPreviewInvalid );
 			button.classList.toggle( 'is-unavailable', isUnavailable );
+			button.classList.toggle( 'is-unavailable-range-start', isRangeStart );
+			button.classList.toggle( 'is-unavailable-range-end', isRangeEnd );
 			button.classList.toggle( 'is-boundary-selectable', canSelectBoundary );
 			button.setAttribute( 'aria-pressed', isArrival || isDeparture ? 'true' : 'false' );
 			button.setAttribute(
@@ -509,6 +517,7 @@ const initializeCalendar = ( root ) => {
 
 			url.searchParams.set( 'start', nextStart );
 			url.searchParams.set( 'months', String( monthsToShow ) );
+			url.searchParams.set( 'allowEndpoints', allowUnavailableEndpoints ? '1' : '0' );
 
 			const response = await fetch( url.toString(), {
 				credentials: 'same-origin',
@@ -770,6 +779,14 @@ const initializeCalendar = ( root ) => {
 
 				if ( unavailableDates.has( date ) ) {
 					dayElement.classList.add( 'vvm-flatpickr-unavailable' );
+					dayElement.classList.toggle(
+						'vvm-flatpickr-unavailable-start',
+						allowUnavailableEndpoints && isUnavailableRangeStart( date )
+					);
+					dayElement.classList.toggle(
+						'vvm-flatpickr-unavailable-end',
+						allowUnavailableEndpoints && isUnavailableRangeEnd( date )
+					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-boundary-selectable',
 						allowUnavailableEndpoints &&

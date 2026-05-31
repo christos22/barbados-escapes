@@ -172,6 +172,30 @@
 	cursor: pointer;
 }
 
+.vvm-villa-availability-calendar__day.is-unavailable.is-unavailable-range-start {
+	background: linear-gradient(
+		135deg,
+		transparent 0 49%,
+		var(--vvm-calendar-unavailable) 50% 100%
+	);
+}
+
+.vvm-villa-availability-calendar__day.is-unavailable.is-unavailable-range-end {
+	background: linear-gradient(
+		135deg,
+		var(--vvm-calendar-unavailable) 0 49%,
+		transparent 50% 100%
+	);
+}
+
+.vvm-villa-availability-calendar__day.is-unavailable.is-unavailable-range-start.is-unavailable-range-end {
+	background: linear-gradient(
+		135deg,
+		transparent 0 49%,
+		var(--vvm-calendar-unavailable) 50% 100%
+	);
+}
+
 .vvm-villa-availability-calendar__day.is-checkout-candidate {
 	cursor: pointer;
 }
@@ -385,6 +409,33 @@
 	background: var(--vvm-date-picker-unavailable);
 	border-color: var(--vvm-date-picker-unavailable);
 	color: #807970;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-unavailable.vvm-flatpickr-unavailable-start,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-unavailable.vvm-flatpickr-unavailable-start:hover {
+	background: linear-gradient(
+		135deg,
+		transparent 0 49%,
+		var(--vvm-date-picker-unavailable) 50% 100%
+	);
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-unavailable.vvm-flatpickr-unavailable-end,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-unavailable.vvm-flatpickr-unavailable-end:hover {
+	background: linear-gradient(
+		135deg,
+		var(--vvm-date-picker-unavailable) 0 49%,
+		transparent 50% 100%
+	);
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-unavailable.vvm-flatpickr-unavailable-start.vvm-flatpickr-unavailable-end,
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-unavailable.vvm-flatpickr-unavailable-start.vvm-flatpickr-unavailable-end:hover {
+	background: linear-gradient(
+		135deg,
+		transparent 0 49%,
+		var(--vvm-date-picker-unavailable) 50% 100%
+	);
 }
 
 .flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-boundary-selectable {

@@ -1377,26 +1377,26 @@ function gutenberg_lab_blocks_format_villa_availability_window_label( DateTimeIm
 /**
  * Builds the HTML and data for one visible availability window.
  *
- * @param int               $villa_id       Villa post ID.
- * @param DateTimeImmutable $month_start    First visible month.
- * @param int               $months_to_show Number of visible months.
+ * @param int               $villa_id                     Villa post ID.
+ * @param DateTimeImmutable $month_start                  First visible month.
+ * @param int               $months_to_show               Number of visible months.
+ * @param bool              $allow_unavailable_endpoints Whether blocked range edges stay selectable.
  * @return array<string, mixed>
  */
-function gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, DateTimeImmutable $month_start, $months_to_show ) {
-	$months_to_show = min( 18, max( 1, absint( $months_to_show ) ) );
-	$range_end      = $month_start->modify( '+' . $months_to_show . ' months' );
-	$visible_unavailable = gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $month_start->format( 'Y-m-d' ), $range_end->format( 'Y-m-d' ) );
+function gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, DateTimeImmutable $month_start, $months_to_show, $allow_unavailable_endpoints = false ) {
+	$months_to_show      = min( 18, max( 1, absint( $months_to_show ) ) );
+	$range_end           = $month_start->modify( '+' . $months_to_show . ' months' );
 	$boundary_unavailable = gutenberg_lab_blocks_get_villa_unavailable_dates(
 		$villa_id,
 		$month_start->modify( '-1 day' )->format( 'Y-m-d' ),
 		$range_end->modify( '+1 day' )->format( 'Y-m-d' )
 	);
-	$lookup         = array_fill_keys( $visible_unavailable, true );
+	$lookup              = array_fill_keys( $boundary_unavailable, true );
 
 	ob_start();
 
 	for ( $month_index = 0; $month_index < $months_to_show; ++$month_index ) {
-		echo gutenberg_lab_blocks_render_villa_availability_month( $month_start->modify( '+' . $month_index . ' months' ), $lookup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo gutenberg_lab_blocks_render_villa_availability_month( $month_start->modify( '+' . $month_index . ' months' ), $lookup, $allow_unavailable_endpoints ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	return array(
@@ -1433,6 +1433,10 @@ function gutenberg_lab_blocks_register_villa_availability_rest_routes() {
 					'type'              => 'integer',
 					'sanitize_callback' => 'absint',
 				),
+				'allowEndpoints' => array(
+					'type'              => 'boolean',
+					'sanitize_callback' => 'rest_sanitize_boolean',
+				),
 			),
 		)
 	);
@@ -1465,8 +1469,9 @@ function gutenberg_lab_blocks_get_villa_availability_window_rest( WP_REST_Reques
 		$month_start = $minimum_start;
 	}
 
-	$response                 = gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, $month_start, $months_to_show );
-	$response['minimumStart'] = $minimum_start->format( 'Y-m-d' );
+	$allow_unavailable_endpoints = rest_sanitize_boolean( $request->get_param( 'allowEndpoints' ) );
+	$response                    = gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, $month_start, $months_to_show, $allow_unavailable_endpoints );
+	$response['minimumStart']    = $minimum_start->format( 'Y-m-d' );
 
 	return rest_ensure_response( $response );
 }
@@ -1512,7 +1517,7 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 		: '.vvm-villa-contact-form';
 	$allow_unavailable_endpoints = ! empty( $attributes['allowUnavailableEndpoints'] );
 	$month_start    = gutenberg_lab_blocks_normalize_villa_availability_month_start( '' );
-	$window         = gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, $month_start, $months_to_show );
+	$window         = gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, $month_start, $months_to_show, $allow_unavailable_endpoints );
 	$payload        = array(
 		'villaId'                    => $villa_id,
 		'villaTitle'                 => get_the_title( $villa_id ),
@@ -1594,11 +1599,12 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 /**
  * Renders one month grid.
  *
- * @param DateTimeImmutable     $month_start        First day of month.
- * @param array<string, bool>   $unavailable_lookup Unavailable date lookup.
+ * @param DateTimeImmutable     $month_start                  First day of month.
+ * @param array<string, bool>   $unavailable_lookup           Unavailable date lookup.
+ * @param bool                  $allow_unavailable_endpoints Whether blocked range edges stay selectable.
  * @return string
  */
-function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable $month_start, $unavailable_lookup ) {
+function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable $month_start, $unavailable_lookup, $allow_unavailable_endpoints = false ) {
 	$days_in_month = (int) $month_start->format( 't' );
 	$first_weekday = (int) $month_start->format( 'w' );
 	$today         = wp_date( 'Y-m-d' );
@@ -1645,6 +1651,20 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 
 							if ( $unavailable ) {
 								$classes[] = 'is-unavailable';
+
+								if ( $allow_unavailable_endpoints ) {
+									$date_context  = new DateTimeImmutable( $date, wp_timezone() );
+									$previous_date = $date_context->modify( '-1 day' )->format( 'Y-m-d' );
+									$next_date     = $date_context->modify( '+1 day' )->format( 'Y-m-d' );
+
+									if ( ! isset( $unavailable_lookup[ $previous_date ] ) ) {
+										$classes[] = 'is-unavailable-range-start';
+									}
+
+									if ( ! isset( $unavailable_lookup[ $next_date ] ) ) {
+										$classes[] = 'is-unavailable-range-end';
+									}
+								}
 							}
 
 							if ( $date === $today ) {
