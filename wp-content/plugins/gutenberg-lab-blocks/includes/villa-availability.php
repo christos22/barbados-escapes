@@ -491,7 +491,10 @@ function gutenberg_lab_blocks_sync_villa_availability( $villa_id ) {
 			'label'             => $feed['label'],
 			'url'               => $feed['url'],
 			'key'               => $feed['key'],
-			'last_synced'       => current_time( 'timestamp' ),
+			// Store a real Unix timestamp. wp_date() applies the site timezone
+			// when displaying it, so storing current_time( 'timestamp' ) here
+			// would apply the Barbados offset twice.
+			'last_synced'       => time(),
 			'unavailable_count' => 0,
 			'error'             => '',
 		);
@@ -529,7 +532,8 @@ function gutenberg_lab_blocks_sync_villa_availability( $villa_id ) {
 	}
 
 	$summary = array(
-		'last_synced'       => current_time( 'timestamp' ),
+		// Store UTC-based Unix time; render with wp_date() for site-local time.
+		'last_synced'       => time(),
 		'feeds'             => $statuses,
 		'unavailable_count' => count( gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id ) ),
 	);
