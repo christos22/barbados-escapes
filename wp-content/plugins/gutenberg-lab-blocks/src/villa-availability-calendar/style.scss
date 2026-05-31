@@ -168,6 +168,10 @@
 	cursor: not-allowed;
 }
 
+.vvm-villa-availability-calendar__day.is-unavailable.is-boundary-selectable {
+	cursor: pointer;
+}
+
 .vvm-villa-availability-calendar__day.is-checkout-candidate {
 	cursor: pointer;
 }
@@ -381,6 +385,10 @@
 	background: var(--vvm-date-picker-unavailable);
 	border-color: var(--vvm-date-picker-unavailable);
 	color: #807970;
+}
+
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-boundary-selectable {
+	cursor: pointer;
 }
 
 @media (max-width: 1200px) {

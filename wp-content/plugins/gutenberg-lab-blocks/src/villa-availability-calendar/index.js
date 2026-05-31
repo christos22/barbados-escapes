@@ -1,6 +1,6 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody, Placeholder, TextControl } from '@wordpress/components';
+import { PanelBody, Placeholder, TextControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 import './style.scss';
@@ -10,7 +10,13 @@ import metadata from './block.json';
 
 const Edit = ( { attributes, setAttributes } ) => {
 	const blockProps = useBlockProps();
-	const { villaId, monthsToShow, heading, formSelector } = attributes;
+	const {
+		allowUnavailableEndpoints,
+		villaId,
+		monthsToShow,
+		heading,
+		formSelector,
+	} = attributes;
 
 	return (
 		<>
@@ -50,6 +56,14 @@ const Edit = ( { attributes, setAttributes } ) => {
 						help={ __( 'The calendar fills this CF7 form after a date range is selected.', 'gutenberg-lab-blocks' ) }
 						value={ formSelector }
 						onChange={ ( value ) => setAttributes( { formSelector: value } ) }
+					/>
+					<ToggleControl
+						label={ __( 'Allow boundary check-in/out', 'gutenberg-lab-blocks' ) }
+						help={ __( 'When enabled, guests may check out on the first greyed-out date or check in on the last greyed-out date. Dates inside the grey range stay blocked.', 'gutenberg-lab-blocks' ) }
+						checked={ !! allowUnavailableEndpoints }
+						onChange={ ( value ) =>
+							setAttributes( { allowUnavailableEndpoints: value } )
+						}
 					/>
 				</PanelBody>
 			</InspectorControls>

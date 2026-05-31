@@ -588,14 +588,56 @@ function gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $start_dat
 }
 
 /**
- * Checks if a guest stay avoids every unavailable calendar date in a range.
+ * Shifts a normalized ISO date by a day offset.
  *
- * @param int    $villa_id       Villa post ID.
- * @param string $arrival_date   Arrival date.
- * @param string $departure_date Departure date.
+ * @param string $date Date in Y-m-d format.
+ * @param int    $days Number of days to shift.
+ * @return string
+ */
+function gutenberg_lab_blocks_shift_iso_date( $date, $days ) {
+	$date = gutenberg_lab_blocks_normalize_iso_date( $date );
+
+	if ( '' === $date ) {
+		return '';
+	}
+
+	return ( new DateTimeImmutable( $date, wp_timezone() ) )
+		->modify( (int) $days . ' days' )
+		->format( 'Y-m-d' );
+}
+
+/**
+ * Checks whether an unavailable date starts a contiguous unavailable run.
+ *
+ * @param string              $date   Date in Y-m-d format.
+ * @param array<string, bool> $lookup Unavailable date lookup.
  * @return bool
  */
-function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival_date, $departure_date ) {
+function gutenberg_lab_blocks_is_unavailable_range_start( $date, $lookup ) {
+	return isset( $lookup[ $date ] ) && ! isset( $lookup[ gutenberg_lab_blocks_shift_iso_date( $date, -1 ) ] );
+}
+
+/**
+ * Checks whether an unavailable date ends a contiguous unavailable run.
+ *
+ * @param string              $date   Date in Y-m-d format.
+ * @param array<string, bool> $lookup Unavailable date lookup.
+ * @return bool
+ */
+function gutenberg_lab_blocks_is_unavailable_range_end( $date, $lookup ) {
+	return isset( $lookup[ $date ] ) && ! isset( $lookup[ gutenberg_lab_blocks_shift_iso_date( $date, 1 ) ] );
+}
+
+/**
+ * Checks if a guest stay avoids every unavailable calendar date in a range.
+ *
+ * @param int    $villa_id                    Villa post ID.
+ * @param string $arrival_date                Arrival date.
+ * @param string $departure_date              Departure date.
+ * @param bool   $allow_unavailable_endpoints Whether unavailable range edges are selectable.
+ * @return bool
+ */
+function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival_date, $departure_date, $allow_unavailable_endpoints = false ) {
 	global $wpdb;
 
 	// CF7 validation can run on frontend requests, so do not rely on admin_init.
@@ -608,6 +650,52 @@ function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival
 
 	if ( ! $villa_id || '' === $arrival_date || '' === $departure_date || $departure_date <= $arrival_date ) {
 		return false;
+	}
+
+	if ( $allow_unavailable_endpoints ) {
+		$lookup_start = gutenberg_lab_blocks_shift_iso_date( $arrival_date, -1 );
+		$lookup_end   = gutenberg_lab_blocks_shift_iso_date( $departure_date, 1 );
+		$unavailable  = gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $lookup_start, $lookup_end );
+		$lookup       = array_fill_keys( $unavailable, true );
+
+		if (
+			isset( $lookup[ $arrival_date ] ) &&
+			! gutenberg_lab_blocks_is_unavailable_range_end( $arrival_date, $lookup )
+		) {
+			return false;
+		}
+
+		if (
+			isset( $lookup[ $departure_date ] ) &&
+			! gutenberg_lab_blocks_is_unavailable_range_start( $departure_date, $lookup )
+		) {
+			return false;
+		}
+
+		$cursor = new DateTimeImmutable( $arrival_date, wp_timezone() );
+		$end    = new DateTimeImmutable( $departure_date, wp_timezone() );
+		$limit  = 0;
+
+		while ( $cursor < $end && $limit < 1095 ) {
+			$date = $cursor->format( 'Y-m-d' );
+
+			// A grey check-in date is allowed only when it is the final date
+			// in an unavailable run; all other unavailable nights still block.
+			if (
+				isset( $lookup[ $date ] ) &&
+				! (
+					$date === $arrival_date &&
+					gutenberg_lab_blocks_is_unavailable_range_end( $date, $lookup )
+				)
+			) {
+				return false;
+			}
+
+			$cursor = $cursor->modify( '+1 day' );
+			++$limit;
+		}
+
+		return true;
 	}
 
 	$blocked_count = (int) $wpdb->get_var(
@@ -1087,8 +1175,13 @@ function gutenberg_lab_blocks_format_villa_availability_window_label( DateTimeIm
 function gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, DateTimeImmutable $month_start, $months_to_show ) {
 	$months_to_show = min( 18, max( 1, absint( $months_to_show ) ) );
 	$range_end      = $month_start->modify( '+' . $months_to_show . ' months' );
-	$unavailable    = gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $month_start->format( 'Y-m-d' ), $range_end->format( 'Y-m-d' ) );
-	$lookup         = array_fill_keys( $unavailable, true );
+	$visible_unavailable = gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $month_start->format( 'Y-m-d' ), $range_end->format( 'Y-m-d' ) );
+	$boundary_unavailable = gutenberg_lab_blocks_get_villa_unavailable_dates(
+		$villa_id,
+		$month_start->modify( '-1 day' )->format( 'Y-m-d' ),
+		$range_end->modify( '+1 day' )->format( 'Y-m-d' )
+	);
+	$lookup         = array_fill_keys( $visible_unavailable, true );
 
 	ob_start();
 
@@ -1102,7 +1195,7 @@ function gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id,
 		'monthsToShow'     => $months_to_show,
 		'rangeLabel'       => gutenberg_lab_blocks_format_villa_availability_window_label( $month_start, $months_to_show ),
 		'html'             => ob_get_clean(),
-		'unavailableDates' => $unavailable,
+		'unavailableDates' => $boundary_unavailable,
 	);
 }
 
@@ -1207,29 +1300,32 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 	$form_selector  = isset( $attributes['formSelector'] ) && '' !== trim( (string) $attributes['formSelector'] )
 		? sanitize_text_field( $attributes['formSelector'] )
 		: '.vvm-villa-contact-form';
+	$allow_unavailable_endpoints = ! empty( $attributes['allowUnavailableEndpoints'] );
 	$month_start    = gutenberg_lab_blocks_normalize_villa_availability_month_start( '' );
 	$window         = gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, $month_start, $months_to_show );
 	$payload        = array(
-		'villaId'          => $villa_id,
-		'villaTitle'       => get_the_title( $villa_id ),
-		'villaUrl'         => get_permalink( $villa_id ),
-		'formSelector'     => $form_selector,
-		'endpoint'         => rest_url( 'gutenberg-lab-blocks/v1/villa-availability/' . $villa_id ),
-		'windowStart'      => $window['start'],
-		'windowEnd'        => $window['end'],
-		'minimumStart'     => $window['start'],
-		'monthsToShow'     => $months_to_show,
-		'unavailableDates' => $window['unavailableDates'],
-		'fields'           => array(
-			'arrival'      => 'preferred-arrival',
-			'departure'    => 'preferred-departure',
-			'villaId'      => 'villa-id',
-			'villaTitle'   => 'villa-title',
-			'villaUrl'     => 'villa-url',
-			'dateSummary'  => 'selected-dates-summary',
+		'villaId'                    => $villa_id,
+		'villaTitle'                 => get_the_title( $villa_id ),
+		'villaUrl'                   => get_permalink( $villa_id ),
+		'formSelector'               => $form_selector,
+		'allowUnavailableEndpoints'  => $allow_unavailable_endpoints,
+		'endpoint'                   => rest_url( 'gutenberg-lab-blocks/v1/villa-availability/' . $villa_id ),
+		'windowStart'                => $window['start'],
+		'windowEnd'                  => $window['end'],
+		'minimumStart'               => $window['start'],
+		'monthsToShow'               => $months_to_show,
+		'unavailableDates'           => $window['unavailableDates'],
+		'fields'                     => array(
+			'arrival'                   => 'preferred-arrival',
+			'departure'                 => 'preferred-departure',
+			'villaId'                   => 'villa-id',
+			'villaTitle'                => 'villa-title',
+			'villaUrl'                  => 'villa-url',
+			'allowUnavailableEndpoints' => 'allow-unavailable-endpoints',
+			'dateSummary'               => 'selected-dates-summary',
 		),
-		'prices'           => array(),
-		'messages'         => array(
+		'prices'                     => array(),
+		'messages'                   => array(
 			'selectArrival' => __( 'Choose an available check-in date.', 'gutenberg-lab-blocks' ),
 			'selectDeparture' => __( 'Choose a check-out date.', 'gutenberg-lab-blocks' ),
 			'arrivalUnavailable' => __( 'That check-in date is unavailable. Please choose another date.', 'gutenberg-lab-blocks' ),
@@ -1389,13 +1485,14 @@ function gutenberg_lab_blocks_validate_cf7_villa_availability( $result, $tag ) {
 	$arrival   = isset( $_POST['preferred-arrival'] ) ? gutenberg_lab_blocks_normalize_iso_date( sanitize_text_field( wp_unslash( $_POST['preferred-arrival'] ) ) ) : '';
 	$departure = isset( $_POST['preferred-departure'] ) ? gutenberg_lab_blocks_normalize_iso_date( sanitize_text_field( wp_unslash( $_POST['preferred-departure'] ) ) ) : '';
 	$villa_id  = isset( $_POST['villa-id'] ) ? absint( $_POST['villa-id'] ) : 0;
+	$allow_unavailable_endpoints = isset( $_POST['allow-unavailable-endpoints'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['allow-unavailable-endpoints'] ) );
 
 	if ( '' !== $arrival && '' !== $departure && $departure <= $arrival ) {
 		$result->invalidate( $tag, __( 'Check-out date must be after check-in date.', 'gutenberg-lab-blocks' ) );
 		return $result;
 	}
 
-	if ( $villa_id && '' !== $arrival && '' !== $departure && ! gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival, $departure ) ) {
+	if ( $villa_id && '' !== $arrival && '' !== $departure && ! gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival, $departure, $allow_unavailable_endpoints ) ) {
 		$result->invalidate( $tag, __( 'Those dates are not available. Please choose another date range.', 'gutenberg-lab-blocks' ) );
 	}
 

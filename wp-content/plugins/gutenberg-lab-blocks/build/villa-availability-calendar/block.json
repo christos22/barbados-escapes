@@ -23,6 +23,10 @@
     "formSelector": {
       "type": "string",
       "default": ".vvm-villa-contact-form"
+    },
+    "allowUnavailableEndpoints": {
+      "type": "boolean",
+      "default": false
     }
   },
   "usesContext": [

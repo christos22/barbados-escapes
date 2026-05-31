@@ -225,6 +225,7 @@ const initializeCalendar = ( root ) => {
 	}
 
 	const unavailableDates = new Set( data.unavailableDates || [] );
+	const allowUnavailableEndpoints = data.allowUnavailableEndpoints === true;
 	const monthsToShow = Number( data.monthsToShow || 12 );
 	const minimumStart = data.minimumStart || data.windowStart;
 	let dayButtons = Array.from( root.querySelectorAll( '[data-vvm-calendar-day]' ) );
@@ -278,6 +279,22 @@ const initializeCalendar = ( root ) => {
 		statusNode.replaceChildren( message );
 	};
 
+	const isUnavailableDate = ( date ) => unavailableDates.has( date );
+
+	const isUnavailableRangeStart = ( date ) =>
+		isUnavailableDate( date ) && ! isUnavailableDate( addDays( date, -1 ) );
+
+	const isUnavailableRangeEnd = ( date ) =>
+		isUnavailableDate( date ) && ! isUnavailableDate( addDays( date, 1 ) );
+
+	const canSelectArrivalDate = ( date ) =>
+		! isUnavailableDate( date ) ||
+		( allowUnavailableEndpoints && isUnavailableRangeEnd( date ) );
+
+	const canSelectDepartureDate = ( date ) =>
+		! isUnavailableDate( date ) ||
+		( allowUnavailableEndpoints && isUnavailableRangeStart( date ) );
+
 	const rangeIsAvailable = ( arrival, departure ) => {
 		const arrivalKey = parseDateKey( arrival );
 		const departureKey = parseDateKey( departure );
@@ -286,14 +303,23 @@ const initializeCalendar = ( root ) => {
 			return false;
 		}
 
-		if ( unavailableDates.has( departure ) ) {
+		if ( ! canSelectArrivalDate( arrival ) || ! canSelectDepartureDate( departure ) ) {
 			return false;
 		}
 
 		for ( let cursor = arrivalKey; cursor < departureKey; cursor += DAY_MS ) {
 			const cursorDate = new Date( cursor ).toISOString().slice( 0, 10 );
 
-			if ( unavailableDates.has( cursorDate ) ) {
+			// When endpoint selection is enabled, a grey check-in date is only
+			// allowed if it is the final date in a blocked run.
+			if (
+				isUnavailableDate( cursorDate ) &&
+				! (
+					allowUnavailableEndpoints &&
+					cursorDate === arrival &&
+					isUnavailableRangeEnd( cursorDate )
+				)
+			) {
 				return false;
 			}
 		}
@@ -317,9 +343,15 @@ const initializeCalendar = ( root ) => {
 		dayButtons.forEach( ( button ) => {
 			const date = button.dataset.date;
 			const dateKey = parseDateKey( date );
-			const isUnavailable = unavailableDates.has( date );
+			const isUnavailable = isUnavailableDate( date );
 			const isArrival = date === selectedArrival;
 			const isDeparture = date === selectedDeparture;
+			const canSelectBoundary =
+				allowUnavailableEndpoints &&
+				isUnavailable &&
+				( selectedArrival && ! selectedDeparture && date > selectedArrival
+					? isUnavailableRangeStart( date )
+					: isUnavailableRangeEnd( date ) );
 			const isInRange =
 				arrivalKey !== null &&
 				departureKey !== null &&
@@ -357,7 +389,14 @@ const initializeCalendar = ( root ) => {
 			button.classList.toggle( 'is-preview-end', isPreviewEnd && previewIsAvailable );
 			button.classList.toggle( 'is-preview-invalid', isPreviewInvalid );
 			button.classList.toggle( 'is-unavailable', isUnavailable );
+			button.classList.toggle( 'is-boundary-selectable', canSelectBoundary );
 			button.setAttribute( 'aria-pressed', isArrival || isDeparture ? 'true' : 'false' );
+			button.setAttribute(
+				'aria-disabled',
+				isUnavailable && ! canSelectBoundary && ! isArrival && ! isDeparture
+					? 'true'
+					: 'false'
+			);
 		} );
 	};
 
@@ -396,10 +435,9 @@ const initializeCalendar = ( root ) => {
 
 			button.addEventListener( 'click', () => {
 				const date = button.dataset.date;
-				const isUnavailable = unavailableDates.has( date );
 
 				if ( ! selectedArrival || selectedDeparture || date <= selectedArrival ) {
-					if ( isUnavailable ) {
+					if ( ! canSelectArrivalDate( date ) ) {
 						setStatus( data.messages?.selectArrival || 'Choose an available check-in date.' );
 						return;
 					}
@@ -521,6 +559,13 @@ const initializeCalendar = ( root ) => {
 		setFieldValue( form, fields.villaId, String( data.villaId || '' ), 'hidden', false );
 		setFieldValue( form, fields.villaTitle, data.villaTitle || '', 'hidden', false );
 		setFieldValue( form, fields.villaUrl, data.villaUrl || '', 'hidden', false );
+		setFieldValue(
+			form,
+			fields.allowUnavailableEndpoints,
+			allowUnavailableEndpoints ? '1' : '0',
+			'hidden',
+			false
+		);
 		setFieldValue( form, fields.dateSummary, summary, 'hidden', false );
 
 		if ( arrivalField && departureField ) {
@@ -536,6 +581,11 @@ const initializeCalendar = ( root ) => {
 		setFieldValue( form, fields.villaId, String( data.villaId || '' ) );
 		setFieldValue( form, fields.villaTitle, data.villaTitle || '' );
 		setFieldValue( form, fields.villaUrl, data.villaUrl || '' );
+		setFieldValue(
+			form,
+			fields.allowUnavailableEndpoints,
+			allowUnavailableEndpoints ? '1' : '0'
+		);
 	};
 
 	const setDateFieldValidity = ( field, message = '' ) => {
@@ -591,7 +641,7 @@ const initializeCalendar = ( root ) => {
 			departureField.min = arrival ? addDays( arrival, 1 ) : minimumStart;
 		}
 
-		if ( arrival && unavailableDates.has( arrival ) ) {
+		if ( arrival && ! canSelectArrivalDate( arrival ) ) {
 			setDateFieldValidity(
 				arrivalField,
 				data.messages?.arrivalUnavailable ||
@@ -644,7 +694,7 @@ const initializeCalendar = ( root ) => {
 		document.body;
 
 	const getArrivalDisableRules = () => [
-		( date ) => unavailableDates.has( formatPickerDate( date ) ),
+		( date ) => ! canSelectArrivalDate( formatPickerDate( date ) ),
 	];
 
 	const getDepartureDisableRules = ( arrival ) => [
@@ -656,7 +706,7 @@ const initializeCalendar = ( root ) => {
 			}
 
 			if ( ! arrival ) {
-				return unavailableDates.has( departure );
+				return ! canSelectDepartureDate( departure );
 			}
 
 			return departure <= arrival || ! rangeIsAvailable( arrival, departure );
@@ -686,7 +736,7 @@ const initializeCalendar = ( root ) => {
 		const arrival = normalizeDateValue( arrivalField.value );
 		const departure = normalizeDateValue( departureField.value );
 		const isValid = validateFormDateFields( form, arrivalField, departureField, true );
-		const arrivalIsUnavailable = arrival && unavailableDates.has( arrival );
+		const arrivalIsUnavailable = arrival && ! canSelectArrivalDate( arrival );
 
 		selectedArrival = arrival && ! arrivalIsUnavailable ? arrival : '';
 		selectedDeparture = arrival && departure && isValid ? departure : '';
@@ -720,6 +770,11 @@ const initializeCalendar = ( root ) => {
 
 				if ( unavailableDates.has( date ) ) {
 					dayElement.classList.add( 'vvm-flatpickr-unavailable' );
+					dayElement.classList.toggle(
+						'vvm-flatpickr-boundary-selectable',
+						allowUnavailableEndpoints &&
+							( isUnavailableRangeStart( date ) || isUnavailableRangeEnd( date ) )
+					);
 					dayElement.setAttribute(
 						'title',
 						data.messages?.arrivalUnavailable || 'Unavailable'
