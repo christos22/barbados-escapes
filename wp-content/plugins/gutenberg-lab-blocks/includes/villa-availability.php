@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const GUTENBERG_LAB_BLOCKS_VILLA_AVAILABILITY_DB_VERSION = '20260518';
 const GUTENBERG_LAB_BLOCKS_VILLA_ICAL_META              = '_gutenberg_lab_villa_ical_feeds';
 const GUTENBERG_LAB_BLOCKS_VILLA_MANUAL_BLOCKS_META     = '_gutenberg_lab_villa_manual_blocks';
+const GUTENBERG_LAB_BLOCKS_VILLA_CHECKOUT_BUFFER_META   = '_gutenberg_lab_villa_checkout_buffer_nights';
 const GUTENBERG_LAB_BLOCKS_VILLA_SYNC_STATUS_META       = '_gutenberg_lab_villa_availability_sync_status';
 const GUTENBERG_LAB_BLOCKS_VILLA_SYNC_HOOK              = 'gutenberg_lab_blocks_sync_villa_availability';
 
@@ -264,6 +265,16 @@ function gutenberg_lab_blocks_get_villa_manual_blocks( $villa_id ) {
 }
 
 /**
+ * Returns how many extra nights should be blocked after each iCal checkout.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return int
+ */
+function gutenberg_lab_blocks_get_villa_checkout_buffer_nights( $villa_id ) {
+	return min( 7, absint( get_post_meta( $villa_id, GUTENBERG_LAB_BLOCKS_VILLA_CHECKOUT_BUFFER_META, true ) ) );
+}
+
+/**
  * Replaces all dates for one villa/source pair.
  *
  * @param int           $villa_id    Villa post ID.
@@ -333,23 +344,23 @@ function gutenberg_lab_blocks_prune_villa_ical_sources( $villa_id, $source_keys 
 	}
 
 	if ( empty( $source_keys ) ) {
-		$wpdb->delete(
-			$table_name,
-			array(
-				'villa_id'     => $villa_id,
-				'source_type' => 'ical',
-			),
-			array( '%d', '%s' )
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$table_name} WHERE villa_id = %d AND source_type IN (%s, %s)",
+				$villa_id,
+				'ical',
+				'ical-buffer'
+			)
 		);
 		return;
 	}
 
 	$placeholders = implode( ', ', array_fill( 0, count( $source_keys ), '%s' ) );
-	$params       = array_merge( array( $villa_id, 'ical' ), $source_keys );
+	$params       = array_merge( array( $villa_id, 'ical', 'ical-buffer' ), $source_keys );
 
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE FROM {$table_name} WHERE villa_id = %d AND source_type = %s AND source_key NOT IN ({$placeholders})",
+			"DELETE FROM {$table_name} WHERE villa_id = %d AND source_type IN (%s, %s) AND source_key NOT IN ({$placeholders})",
 			$params
 		)
 	);
@@ -386,12 +397,13 @@ function gutenberg_lab_blocks_should_ignore_villa_ical_event( $event ) {
 }
 
 /**
- * Parses iCal content into unavailable nights.
+ * Parses iCal content into booked nights and optional checkout buffer nights.
  *
- * @param string $ical_body Raw iCal body.
- * @return array<int, string>|WP_Error
+ * @param string $ical_body              Raw iCal body.
+ * @param int    $checkout_buffer_nights Extra nights to block after checkout.
+ * @return array{dates: array<int, string>, buffer_dates: array<int, string>}|WP_Error
  */
-function gutenberg_lab_blocks_parse_ical_unavailable_dates( $ical_body ) {
+function gutenberg_lab_blocks_parse_ical_availability_dates( $ical_body, $checkout_buffer_nights = 0 ) {
 	if ( ! class_exists( '\Sabre\VObject\Reader' ) ) {
 		return new WP_Error(
 			'ical_parser_missing',
@@ -404,10 +416,15 @@ function gutenberg_lab_blocks_parse_ical_unavailable_dates( $ical_body ) {
 		$start    = new DateTimeImmutable( 'first day of this month 00:00:00', wp_timezone() );
 		$end      = $start->modify( '+24 months' );
 		$calendar = method_exists( $calendar, 'expand' ) ? $calendar->expand( $start, $end, wp_timezone() ) : $calendar;
-		$dates    = array();
+		$dates                   = array();
+		$buffer_dates            = array();
+		$checkout_buffer_nights = min( 7, max( 0, absint( $checkout_buffer_nights ) ) );
 
 		if ( ! isset( $calendar->VEVENT ) ) {
-			return array();
+			return array(
+				'dates'        => array(),
+				'buffer_dates' => array(),
+			);
 		}
 
 		foreach ( $calendar->VEVENT as $event ) {
@@ -446,12 +463,32 @@ function gutenberg_lab_blocks_parse_ical_unavailable_dates( $ical_body ) {
 			}
 
 			$dates = array_merge( $dates, gutenberg_lab_blocks_get_date_span( $start_date, $end_date ) );
+
+			if ( $checkout_buffer_nights > 0 ) {
+				$buffer_end   = ( new DateTimeImmutable( $end_date, wp_timezone() ) )->modify( '+' . $checkout_buffer_nights . ' days' )->format( 'Y-m-d' );
+				$buffer_dates = array_merge( $buffer_dates, gutenberg_lab_blocks_get_date_span( $end_date, $buffer_end ) );
+			}
 		}
 
-		return array_values( array_unique( $dates ) );
+		return array(
+			'dates'        => array_values( array_unique( $dates ) ),
+			'buffer_dates' => array_values( array_unique( $buffer_dates ) ),
+		);
 	} catch ( Exception $exception ) {
 		return new WP_Error( 'ical_parse_error', $exception->getMessage() );
 	}
+}
+
+/**
+ * Parses iCal content into unavailable nights.
+ *
+ * @param string $ical_body Raw iCal body.
+ * @return array<int, string>|WP_Error
+ */
+function gutenberg_lab_blocks_parse_ical_unavailable_dates( $ical_body ) {
+	$availability = gutenberg_lab_blocks_parse_ical_availability_dates( $ical_body );
+
+	return is_wp_error( $availability ) ? $availability : $availability['dates'];
 }
 
 /**
@@ -490,6 +527,7 @@ function gutenberg_lab_blocks_sync_villa_availability( $villa_id ) {
 	$feeds    = gutenberg_lab_blocks_get_villa_ical_feeds( $villa_id );
 	$statuses = array();
 	$keys     = wp_list_pluck( $feeds, 'key' );
+	$checkout_buffer_nights = gutenberg_lab_blocks_get_villa_checkout_buffer_nights( $villa_id );
 
 	gutenberg_lab_blocks_maybe_install_villa_availability();
 	gutenberg_lab_blocks_refresh_villa_manual_availability( $villa_id );
@@ -515,6 +553,7 @@ function gutenberg_lab_blocks_sync_villa_availability( $villa_id ) {
 			// would apply the Barbados offset twice.
 			'last_synced'       => time(),
 			'unavailable_count' => 0,
+			'buffer_count'      => 0,
 			'error'             => '',
 		);
 
@@ -536,17 +575,22 @@ function gutenberg_lab_blocks_sync_villa_availability( $villa_id ) {
 			continue;
 		}
 
-		$dates = gutenberg_lab_blocks_parse_ical_unavailable_dates( wp_remote_retrieve_body( $response ) );
+		$availability = gutenberg_lab_blocks_parse_ical_availability_dates( wp_remote_retrieve_body( $response ), $checkout_buffer_nights );
 
-		if ( is_wp_error( $dates ) ) {
-			$status['error']       = $dates->get_error_message();
+		if ( is_wp_error( $availability ) ) {
+			$status['error']       = $availability->get_error_message();
 			$statuses[ $feed['key'] ] = $status;
 			continue;
 		}
 
-		gutenberg_lab_blocks_replace_villa_availability_dates( $villa_id, 'ical', $feed['key'], $dates );
+		$dates        = $availability['dates'];
+		$buffer_dates = $availability['buffer_dates'];
 
-		$status['unavailable_count'] = count( $dates );
+		gutenberg_lab_blocks_replace_villa_availability_dates( $villa_id, 'ical', $feed['key'], $dates );
+		gutenberg_lab_blocks_replace_villa_availability_dates( $villa_id, 'ical-buffer', $feed['key'], $buffer_dates );
+
+		$status['unavailable_count'] = count( array_unique( array_merge( $dates, $buffer_dates ) ) );
+		$status['buffer_count']      = count( $buffer_dates );
 		$statuses[ $feed['key'] ]    = $status;
 	}
 
@@ -585,6 +629,56 @@ function gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $start_dat
 
 	$where  = 'WHERE villa_id = %d AND status = %s';
 	$params = array( $villa_id, 'unavailable' );
+
+	$start_date = gutenberg_lab_blocks_normalize_iso_date( $start_date );
+	$end_date   = gutenberg_lab_blocks_normalize_iso_date( $end_date );
+
+	if ( '' !== $start_date ) {
+		$where   .= ' AND date >= %s';
+		$params[] = $start_date;
+	}
+
+	if ( '' !== $end_date ) {
+		$where   .= ' AND date < %s';
+		$params[] = $end_date;
+	}
+
+	return array_map(
+		'strval',
+		$wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT date FROM {$table_name} {$where} ORDER BY date ASC",
+				$params
+			)
+		)
+	);
+}
+
+/**
+ * Returns checkout buffer date strings for a villa.
+ *
+ * Buffer dates are unavailable dates, but they must stay hard-blocked even
+ * when the calendar allows normal booking edge dates.
+ *
+ * @param int    $villa_id   Villa post ID.
+ * @param string $start_date Optional inclusive start date.
+ * @param string $end_date   Optional exclusive end date.
+ * @return array<int, string>
+ */
+function gutenberg_lab_blocks_get_villa_checkout_buffer_dates( $villa_id, $start_date = '', $end_date = '' ) {
+	global $wpdb;
+
+	gutenberg_lab_blocks_maybe_install_villa_availability();
+
+	$table_name = gutenberg_lab_blocks_get_villa_availability_table_name();
+	$villa_id   = absint( $villa_id );
+
+	if ( ! $villa_id ) {
+		return array();
+	}
+
+	$where  = 'WHERE villa_id = %d AND status = %s AND source_type = %s';
+	$params = array( $villa_id, 'unavailable', 'ical-buffer' );
 
 	$start_date = gutenberg_lab_blocks_normalize_iso_date( $start_date );
 	$end_date   = gutenberg_lab_blocks_normalize_iso_date( $end_date );
@@ -679,18 +773,20 @@ function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival
 		$lookup_start = gutenberg_lab_blocks_shift_iso_date( $arrival_date, -1 );
 		$lookup_end   = gutenberg_lab_blocks_shift_iso_date( $departure_date, 1 );
 		$unavailable  = gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $lookup_start, $lookup_end );
+		$buffer_dates = gutenberg_lab_blocks_get_villa_checkout_buffer_dates( $villa_id, $lookup_start, $lookup_end );
 		$lookup       = array_fill_keys( $unavailable, true );
+		$buffer_lookup = array_fill_keys( $buffer_dates, true );
 
 		if (
 			isset( $lookup[ $arrival_date ] ) &&
-			! gutenberg_lab_blocks_is_unavailable_range_end( $arrival_date, $lookup )
+			( isset( $buffer_lookup[ $arrival_date ] ) || ! gutenberg_lab_blocks_is_unavailable_range_end( $arrival_date, $lookup ) )
 		) {
 			return false;
 		}
 
 		if (
 			isset( $lookup[ $departure_date ] ) &&
-			! gutenberg_lab_blocks_is_unavailable_range_start( $departure_date, $lookup )
+			( isset( $buffer_lookup[ $departure_date ] ) || ! gutenberg_lab_blocks_is_unavailable_range_start( $departure_date, $lookup ) )
 		) {
 			return false;
 		}
@@ -708,6 +804,7 @@ function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival
 				isset( $lookup[ $date ] ) &&
 				! (
 					$date === $arrival_date &&
+					! isset( $buffer_lookup[ $date ] ) &&
 					gutenberg_lab_blocks_is_unavailable_range_end( $date, $lookup )
 				)
 			) {
@@ -757,6 +854,7 @@ add_action( 'add_meta_boxes_villa', 'gutenberg_lab_blocks_add_villa_availability
 function gutenberg_lab_blocks_render_villa_availability_meta_box( $post ) {
 	$feeds         = gutenberg_lab_blocks_get_villa_ical_feeds( $post->ID );
 	$manual_blocks = gutenberg_lab_blocks_get_villa_manual_blocks( $post->ID );
+	$checkout_buffer_nights = gutenberg_lab_blocks_get_villa_checkout_buffer_nights( $post->ID );
 	$status        = get_post_meta( $post->ID, GUTENBERG_LAB_BLOCKS_VILLA_SYNC_STATUS_META, true );
 
 	if ( empty( $feeds ) ) {
@@ -819,6 +917,31 @@ function gutenberg_lab_blocks_render_villa_availability_meta_box( $post ) {
 				<?php esc_html_e( 'Add manual block', 'gutenberg-lab-blocks' ); ?>
 			</button>
 		</p>
+
+		<h3><?php esc_html_e( 'Booking rules', 'gutenberg-lab-blocks' ); ?></h3>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row">
+					<label for="gutenberg_lab_villa_checkout_buffer_nights">
+						<?php esc_html_e( 'Post-checkout buffer', 'gutenberg-lab-blocks' ); ?>
+					</label>
+				</th>
+				<td>
+					<input
+						type="number"
+						id="gutenberg_lab_villa_checkout_buffer_nights"
+						name="gutenberg_lab_villa_checkout_buffer_nights"
+						value="<?php echo esc_attr( (string) $checkout_buffer_nights ); ?>"
+						min="0"
+						max="7"
+						step="1"
+					/>
+					<p class="description">
+						<?php esc_html_e( 'Extra nights to block after each imported iCal booking. Use 1 for Landfall’s 24-hour post-checkout buffer, then sync the villa.', 'gutenberg-lab-blocks' ); ?>
+					</p>
+				</td>
+			</tr>
+		</table>
 
 		<div
 			class="gblb-villa-availability-admin__status"
@@ -894,7 +1017,7 @@ function gutenberg_lab_blocks_render_villa_availability_meta_box( $post ) {
 
 			// Send only the availability fields so the AJAX sync can save them
 			// before fetching the iCal feed. This avoids leaving the edit screen.
-			root.querySelectorAll( 'input[name^="gutenberg_lab_villa_ical_feeds"], input[name^="gutenberg_lab_villa_manual_blocks"]' ).forEach( function( input ) {
+			root.querySelectorAll( 'input[name^="gutenberg_lab_villa_ical_feeds"], input[name^="gutenberg_lab_villa_manual_blocks"], input[name="gutenberg_lab_villa_checkout_buffer_nights"]' ).forEach( function( input ) {
 				formData.append( input.name, input.value );
 			} );
 
@@ -1069,6 +1192,14 @@ function gutenberg_lab_blocks_render_villa_sync_status( $status ) {
 				esc_html__( 'dates:', 'gutenberg-lab-blocks' ),
 				isset( $feed_status['unavailable_count'] ) ? absint( $feed_status['unavailable_count'] ) : 0
 			);
+
+			if ( ! empty( $feed_status['buffer_count'] ) ) {
+				printf(
+					' (%s %d)',
+					esc_html__( 'buffer:', 'gutenberg-lab-blocks' ),
+					absint( $feed_status['buffer_count'] )
+				);
+			}
 		}
 
 		echo '</li>';
@@ -1152,13 +1283,17 @@ function gutenberg_lab_blocks_sanitize_villa_manual_block_input( $manual_input )
 /**
  * Saves villa availability fields and refreshes local manual/source rows.
  *
- * @param int   $post_id      Current villa ID.
- * @param mixed $feed_input   Raw iCal feed input.
- * @param mixed $manual_input Raw manual block input.
+ * @param int   $post_id               Current villa ID.
+ * @param mixed $feed_input            Raw iCal feed input.
+ * @param mixed $manual_input          Raw manual block input.
+ * @param mixed $checkout_buffer_input Raw post-checkout buffer input.
  */
-function gutenberg_lab_blocks_update_villa_availability_meta( $post_id, $feed_input, $manual_input ) {
+function gutenberg_lab_blocks_update_villa_availability_meta( $post_id, $feed_input, $manual_input, $checkout_buffer_input = 0 ) {
+	global $wpdb;
+
 	$feeds         = gutenberg_lab_blocks_sanitize_villa_ical_feed_input( $feed_input );
 	$manual_blocks = gutenberg_lab_blocks_sanitize_villa_manual_block_input( $manual_input );
+	$checkout_buffer_nights = min( 7, absint( $checkout_buffer_input ) );
 
 	if ( empty( $feeds ) ) {
 		delete_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_ICAL_META );
@@ -1170,6 +1305,20 @@ function gutenberg_lab_blocks_update_villa_availability_meta( $post_id, $feed_in
 		delete_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_MANUAL_BLOCKS_META );
 	} else {
 		update_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_MANUAL_BLOCKS_META, $manual_blocks );
+	}
+
+	if ( $checkout_buffer_nights > 0 ) {
+		update_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_CHECKOUT_BUFFER_META, $checkout_buffer_nights );
+	} else {
+		delete_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_CHECKOUT_BUFFER_META );
+		$wpdb->delete(
+			gutenberg_lab_blocks_get_villa_availability_table_name(),
+			array(
+				'villa_id'     => absint( $post_id ),
+				'source_type' => 'ical-buffer',
+			),
+			array( '%d', '%s' )
+		);
 	}
 
 	gutenberg_lab_blocks_refresh_villa_manual_availability( $post_id );
@@ -1208,7 +1357,11 @@ function gutenberg_lab_blocks_save_villa_availability_meta( $post_id ) {
 		? wp_unslash( $_POST['gutenberg_lab_villa_manual_blocks'] )
 		: array();
 
-	gutenberg_lab_blocks_update_villa_availability_meta( $post_id, $feed_input, $manual_input );
+	$checkout_buffer_input = isset( $_POST['gutenberg_lab_villa_checkout_buffer_nights'] )
+		? wp_unslash( $_POST['gutenberg_lab_villa_checkout_buffer_nights'] )
+		: 0;
+
+	gutenberg_lab_blocks_update_villa_availability_meta( $post_id, $feed_input, $manual_input, $checkout_buffer_input );
 }
 add_action( 'save_post_villa', 'gutenberg_lab_blocks_save_villa_availability_meta' );
 
@@ -1240,7 +1393,11 @@ function gutenberg_lab_blocks_handle_ajax_villa_availability_sync() {
 		? wp_unslash( $_POST['gutenberg_lab_villa_manual_blocks'] )
 		: array();
 
-	gutenberg_lab_blocks_update_villa_availability_meta( $villa_id, $feed_input, $manual_input );
+	$checkout_buffer_input = isset( $_POST['gutenberg_lab_villa_checkout_buffer_nights'] )
+		? wp_unslash( $_POST['gutenberg_lab_villa_checkout_buffer_nights'] )
+		: 0;
+
+	gutenberg_lab_blocks_update_villa_availability_meta( $villa_id, $feed_input, $manual_input, $checkout_buffer_input );
 
 	$status = gutenberg_lab_blocks_sync_villa_availability( $villa_id );
 	$errors = 0;
@@ -1391,12 +1548,18 @@ function gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id,
 		$month_start->modify( '-1 day' )->format( 'Y-m-d' ),
 		$range_end->modify( '+1 day' )->format( 'Y-m-d' )
 	);
+	$boundary_buffer      = gutenberg_lab_blocks_get_villa_checkout_buffer_dates(
+		$villa_id,
+		$month_start->modify( '-1 day' )->format( 'Y-m-d' ),
+		$range_end->modify( '+1 day' )->format( 'Y-m-d' )
+	);
 	$lookup              = array_fill_keys( $boundary_unavailable, true );
+	$buffer_lookup       = array_fill_keys( $boundary_buffer, true );
 
 	ob_start();
 
 	for ( $month_index = 0; $month_index < $months_to_show; ++$month_index ) {
-		echo gutenberg_lab_blocks_render_villa_availability_month( $month_start->modify( '+' . $month_index . ' months' ), $lookup, $allow_unavailable_endpoints ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo gutenberg_lab_blocks_render_villa_availability_month( $month_start->modify( '+' . $month_index . ' months' ), $lookup, $allow_unavailable_endpoints, $buffer_lookup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	return array(
@@ -1406,6 +1569,7 @@ function gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id,
 		'rangeLabel'       => gutenberg_lab_blocks_format_villa_availability_window_label( $month_start, $months_to_show ),
 		'html'             => ob_get_clean(),
 		'unavailableDates' => $boundary_unavailable,
+		'bufferDates'      => $boundary_buffer,
 	);
 }
 
@@ -1530,6 +1694,7 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 		'minimumStart'               => $window['start'],
 		'monthsToShow'               => $months_to_show,
 		'unavailableDates'           => $window['unavailableDates'],
+		'bufferDates'                => $window['bufferDates'],
 		'fields'                     => array(
 			'arrival'                   => 'preferred-arrival',
 			'departure'                 => 'preferred-departure',
@@ -1602,9 +1767,10 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
  * @param DateTimeImmutable     $month_start                  First day of month.
  * @param array<string, bool>   $unavailable_lookup           Unavailable date lookup.
  * @param bool                  $allow_unavailable_endpoints Whether blocked range edges stay selectable.
+ * @param array<string, bool>   $buffer_lookup              Hard-blocked checkout buffer date lookup.
  * @return string
  */
-function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable $month_start, $unavailable_lookup, $allow_unavailable_endpoints = false ) {
+function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable $month_start, $unavailable_lookup, $allow_unavailable_endpoints = false, $buffer_lookup = array() ) {
 	$days_in_month = (int) $month_start->format( 't' );
 	$first_weekday = (int) $month_start->format( 'w' );
 	$today         = wp_date( 'Y-m-d' );
@@ -1647,12 +1813,17 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 							<?php
 							$date        = $month_start->setDate( (int) $month_start->format( 'Y' ), (int) $month_start->format( 'm' ), $day )->format( 'Y-m-d' );
 							$unavailable = isset( $unavailable_lookup[ $date ] );
+							$is_buffer   = isset( $buffer_lookup[ $date ] );
 							$classes     = array( 'vvm-villa-availability-calendar__day' );
 
 							if ( $unavailable ) {
 								$classes[] = 'is-unavailable';
 
-								if ( $allow_unavailable_endpoints ) {
+								if ( $is_buffer ) {
+									$classes[] = 'is-checkout-buffer';
+								}
+
+								if ( $allow_unavailable_endpoints && ! $is_buffer ) {
 									$date_context  = new DateTimeImmutable( $date, wp_timezone() );
 									$previous_date = $date_context->modify( '-1 day' )->format( 'Y-m-d' );
 									$next_date     = $date_context->modify( '+1 day' )->format( 'Y-m-d' );
@@ -1678,6 +1849,7 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 									data-vvm-calendar-day
 									data-date="<?php echo esc_attr( $date ); ?>"
 									data-unavailable="<?php echo $unavailable ? 'true' : 'false'; ?>"
+									data-buffer="<?php echo $is_buffer ? 'true' : 'false'; ?>"
 									aria-disabled="<?php echo $unavailable ? 'true' : 'false'; ?>"
 									aria-label="<?php echo esc_attr( sprintf( '%1$s %2$s', $month_start->setDate( (int) $month_start->format( 'Y' ), (int) $month_start->format( 'm' ), $day )->format( 'F j, Y' ), $unavailable ? __( 'unavailable', 'gutenberg-lab-blocks' ) : __( 'available', 'gutenberg-lab-blocks' ) ) ); ?>"
 								>

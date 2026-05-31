@@ -225,6 +225,7 @@ const initializeCalendar = ( root ) => {
 	}
 
 	const unavailableDates = new Set( data.unavailableDates || [] );
+	const checkoutBufferDates = new Set( data.bufferDates || [] );
 	const allowUnavailableEndpoints = data.allowUnavailableEndpoints === true;
 	const monthsToShow = Number( data.monthsToShow || 12 );
 	const minimumStart = data.minimumStart || data.windowStart;
@@ -281,6 +282,8 @@ const initializeCalendar = ( root ) => {
 
 	const isUnavailableDate = ( date ) => unavailableDates.has( date );
 
+	const isCheckoutBufferDate = ( date ) => checkoutBufferDates.has( date );
+
 	const isUnavailableRangeStart = ( date ) =>
 		isUnavailableDate( date ) && ! isUnavailableDate( addDays( date, -1 ) );
 
@@ -289,11 +292,15 @@ const initializeCalendar = ( root ) => {
 
 	const canSelectArrivalDate = ( date ) =>
 		! isUnavailableDate( date ) ||
-		( allowUnavailableEndpoints && isUnavailableRangeEnd( date ) );
+		( allowUnavailableEndpoints &&
+			! isCheckoutBufferDate( date ) &&
+			isUnavailableRangeEnd( date ) );
 
 	const canSelectDepartureDate = ( date ) =>
 		! isUnavailableDate( date ) ||
-		( allowUnavailableEndpoints && isUnavailableRangeStart( date ) );
+		( allowUnavailableEndpoints &&
+			! isCheckoutBufferDate( date ) &&
+			isUnavailableRangeStart( date ) );
 
 	const rangeIsAvailable = ( arrival, departure ) => {
 		const arrivalKey = parseDateKey( arrival );
@@ -317,6 +324,7 @@ const initializeCalendar = ( root ) => {
 				! (
 					allowUnavailableEndpoints &&
 					cursorDate === arrival &&
+					! isCheckoutBufferDate( cursorDate ) &&
 					isUnavailableRangeEnd( cursorDate )
 				)
 			) {
@@ -344,17 +352,23 @@ const initializeCalendar = ( root ) => {
 			const date = button.dataset.date;
 			const dateKey = parseDateKey( date );
 			const isUnavailable = isUnavailableDate( date );
+			const isCheckoutBuffer = isCheckoutBufferDate( date );
 			const isRangeStart =
 				allowUnavailableEndpoints &&
 				isUnavailable &&
+				! isCheckoutBuffer &&
 				isUnavailableRangeStart( date );
 			const isRangeEnd =
-				allowUnavailableEndpoints && isUnavailable && isUnavailableRangeEnd( date );
+				allowUnavailableEndpoints &&
+				isUnavailable &&
+				! isCheckoutBuffer &&
+				isUnavailableRangeEnd( date );
 			const isArrival = date === selectedArrival;
 			const isDeparture = date === selectedDeparture;
 			const canSelectBoundary =
 				allowUnavailableEndpoints &&
 				isUnavailable &&
+				! isCheckoutBuffer &&
 				( selectedArrival && ! selectedDeparture && date > selectedArrival
 					? isUnavailableRangeStart( date )
 					: isUnavailableRangeEnd( date ) );
@@ -395,6 +409,7 @@ const initializeCalendar = ( root ) => {
 			button.classList.toggle( 'is-preview-end', isPreviewEnd && previewIsAvailable );
 			button.classList.toggle( 'is-preview-invalid', isPreviewInvalid );
 			button.classList.toggle( 'is-unavailable', isUnavailable );
+			button.classList.toggle( 'is-checkout-buffer', isCheckoutBuffer );
 			button.classList.toggle( 'is-unavailable-range-start', isRangeStart );
 			button.classList.toggle( 'is-unavailable-range-end', isRangeEnd );
 			button.classList.toggle( 'is-boundary-selectable', canSelectBoundary );
@@ -497,6 +512,10 @@ const initializeCalendar = ( root ) => {
 
 		( windowData.unavailableDates || [] ).forEach( ( date ) => {
 			unavailableDates.add( date );
+		} );
+
+		( windowData.bufferDates || [] ).forEach( ( date ) => {
+			checkoutBufferDates.add( date );
 		} );
 
 		bindDayButtons();
@@ -780,16 +799,25 @@ const initializeCalendar = ( root ) => {
 				if ( unavailableDates.has( date ) ) {
 					dayElement.classList.add( 'vvm-flatpickr-unavailable' );
 					dayElement.classList.toggle(
+						'vvm-flatpickr-checkout-buffer',
+						isCheckoutBufferDate( date )
+					);
+					dayElement.classList.toggle(
 						'vvm-flatpickr-unavailable-start',
-						allowUnavailableEndpoints && isUnavailableRangeStart( date )
+						allowUnavailableEndpoints &&
+							! isCheckoutBufferDate( date ) &&
+							isUnavailableRangeStart( date )
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-unavailable-end',
-						allowUnavailableEndpoints && isUnavailableRangeEnd( date )
+						allowUnavailableEndpoints &&
+							! isCheckoutBufferDate( date ) &&
+							isUnavailableRangeEnd( date )
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-boundary-selectable',
 						allowUnavailableEndpoints &&
+							! isCheckoutBufferDate( date ) &&
 							( isUnavailableRangeStart( date ) || isUnavailableRangeEnd( date ) )
 					);
 					dayElement.setAttribute(
