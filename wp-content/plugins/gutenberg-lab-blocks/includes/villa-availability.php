@@ -371,6 +371,21 @@ function gutenberg_lab_blocks_refresh_villa_manual_availability( $villa_id ) {
 }
 
 /**
+ * Checks whether an iCal event should be ignored for villa availability.
+ *
+ * This is a temporary content hygiene guard for Tara House's iCloud feed. That
+ * feed contains a monthly admin reminder, not a booking or owner hold.
+ *
+ * @param mixed $event Parsed VEVENT object.
+ * @return bool
+ */
+function gutenberg_lab_blocks_should_ignore_villa_ical_event( $event ) {
+	$summary = isset( $event->SUMMARY ) ? trim( (string) $event->SUMMARY ) : '';
+
+	return 0 === strcasecmp( $summary, 'Send Key Availability Update' );
+}
+
+/**
  * Parses iCal content into unavailable nights.
  *
  * @param string $ical_body Raw iCal body.
@@ -397,6 +412,10 @@ function gutenberg_lab_blocks_parse_ical_unavailable_dates( $ical_body ) {
 
 		foreach ( $calendar->VEVENT as $event ) {
 			if ( isset( $event->STATUS ) && 'CANCELLED' === strtoupper( (string) $event->STATUS ) ) {
+				continue;
+			}
+
+			if ( gutenberg_lab_blocks_should_ignore_villa_ical_event( $event ) ) {
 				continue;
 			}
 
