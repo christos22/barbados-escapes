@@ -797,16 +797,25 @@ function gutenberg_lab_blocks_render_villa_availability_meta_box( $post ) {
 			</button>
 		</p>
 
-		<div class="gblb-villa-availability-admin__status">
+		<div
+			class="gblb-villa-availability-admin__status"
+			data-gblb-availability-sync-panel
+		>
 			<h3><?php esc_html_e( 'Sync status', 'gutenberg-lab-blocks' ); ?></h3>
-			<?php gutenberg_lab_blocks_render_villa_sync_status( $status ); ?>
+			<div data-gblb-availability-sync-status>
+				<?php gutenberg_lab_blocks_render_villa_sync_status( $status ); ?>
+			</div>
+			<p class="description" data-gblb-availability-sync-message hidden></p>
 			<p>
-				<a
+				<button
+					type="button"
 					class="button button-primary"
-					href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=gutenberg_lab_blocks_sync_villa_availability&villa_id=' . absint( $post->ID ) ), 'gutenberg_lab_blocks_sync_villa_availability_' . absint( $post->ID ) ) ); ?>"
+					data-gblb-sync-availability
+					data-villa-id="<?php echo esc_attr( absint( $post->ID ) ); ?>"
+					data-nonce="<?php echo esc_attr( wp_create_nonce( 'gutenberg_lab_blocks_sync_villa_availability_' . absint( $post->ID ) ) ); ?>"
 				>
 					<?php esc_html_e( 'Sync now', 'gutenberg-lab-blocks' ); ?>
-				</a>
+				</button>
 			</p>
 		</div>
 
@@ -839,7 +848,78 @@ function gutenberg_lab_blocks_render_villa_availability_meta_box( $post ) {
 					row.remove();
 				}
 			}
+
+			var syncButton = event.target.closest( '[data-gblb-sync-availability]' );
+
+			if ( syncButton ) {
+				event.preventDefault();
+				syncVillaAvailability( syncButton );
+			}
 		} );
+
+		function syncVillaAvailability( button ) {
+			var root = button.closest( '.gblb-villa-availability-admin' );
+			var panel = button.closest( '[data-gblb-availability-sync-panel]' );
+			var status = panel ? panel.querySelector( '[data-gblb-availability-sync-status]' ) : null;
+			var message = panel ? panel.querySelector( '[data-gblb-availability-sync-message]' ) : null;
+			var originalText = button.textContent.trim();
+			var formData = new FormData();
+
+			if ( ! root || ! window.fetch || typeof ajaxurl === 'undefined' ) {
+				return;
+			}
+
+			// Send only the availability fields so the AJAX sync can save them
+			// before fetching the iCal feed. This avoids leaving the edit screen.
+			root.querySelectorAll( 'input[name^="gutenberg_lab_villa_ical_feeds"], input[name^="gutenberg_lab_villa_manual_blocks"]' ).forEach( function( input ) {
+				formData.append( input.name, input.value );
+			} );
+
+			formData.append( 'action', 'gutenberg_lab_blocks_sync_villa_availability' );
+			formData.append( 'villa_id', button.getAttribute( 'data-villa-id' ) || '' );
+			formData.append( 'nonce', button.getAttribute( 'data-nonce' ) || '' );
+
+			button.disabled = true;
+			button.textContent = '<?php echo esc_js( __( 'Syncing...', 'gutenberg-lab-blocks' ) ); ?>';
+
+			if ( message ) {
+				message.hidden = true;
+				message.textContent = '';
+			}
+
+			fetch( ajaxurl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body: formData
+			} )
+				.then( function( response ) {
+					return response.json();
+				} )
+				.then( function( response ) {
+					if ( ! response || ! response.success ) {
+						throw new Error( response && response.data && response.data.message ? response.data.message : '<?php echo esc_js( __( 'Availability sync failed.', 'gutenberg-lab-blocks' ) ); ?>' );
+					}
+
+					if ( status && response.data.statusHtml ) {
+						status.innerHTML = response.data.statusHtml;
+					}
+
+					if ( message ) {
+						message.hidden = false;
+						message.textContent = response.data.message || '<?php echo esc_js( __( 'Availability sync finished successfully.', 'gutenberg-lab-blocks' ) ); ?>';
+					}
+				} )
+				.catch( function( error ) {
+					if ( message ) {
+						message.hidden = false;
+						message.textContent = error.message || '<?php echo esc_js( __( 'Availability sync failed.', 'gutenberg-lab-blocks' ) ); ?>';
+					}
+				} )
+				.finally( function() {
+					button.disabled = false;
+					button.textContent = originalText;
+				} );
+		}
 	</script>
 	<?php
 }
@@ -974,6 +1054,106 @@ function gutenberg_lab_blocks_render_villa_sync_status( $status ) {
 }
 
 /**
+ * Sanitizes iCal feed input from the villa edit screen.
+ *
+ * Keeping this separate lets normal post saves and AJAX syncs use the same
+ * validation rules before any feed is fetched.
+ *
+ * @param mixed $feed_input Raw feed input.
+ * @return array<int, array{label: string, url: string}>
+ */
+function gutenberg_lab_blocks_sanitize_villa_ical_feed_input( $feed_input ) {
+	$feeds     = array();
+	$seen_urls = array();
+
+	if ( ! is_array( $feed_input ) ) {
+		return $feeds;
+	}
+
+	foreach ( $feed_input as $feed ) {
+		if ( ! is_array( $feed ) ) {
+			continue;
+		}
+
+		$url = isset( $feed['url'] ) ? gutenberg_lab_blocks_normalize_ical_url( $feed['url'] ) : '';
+
+		if ( '' === $url || isset( $seen_urls[ $url ] ) ) {
+			continue;
+		}
+
+		$seen_urls[ $url ] = true;
+		$feeds[]          = array(
+			'label' => isset( $feed['label'] ) ? sanitize_text_field( $feed['label'] ) : '',
+			'url'   => $url,
+		);
+	}
+
+	return $feeds;
+}
+
+/**
+ * Sanitizes manual blocked-date input from the villa edit screen.
+ *
+ * @param mixed $manual_input Raw manual block input.
+ * @return array<int, array{label: string, start: string, end: string}>
+ */
+function gutenberg_lab_blocks_sanitize_villa_manual_block_input( $manual_input ) {
+	$manual_blocks = array();
+
+	if ( ! is_array( $manual_input ) ) {
+		return $manual_blocks;
+	}
+
+	foreach ( $manual_input as $block ) {
+		if ( ! is_array( $block ) ) {
+			continue;
+		}
+
+		$start = isset( $block['start'] ) ? gutenberg_lab_blocks_normalize_iso_date( $block['start'] ) : '';
+		$end   = isset( $block['end'] ) ? gutenberg_lab_blocks_normalize_iso_date( $block['end'] ) : '';
+
+		if ( '' === $start || '' === $end || $end <= $start ) {
+			continue;
+		}
+
+		$manual_blocks[] = array(
+			'label' => isset( $block['label'] ) ? sanitize_text_field( $block['label'] ) : '',
+			'start' => $start,
+			'end'   => $end,
+		);
+	}
+
+	return $manual_blocks;
+}
+
+/**
+ * Saves villa availability fields and refreshes local manual/source rows.
+ *
+ * @param int   $post_id      Current villa ID.
+ * @param mixed $feed_input   Raw iCal feed input.
+ * @param mixed $manual_input Raw manual block input.
+ */
+function gutenberg_lab_blocks_update_villa_availability_meta( $post_id, $feed_input, $manual_input ) {
+	$feeds         = gutenberg_lab_blocks_sanitize_villa_ical_feed_input( $feed_input );
+	$manual_blocks = gutenberg_lab_blocks_sanitize_villa_manual_block_input( $manual_input );
+
+	if ( empty( $feeds ) ) {
+		delete_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_ICAL_META );
+	} else {
+		update_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_ICAL_META, $feeds );
+	}
+
+	if ( empty( $manual_blocks ) ) {
+		delete_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_MANUAL_BLOCKS_META );
+	} else {
+		update_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_MANUAL_BLOCKS_META, $manual_blocks );
+	}
+
+	gutenberg_lab_blocks_refresh_villa_manual_availability( $post_id );
+	gutenberg_lab_blocks_prune_villa_ical_sources( $post_id, array_map( 'sha1', wp_list_pluck( $feeds, 'url' ) ) );
+}
+
+/**
  * Saves villa availability admin fields.
  *
  * @param int $post_id Current villa ID.
@@ -997,70 +1177,77 @@ function gutenberg_lab_blocks_save_villa_availability_meta( $post_id ) {
 		return;
 	}
 
-	$feeds      = array();
-	$seen_urls  = array();
 	$feed_input = isset( $_POST['gutenberg_lab_villa_ical_feeds'] ) && is_array( $_POST['gutenberg_lab_villa_ical_feeds'] )
 		? wp_unslash( $_POST['gutenberg_lab_villa_ical_feeds'] )
 		: array();
 
-	foreach ( $feed_input as $feed ) {
-		if ( ! is_array( $feed ) ) {
-			continue;
-		}
-
-		$url = isset( $feed['url'] ) ? gutenberg_lab_blocks_normalize_ical_url( $feed['url'] ) : '';
-
-		if ( '' === $url || isset( $seen_urls[ $url ] ) ) {
-			continue;
-		}
-
-		$seen_urls[ $url ] = true;
-		$feeds[]          = array(
-			'label' => isset( $feed['label'] ) ? sanitize_text_field( $feed['label'] ) : '',
-			'url'   => $url,
-		);
-	}
-
-	if ( empty( $feeds ) ) {
-		delete_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_ICAL_META );
-	} else {
-		update_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_ICAL_META, $feeds );
-	}
-
-	$manual_blocks = array();
-	$manual_input  = isset( $_POST['gutenberg_lab_villa_manual_blocks'] ) && is_array( $_POST['gutenberg_lab_villa_manual_blocks'] )
+	$manual_input = isset( $_POST['gutenberg_lab_villa_manual_blocks'] ) && is_array( $_POST['gutenberg_lab_villa_manual_blocks'] )
 		? wp_unslash( $_POST['gutenberg_lab_villa_manual_blocks'] )
 		: array();
 
-	foreach ( $manual_input as $block ) {
-		if ( ! is_array( $block ) ) {
-			continue;
-		}
+	gutenberg_lab_blocks_update_villa_availability_meta( $post_id, $feed_input, $manual_input );
+}
+add_action( 'save_post_villa', 'gutenberg_lab_blocks_save_villa_availability_meta' );
 
-		$start = isset( $block['start'] ) ? gutenberg_lab_blocks_normalize_iso_date( $block['start'] ) : '';
-		$end   = isset( $block['end'] ) ? gutenberg_lab_blocks_normalize_iso_date( $block['end'] ) : '';
+/**
+ * Handles the AJAX "Sync now" action from the villa edit screen.
+ */
+function gutenberg_lab_blocks_handle_ajax_villa_availability_sync() {
+	$villa_id = isset( $_POST['villa_id'] ) ? absint( $_POST['villa_id'] ) : 0;
 
-		if ( '' === $start || '' === $end || $end <= $start ) {
-			continue;
-		}
-
-		$manual_blocks[] = array(
-			'label' => isset( $block['label'] ) ? sanitize_text_field( $block['label'] ) : '',
-			'start' => $start,
-			'end'   => $end,
+	if ( ! $villa_id || ! current_user_can( 'edit_post', $villa_id ) ) {
+		wp_send_json_error(
+			array( 'message' => __( 'You are not allowed to sync this villa.', 'gutenberg-lab-blocks' ) ),
+			403
 		);
 	}
 
-	if ( empty( $manual_blocks ) ) {
-		delete_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_MANUAL_BLOCKS_META );
-	} else {
-		update_post_meta( $post_id, GUTENBERG_LAB_BLOCKS_VILLA_MANUAL_BLOCKS_META, $manual_blocks );
+	if ( ! check_ajax_referer( 'gutenberg_lab_blocks_sync_villa_availability_' . $villa_id, 'nonce', false ) ) {
+		wp_send_json_error(
+			array( 'message' => __( 'The sync request expired. Refresh the editor and try again.', 'gutenberg-lab-blocks' ) ),
+			403
+		);
 	}
 
-	gutenberg_lab_blocks_refresh_villa_manual_availability( $post_id );
-	gutenberg_lab_blocks_prune_villa_ical_sources( $post_id, array_map( 'sha1', wp_list_pluck( $feeds, 'url' ) ) );
+	$feed_input = isset( $_POST['gutenberg_lab_villa_ical_feeds'] ) && is_array( $_POST['gutenberg_lab_villa_ical_feeds'] )
+		? wp_unslash( $_POST['gutenberg_lab_villa_ical_feeds'] )
+		: array();
+
+	$manual_input = isset( $_POST['gutenberg_lab_villa_manual_blocks'] ) && is_array( $_POST['gutenberg_lab_villa_manual_blocks'] )
+		? wp_unslash( $_POST['gutenberg_lab_villa_manual_blocks'] )
+		: array();
+
+	gutenberg_lab_blocks_update_villa_availability_meta( $villa_id, $feed_input, $manual_input );
+
+	$status = gutenberg_lab_blocks_sync_villa_availability( $villa_id );
+	$errors = 0;
+
+	foreach ( $status['feeds'] as $feed_status ) {
+		if ( ! empty( $feed_status['error'] ) ) {
+			++$errors;
+		}
+	}
+
+	ob_start();
+	gutenberg_lab_blocks_render_villa_sync_status( $status );
+	$status_html = ob_get_clean();
+	$message     = $errors > 0
+		? sprintf(
+			/* translators: %d: number of feed errors. */
+			__( 'Availability sync finished, but %d feed had an error. Check the status details above.', 'gutenberg-lab-blocks' ),
+			$errors
+		)
+		: __( 'Availability sync finished successfully.', 'gutenberg-lab-blocks' );
+
+	wp_send_json_success(
+		array(
+			'statusHtml' => $status_html,
+			'message'    => $message,
+			'errors'     => $errors,
+		)
+	);
 }
-add_action( 'save_post_villa', 'gutenberg_lab_blocks_save_villa_availability_meta' );
+add_action( 'wp_ajax_gutenberg_lab_blocks_sync_villa_availability', 'gutenberg_lab_blocks_handle_ajax_villa_availability_sync' );
 
 /**
  * Handles the admin "Sync now" action.
