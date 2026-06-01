@@ -336,6 +336,53 @@ function bindThumbInteractions( thumbsElement, stage, prefersReducedMotion ) {
 	} );
 }
 
+function bindGalleryCtaScroll( rootElement, prefersReducedMotion ) {
+	const galleryCta = rootElement.querySelector(
+		'[data-villa-gallery-hero-cta="gallery"]'
+	);
+	const galleryTarget = rootElement.querySelector(
+		'[data-villa-gallery-hero-target="gallery"]'
+	);
+
+	if ( ! galleryCta || ! galleryTarget ) {
+		return;
+	}
+
+	galleryCta.addEventListener( 'click', ( event ) => {
+		if (
+			event.defaultPrevented ||
+			event.altKey ||
+			event.ctrlKey ||
+			event.metaKey ||
+			event.shiftKey
+		) {
+			return;
+		}
+
+		event.preventDefault();
+
+		const targetRect = galleryTarget.getBoundingClientRect();
+		const maxScrollY = Math.max(
+			0,
+			document.documentElement.scrollHeight - window.innerHeight
+		);
+		const scrollY = Math.min(
+			maxScrollY,
+			Math.max( 0, window.scrollY + targetRect.bottom - window.innerHeight )
+		);
+
+		// Align the bottom of the thumbnail rail with the bottom of the viewport.
+		window.scrollTo( {
+			top: scrollY,
+			behavior: prefersReducedMotion ? 'auto' : 'smooth',
+		} );
+
+		if ( galleryTarget.id ) {
+			window.history.pushState( null, '', `#${ galleryTarget.id }` );
+		}
+	} );
+}
+
 function initializeVillaGalleryHero( rootElement ) {
 	const stageElement = rootElement.querySelector( '[data-villa-gallery-stage]' );
 	const thumbsElement = rootElement.querySelector( '[data-villa-gallery-thumbs]' );
@@ -351,6 +398,7 @@ function initializeVillaGalleryHero( rootElement ) {
 		! reducedMotionMediaQuery.matches &&
 		! isSaveDataEnabled();
 
+	bindGalleryCtaScroll( rootElement, reducedMotionMediaQuery.matches );
 	bindNativeVideoControls( rootElement );
 	bindVimeoShellTransportControls( rootElement );
 
