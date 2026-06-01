@@ -19,14 +19,44 @@ function getRailStep( track, slides ) {
 	return firstSlide.offsetWidth + gap;
 }
 
-function getRailItemTargetScrollLeft( track, item ) {
+function getRailItemTargetScrollLeft(
+	track,
+	item,
+	{ align = 'nearest' } = {}
+) {
 	if ( ! track || ! item ) {
 		return 0;
 	}
 
+	const maxScrollLeft = getRailMaxScroll( track );
+	const currentScrollLeft = track.scrollLeft;
+	const itemStart = item.offsetLeft;
+	const itemEnd = itemStart + item.offsetWidth;
+	const visibleStart = currentScrollLeft;
+	const visibleEnd = currentScrollLeft + track.clientWidth;
+	const isFullyVisible = itemStart >= visibleStart && itemEnd <= visibleEnd;
+
+	if ( isFullyVisible ) {
+		return currentScrollLeft;
+	}
+
+	if ( 'center' === align ) {
+		return Math.min(
+			maxScrollLeft,
+			Math.max(
+				0,
+				itemStart - ( track.clientWidth - item.offsetWidth ) / 2
+			)
+		);
+	}
+
+	if ( itemStart < visibleStart ) {
+		return Math.min( maxScrollLeft, Math.max( 0, itemStart ) );
+	}
+
 	return Math.min(
-		getRailMaxScroll( track ),
-		Math.max( 0, item.offsetLeft + item.offsetWidth - track.clientWidth )
+		maxScrollLeft,
+		Math.max( 0, itemEnd - track.clientWidth )
 	);
 }
 
@@ -94,12 +124,17 @@ export function scrollRailByStep(
 	scrollRailTo( track, targetScrollLeft, prefersReducedMotion );
 }
 
-export function revealRailItem( track, item, prefersReducedMotion ) {
+export function revealRailItem(
+	track,
+	item,
+	prefersReducedMotion,
+	options = {}
+) {
 	if ( ! track || ! item ) {
 		return;
 	}
 
-	const targetScrollLeft = getRailItemTargetScrollLeft( track, item );
+	const targetScrollLeft = getRailItemTargetScrollLeft( track, item, options );
 
 	if ( Math.abs( track.scrollLeft - targetScrollLeft ) < RAIL_SCROLL_TOLERANCE ) {
 		return;

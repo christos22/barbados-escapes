@@ -223,7 +223,11 @@ function revealActiveThumbIfNeeded(
 		activeIndex
 	];
 
-	revealRailItem( track, activeSlide, prefersReducedMotion );
+	// Center only hidden/partially hidden thumbs so a click does not shove the
+	// newly active thumbnail against the far edge of the viewport.
+	revealRailItem( track, activeSlide, prefersReducedMotion, {
+		align: 'center',
+	} );
 }
 
 function syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion ) {
@@ -294,9 +298,21 @@ function bindThumbInteractions( thumbsElement, stage, prefersReducedMotion ) {
 		slide.setAttribute( 'role', 'button' );
 		slide.setAttribute( 'tabindex', '0' );
 
-		slide.addEventListener( 'click', () => {
+		const activateSlide = () => {
 			stage.go( slideIndex );
+		};
+
+		slide.addEventListener( 'pointerdown', ( event ) => {
+			if ( 'mouse' !== event.pointerType || 0 !== event.button ) {
+				return;
+			}
+
+			// Smooth rail scrolling can move a thumb before the browser fires
+			// click; mouse pointerdown keeps thumbnail selection responsive.
+			activateSlide();
 		} );
+
+		slide.addEventListener( 'click', activateSlide );
 
 		slide.addEventListener( 'keydown', ( event ) => {
 			if ( 'Enter' !== event.key && ' ' !== event.key ) {
@@ -304,7 +320,7 @@ function bindThumbInteractions( thumbsElement, stage, prefersReducedMotion ) {
 			}
 
 			event.preventDefault();
-			stage.go( slideIndex );
+			activateSlide();
 		} );
 
 		slide.addEventListener( 'focus', () => {
@@ -411,14 +427,15 @@ function initializeVillaGalleryHero( rootElement ) {
 		type: 'fade',
 		speed: prefersReducedMotion ? 0 : 700,
 		updateOnMove: true,
-		waitForTransition: true,
+		// Thumbnail clicks should be able to interrupt a fade started by arrows.
+		waitForTransition: false,
 	} );
 
-	const syncActiveState = () => {
+	const syncActiveState = ( activeIndex = stage.index ) => {
 		syncActiveGalleryState(
 			stageElement,
 			thumbsElement,
-			stage.index,
+			activeIndex,
 			shouldAutoplayNativeVideos(),
 			canAutoplayVimeoAfterIntent(),
 			prefersReducedMotion
@@ -458,6 +475,11 @@ function initializeVillaGalleryHero( rootElement ) {
 	// first active slide is in place before we try to autoplay its managed media.
 	stage.on( 'ready moved', () => {
 		syncActiveState();
+		window.requestAnimationFrame( syncThumbRailButtons );
+	} );
+
+	stage.on( 'move', ( activeIndex ) => {
+		syncActiveState( activeIndex );
 		window.requestAnimationFrame( syncThumbRailButtons );
 	} );
 
