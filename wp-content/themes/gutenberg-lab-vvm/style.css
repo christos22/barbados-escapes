@@ -1642,6 +1642,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	gap: 0.55rem;
 	box-sizing: border-box;
 	min-height: 3rem;
 	min-width: min(100%, 12.5rem);
@@ -1679,9 +1680,20 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	color: rgb(247 241 231 / 0.78) !important;
 }
 
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button::before,
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button::after {
 	content: none;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button::before {
+	content: "";
+	display: inline-block;
+	flex: 0 0 auto;
+	width: 1rem;
+	height: 1rem;
+	/* currentColor keeps the icon matched to the button text in every state. */
+	background-color: currentColor;
+	-webkit-mask: url("assets/icons/whatsapp.svg") center / contain no-repeat;
+	mask: url("assets/icons/whatsapp.svg") center / contain no-repeat;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit:hover,
