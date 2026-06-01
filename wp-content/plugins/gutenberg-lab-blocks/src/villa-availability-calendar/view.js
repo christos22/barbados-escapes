@@ -226,9 +226,6 @@ const initializeCalendar = ( root ) => {
 
 	const unavailableDates = new Set( data.unavailableDates || [] );
 	const checkoutBufferDates = new Set( data.bufferDates || [] );
-	const checkoutBufferBoundaryDates = new Set(
-		data.bufferBoundaryDates || []
-	);
 	const allowUnavailableEndpoints = data.allowUnavailableEndpoints === true;
 	const monthsToShow = Number( data.monthsToShow || 12 );
 	const minimumStart = data.minimumStart || data.windowStart;
@@ -287,11 +284,6 @@ const initializeCalendar = ( root ) => {
 
 	const isCheckoutBufferDate = ( date ) => checkoutBufferDates.has( date );
 
-	const isCheckoutBufferBoundaryDate = ( date ) =>
-		allowUnavailableEndpoints &&
-		! isUnavailableDate( date ) &&
-		checkoutBufferBoundaryDates.has( date );
-
 	const isUnavailableRangeStart = ( date ) =>
 		isUnavailableDate( date ) && ! isUnavailableDate( addDays( date, -1 ) );
 
@@ -300,15 +292,11 @@ const initializeCalendar = ( root ) => {
 
 	const canSelectArrivalDate = ( date ) =>
 		! isUnavailableDate( date ) ||
-		( allowUnavailableEndpoints &&
-			! isCheckoutBufferDate( date ) &&
-			isUnavailableRangeEnd( date ) );
+		( allowUnavailableEndpoints && isUnavailableRangeEnd( date ) );
 
 	const canSelectDepartureDate = ( date ) =>
 		! isUnavailableDate( date ) ||
-		( allowUnavailableEndpoints &&
-			! isCheckoutBufferDate( date ) &&
-			isUnavailableRangeStart( date ) );
+		( allowUnavailableEndpoints && isUnavailableRangeStart( date ) );
 
 	const rangeIsAvailable = ( arrival, departure ) => {
 		const arrivalKey = parseDateKey( arrival );
@@ -332,7 +320,6 @@ const initializeCalendar = ( root ) => {
 				! (
 					allowUnavailableEndpoints &&
 					cursorDate === arrival &&
-					! isCheckoutBufferDate( cursorDate ) &&
 					isUnavailableRangeEnd( cursorDate )
 				)
 			) {
@@ -361,23 +348,19 @@ const initializeCalendar = ( root ) => {
 			const dateKey = parseDateKey( date );
 			const isUnavailable = isUnavailableDate( date );
 			const isCheckoutBuffer = isCheckoutBufferDate( date );
-			const isCheckoutBufferBoundary = isCheckoutBufferBoundaryDate( date );
 			const isRangeStart =
 				allowUnavailableEndpoints &&
 				isUnavailable &&
-				! isCheckoutBuffer &&
 				isUnavailableRangeStart( date );
 			const isRangeEnd =
 				allowUnavailableEndpoints &&
 				isUnavailable &&
-				! isCheckoutBuffer &&
 				isUnavailableRangeEnd( date );
 			const isArrival = date === selectedArrival;
 			const isDeparture = date === selectedDeparture;
 			const canSelectBoundary =
 				allowUnavailableEndpoints &&
 				isUnavailable &&
-				! isCheckoutBuffer &&
 				( selectedArrival && ! selectedDeparture && date > selectedArrival
 					? isUnavailableRangeStart( date )
 					: isUnavailableRangeEnd( date ) );
@@ -419,16 +402,9 @@ const initializeCalendar = ( root ) => {
 			button.classList.toggle( 'is-preview-invalid', isPreviewInvalid );
 			button.classList.toggle( 'is-unavailable', isUnavailable );
 			button.classList.toggle( 'is-checkout-buffer', isCheckoutBuffer );
-			button.classList.toggle(
-				'is-checkout-buffer-boundary',
-				isCheckoutBufferBoundary
-			);
 			button.classList.toggle( 'is-unavailable-range-start', isRangeStart );
 			button.classList.toggle( 'is-unavailable-range-end', isRangeEnd );
-			button.classList.toggle(
-				'is-boundary-selectable',
-				canSelectBoundary || isCheckoutBufferBoundary
-			);
+			button.classList.toggle( 'is-boundary-selectable', canSelectBoundary );
 			button.setAttribute( 'aria-pressed', isArrival || isDeparture ? 'true' : 'false' );
 			button.setAttribute(
 				'aria-disabled',
@@ -532,10 +508,6 @@ const initializeCalendar = ( root ) => {
 
 		( windowData.bufferDates || [] ).forEach( ( date ) => {
 			checkoutBufferDates.add( date );
-		} );
-
-		( windowData.bufferBoundaryDates || [] ).forEach( ( date ) => {
-			checkoutBufferBoundaryDates.add( date );
 		} );
 
 		bindDayButtons();
@@ -815,12 +787,6 @@ const initializeCalendar = ( root ) => {
 			onChange: options.onChange,
 			onDayCreate: ( _selectedDates, _dateStr, _instance, dayElement ) => {
 				const date = formatPickerDate( dayElement.dateObj );
-				const isBufferBoundary = isCheckoutBufferBoundaryDate( date );
-
-				dayElement.classList.toggle(
-					'vvm-flatpickr-checkout-buffer-boundary',
-					isBufferBoundary
-				);
 
 				if ( unavailableDates.has( date ) ) {
 					dayElement.classList.add( 'vvm-flatpickr-unavailable' );
@@ -830,28 +796,21 @@ const initializeCalendar = ( root ) => {
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-unavailable-start',
-						allowUnavailableEndpoints &&
-							! isCheckoutBufferDate( date ) &&
-							isUnavailableRangeStart( date )
+						allowUnavailableEndpoints && isUnavailableRangeStart( date )
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-unavailable-end',
-						allowUnavailableEndpoints &&
-							! isCheckoutBufferDate( date ) &&
-							isUnavailableRangeEnd( date )
+						allowUnavailableEndpoints && isUnavailableRangeEnd( date )
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-boundary-selectable',
 						allowUnavailableEndpoints &&
-							! isCheckoutBufferDate( date ) &&
 							( isUnavailableRangeStart( date ) || isUnavailableRangeEnd( date ) )
 					);
 					dayElement.setAttribute(
 						'title',
 						data.messages?.arrivalUnavailable || 'Unavailable'
 					);
-				} else if ( isBufferBoundary ) {
-					dayElement.classList.add( 'vvm-flatpickr-boundary-selectable' );
 				}
 			},
 			onReady: ( _selectedDates, _dateStr, instance ) => {

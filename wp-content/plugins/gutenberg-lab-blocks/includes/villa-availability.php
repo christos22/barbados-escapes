@@ -705,35 +705,6 @@ function gutenberg_lab_blocks_get_villa_checkout_buffer_dates( $villa_id, $start
 }
 
 /**
- * Returns the first available day after each checkout buffer run.
- *
- * These dates are selectable, but the calendar renders them as half-days when
- * boundary check-in/out is enabled because the buffer covers the first part of
- * the day.
- *
- * @param array<int, string> $buffer_dates      Checkout buffer dates.
- * @param array<int, string> $unavailable_dates All unavailable dates in view.
- * @return array<int, string>
- */
-function gutenberg_lab_blocks_get_checkout_buffer_boundary_dates( $buffer_dates, $unavailable_dates ) {
-	$buffer_lookup      = array_fill_keys( $buffer_dates, true );
-	$unavailable_lookup = array_fill_keys( $unavailable_dates, true );
-	$boundary_dates     = array();
-
-	foreach ( $buffer_dates as $buffer_date ) {
-		$next_date = gutenberg_lab_blocks_shift_iso_date( $buffer_date, 1 );
-
-		if ( '' === $next_date || isset( $buffer_lookup[ $next_date ] ) || isset( $unavailable_lookup[ $next_date ] ) ) {
-			continue;
-		}
-
-		$boundary_dates[] = $next_date;
-	}
-
-	return array_values( array_unique( $boundary_dates ) );
-}
-
-/**
  * Shifts a normalized ISO date by a day offset.
  *
  * @param string $date Date in Y-m-d format.
@@ -802,20 +773,18 @@ function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival
 		$lookup_start = gutenberg_lab_blocks_shift_iso_date( $arrival_date, -1 );
 		$lookup_end   = gutenberg_lab_blocks_shift_iso_date( $departure_date, 1 );
 		$unavailable  = gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $lookup_start, $lookup_end );
-		$buffer_dates = gutenberg_lab_blocks_get_villa_checkout_buffer_dates( $villa_id, $lookup_start, $lookup_end );
 		$lookup       = array_fill_keys( $unavailable, true );
-		$buffer_lookup = array_fill_keys( $buffer_dates, true );
 
 		if (
 			isset( $lookup[ $arrival_date ] ) &&
-			( isset( $buffer_lookup[ $arrival_date ] ) || ! gutenberg_lab_blocks_is_unavailable_range_end( $arrival_date, $lookup ) )
+			! gutenberg_lab_blocks_is_unavailable_range_end( $arrival_date, $lookup )
 		) {
 			return false;
 		}
 
 		if (
 			isset( $lookup[ $departure_date ] ) &&
-			( isset( $buffer_lookup[ $departure_date ] ) || ! gutenberg_lab_blocks_is_unavailable_range_start( $departure_date, $lookup ) )
+			! gutenberg_lab_blocks_is_unavailable_range_start( $departure_date, $lookup )
 		) {
 			return false;
 		}
@@ -833,7 +802,6 @@ function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival
 				isset( $lookup[ $date ] ) &&
 				! (
 					$date === $arrival_date &&
-					! isset( $buffer_lookup[ $date ] ) &&
 					gutenberg_lab_blocks_is_unavailable_range_end( $date, $lookup )
 				)
 			) {
@@ -1582,15 +1550,13 @@ function gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id,
 		$month_start->modify( '-1 day' )->format( 'Y-m-d' ),
 		$range_end->modify( '+1 day' )->format( 'Y-m-d' )
 	);
-	$lookup                 = array_fill_keys( $boundary_unavailable, true );
-	$buffer_lookup          = array_fill_keys( $boundary_buffer, true );
-	$buffer_boundaries      = gutenberg_lab_blocks_get_checkout_buffer_boundary_dates( $boundary_buffer, $boundary_unavailable );
-	$buffer_boundary_lookup = array_fill_keys( $buffer_boundaries, true );
+	$lookup        = array_fill_keys( $boundary_unavailable, true );
+	$buffer_lookup = array_fill_keys( $boundary_buffer, true );
 
 	ob_start();
 
 	for ( $month_index = 0; $month_index < $months_to_show; ++$month_index ) {
-		echo gutenberg_lab_blocks_render_villa_availability_month( $month_start->modify( '+' . $month_index . ' months' ), $lookup, $allow_unavailable_endpoints, $buffer_lookup, $buffer_boundary_lookup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo gutenberg_lab_blocks_render_villa_availability_month( $month_start->modify( '+' . $month_index . ' months' ), $lookup, $allow_unavailable_endpoints, $buffer_lookup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	return array(
@@ -1598,10 +1564,9 @@ function gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id,
 		'end'              => $range_end->format( 'Y-m-d' ),
 		'monthsToShow'     => $months_to_show,
 		'rangeLabel'       => gutenberg_lab_blocks_format_villa_availability_window_label( $month_start, $months_to_show ),
-		'html'                => ob_get_clean(),
-		'unavailableDates'    => $boundary_unavailable,
-		'bufferDates'         => $boundary_buffer,
-		'bufferBoundaryDates' => $buffer_boundaries,
+		'html'             => ob_get_clean(),
+		'unavailableDates' => $boundary_unavailable,
+		'bufferDates'      => $boundary_buffer,
 	);
 }
 
@@ -1727,7 +1692,6 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 		'monthsToShow'               => $months_to_show,
 		'unavailableDates'           => $window['unavailableDates'],
 		'bufferDates'                => $window['bufferDates'],
-		'bufferBoundaryDates'        => $window['bufferBoundaryDates'],
 		'fields'                     => array(
 			'arrival'                   => 'preferred-arrival',
 			'departure'                 => 'preferred-departure',
@@ -1801,10 +1765,9 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
  * @param array<string, bool>   $unavailable_lookup           Unavailable date lookup.
  * @param bool                  $allow_unavailable_endpoints Whether blocked range edges stay selectable.
  * @param array<string, bool>   $buffer_lookup                Hard-blocked checkout buffer date lookup.
- * @param array<string, bool>   $buffer_boundary_lookup       Selectable post-buffer boundary date lookup.
  * @return string
  */
-function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable $month_start, $unavailable_lookup, $allow_unavailable_endpoints = false, $buffer_lookup = array(), $buffer_boundary_lookup = array() ) {
+function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable $month_start, $unavailable_lookup, $allow_unavailable_endpoints = false, $buffer_lookup = array() ) {
 	$days_in_month = (int) $month_start->format( 't' );
 	$first_weekday = (int) $month_start->format( 'w' );
 	$today         = wp_date( 'Y-m-d' );
@@ -1848,8 +1811,7 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 							$date               = $month_start->setDate( (int) $month_start->format( 'Y' ), (int) $month_start->format( 'm' ), $day )->format( 'Y-m-d' );
 							$unavailable        = isset( $unavailable_lookup[ $date ] );
 							$is_buffer          = isset( $buffer_lookup[ $date ] );
-							$is_buffer_boundary = $allow_unavailable_endpoints && ! $unavailable && isset( $buffer_boundary_lookup[ $date ] );
-							$classes     = array( 'vvm-villa-availability-calendar__day' );
+							$classes            = array( 'vvm-villa-availability-calendar__day' );
 
 							if ( $unavailable ) {
 								$classes[] = 'is-unavailable';
@@ -1858,7 +1820,7 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 									$classes[] = 'is-checkout-buffer';
 								}
 
-								if ( $allow_unavailable_endpoints && ! $is_buffer ) {
+								if ( $allow_unavailable_endpoints ) {
 									$date_context  = new DateTimeImmutable( $date, wp_timezone() );
 									$previous_date = $date_context->modify( '-1 day' )->format( 'Y-m-d' );
 									$next_date     = $date_context->modify( '+1 day' )->format( 'Y-m-d' );
@@ -1873,10 +1835,6 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 								}
 							}
 
-							if ( $is_buffer_boundary ) {
-								$classes[] = 'is-checkout-buffer-boundary';
-							}
-
 							if ( $date === $today ) {
 								$classes[] = 'is-today';
 							}
@@ -1889,7 +1847,6 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 									data-date="<?php echo esc_attr( $date ); ?>"
 									data-unavailable="<?php echo $unavailable ? 'true' : 'false'; ?>"
 									data-buffer="<?php echo $is_buffer ? 'true' : 'false'; ?>"
-									data-buffer-boundary="<?php echo $is_buffer_boundary ? 'true' : 'false'; ?>"
 									aria-disabled="<?php echo $unavailable ? 'true' : 'false'; ?>"
 									aria-label="<?php echo esc_attr( sprintf( '%1$s %2$s', $month_start->setDate( (int) $month_start->format( 'Y' ), (int) $month_start->format( 'm' ), $day )->format( 'F j, Y' ), $unavailable ? __( 'unavailable', 'gutenberg-lab-blocks' ) : __( 'available', 'gutenberg-lab-blocks' ) ) ); ?>"
 								>
