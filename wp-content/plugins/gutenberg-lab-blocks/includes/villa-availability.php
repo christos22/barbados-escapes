@@ -265,7 +265,7 @@ function gutenberg_lab_blocks_get_villa_manual_blocks( $villa_id ) {
 }
 
 /**
- * Returns how many extra nights should be blocked after each iCal checkout.
+ * Returns how many extra nights should be blocked around each iCal booking.
  *
  * @param int $villa_id Villa post ID.
  * @return int
@@ -397,10 +397,10 @@ function gutenberg_lab_blocks_should_ignore_villa_ical_event( $event ) {
 }
 
 /**
- * Parses iCal content into booked nights and optional checkout buffer nights.
+ * Parses iCal content into booked nights and optional turnaround buffer nights.
  *
  * @param string $ical_body              Raw iCal body.
- * @param int    $checkout_buffer_nights Extra nights to block after checkout.
+ * @param int    $checkout_buffer_nights Extra nights to block before check-in and after checkout.
  * @return array{dates: array<int, string>, buffer_dates: array<int, string>}|WP_Error
  */
 function gutenberg_lab_blocks_parse_ical_availability_dates( $ical_body, $checkout_buffer_nights = 0 ) {
@@ -416,8 +416,8 @@ function gutenberg_lab_blocks_parse_ical_availability_dates( $ical_body, $checko
 		$start    = new DateTimeImmutable( 'first day of this month 00:00:00', wp_timezone() );
 		$end      = $start->modify( '+24 months' );
 		$calendar = method_exists( $calendar, 'expand' ) ? $calendar->expand( $start, $end, wp_timezone() ) : $calendar;
-		$dates                   = array();
-		$buffer_dates            = array();
+		$dates                  = array();
+		$buffer_dates           = array();
 		$checkout_buffer_nights = min( 7, max( 0, absint( $checkout_buffer_nights ) ) );
 
 		if ( ! isset( $calendar->VEVENT ) ) {
@@ -465,8 +465,14 @@ function gutenberg_lab_blocks_parse_ical_availability_dates( $ical_body, $checko
 			$dates = array_merge( $dates, gutenberg_lab_blocks_get_date_span( $start_date, $end_date ) );
 
 			if ( $checkout_buffer_nights > 0 ) {
+				$buffer_start = ( new DateTimeImmutable( $start_date, wp_timezone() ) )->modify( '-' . $checkout_buffer_nights . ' days' )->format( 'Y-m-d' );
 				$buffer_end   = ( new DateTimeImmutable( $end_date, wp_timezone() ) )->modify( '+' . $checkout_buffer_nights . ' days' )->format( 'Y-m-d' );
-				$buffer_dates = array_merge( $buffer_dates, gutenberg_lab_blocks_get_date_span( $end_date, $buffer_end ) );
+
+				$buffer_dates = array_merge(
+					$buffer_dates,
+					gutenberg_lab_blocks_get_date_span( $buffer_start, $start_date ),
+					gutenberg_lab_blocks_get_date_span( $end_date, $buffer_end )
+				);
 			}
 		}
 
@@ -920,7 +926,7 @@ function gutenberg_lab_blocks_render_villa_availability_meta_box( $post ) {
 			<tr>
 				<th scope="row">
 					<label for="gutenberg_lab_villa_checkout_buffer_nights">
-						<?php esc_html_e( 'Post-checkout buffer', 'gutenberg-lab-blocks' ); ?>
+						<?php esc_html_e( 'Turnaround buffer', 'gutenberg-lab-blocks' ); ?>
 					</label>
 				</th>
 				<td>
@@ -934,7 +940,7 @@ function gutenberg_lab_blocks_render_villa_availability_meta_box( $post ) {
 						step="1"
 					/>
 					<p class="description">
-						<?php esc_html_e( 'Extra nights to block after each imported iCal booking. Use 1 for Landfall’s 24-hour post-checkout buffer, then sync the villa.', 'gutenberg-lab-blocks' ); ?>
+						<?php esc_html_e( 'Extra nights to block before and after each imported iCal booking. Use 1 for Landfall’s 24-hour turnaround buffer, then sync the villa.', 'gutenberg-lab-blocks' ); ?>
 					</p>
 				</td>
 			</tr>
