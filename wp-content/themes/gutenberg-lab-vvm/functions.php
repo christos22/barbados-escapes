@@ -1305,8 +1305,32 @@ function gutenberg_lab_vvm_enqueue_assets() {
 			'strategy'  => 'defer',
 		)
 	);
+
+	// Load the Elfsight platform once; the footer widget container below tells
+	// Elfsight which WhatsApp Chat widget to render.
+	wp_enqueue_script(
+		'gutenberg-lab-vvm-elfsight-platform',
+		'https://elfsightcdn.com/platform.js',
+		array(),
+		null,
+		array(
+			'in_footer' => true,
+			'strategy'  => 'async',
+		)
+	);
 }
 add_action( 'wp_enqueue_scripts', 'gutenberg_lab_vvm_enqueue_assets' );
+
+/**
+ * Prints the Elfsight WhatsApp Chat mount node on every public page.
+ *
+ * Elfsight's floating widgets are installed site-wide by placing this element
+ * near the closing body tag; WordPress exposes that position through wp_footer.
+ */
+function gutenberg_lab_vvm_render_elfsight_whatsapp_chat() {
+	echo '<div class="elfsight-app-f892c257-d383-4a04-ac8e-fa19983e075f" data-elfsight-app-lazy></div>' . "\n";
+}
+add_action( 'wp_footer', 'gutenberg_lab_vvm_render_elfsight_whatsapp_chat' );
 
 /**
  * Defers Google Map iframe loading for the saved gmap block.
