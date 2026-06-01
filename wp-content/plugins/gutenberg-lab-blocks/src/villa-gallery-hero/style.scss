@@ -329,6 +329,15 @@ body.vvm-has-hero-header
 	background: rgba(7, 12, 12, 0.88);
 }
 
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs-shell[id],
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs-shell[id] {
+	/*
+	 * The hero CTA scrolls to the gallery rail; keep the bottom of the hero in
+	 * view so visitors land on the visual "Explore Gallery" moment.
+	 */
+	scroll-margin-top: clamp(5rem, 13vh, 8rem);
+}
+
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs,
 .vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs {
 	padding: 0;

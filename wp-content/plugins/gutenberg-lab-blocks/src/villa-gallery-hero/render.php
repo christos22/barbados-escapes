@@ -141,6 +141,108 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_get_default_con
 	}
 }
 
+if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_normalize_cta_text' ) ) {
+	/**
+	 * Normalizes rendered button text before matching the gallery CTA label.
+	 *
+	 * @param string $text Raw link text.
+	 * @return string
+	 */
+	function gutenberg_lab_blocks_villa_gallery_hero_normalize_cta_text( $text ) {
+		$charset = get_bloginfo( 'charset' ) ? get_bloginfo( 'charset' ) : 'UTF-8';
+
+		return trim(
+			preg_replace(
+				'/\s+/',
+				' ',
+				html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES, $charset )
+			)
+		);
+	}
+}
+
+if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_link_gallery_cta' ) ) {
+	/**
+	 * Points authored "Explore Gallery" buttons to the hero thumbnail rail.
+	 *
+	 * Editors keep using native core buttons. The dynamic parent block adds the
+	 * frontend href so every villa hero follows the same gallery-scroll contract.
+	 *
+	 * @param string $content_markup Rendered hero content HTML.
+	 * @param string $target_id Gallery rail anchor ID.
+	 * @return string
+	 */
+	function gutenberg_lab_blocks_villa_gallery_hero_link_gallery_cta( $content_markup, $target_id ) {
+		if (
+			'' === trim( $content_markup ) ||
+			'' === trim( $target_id ) ||
+			false === stripos( $content_markup, 'Explore Gallery' )
+		) {
+			return $content_markup;
+		}
+
+		$target_href = '#' . sanitize_html_class( $target_id );
+
+		if ( class_exists( 'DOMDocument' ) ) {
+			$document = new DOMDocument();
+			$previous = libxml_use_internal_errors( true );
+			$charset  = get_bloginfo( 'charset' ) ? get_bloginfo( 'charset' ) : 'UTF-8';
+
+			$document->loadHTML(
+				'<?xml encoding="' . esc_attr( $charset ) . '">' .
+				'<!doctype html><html><body><div id="vvm-gallery-hero-content-root">' .
+				$content_markup .
+				'</div></body></html>'
+			);
+			libxml_clear_errors();
+			libxml_use_internal_errors( $previous );
+
+			$root = $document->getElementById( 'vvm-gallery-hero-content-root' );
+
+			if ( $root ) {
+				foreach ( $root->getElementsByTagName( 'a' ) as $link ) {
+					$link_text = gutenberg_lab_blocks_villa_gallery_hero_normalize_cta_text( $link->textContent );
+
+					if ( 0 !== strcasecmp( 'Explore Gallery', $link_text ) ) {
+						continue;
+					}
+
+					$link->setAttribute( 'href', $target_href );
+					$link->setAttribute( 'data-villa-gallery-hero-cta', 'gallery' );
+				}
+
+				$updated_markup = '';
+
+				foreach ( $root->childNodes as $child_node ) {
+					$updated_markup .= $document->saveHTML( $child_node );
+				}
+
+				return $updated_markup;
+			}
+		}
+
+		return preg_replace_callback(
+			'/<a\b([^>]*)>(\s*Explore Gallery\s*)<\/a>/i',
+			static function ( $matches ) use ( $target_href ) {
+				$attributes = preg_replace(
+					'/\s(?:href|data-villa-gallery-hero-cta)=(["\']).*?\1/i',
+					'',
+					$matches[1]
+				);
+
+				return sprintf(
+					'<a%s href="%s" data-villa-gallery-hero-cta="gallery">%s</a>',
+					$attributes,
+					esc_attr( $target_href ),
+					$matches[2]
+				);
+			},
+			$content_markup,
+			1
+		);
+	}
+}
+
 if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_normalize_slide' ) ) {
 	/**
 	 * Normalizes one parsed slide block into the shared hero media shape.
@@ -376,17 +478,19 @@ if ( empty( $slides ) ) {
 	}
 }
 
+$slide_count         = count( $slides );
+$has_thumb_navigation = $slide_count > 1;
+$hero_id_base        = ! empty( $attributes['anchor'] )
+	? sanitize_html_class( $attributes['anchor'] )
+	: sanitize_html_class( wp_unique_id( 'villa-gallery-hero-' ) );
+$gallery_anchor_id   = $has_thumb_navigation ? $hero_id_base . '-gallery' : '';
 $content_markup      = $hero_regions['content_markup'];
 
 if ( '' === trim( wp_strip_all_tags( $content_markup ) ) ) {
 	$content_markup = gutenberg_lab_blocks_villa_gallery_hero_get_default_content_markup( $block ?? null );
 }
 
-$slide_count         = count( $slides );
-$has_thumb_navigation = $slide_count > 1;
-$hero_id_base        = ! empty( $attributes['anchor'] )
-	? sanitize_html_class( $attributes['anchor'] )
-	: sanitize_html_class( wp_unique_id( 'villa-gallery-hero-' ) );
+$content_markup      = gutenberg_lab_blocks_villa_gallery_hero_link_gallery_cta( $content_markup, $gallery_anchor_id );
 $classes             = array(
 	'vvm-villa-gallery-hero',
 	'vvm-villa-gallery-hero--height-' . sanitize_html_class( $hero_height ),
@@ -591,7 +695,11 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 	</div>
 
 		<?php if ( $has_thumb_navigation ) : ?>
-			<div class="vvm-villa-gallery-hero__thumbs-shell vvm-slider-surface">
+			<div
+				id="<?php echo esc_attr( $gallery_anchor_id ); ?>"
+				class="vvm-villa-gallery-hero__thumbs-shell vvm-slider-surface"
+				data-villa-gallery-hero-target="gallery"
+			>
 				<div
 					<?php
 					echo gutenberg_lab_blocks_get_slider_controls_attributes(
