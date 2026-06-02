@@ -1697,15 +1697,18 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link.wp-element-button::before {
-	content: "";
-	display: inline-block;
+	content: "" !important;
+	position: static !important;
+	inset: auto !important;
+	display: inline-block !important;
 	flex: 0 0 auto;
-	width: 1rem;
-	height: 1rem;
+	width: 1.125rem;
+	height: 1.125rem;
 	/* currentColor keeps the icon matched to the button text in every state. */
 	background-color: currentColor;
 	-webkit-mask: url("assets/icons/whatsapp.svg") center / contain no-repeat;
 	mask: url("assets/icons/whatsapp.svg") center / contain no-repeat;
+	transform: none !important;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit:hover,
