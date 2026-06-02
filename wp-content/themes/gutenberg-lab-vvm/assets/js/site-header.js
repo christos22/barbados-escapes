@@ -203,9 +203,12 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		} );
 	};
 
-	const initializeVillaContactWidgetButtons = () => {
+	const initializeContactWidgetButtons = () => {
 		const buttons = document.querySelectorAll(
-			'.vvm-villa-contact__whatsapp .wp-block-button__link'
+			[
+				'.vvm-villa-contact__whatsapp .wp-block-button__link',
+				'.vvm-header__contact a',
+			].join( ',' )
 		);
 
 		if ( ! buttons.length ) {
@@ -293,7 +296,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		const getControlScore = ( element, rootIndex ) => {
 			if (
 				! isVisibleElement( element ) ||
-				element.closest?.( '.vvm-villa-contact__whatsapp' )
+				element.closest?.( '.vvm-villa-contact__whatsapp, .vvm-header__contact' )
 			) {
 				return -1;
 			}
@@ -505,7 +508,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	initializeBedroomLevels();
 	initializeVillaContactDateRanges();
 	initializeVillaContactTextareas();
-	initializeVillaContactWidgetButtons();
+	initializeContactWidgetButtons();
 	initializeLazyMaps();
 	window.addEventListener( 'resize', syncScrollbarWidth, { passive: true } );
 
