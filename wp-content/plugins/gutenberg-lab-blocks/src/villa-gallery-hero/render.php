@@ -161,6 +161,21 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_normalize_cta_t
 	}
 }
 
+if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_is_gallery_cta_text' ) ) {
+	/**
+	 * Determines whether a rendered link is the hero gallery CTA.
+	 *
+	 * Editors sometimes add a decorative arrow to the native button label, so
+	 * match the CTA intent by its leading words instead of an exact string.
+	 *
+	 * @param string $text Normalized link text.
+	 * @return bool
+	 */
+	function gutenberg_lab_blocks_villa_gallery_hero_is_gallery_cta_text( $text ) {
+		return 0 === stripos( $text, 'Explore Gallery' );
+	}
+}
+
 if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_link_gallery_cta' ) ) {
 	/**
 	 * Points authored "Explore Gallery" buttons to the hero thumbnail rail.
@@ -203,7 +218,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_link_gallery_ct
 				foreach ( $root->getElementsByTagName( 'a' ) as $link ) {
 					$link_text = gutenberg_lab_blocks_villa_gallery_hero_normalize_cta_text( $link->textContent );
 
-					if ( 0 !== strcasecmp( 'Explore Gallery', $link_text ) ) {
+					if ( ! gutenberg_lab_blocks_villa_gallery_hero_is_gallery_cta_text( $link_text ) ) {
 						continue;
 					}
 
@@ -222,7 +237,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_link_gallery_ct
 		}
 
 		return preg_replace_callback(
-			'/<a\b([^>]*)>(\s*Explore Gallery\s*)<\/a>/i',
+			'/<a\b([^>]*)>(\s*Explore Gallery[^<]*)<\/a>/i',
 			static function ( $matches ) use ( $target_href ) {
 				$attributes = preg_replace(
 					'/\s(?:href|data-villa-gallery-hero-cta)=(["\']).*?\1/i',
