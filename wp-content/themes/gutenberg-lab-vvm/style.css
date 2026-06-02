@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.34
+Version: 0.1.36
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -26,6 +26,18 @@ html.vvm-has-scrollbar {
 body {
 	margin: 0;
 	background: #ffffff;
+}
+
+/*
+ * Elfsight renders the chat UI inside a shadow root. The shadow tree inherits
+ * from this host element, so set the host font to avoid the site's serif
+ * display family leaking into the widget.
+ */
+.elfsight-app-00ed413b-b198-48a2-a248-4560584516e6,
+.elfsight-app-5f976442-bb60-49fe-837c-7c24128cac9d,
+.eapps-all-in-one-chat-00ed413b-b198-48a2-a248-4560584516e6-custom-css-root,
+.eapps-all-in-one-chat-5f976442-bb60-49fe-837c-7c24128cac9d-custom-css-root {
+	font-family: "TT Norms", system-ui, -apple-system, "Segoe UI", sans-serif !important;
 }
 
 @supports not (scrollbar-gutter: stable) {
