@@ -204,7 +204,13 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	};
 
 	const initializeContactWidgetButtons = () => {
-		const contactWidgetTriggerSelector = '.vvm-contact-widget-trigger';
+		const contactWidgetTriggerClass = 'vvm-contact-widget-trigger';
+		const contactWidgetTriggerSelector = `.${ contactWidgetTriggerClass }`;
+		const contactWidgetLegacyTriggerSelector = [
+			'.vvm-header__contact',
+			'.vvm-villa-contact__whatsapp',
+			'.vvm-villa-staff .wp-block-button.is-style-vvm-link-primary',
+		].join( ',' );
 		const widgetRootSelector = [
 			'#__EAAPS_PORTAL',
 			'[class*="elfsight-app-"]',
@@ -212,6 +218,14 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			'[id*="EAAPS"]',
 			'[id*="eapps"]',
 		].join( ',' );
+		const normalizeContactWidgetTriggers = () => {
+			// DB-backed template parts can keep older markup after a theme file changes.
+			document
+				.querySelectorAll( contactWidgetLegacyTriggerSelector )
+				.forEach( ( trigger ) => {
+					trigger.classList.add( contactWidgetTriggerClass );
+				} );
+		};
 		const getContactWidgetButtons = () => {
 			const buttons = Array.from(
 				document.querySelectorAll( contactWidgetTriggerSelector )
@@ -227,6 +241,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 			return Array.from( new Set( buttons ) );
 		};
+		normalizeContactWidgetTriggers();
 		const buttons = getContactWidgetButtons();
 
 		if ( ! buttons.length ) {
