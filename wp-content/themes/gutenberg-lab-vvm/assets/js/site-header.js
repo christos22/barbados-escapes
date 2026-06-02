@@ -204,11 +204,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	};
 
 	const initializeContactWidgetButtons = () => {
-		const contactWidgetTriggerSelector = [
-			'.vvm-contact-widget-trigger',
-			'.vvm-villa-contact__whatsapp .wp-block-button__link',
-			'.vvm-header__contact a',
-		].join( ',' );
+		const contactWidgetTriggerSelector = '.vvm-contact-widget-trigger';
 		const widgetRootSelector = [
 			'#__EAAPS_PORTAL',
 			'[class*="elfsight-app-"]',
@@ -216,26 +212,20 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			'[id*="EAAPS"]',
 			'[id*="eapps"]',
 		].join( ',' );
-		const widgetButtonTextPattern = /\bwhatsapp\b/i;
 		const getContactWidgetButtons = () => {
-			const buttons = new Set(
+			const buttons = Array.from(
 				document.querySelectorAll( contactWidgetTriggerSelector )
-			);
-
-			document
-				.querySelectorAll( '.wp-block-button__link, .wp-element-button' )
-				.forEach( ( button ) => {
-					if (
-						! widgetButtonTextPattern.test( button.textContent || '' ) ||
-						button.closest?.( widgetRootSelector )
-					) {
-						return;
+			)
+				.map( ( trigger ) => {
+					if ( trigger.matches( 'a, button, [role="button"]' ) ) {
+						return trigger;
 					}
 
-					buttons.add( button );
-				} );
+					return trigger.querySelector( 'a, button, [role="button"]' );
+				} )
+				.filter( ( button ) => button && ! button.closest?.( widgetRootSelector ) );
 
-			return Array.from( buttons );
+			return Array.from( new Set( buttons ) );
 		};
 		const buttons = getContactWidgetButtons();
 
@@ -317,7 +307,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		const getControlScore = ( element, rootIndex ) => {
 			if (
 				! isVisibleElement( element ) ||
-				element.closest?.( '.vvm-villa-contact__whatsapp, .vvm-header__contact' )
+				element.closest?.( contactWidgetTriggerSelector )
 			) {
 				return -1;
 			}
