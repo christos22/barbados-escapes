@@ -204,12 +204,40 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	};
 
 	const initializeContactWidgetButtons = () => {
-		const buttons = document.querySelectorAll(
-			[
-				'.vvm-villa-contact__whatsapp .wp-block-button__link',
-				'.vvm-header__contact a',
-			].join( ',' )
-		);
+		const contactWidgetTriggerSelector = [
+			'.vvm-contact-widget-trigger',
+			'.vvm-villa-contact__whatsapp .wp-block-button__link',
+			'.vvm-header__contact a',
+		].join( ',' );
+		const widgetRootSelector = [
+			'#__EAAPS_PORTAL',
+			'[class*="elfsight-app-"]',
+			'[class*="eapps"]',
+			'[id*="EAAPS"]',
+			'[id*="eapps"]',
+		].join( ',' );
+		const widgetButtonTextPattern = /\bwhatsapp\b/i;
+		const getContactWidgetButtons = () => {
+			const buttons = new Set(
+				document.querySelectorAll( contactWidgetTriggerSelector )
+			);
+
+			document
+				.querySelectorAll( '.wp-block-button__link, .wp-element-button' )
+				.forEach( ( button ) => {
+					if (
+						! widgetButtonTextPattern.test( button.textContent || '' ) ||
+						button.closest?.( widgetRootSelector )
+					) {
+						return;
+					}
+
+					buttons.add( button );
+				} );
+
+			return Array.from( buttons );
+		};
+		const buttons = getContactWidgetButtons();
 
 		if ( ! buttons.length ) {
 			return;
@@ -220,13 +248,6 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			'mailto:info@barbadosescapes.com';
 		const widgetControlSelector =
 			'button, a[href], [role="button"], [tabindex]:not([tabindex="-1"])';
-		const widgetRootSelector = [
-			'#__EAAPS_PORTAL',
-			'[class*="elfsight-app-"]',
-			'[class*="eapps"]',
-			'[id*="EAAPS"]',
-			'[id*="eapps"]',
-		].join( ',' );
 
 		const isVisibleElement = ( element ) => {
 			if ( ! ( element instanceof HTMLElement ) ) {
@@ -363,7 +384,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		buttons.forEach( ( button ) => {
 			const href = button.getAttribute( 'href' );
 
-			if ( ! href || href === '#' ) {
+			if ( button instanceof HTMLAnchorElement && ( ! href || href === '#' ) ) {
 				button.href = fallbackHref;
 			}
 
