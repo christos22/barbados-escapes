@@ -203,6 +203,177 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		} );
 	};
 
+	const initializeVillaContactWidgetButtons = () => {
+		const buttons = document.querySelectorAll(
+			'.vvm-villa-contact__whatsapp .wp-block-button__link'
+		);
+
+		if ( ! buttons.length ) {
+			return;
+		}
+
+		const fallbackHref =
+			document.querySelector( '.vvm-footer a[href^="mailto:"]' )?.href ||
+			'mailto:info@barbadosescapes.com';
+		const widgetControlSelector =
+			'button, a[href], [role="button"], [tabindex]:not([tabindex="-1"])';
+		const widgetRootSelector = [
+			'#__EAAPS_PORTAL',
+			'[class*="elfsight-app-"]',
+			'[class*="eapps"]',
+			'[id*="EAAPS"]',
+			'[id*="eapps"]',
+		].join( ',' );
+
+		const isVisibleElement = ( element ) => {
+			if ( ! ( element instanceof HTMLElement ) ) {
+				return false;
+			}
+
+			const style = window.getComputedStyle( element );
+			const rect = element.getBoundingClientRect();
+
+			return (
+				style.display !== 'none' &&
+				style.visibility !== 'hidden' &&
+				style.opacity !== '0' &&
+				style.pointerEvents !== 'none' &&
+				rect.width > 0 &&
+				rect.height > 0 &&
+				rect.bottom > 0 &&
+				rect.right > 0 &&
+				rect.top < window.innerHeight &&
+				rect.left < window.innerWidth
+			);
+		};
+
+		const getElementDescriptor = ( element ) =>
+			[
+				element.id,
+				element.className,
+				element.getAttribute( 'aria-label' ),
+				element.getAttribute( 'title' ),
+				element.textContent,
+			]
+				.join( ' ' )
+				.toLowerCase();
+
+		const collectWidgetRoots = () => {
+			const roots = [];
+			const seen = new Set();
+
+			const addRoot = ( root ) => {
+				if ( ! root || seen.has( root ) ) {
+					return;
+				}
+
+				seen.add( root );
+				roots.push( root );
+			};
+
+			const addShadowRoots = ( root ) => {
+				root.querySelectorAll?.( '*' ).forEach( ( element ) => {
+					if ( ! element.shadowRoot ) {
+						return;
+					}
+
+					addRoot( element.shadowRoot );
+					addShadowRoots( element.shadowRoot );
+				} );
+			};
+
+			document.querySelectorAll( widgetRootSelector ).forEach( ( root ) => {
+				addRoot( root );
+				addShadowRoots( root );
+			} );
+
+			return roots;
+		};
+
+		const getControlScore = ( element, rootIndex ) => {
+			if (
+				! isVisibleElement( element ) ||
+				element.closest?.( '.vvm-villa-contact__whatsapp' )
+			) {
+				return -1;
+			}
+
+			const descriptor = getElementDescriptor( element );
+
+			if ( /(close|dismiss|minimize|powered|privacy|terms)/.test( descriptor ) ) {
+				return -1;
+			}
+
+			const rect = element.getBoundingClientRect();
+			let score = Math.max( 0, 30 - rootIndex );
+
+			if ( /chat|contact|email|message|whatsapp|eapps|elfsight|eaaps/.test( descriptor ) ) {
+				score += 30;
+			}
+
+			if ( element.tagName === 'BUTTON' ) {
+				score += 15;
+			}
+
+			if (
+				rect.right > window.innerWidth * 0.55 &&
+				rect.bottom > window.innerHeight * 0.45
+			) {
+				score += 20;
+			}
+
+			// Prefer the closed floating launcher over larger in-dialog CTAs.
+			if ( rect.width <= 120 && rect.height <= 120 ) {
+				score += 15;
+			}
+
+			return score;
+		};
+
+		const openActiveElfsightWidget = () => {
+			const controls = [];
+
+			collectWidgetRoots().forEach( ( root, rootIndex ) => {
+				root.querySelectorAll?.( widgetControlSelector ).forEach( ( element ) => {
+					const score = getControlScore( element, rootIndex );
+
+					if ( score < 0 ) {
+						return;
+					}
+
+					controls.push( { element, score } );
+				} );
+			} );
+
+			controls.sort( ( a, b ) => b.score - a.score );
+
+			if ( ! controls.length ) {
+				return false;
+			}
+
+			controls[ 0 ].element.click();
+			return true;
+		};
+
+		window.vvmOpenActiveElfsightWidget = openActiveElfsightWidget;
+
+		buttons.forEach( ( button ) => {
+			const href = button.getAttribute( 'href' );
+
+			if ( ! href || href === '#' ) {
+				button.href = fallbackHref;
+			}
+
+			button.addEventListener( 'click', ( event ) => {
+				if ( ! openActiveElfsightWidget() ) {
+					return;
+				}
+
+				event.preventDefault();
+			} );
+		} );
+	};
+
 	const initializeLazyMaps = () => {
 		if ( ! lazyMaps.length ) {
 			return;
@@ -334,6 +505,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	initializeBedroomLevels();
 	initializeVillaContactDateRanges();
 	initializeVillaContactTextareas();
+	initializeVillaContactWidgetButtons();
 	initializeLazyMaps();
 	window.addEventListener( 'resize', syncScrollbarWidth, { passive: true } );
 
