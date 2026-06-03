@@ -192,6 +192,63 @@ function gutenberg_lab_vvm_seo_document_title( $title ) {
 add_filter( 'pre_get_document_title', 'gutenberg_lab_vvm_seo_document_title', 20 );
 
 /**
+ * Fills empty rendered image alt attributes from Media Library metadata.
+ *
+ * Existing saved Gutenberg markup can keep `alt=""` even after the attachment
+ * alt text is updated. This keeps frontend output aligned with the Media
+ * Library without rewriting every saved block.
+ *
+ * @param string $block_content Rendered block HTML.
+ * @return string
+ */
+function gutenberg_lab_vvm_seo_fill_rendered_image_alt( $block_content ) {
+	if ( false === stripos( $block_content, '<img' ) || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+		return $block_content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+	$changed   = false;
+
+	while ( $processor->next_tag( 'img' ) ) {
+		$current_alt = $processor->get_attribute( 'alt' );
+
+		if ( null !== $current_alt && true !== $current_alt && '' !== trim( (string) $current_alt ) ) {
+			continue;
+		}
+
+		$src = $processor->get_attribute( 'src' );
+
+		if ( ! is_string( $src ) || '' === trim( $src ) ) {
+			continue;
+		}
+
+		$attachment_id = gutenberg_lab_vvm_seo_get_attachment_id_from_src( $src );
+
+		if ( ! $attachment_id ) {
+			continue;
+		}
+
+		$alt = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+
+		if ( '' === trim( (string) $alt ) ) {
+			$alt = get_the_title( $attachment_id );
+		}
+
+		$alt = gutenberg_lab_vvm_seo_clean_image_alt( $alt );
+
+		if ( '' === $alt ) {
+			continue;
+		}
+
+		$processor->set_attribute( 'alt', $alt );
+		$changed = true;
+	}
+
+	return $changed ? $processor->get_updated_html() : $block_content;
+}
+add_filter( 'render_block', 'gutenberg_lab_vvm_seo_fill_rendered_image_alt', 20 );
+
+/**
  * Returns attachment image data for SEO/social metadata.
  *
  * @param int    $attachment_id Attachment ID.
@@ -241,6 +298,76 @@ function gutenberg_lab_vvm_seo_clean_image_alt( $alt, $fallback_alt = '' ) {
 	}
 
 	return $alt;
+}
+
+/**
+ * Resolves an image `src` URL, including generated sizes, to an attachment ID.
+ *
+ * @param string $src Image source URL.
+ * @return int
+ */
+function gutenberg_lab_vvm_seo_get_attachment_id_from_src( $src ) {
+	static $cache = array();
+
+	$src = strtok( (string) $src, '?' );
+	$src = strtok( $src, '#' );
+	$src = trim( $src );
+
+	if ( '' === $src ) {
+		return 0;
+	}
+
+	if ( isset( $cache[ $src ] ) ) {
+		return $cache[ $src ];
+	}
+
+	$attachment_id = attachment_url_to_postid( $src );
+
+	if ( $attachment_id ) {
+		$cache[ $src ] = (int) $attachment_id;
+		return $cache[ $src ];
+	}
+
+	$uploads = wp_get_upload_dir();
+	$baseurl = isset( $uploads['baseurl'] ) ? trailingslashit( $uploads['baseurl'] ) : '';
+
+	if ( '' === $baseurl || 0 !== strpos( $src, $baseurl ) ) {
+		$cache[ $src ] = 0;
+		return 0;
+	}
+
+	$relative_path = ltrim( substr( $src, strlen( $baseurl ) ), '/' );
+	$full_size_path = preg_replace( '/-\d+x\d+(?=\.(?:jpe?g|png|webp|gif)$)/i', '', $relative_path );
+	$candidates    = array_filter(
+		array_unique(
+			array(
+				$relative_path,
+				$full_size_path,
+				preg_replace( '/(?=\.(?:jpe?g|png|webp|gif)$)/i', '-scaled', $full_size_path ),
+			)
+		)
+	);
+
+	if ( empty( $candidates ) ) {
+		$cache[ $src ] = 0;
+		return 0;
+	}
+
+	global $wpdb;
+
+	$placeholders = implode( ',', array_fill( 0, count( $candidates ), '%s' ) );
+	$query_args   = array_merge( array( '_wp_attached_file' ), $candidates );
+
+	$attachment_id = (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value IN ({$placeholders}) LIMIT 1",
+			$query_args
+		)
+	);
+
+	$cache[ $src ] = $attachment_id;
+
+	return $attachment_id;
 }
 
 /**
