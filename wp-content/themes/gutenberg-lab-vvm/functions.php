@@ -652,62 +652,26 @@ function gutenberg_lab_vvm_seed_navigation_post( $slug, $title, $content ) {
 }
 
 /**
- * Creates or updates a navigation post by slug.
+ * Seeds the footer navigation entities used by the premium footer template.
  *
- * This is only used for the one-time migration from the old code-owned chrome
- * setup to the new native Gutenberg workflow.
+ * These posts are only created when missing. Once they exist, Appearance/Site
+ * Editor owns their labels, URLs, and ordering.
  *
- * @param string $slug    Stable post_name for the navigation entity.
- * @param string $title   Editor-facing navigation title.
- * @param string $content Serialized navigation block content.
- * @return int
- */
-function gutenberg_lab_vvm_upsert_navigation_post( $slug, $title, $content ) {
-	$existing = get_page_by_path( $slug, OBJECT, 'wp_navigation' );
-
-	$args = array(
-		'post_type'    => 'wp_navigation',
-		'post_status'  => 'publish',
-		'post_title'   => $title,
-		'post_name'    => $slug,
-		'post_content' => $content,
-	);
-
-	if ( $existing instanceof WP_Post ) {
-		$args['ID'] = $existing->ID;
-		wp_update_post( $args );
-		return (int) $existing->ID;
-	}
-
-	return (int) wp_insert_post( $args );
-}
-
-/**
- * Syncs the footer navigation entities used by the premium footer template.
- *
- * @param string $mode Either `seed` or `upsert`.
  * @return array<string, int>
  */
-function gutenberg_lab_vvm_sync_footer_navigation_entities( $mode = 'seed' ) {
-	$sync_navigation = 'upsert' === $mode
-		? 'gutenberg_lab_vvm_upsert_navigation_post'
-		: 'gutenberg_lab_vvm_seed_navigation_post';
-
+function gutenberg_lab_vvm_seed_footer_navigation_entities() {
 	return array(
-		'footer_villas'  => (int) call_user_func(
-			$sync_navigation,
+		'footer_villas'  => (int) gutenberg_lab_vvm_seed_navigation_post(
 			'footer-villas-navigation',
 			'Footer Villas Navigation',
 			gutenberg_lab_vvm_get_footer_villas_navigation_content()
 		),
-		'footer_explore' => (int) call_user_func(
-			$sync_navigation,
+		'footer_explore' => (int) gutenberg_lab_vvm_seed_navigation_post(
 			'footer-explore-navigation',
 			'Footer Explore Navigation',
 			gutenberg_lab_vvm_get_footer_explore_navigation_content()
 		),
-		'footer_legal'   => (int) call_user_func(
-			$sync_navigation,
+		'footer_legal'   => (int) gutenberg_lab_vvm_seed_navigation_post(
 			'footer-navigation',
 			'Footer Navigation',
 			gutenberg_lab_vvm_get_footer_navigation_content()
@@ -821,43 +785,6 @@ function gutenberg_lab_vvm_ensure_template_part_post( $slug, $title, $area, $nav
 }
 
 /**
- * Creates or updates a template-part post from the current file markup.
- *
- * We use this once when migrating away from the old code-owned chrome setup so
- * the live database entity picks up the locked native block structure.
- *
- * @param string $slug            Template part slug.
- * @param string $title           Editor-facing template part title.
- * @param string $area            Template part area taxonomy value.
- * @param array  $navigation_refs Map of logical navigation keys to post IDs.
- * @return int
- */
-function gutenberg_lab_vvm_upsert_template_part_post( $slug, $title, $area, $navigation_refs ) {
-	$existing = get_block_template( get_stylesheet() . '//' . $slug, 'wp_template_part' );
-	$content  = gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs );
-
-	if ( $existing && ! empty( $existing->wp_id ) ) {
-		$post_id = (int) $existing->wp_id;
-
-		wp_update_post(
-			array(
-				'ID'           => $post_id,
-				'post_title'   => $title,
-				'post_name'    => $slug,
-				'post_content' => $content,
-			)
-		);
-
-		wp_set_post_terms( $post_id, array( get_stylesheet() ), 'wp_theme' );
-		wp_set_post_terms( $post_id, array( $area ), 'wp_template_part_area' );
-
-		return $post_id;
-	}
-
-	return gutenberg_lab_vvm_ensure_template_part_post( $slug, $title, $area, $navigation_refs );
-}
-
-/**
  * Seeds the native Gutenberg entities that power the shared site chrome.
  *
  * The file markup acts as the initial template. After the first seed, the
@@ -882,7 +809,7 @@ function gutenberg_lab_vvm_bootstrap_native_entities() {
 			'primary' => $primary_navigation_id,
 			'header'  => $header_navigation_id,
 		),
-		gutenberg_lab_vvm_sync_footer_navigation_entities( 'seed' )
+		gutenberg_lab_vvm_seed_footer_navigation_entities()
 	);
 
 	gutenberg_lab_vvm_ensure_template_part_post(
@@ -916,56 +843,6 @@ function gutenberg_lab_vvm_ensure_native_entities_exist() {
 	gutenberg_lab_vvm_bootstrap_native_entities();
 }
 add_action( 'init', 'gutenberg_lab_vvm_ensure_native_entities_exist', 20 );
-
-/**
- * Performs a one-time migration from code-owned chrome to native Gutenberg.
- *
- * Earlier versions rewrote the site chrome on every request. We intentionally
- * replace that once so the current site gets the new locked header structure,
- * then we stop touching the entities and let editors own them from there.
- */
-function gutenberg_lab_vvm_migrate_site_chrome_to_native_gutenberg() {
-	if ( get_option( 'gutenberg_lab_vvm_native_site_editor_migrated' ) ) {
-		return;
-	}
-
-	$primary_navigation_id = gutenberg_lab_vvm_upsert_navigation_post(
-		'navigation',
-		'Primary Navigation',
-		gutenberg_lab_vvm_get_primary_navigation_content()
-	);
-
-	$header_navigation_id = gutenberg_lab_vvm_upsert_navigation_post(
-		'header-navigation',
-		'Header Navigation',
-		gutenberg_lab_vvm_get_header_navigation_content()
-	);
-
-	$navigation_refs = array_merge(
-		array(
-			'primary' => $primary_navigation_id,
-			'header'  => $header_navigation_id,
-		),
-		gutenberg_lab_vvm_sync_footer_navigation_entities( 'upsert' )
-	);
-
-	gutenberg_lab_vvm_upsert_template_part_post(
-		'header',
-		'Header',
-		WP_TEMPLATE_PART_AREA_HEADER,
-		$navigation_refs
-	);
-
-	gutenberg_lab_vvm_upsert_template_part_post(
-		'footer',
-		'Footer',
-		WP_TEMPLATE_PART_AREA_FOOTER,
-		$navigation_refs
-	);
-
-	update_option( 'gutenberg_lab_vvm_native_site_editor_migrated', 1, false );
-}
-add_action( 'init', 'gutenberg_lab_vvm_migrate_site_chrome_to_native_gutenberg', 21 );
 
 /**
  * Seeds the initial Barbados Escapes villa posts when they are missing.
@@ -1090,40 +967,6 @@ function gutenberg_lab_vvm_seed_initial_villas() {
 	update_option( 'gutenberg_lab_vvm_initial_villa_seed_version', $seed_version, false );
 }
 add_action( 'init', 'gutenberg_lab_vvm_seed_initial_villas', 12 );
-
-/**
- * Refreshes the seeded footer chrome when the canonical file markup changes.
- *
- * The site editor owns the footer entity after the original migration, but
- * this gives us a safe one-time code-driven refresh for deliberate redesigns.
- */
-function gutenberg_lab_vvm_refresh_footer_template_part() {
-	$footer_refresh_version = '2026-06-02-barbados-escapes-footer-v4';
-
-	if ( get_option( 'gutenberg_lab_vvm_footer_refresh_version' ) === $footer_refresh_version ) {
-		return;
-	}
-
-	$primary_navigation_id = gutenberg_lab_vvm_get_primary_navigation_post_id();
-	$header_navigation_id  = gutenberg_lab_vvm_get_header_navigation_post_id();
-	$navigation_refs       = array_merge(
-		array(
-			'primary' => $primary_navigation_id,
-			'header'  => $header_navigation_id ? $header_navigation_id : $primary_navigation_id,
-		),
-		gutenberg_lab_vvm_sync_footer_navigation_entities( 'upsert' )
-	);
-
-	gutenberg_lab_vvm_upsert_template_part_post(
-		'footer',
-		'Footer',
-		WP_TEMPLATE_PART_AREA_FOOTER,
-		$navigation_refs
-	);
-
-	update_option( 'gutenberg_lab_vvm_footer_refresh_version', $footer_refresh_version, false );
-}
-add_action( 'init', 'gutenberg_lab_vvm_refresh_footer_template_part', 22 );
 
 /**
  * Returns the first meaningful content block from a parsed block list.
