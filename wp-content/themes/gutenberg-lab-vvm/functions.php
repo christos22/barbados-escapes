@@ -55,6 +55,50 @@ function gutenberg_lab_vvm_add_js_class() {
 add_action( 'wp_head', 'gutenberg_lab_vvm_add_js_class', 0 );
 
 /**
+ * Removes the public users sitemap from WordPress core sitemaps.
+ *
+ * The users sitemap exposes author archive URLs, which are not useful for this
+ * brochure-style villa site and add noise to the public sitemap index.
+ *
+ * @param WP_Sitemaps_Provider|false $provider Sitemap provider instance.
+ * @param string                     $name     Registered sitemap provider name.
+ * @return WP_Sitemaps_Provider|false
+ */
+function gutenberg_lab_vvm_disable_users_sitemap( $provider, $name ) {
+	if ( 'users' === $name ) {
+		return false;
+	}
+
+	return $provider;
+}
+add_filter( 'wp_sitemaps_add_provider', 'gutenberg_lab_vvm_disable_users_sitemap', 10, 2 );
+
+/**
+ * Adds the public sitemap index URL to WordPress's virtual robots.txt file.
+ *
+ * WordPress owns the base robots output, including the wp-admin rules. This
+ * filter keeps that native behavior and adds the sitemap hint crawlers expect.
+ *
+ * @param string $output Existing robots.txt output.
+ * @param bool   $public Whether the site is public to search engines.
+ * @return string
+ */
+function gutenberg_lab_vvm_add_robots_sitemap( $output, $public ) {
+	if ( ! $public ) {
+		return $output;
+	}
+
+	$sitemap_url = esc_url_raw( home_url( '/wp-sitemap.xml' ) );
+
+	if ( str_contains( $output, $sitemap_url ) ) {
+		return $output;
+	}
+
+	return rtrim( $output ) . "\nSitemap: {$sitemap_url}\n";
+}
+add_filter( 'robots_txt', 'gutenberg_lab_vvm_add_robots_sitemap', 10, 2 );
+
+/**
  * Adds the villa slug to body classes for page-specific styling hooks.
  *
  * WordPress gives us `postid-*` by default, but slugs are safer across local,
@@ -494,10 +538,6 @@ function gutenberg_lab_vvm_get_footer_navigation_content() {
 			array(
 				'label' => 'Privacy Policy',
 				'url'   => '/privacy-policy/',
-			),
-			array(
-				'label' => 'Terms of Service',
-				'url'   => '/terms-of-service/',
 			),
 			array(
 				'label' => 'Sitemap',
@@ -1056,7 +1096,7 @@ add_action( 'init', 'gutenberg_lab_vvm_seed_initial_villas', 12 );
  * this gives us a safe one-time code-driven refresh for deliberate redesigns.
  */
 function gutenberg_lab_vvm_refresh_footer_template_part() {
-	$footer_refresh_version = '2026-04-11-barbados-escapes-footer-v3';
+	$footer_refresh_version = '2026-06-02-barbados-escapes-footer-v4';
 
 	if ( get_option( 'gutenberg_lab_vvm_footer_refresh_version' ) === $footer_refresh_version ) {
 		return;
