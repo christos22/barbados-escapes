@@ -22,6 +22,11 @@ preserve_ai1wm_gdrive=1
 temp_dump=""
 remote_temp_dump=""
 remote_preserved_options=""
+local_table_prefix=""
+remote_table_prefix=""
+remote_config_db_host=""
+remote_config_db_name=""
+remote_config_db_user=""
 
 AI1WM_PRESERVE_WHERE="option_name LIKE 'ai1wmge_gdrive\\_%' OR option_name IN ('ai1wmge_plugin_key','ai1wm_auth_header','ai1wm_secret_key','ai1wm_updater','ai1wm_sites_links','ai1wm_status','ai1wm_messages','ai1wm_backups_labels')"
 
@@ -87,6 +92,31 @@ require_set_var() {
 	[[ "${!var_name+x}" ]] || fail "Missing ${var_name} in ${ENV_FILE}"
 }
 
+validate_table_prefix() {
+	local table_prefix="$1"
+	[[ "${table_prefix}" =~ ^[A-Za-z0-9_]+_$ ]] || fail "Detected table prefix '${table_prefix}' was not in the expected format."
+}
+
+normalize_db_host() {
+	local db_host="$1"
+
+	if [[ "${db_host}" == /* ]]; then
+		printf 'localhost\n'
+		return
+	fi
+
+	printf '%s\n' "${db_host%:*}"
+}
+
+current_local_table_prefix() {
+	local table_prefix
+	table_prefix="$(ddev wp db prefix "${WP_CLI_MAINTENANCE_ARGS[@]}" 2>/dev/null | tr -d '\r' | tail -n 1)"
+	[[ -n "${table_prefix}" ]] || fail "Could not detect the current local WordPress table prefix."
+	validate_table_prefix "${table_prefix}"
+
+	printf '%s\n' "${table_prefix}"
+}
+
 usage() {
 	cat <<'EOF'
 Push the local DDEV database to the live InMotion WordPress site.
@@ -104,6 +134,8 @@ Flags:
 
 Safety:
   - The command creates a remote DB backup before importing the local dump.
+  - It refuses to push if local and remote table prefixes differ.
+  - Set REMOTE_EXPECTED_TABLE_PREFIX=vvm_ to guard the production target.
   - By default, it preserves remote ai1wmge_gdrive_* and related AI1WM option rows.
   - It rewrites local URLs to the configured remote URL after import.
 
@@ -178,6 +210,11 @@ set -a
 source "${ENV_FILE}"
 set +a
 
+REMOTE_EXPECTED_TABLE_PREFIX="${REMOTE_EXPECTED_TABLE_PREFIX:-}"
+if [[ -n "${REMOTE_EXPECTED_TABLE_PREFIX}" ]]; then
+	validate_table_prefix "${REMOTE_EXPECTED_TABLE_PREFIX}"
+fi
+
 for required_var in REMOTE_SSH_HOST REMOTE_WP_PATH REMOTE_DB_HOST REMOTE_DB_NAME REMOTE_DB_USER REMOTE_SITE_URL LOCAL_SITE_URL; do
 	require_nonempty_var "${required_var}"
 done
@@ -232,9 +269,35 @@ log "Validating remote WordPress and database access"
 remote_bash "cd ${quoted_remote_wp_path} && wp core is-installed ${WP_CLI_MAINTENANCE_ARGS[*]} >/dev/null"
 remote_bash "MYSQL_PWD=${quoted_remote_db_password} mysql ${connection_args} -u ${quoted_remote_db_user} ${quoted_remote_db_name} -e 'SELECT 1' >/dev/null"
 
+remote_config_db_name="$(remote_bash "cd ${quoted_remote_wp_path} && wp config get DB_NAME ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+remote_config_db_user="$(remote_bash "cd ${quoted_remote_wp_path} && wp config get DB_USER ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+remote_config_db_host="$(remote_bash "cd ${quoted_remote_wp_path} && wp config get DB_HOST ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+
+if [[ "${REMOTE_DB_NAME}" != "${remote_config_db_name}" ]]; then
+	fail "REMOTE_DB_NAME does not match the database configured by ${REMOTE_WP_PATH}/wp-config.php."
+fi
+
+if [[ "${REMOTE_DB_USER}" != "${remote_config_db_user}" ]]; then
+	fail "REMOTE_DB_USER does not match the database user configured by ${REMOTE_WP_PATH}/wp-config.php."
+fi
+
+if [[ "$(normalize_db_host "${REMOTE_DB_HOST}")" != "$(normalize_db_host "${remote_config_db_host}")" ]]; then
+	fail "REMOTE_DB_HOST does not match the database host configured by ${REMOTE_WP_PATH}/wp-config.php."
+fi
+
 remote_table_prefix="$(remote_bash "cd ${quoted_remote_wp_path} && wp db prefix ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
-[[ -n "${remote_table_prefix}" && "${remote_table_prefix}" == *_ ]] || fail "Could not detect the remote WordPress table prefix."
+validate_table_prefix "${remote_table_prefix}"
 remote_options_table="${remote_table_prefix}options"
+
+if [[ -n "${REMOTE_EXPECTED_TABLE_PREFIX}" && "${remote_table_prefix}" != "${REMOTE_EXPECTED_TABLE_PREFIX}" ]]; then
+	fail "Remote table prefix is '${remote_table_prefix}', expected '${REMOTE_EXPECTED_TABLE_PREFIX}'. Refusing to overwrite production."
+fi
+
+local_table_prefix="$(current_local_table_prefix)"
+
+if [[ "${local_table_prefix}" != "${remote_table_prefix}" ]]; then
+	fail "Local table prefix is '${local_table_prefix}' but remote table prefix is '${remote_table_prefix}'. Pull production first or align prefixes before pushing."
+fi
 
 if (( dry_run )); then
 	log "Dry run succeeded. Remote SSH, WordPress, and database access look good."

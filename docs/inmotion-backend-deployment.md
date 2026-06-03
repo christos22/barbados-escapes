@@ -4,7 +4,7 @@
 
 This note documents the working backend deployment path for the Barbados Escapes WordPress install on InMotion. It covers only the backend connection and deployment flow, not any frontend hosting.
 
-Verified on April 12-13, 2026.
+Verified on April 12-13, 2026. Updated for the production launch target on June 3, 2026.
 
 ## AI Chat Notes
 
@@ -15,15 +15,17 @@ Verified on April 12-13, 2026.
   - `github_deploy_key` is for GitHub Actions -> server SSH login.
 - If `/wp-json/` fails but `/?rest_route=/` works, suspect rewrite routing before suspecting WordPress or deployment.
 - If both `/wp-json/` and `/?rest_route=/` return `401`, suspect server-level Basic Auth before suspecting WordPress or rewrite routing.
-- The live `.htaccess` file is currently a server-side prerequisite, not a repo-managed artifact.
+- The production `.htaccess` file is currently a server-side prerequisite, not a repo-managed artifact.
 
 ## Live Paths
 
 - GitHub repo: `git@github.com:christos22/barbados-escapes.git`
 - cPanel-managed server repo: `/home/grapsa5/repositories/barbados-escapes`
-- Live WordPress docroot: `/home/grapsa5/barbadosescapes.verseandvision.ca`
-- Deployed theme path: `/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm`
-- Deployed plugin path: `/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks`
+- Production URL: `https://barbadosescapes.com/`
+- Production WordPress docroot: `/home/grapsa5/barbadosescapes.com`
+- Production table prefix: `vvm_`
+- Deployed theme path: `/home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm`
+- Deployed plugin path: `/home/grapsa5/barbadosescapes.com/wp-content/plugins/gutenberg-lab-blocks`
 
 ## Deploy Contract
 
@@ -159,7 +161,7 @@ The standard local refresh workflow is a DDEV host command:
 ddev sync-remote
 ```
 
-This command is intended for local development only. It refreshes the local DDEV database and uploads from the live InMotion WordPress install.
+This command is intended for local development only. It refreshes the local DDEV database and uploads from the production InMotion WordPress install.
 
 ### Local SSH Prerequisite
 
@@ -192,13 +194,25 @@ Copy the example file:
 cp .ddev/.env.sync-remote.example .ddev/.env.sync-remote
 ```
 
-Then fill in the live database credentials. The real `.ddev/.env.sync-remote` file is intentionally ignored by Git.
+Then fill in the production database credentials. The real `.ddev/.env.sync-remote` file is intentionally ignored by Git.
 
-When a live database is imported, the command auto-detects its WordPress table prefix and writes a local-only override file:
+For production, keep these values aligned:
+
+```dotenv
+REMOTE_WP_PATH=/home/grapsa5/barbadosescapes.com
+REMOTE_SITE_URL=https://barbadosescapes.com
+REMOTE_EXPECTED_TABLE_PREFIX=vvm_
+```
+
+Quote DB values in `.ddev/.env.sync-remote`. The file is sourced by Bash, and production passwords commonly contain characters such as `)`, `$`, or `!`.
+
+The sync and push commands also compare `REMOTE_DB_NAME`, `REMOTE_DB_USER`, and `REMOTE_DB_HOST` against the production `wp-config.php`. This prevents a bad state where `REMOTE_WP_PATH` points to production but the dump/import credentials still point to staging.
+
+When a production database is imported, the command auto-detects its WordPress table prefix and writes a local-only override file:
 
 - `wp-config-ddev-local.php`
 
-That file is intentionally ignored by Git. It exists so local DDEV can boot imported databases that do not use the default `wp_` prefix. The command also patches the local ignored `wp-config-ddev.php` once so DDEV loads that override file on future requests.
+That file is intentionally ignored by Git. It exists so local DDEV can boot imported databases that do not use the default `wp_` prefix. The tracked DDEV default is also `vvm_`, matching production.
 
 ### Command Modes
 
@@ -217,6 +231,23 @@ That file is intentionally ignored by Git. It exists so local DDEV can boot impo
   Skip the pre-import DDEV DB snapshot
 - `ddev sync-remote --dry-run`
   Validate SSH and remote paths without importing data
+
+### Local To Production DB Push
+
+Use this only when local DDEV is intentionally the source of truth for production content.
+
+- `ddev push-remote --db-only --dry-run`
+  Validate SSH, production WordPress, DB credentials, and table-prefix guardrails without changing production
+- `ddev push-remote --db-only --yes`
+  Push the local DDEV database to production
+
+Safety behavior:
+
+- creates a production DB backup before import
+- refuses to push if local and production table prefixes differ
+- refuses to push if the configured DB credentials do not match production `wp-config.php`
+- preserves remote All-in-One WP Migration Google Drive settings by default
+- rewrites local URLs to `https://barbadosescapes.com`
 
 ### Rollback
 
@@ -239,8 +270,8 @@ Use these checks after setup changes or deployment troubleshooting:
 2. Confirm deployed files exist:
 
    ```bash
-   test -f /home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm/style.css && echo "theme ok"
-   test -f /home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php && echo "plugin ok"
+   test -f /home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm/style.css && echo "theme ok"
+   test -f /home/grapsa5/barbadosescapes.com/wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php && echo "plugin ok"
    ```
 
 3. Confirm the server repo is at the pushed commit:
@@ -252,16 +283,16 @@ Use these checks after setup changes or deployment troubleshooting:
 4. Confirm the deployed files match the server repo:
 
    ```bash
-   cmp -s /home/grapsa5/repositories/barbados-escapes/wp-content/themes/gutenberg-lab-vvm/style.css /home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm/style.css && echo "theme copy ok"
-   cmp -s /home/grapsa5/repositories/barbados-escapes/wp-content/themes/gutenberg-lab-vvm/functions.php /home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm/functions.php && echo "theme bootstrap ok"
-   cmp -s /home/grapsa5/repositories/barbados-escapes/wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php /home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php && echo "plugin copy ok"
+   cmp -s /home/grapsa5/repositories/barbados-escapes/wp-content/themes/gutenberg-lab-vvm/style.css /home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm/style.css && echo "theme copy ok"
+   cmp -s /home/grapsa5/repositories/barbados-escapes/wp-content/themes/gutenberg-lab-vvm/functions.php /home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm/functions.php && echo "theme bootstrap ok"
+   cmp -s /home/grapsa5/repositories/barbados-escapes/wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php /home/grapsa5/barbadosescapes.com/wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php && echo "plugin copy ok"
    ```
 
 5. If you need to debug live routing separately from deployment, test REST manually:
 
    ```bash
-   curl -I -A "Mozilla/5.0" https://barbadosescapes.verseandvision.ca/wp-json/
-   curl -I -A "Mozilla/5.0" "https://barbadosescapes.verseandvision.ca/?rest_route=/"
+   curl -I -A "Mozilla/5.0" https://barbadosescapes.com/wp-json/
+   curl -I -A "Mozilla/5.0" "https://barbadosescapes.com/?rest_route=/"
    ```
 
    On April 15, 2026, both routes returned `401` because the live site was behind server-level Basic Auth:

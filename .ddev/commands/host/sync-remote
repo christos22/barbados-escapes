@@ -28,6 +28,11 @@ preserve_post_ids=()
 preserve_post_dump_file=""
 preserve_post_restore_file=""
 preserve_source_table_prefix=""
+remote_table_prefix=""
+dump_connection_args=""
+remote_config_db_host=""
+remote_config_db_name=""
+remote_config_db_user=""
 
 log() {
 	printf '\n==> %s\n' "$*"
@@ -65,6 +70,12 @@ run_with_retries() {
 ssh_run() {
 	run_with_retries "${SSH_RETRY_COUNT}" "${SSH_RETRY_DELAY}" \
 		ssh "${SSH_COMMON_ARGS[@]}" "$@"
+}
+
+remote_bash() {
+	local remote_command="$1"
+
+	ssh_run "${REMOTE_SSH_HOST}" "bash -lc $(printf '%q' "${remote_command}")"
 }
 
 run_remote_dump() {
@@ -116,6 +127,17 @@ validate_post_id() {
 validate_table_prefix() {
 	local table_prefix="$1"
 	[[ "${table_prefix}" =~ ^[A-Za-z0-9_]+_$ ]] || fail "Detected table prefix '${table_prefix}' was not in the expected format."
+}
+
+normalize_db_host() {
+	local db_host="$1"
+
+	if [[ "${db_host}" == /* ]]; then
+		printf 'localhost\n'
+		return
+	fi
+
+	printf '%s\n' "${db_host%:*}"
 }
 
 current_table_prefix() {
@@ -337,6 +359,9 @@ Before running:
   2. Fill in the live database credentials
   3. Load the local SSH key into ssh-agent:
      ssh-add /home/Quester/Nextcloud/Documents/Development/Server/SSH-Keys/inmotion
+
+Safety:
+  - Set REMOTE_EXPECTED_TABLE_PREFIX=vvm_ to refuse accidental staging imports.
 EOF
 }
 
@@ -419,11 +444,16 @@ set -a
 source "${ENV_FILE}"
 set +a
 
+REMOTE_EXPECTED_TABLE_PREFIX="${REMOTE_EXPECTED_TABLE_PREFIX:-}"
+if [[ -n "${REMOTE_EXPECTED_TABLE_PREFIX}" ]]; then
+	validate_table_prefix "${REMOTE_EXPECTED_TABLE_PREFIX}"
+fi
+
 for required_var in REMOTE_SSH_HOST REMOTE_WP_PATH; do
 	require_nonempty_var "${required_var}"
 done
 
-if (( sync_db && dry_run == 0 )); then
+if (( sync_db )); then
 	for required_var in REMOTE_DB_HOST REMOTE_DB_NAME REMOTE_DB_USER REMOTE_SITE_URL LOCAL_SITE_URL; do
 		require_nonempty_var "${required_var}"
 	done
@@ -445,33 +475,7 @@ quoted_remote_wp_path=$(printf '%q' "${REMOTE_WP_PATH}")
 log "Validating remote WordPress path"
 ssh_run "${REMOTE_SSH_HOST}" "test -d ${quoted_remote_wp_path}"
 
-if (( sync_uploads )); then
-	log "Validating remote uploads path"
-	if (( dry_run )); then
-		run_with_retries "${SSH_RETRY_COUNT}" "${SSH_RETRY_DELAY}" \
-			rsync -azn -e "${RSYNC_SSH_COMMAND}" "${REMOTE_SSH_HOST}:${REMOTE_UPLOADS_PATH}" "${LOCAL_UPLOADS_PATH}/"
-	else
-		ssh_run "${REMOTE_SSH_HOST}" "test -d $(printf '%q' "${REMOTE_UPLOADS_PATH}")"
-	fi
-fi
-
-if (( dry_run )); then
-	log "Dry run succeeded. SSH and remote paths look good."
-	exit 0
-fi
-
-if (( sync_db && ${#preserve_post_ids[@]} > 0 )); then
-	preserve_local_posts
-fi
-
-if (( sync_db && skip_snapshot == 0 )); then
-	snapshot_name="pre-sync-remote-$(date +%Y%m%d-%H%M%S)"
-	log "Creating local database snapshot ${snapshot_name}"
-	ddev snapshot --name "${snapshot_name}"
-fi
-
 if (( sync_db )); then
-	temp_dump="$(mktemp "${TMPDIR:-/tmp}/barbados-sync-remote.XXXXXX.sql.gz")"
 	quoted_remote_db_name=$(printf '%q' "${REMOTE_DB_NAME}")
 	quoted_remote_db_user=$(printf '%q' "${REMOTE_DB_USER}")
 	quoted_remote_db_password=$(printf '%q' "${REMOTE_DB_PASSWORD}")
@@ -504,6 +508,61 @@ if (( sync_db )); then
 		dump_connection_args="${dump_connection_args} --socket=${quoted_remote_db_socket}"
 	fi
 
+	log "Validating remote WordPress and database access"
+	remote_bash "cd ${quoted_remote_wp_path} && wp core is-installed ${WP_CLI_MAINTENANCE_ARGS[*]} >/dev/null"
+	remote_bash "MYSQL_PWD=${quoted_remote_db_password} mysql ${dump_connection_args} -u ${quoted_remote_db_user} ${quoted_remote_db_name} -e 'SELECT 1' >/dev/null"
+
+	remote_config_db_name="$(remote_bash "cd ${quoted_remote_wp_path} && wp config get DB_NAME ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+	remote_config_db_user="$(remote_bash "cd ${quoted_remote_wp_path} && wp config get DB_USER ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+	remote_config_db_host="$(remote_bash "cd ${quoted_remote_wp_path} && wp config get DB_HOST ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+
+	if [[ "${REMOTE_DB_NAME}" != "${remote_config_db_name}" ]]; then
+		fail "REMOTE_DB_NAME does not match the database configured by ${REMOTE_WP_PATH}/wp-config.php."
+	fi
+
+	if [[ "${REMOTE_DB_USER}" != "${remote_config_db_user}" ]]; then
+		fail "REMOTE_DB_USER does not match the database user configured by ${REMOTE_WP_PATH}/wp-config.php."
+	fi
+
+	if [[ "$(normalize_db_host "${REMOTE_DB_HOST}")" != "$(normalize_db_host "${remote_config_db_host}")" ]]; then
+		fail "REMOTE_DB_HOST does not match the database host configured by ${REMOTE_WP_PATH}/wp-config.php."
+	fi
+
+	remote_table_prefix="$(remote_bash "cd ${quoted_remote_wp_path} && wp db prefix ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+	validate_table_prefix "${remote_table_prefix}"
+
+	if [[ -n "${REMOTE_EXPECTED_TABLE_PREFIX}" && "${remote_table_prefix}" != "${REMOTE_EXPECTED_TABLE_PREFIX}" ]]; then
+		fail "Remote table prefix is '${remote_table_prefix}', expected '${REMOTE_EXPECTED_TABLE_PREFIX}'. Refusing to import the wrong production database."
+	fi
+fi
+
+if (( sync_uploads )); then
+	log "Validating remote uploads path"
+	if (( dry_run )); then
+		run_with_retries "${SSH_RETRY_COUNT}" "${SSH_RETRY_DELAY}" \
+			rsync -azn -e "${RSYNC_SSH_COMMAND}" "${REMOTE_SSH_HOST}:${REMOTE_UPLOADS_PATH}" "${LOCAL_UPLOADS_PATH}/"
+	else
+		ssh_run "${REMOTE_SSH_HOST}" "test -d $(printf '%q' "${REMOTE_UPLOADS_PATH}")"
+	fi
+fi
+
+if (( dry_run )); then
+	log "Dry run succeeded. SSH and remote paths look good."
+	exit 0
+fi
+
+if (( sync_db && ${#preserve_post_ids[@]} > 0 )); then
+	preserve_local_posts
+fi
+
+if (( sync_db && skip_snapshot == 0 )); then
+	snapshot_name="pre-sync-remote-$(date +%Y%m%d-%H%M%S)"
+	log "Creating local database snapshot ${snapshot_name}"
+	ddev snapshot --name "${snapshot_name}"
+fi
+
+if (( sync_db )); then
+	temp_dump="$(mktemp "${TMPDIR:-/tmp}/barbados-sync-remote.XXXXXX.sql.gz")"
 	remote_dump_command="set -o pipefail; cd ${quoted_remote_wp_path} && MYSQL_PWD=${quoted_remote_db_password} mysqldump ${dump_connection_args} -u ${quoted_remote_db_user} --single-transaction --quick --default-character-set=utf8mb4 ${quoted_remote_db_name} | gzip -c"
 	log "Dumping the remote database"
 	run_remote_dump "${REMOTE_SSH_HOST}" "${remote_dump_command}" "${temp_dump}"
@@ -515,6 +574,9 @@ if (( sync_db )); then
 
 	ensure_local_table_prefix_hook
 	imported_table_prefix="$(detect_imported_table_prefix)"
+	if [[ -n "${REMOTE_EXPECTED_TABLE_PREFIX}" && "${imported_table_prefix}" != "${REMOTE_EXPECTED_TABLE_PREFIX}" ]]; then
+		fail "Imported table prefix is '${imported_table_prefix}', expected '${REMOTE_EXPECTED_TABLE_PREFIX}'. Restore the snapshot if this was not intentional."
+	fi
 	write_local_table_prefix_override "${imported_table_prefix}"
 
 	log "Updating local WordPress URLs"

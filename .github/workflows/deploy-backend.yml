@@ -71,8 +71,8 @@ jobs:
           set -euo pipefail
 
           export REPOPATH=/home/grapsa5/repositories/barbados-escapes
-          export THEMEPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/themes/gutenberg-lab-vvm
-          export PLUGINPATH=/home/grapsa5/barbadosescapes.verseandvision.ca/wp-content/plugins/gutenberg-lab-blocks
+          export THEMEPATH=/home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm
+          export PLUGINPATH=/home/grapsa5/barbadosescapes.com/wp-content/plugins/gutenberg-lab-blocks
 
           cd $REPOPATH
 
