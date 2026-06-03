@@ -12,6 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/inc/seo.php';
+
 /**
  * Registers the global theme supports used by the header/footer implementation.
  */
