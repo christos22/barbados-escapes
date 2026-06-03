@@ -2811,6 +2811,29 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	color: var(--vvm-footer-accent);
 }
 
+/* Site Editor saves these decorative icon placeholders without inline SVGs. */
+.vvm-footer__contact-icon:empty::before {
+	content: "";
+	display: block;
+	width: 100%;
+	height: 100%;
+	background-color: currentColor;
+	-webkit-mask: var(--vvm-footer-contact-icon) center / contain no-repeat;
+	mask: var(--vvm-footer-contact-icon) center / contain no-repeat;
+}
+
+.vvm-footer__contact-item:has(a[href^="tel:"]) .vvm-footer__contact-icon:empty {
+	--vvm-footer-contact-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1-.24 11.72 11.72 0 0 0 3.68.59 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.47a1 1 0 0 1 1 1 11.72 11.72 0 0 0 .59 3.68 1 1 0 0 1-.24 1Z' fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75'/%3E%3C/svg%3E");
+}
+
+.vvm-footer__contact-item:has(a[href^="mailto:"]) .vvm-footer__contact-icon:empty {
+	--vvm-footer-contact-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 6.5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z' fill='none' stroke='black' stroke-linejoin='round' stroke-width='1.75'/%3E%3Cpath d='m4 8 8 5 8-5' fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75'/%3E%3C/svg%3E");
+}
+
+.vvm-footer__contact-item:not(:has(a)) .vvm-footer__contact-icon:empty {
+	--vvm-footer-contact-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21s6-4.35 6-10a6 6 0 1 0-12 0c0 5.65 6 10 6 10Z' fill='none' stroke='black' stroke-linejoin='round' stroke-width='1.75'/%3E%3Ccircle cx='12' cy='11' r='2' fill='none' stroke='black' stroke-width='1.75'/%3E%3C/svg%3E");
+}
+
 .vvm-footer__contact-icon svg {
 	display: block;
 	width: 100%;
