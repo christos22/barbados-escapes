@@ -34,15 +34,7 @@
 
 .vvm-slider-controls--preset-center,
 .vvm-slider-controls--media-center {
-	top: calc(
-		var(--vvm-slider-controls-center-trim-block-start) +
-			(
-				(
-					100% - var(--vvm-slider-controls-center-trim-block-start) -
-						var(--vvm-slider-controls-center-trim-block-end)
-				) / 2
-			)
-	);
+	top: 50%;
 	left: 0;
 	right: 0;
 	justify-content: space-between;
