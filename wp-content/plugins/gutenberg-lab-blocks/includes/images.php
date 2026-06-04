@@ -98,7 +98,87 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_url' ) ) {
 			return (int) $attachment_id;
 		}
 
+		$attachment_id = gutenberg_lab_blocks_get_attachment_id_from_filename( basename( $original_path ) );
+
+		if ( $attachment_id && wp_attachment_is_image( (int) $attachment_id ) ) {
+			return (int) $attachment_id;
+		}
+
 		return 0;
+	}
+}
+
+if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_filename' ) ) {
+	/**
+	 * Resolves a legacy saved image URL by matching the media filename.
+	 *
+	 * Some imported blocks can retain an old generated-size URL even after the
+	 * current attachment has moved to a different month folder or gained a "-1"
+	 * duplicate suffix. This fallback keeps those blocks responsive without
+	 * requiring editors to reselect each image manually.
+	 *
+	 * @param string $filename Original filename without an upload directory.
+	 * @return int
+	 */
+	function gutenberg_lab_blocks_get_attachment_id_from_filename( $filename ) {
+		static $cache = array();
+
+		$filename = is_string( $filename ) ? sanitize_file_name( $filename ) : '';
+
+		if ( '' === $filename ) {
+			return 0;
+		}
+
+		if ( array_key_exists( $filename, $cache ) ) {
+			return (int) $cache[ $filename ];
+		}
+
+		$path_info = pathinfo( $filename );
+		$extension = isset( $path_info['extension'] ) ? strtolower( (string) $path_info['extension'] ) : '';
+		$stem      = isset( $path_info['filename'] ) ? (string) $path_info['filename'] : '';
+
+		if ( '' === $extension || '' === $stem ) {
+			$cache[ $filename ] = 0;
+
+			return 0;
+		}
+
+		global $wpdb;
+
+		$exact_file     = $stem . '.' . $extension;
+		$scaled_file    = $stem . '-scaled.' . $extension;
+		$duplicate_like = '%/' . $wpdb->esc_like( $stem ) . '-%.' . $wpdb->esc_like( $extension );
+
+		$attachment_id = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT posts.ID
+				FROM {$wpdb->posts} AS posts
+				INNER JOIN {$wpdb->postmeta} AS filemeta
+					ON posts.ID = filemeta.post_id
+				WHERE posts.post_type = %s
+					AND posts.post_mime_type LIKE %s
+					AND filemeta.meta_key = %s
+					AND (
+						filemeta.meta_value = %s
+						OR filemeta.meta_value LIKE %s
+						OR filemeta.meta_value LIKE %s
+						OR filemeta.meta_value LIKE %s
+					)
+				ORDER BY posts.ID DESC
+				LIMIT 1",
+				'attachment',
+				'image/%',
+				'_wp_attached_file',
+				$exact_file,
+				'%/' . $wpdb->esc_like( $exact_file ),
+				'%/' . $wpdb->esc_like( $scaled_file ),
+				$duplicate_like
+			)
+		);
+
+		$cache[ $filename ] = $attachment_id;
+
+		return $attachment_id;
 	}
 }
 
