@@ -18,17 +18,14 @@
 	.wp-block-button.is-style-vvm-ghost
 ) :is(.wp-block-button__link, .wp-element-button) {
 	/*
-	 * Romely's uppercase caps render optically high even when the button box
-	 * math is symmetrical. Keep one shared shell spec, then apply a single
-	 * font compensation token so every filled/outlined button variant inherits
-	 * the same visual centering.
+	 * Keep one shared shell spec so every filled/outlined button variant gets
+	 * the same height and equal vertical padding.
 	 */
 	--vvm-button-height: 44px;
 	--vvm-button-font-size: 18px;
 	--vvm-button-line-height: 1;
 	--vvm-button-border-width: 1px;
 	--vvm-button-padding-inline: 32px;
-	--vvm-button-optical-offset-block: 1px;
 	--vvm-button-padding-block-base: calc(
 		(
 			var(--vvm-button-height) -
@@ -45,14 +42,8 @@
 	z-index: 0;
 	box-sizing: border-box;
 	min-block-size: var(--vvm-button-height);
-	padding-block-start: calc(
-		var(--vvm-button-padding-block-base) +
-		var(--vvm-button-optical-offset-block)
-	);
-	padding-block-end: calc(
-		var(--vvm-button-padding-block-base) -
-		var(--vvm-button-optical-offset-block)
-	);
+	/* Use the resolved base value directly so minification cannot break calc() operator spacing. */
+	padding-block: var(--vvm-button-padding-block-base);
 	padding-inline: var(--vvm-button-padding-inline);
 	border: var(--vvm-button-border-width) solid transparent;
 	border-radius: 0;
