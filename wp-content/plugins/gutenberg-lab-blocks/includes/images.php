@@ -182,6 +182,41 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_filename' )
 	}
 }
 
+if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_generated_url_filename' ) ) {
+	/**
+	 * Resolves a generated-size URL by matching the original filename.
+	 *
+	 * @param string $image_url Saved or rewritten image URL.
+	 * @return int
+	 */
+	function gutenberg_lab_blocks_get_attachment_id_from_generated_url_filename( $image_url ) {
+		$image_url = is_string( $image_url ) ? rawurldecode( trim( $image_url ) ) : '';
+
+		if ( '' === $image_url ) {
+			return 0;
+		}
+
+		if ( false !== strpos( $image_url, '/wp-content/uploads/' ) ) {
+			$image_url = preg_replace( '#^.*?(/wp-content/uploads/)#i', '$1', $image_url );
+		}
+
+		$parsed_url = wp_parse_url( $image_url );
+		$path       = is_array( $parsed_url ) ? ( $parsed_url['path'] ?? '' ) : $image_url;
+
+		if ( ! is_string( $path ) || '' === $path ) {
+			return 0;
+		}
+
+		$original_path = preg_replace( '/-\d+x\d+(?=\.(?:jpe?g|png|gif|webp|avif)$)/i', '', $path );
+
+		if ( ! is_string( $original_path ) || $original_path === $path ) {
+			return 0;
+		}
+
+		return gutenberg_lab_blocks_get_attachment_id_from_filename( basename( $original_path ) );
+	}
+}
+
 if ( ! function_exists( 'gutenberg_lab_blocks_get_image_id_from_attributes' ) ) {
 	/**
 	 * Returns an image attachment ID from block attributes.
@@ -262,8 +297,23 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_responsive_image' ) ) {
 		);
 
 		$attachment_id = (int) $args['attachment_id'];
-		$custom_attrs  = (array) $args['attrs'];
-		$image_attrs   = array_merge(
+		$fallback_url  = is_string( $args['fallback_url'] ) ? trim( $args['fallback_url'] ) : '';
+
+		if ( $attachment_id && wp_attachment_is_image( $attachment_id ) && '' !== $fallback_url ) {
+			$current_srcset = wp_get_attachment_image_srcset( $attachment_id, $args['size'] );
+
+			if ( '' === (string) $current_srcset ) {
+				$filename_attachment_id = gutenberg_lab_blocks_get_attachment_id_from_generated_url_filename( $fallback_url );
+				$filename_srcset        = $filename_attachment_id ? wp_get_attachment_image_srcset( $filename_attachment_id, $args['size'] ) : '';
+
+				if ( $filename_attachment_id && '' !== (string) $filename_srcset ) {
+					$attachment_id = $filename_attachment_id;
+				}
+			}
+		}
+
+		$custom_attrs = (array) $args['attrs'];
+		$image_attrs  = array_merge(
 			array(
 				'class'    => trim( (string) $args['class'] ),
 				'alt'      => gutenberg_lab_blocks_get_attachment_alt( $attachment_id, $args['alt'] ),
@@ -299,8 +349,6 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_responsive_image' ) ) {
 				$image_attrs
 			);
 		}
-
-		$fallback_url = is_string( $args['fallback_url'] ) ? trim( $args['fallback_url'] ) : '';
 
 		if ( '' === $fallback_url ) {
 			return '';
