@@ -149,9 +149,9 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_filename' )
 		$scaled_file    = $stem . '-scaled.' . $extension;
 		$duplicate_like = '%/' . $wpdb->esc_like( $stem ) . '-%.' . $wpdb->esc_like( $extension );
 
-		$attachment_id = (int) $wpdb->get_var(
+		$candidates = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT posts.ID
+				"SELECT posts.ID, filemeta.meta_value AS file_path
 				FROM {$wpdb->posts} AS posts
 				INNER JOIN {$wpdb->postmeta} AS filemeta
 					ON posts.ID = filemeta.post_id
@@ -165,7 +165,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_filename' )
 						OR filemeta.meta_value LIKE %s
 					)
 				ORDER BY posts.ID DESC
-				LIMIT 1",
+				LIMIT 25",
 				'attachment',
 				'image/%',
 				'_wp_attached_file',
@@ -175,6 +175,32 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_filename' )
 				$duplicate_like
 			)
 		);
+
+		$attachment_id          = 0;
+		$best_match_score       = 0;
+		$exact_file_lower       = strtolower( $exact_file );
+		$scaled_file_lower      = strtolower( $scaled_file );
+		$duplicate_file_pattern = '/^' . preg_quote( strtolower( $stem ), '/' ) . '-\d+(?:-scaled)?\.' . preg_quote( $extension, '/' ) . '$/';
+		$generated_size_pattern = '/^' . preg_quote( strtolower( $stem ), '/' ) . '-\d+x\d+(?:-scaled)?\.' . preg_quote( $extension, '/' ) . '$/';
+
+		foreach ( (array) $candidates as $candidate ) {
+			$candidate_file = strtolower( basename( (string) ( $candidate->file_path ?? '' ) ) );
+			$match_score    = 0;
+
+			if ( $exact_file_lower === $candidate_file || $scaled_file_lower === $candidate_file ) {
+				$match_score = 3;
+			} elseif ( preg_match( $duplicate_file_pattern, $candidate_file ) ) {
+				$match_score = 2;
+			} elseif ( preg_match( $generated_size_pattern, $candidate_file ) ) {
+				// Generated-size files are a last resort; they usually cannot produce srcset.
+				$match_score = 1;
+			}
+
+			if ( $match_score > $best_match_score ) {
+				$attachment_id    = (int) $candidate->ID;
+				$best_match_score = $match_score;
+			}
+		}
 
 		$cache[ $filename ] = $attachment_id;
 
