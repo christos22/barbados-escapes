@@ -46,6 +46,48 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_url' ) ) {
 			return (int) $attachment_id;
 		}
 
+		$decoded_url   = rawurldecode( $image_url );
+		$attachment_id = attachment_url_to_postid( $decoded_url );
+
+		if ( $attachment_id && wp_attachment_is_image( (int) $attachment_id ) ) {
+			return (int) $attachment_id;
+		}
+
+		$parsed_url = wp_parse_url( $decoded_url );
+		$path       = is_array( $parsed_url ) ? ( $parsed_url['path'] ?? '' ) : '';
+
+		if ( ! is_string( $path ) || '' === $path ) {
+			return 0;
+		}
+
+		// Legacy blocks may save a generated sub-size URL such as image-1920x1200.jpg.
+		$original_path = preg_replace( '/-\d+x\d+(?=\.(?:jpe?g|png|gif|webp|avif)$)/i', '', $path );
+
+		if ( ! is_string( $original_path ) || $original_path === $path ) {
+			return 0;
+		}
+
+		$origin_url    = home_url( $original_path );
+		$attachment_id = attachment_url_to_postid( $origin_url );
+
+		if ( $attachment_id && wp_attachment_is_image( (int) $attachment_id ) ) {
+			return (int) $attachment_id;
+		}
+
+		// WordPress appends "-scaled" to very large master images before creating sub-sizes.
+		$scaled_path = preg_replace( '/(\.(?:jpe?g|png|gif|webp|avif)$)/i', '-scaled$1', $original_path );
+
+		if ( ! is_string( $scaled_path ) || $scaled_path === $original_path ) {
+			return 0;
+		}
+
+		$scaled_url    = home_url( $scaled_path );
+		$attachment_id = attachment_url_to_postid( $scaled_url );
+
+		if ( $attachment_id && wp_attachment_is_image( (int) $attachment_id ) ) {
+			return (int) $attachment_id;
+		}
+
 		return 0;
 	}
 }
