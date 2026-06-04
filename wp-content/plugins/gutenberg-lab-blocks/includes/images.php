@@ -18,9 +18,15 @@ if ( ! function_exists( 'gutenberg_lab_blocks_register_image_sizes' ) ) {
 	 */
 	function gutenberg_lab_blocks_register_image_sizes() {
 		add_image_size( 'gutenberg-lab-hero', 1920, 1200, true );
+		add_image_size( 'gutenberg-lab-hero-md', 1280, 800, true );
+		add_image_size( 'gutenberg-lab-hero-sm', 960, 600, true );
+		add_image_size( 'gutenberg-lab-hero-xs', 640, 400, true );
 		add_image_size( 'gutenberg-lab-card-landscape', 960, 640, true );
+		add_image_size( 'gutenberg-lab-card-landscape-sm', 720, 480, true );
 		add_image_size( 'gutenberg-lab-card-portrait', 960, 1280, true );
+		add_image_size( 'gutenberg-lab-card-portrait-sm', 540, 720, true );
 		add_image_size( 'gutenberg-lab-gallery-card', 720, 960, true );
+		add_image_size( 'gutenberg-lab-gallery-card-sm', 540, 720, true );
 		add_image_size( 'gutenberg-lab-thumb', 480, 320, true );
 	}
 }
