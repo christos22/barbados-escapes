@@ -301,14 +301,15 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_responsive_image' ) ) {
 
 		if ( $attachment_id && wp_attachment_is_image( $attachment_id ) && '' !== $fallback_url ) {
 			$current_srcset = wp_get_attachment_image_srcset( $attachment_id, $args['size'] );
+			$filename_attachment_id = gutenberg_lab_blocks_get_attachment_id_from_generated_url_filename( $fallback_url );
+			$filename_srcset        = $filename_attachment_id ? wp_get_attachment_image_srcset( $filename_attachment_id, $args['size'] ) : '';
 
-			if ( '' === (string) $current_srcset ) {
-				$filename_attachment_id = gutenberg_lab_blocks_get_attachment_id_from_generated_url_filename( $fallback_url );
-				$filename_srcset        = $filename_attachment_id ? wp_get_attachment_image_srcset( $filename_attachment_id, $args['size'] ) : '';
-
-				if ( $filename_attachment_id && '' !== (string) $filename_srcset ) {
-					$attachment_id = $filename_attachment_id;
-				}
+			if (
+				$filename_attachment_id &&
+				'' !== (string) $filename_srcset &&
+				( $filename_attachment_id !== $attachment_id || '' === (string) $current_srcset )
+			) {
+				$attachment_id = $filename_attachment_id;
 			}
 		}
 
