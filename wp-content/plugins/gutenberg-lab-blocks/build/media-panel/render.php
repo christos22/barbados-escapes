@@ -6,8 +6,10 @@
  */
 
 $media_type       = $attributes['mediaType'] ?? 'image';
+$image_id         = gutenberg_lab_blocks_get_image_id_from_attributes( $attributes );
 $image_url        = $attributes['imageUrl'] ?? '';
 $image_alt        = $attributes['imageAlt'] ?? '';
+$fallback_image_id = gutenberg_lab_blocks_get_image_id_from_attributes( $attributes, 'fallbackImageId', 'fallbackImageUrl' );
 $fallback_image_url = $attributes['fallbackImageUrl'] ?? '';
 $fallback_image_alt = $attributes['fallbackImageAlt'] ?? '';
 $dark_overlay     = ! empty( $attributes['darkOverlay'] );
@@ -25,6 +27,7 @@ $video_data       = gutenberg_lab_blocks_get_video_data(
 	array(
 		'poster_url_key' => 'fallbackImageUrl',
 		'poster_alt_key' => 'fallbackImageAlt',
+		'poster_id_key'  => 'fallbackImageId',
 	)
 );
 
@@ -52,11 +55,13 @@ if ( $current_post_id && ( ! $image_url || ! $fallback_image_url ) && has_post_t
 	}
 
 	if ( ! $image_url && $featured_image_url ) {
+		$image_id  = $featured_image_id;
 		$image_url = $featured_image_url;
 		$image_alt = $featured_image_alt;
 	}
 
 	if ( ! $fallback_image_url && $featured_image_url ) {
+		$fallback_image_id  = $featured_image_id;
 		$fallback_image_url = $featured_image_url;
 		$fallback_image_alt = $featured_image_alt;
 	}
@@ -138,6 +143,9 @@ $wrapper_attributes = get_block_wrapper_attributes(
 							'loading'       => 'eager',
 						),
 						'poster_class'  => 'media-panel__image',
+						'poster_id'     => $video_data['poster_id'],
+						'poster_size'   => 'gutenberg-lab-hero',
+						'poster_sizes'  => '100vw',
 						'poster_url'    => $video_data['poster_url'],
 						'shell_class'   => 'media-panel__vimeo-shell',
 						'title'         => __( 'Media panel Vimeo video', 'gutenberg-lab-blocks' ),
@@ -148,17 +156,35 @@ $wrapper_attributes = get_block_wrapper_attributes(
 				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				?>
 			<?php elseif ( 'video' === $media_type && $fallback_image_url ) : ?>
-				<img
-					class="media-panel__image"
-					src="<?php echo esc_url( $fallback_image_url ); ?>"
-					alt="<?php echo esc_attr( $fallback_image_alt ); ?>"
-				/>
+				<?php
+				echo gutenberg_lab_blocks_render_responsive_image(
+					array(
+						'alt'           => $fallback_image_alt,
+						'attachment_id' => $fallback_image_id,
+						'class'         => 'media-panel__image',
+						'fallback_url'  => $fallback_image_url,
+						'fetchpriority' => 'high',
+						'loading'       => 'eager',
+						'size'          => 'gutenberg-lab-hero',
+						'sizes'         => '100vw',
+					)
+				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
 			<?php elseif ( $image_url ) : ?>
-				<img
-					class="media-panel__image"
-					src="<?php echo esc_url( $image_url ); ?>"
-					alt="<?php echo esc_attr( $image_alt ); ?>"
-				/>
+				<?php
+				echo gutenberg_lab_blocks_render_responsive_image(
+					array(
+						'alt'           => $image_alt,
+						'attachment_id' => $image_id,
+						'class'         => 'media-panel__image',
+						'fallback_url'  => $image_url,
+						'fetchpriority' => 'high',
+						'loading'       => 'eager',
+						'size'          => 'gutenberg-lab-hero',
+						'sizes'         => '100vw',
+					)
+				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
 			<?php endif; ?>
 		</div>
 

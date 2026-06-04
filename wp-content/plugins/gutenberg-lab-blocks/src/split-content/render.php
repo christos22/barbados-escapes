@@ -17,6 +17,7 @@ $section_height         = $attributes['sectionHeight'] ?? 'medium';
 $content_background_color = $attributes['contentBackgroundColor'] ?? '';
 $media_type             = $attributes['mediaType'] ?? 'image';
 $media_on_edge          = ! empty( $attributes['mediaOnEdge'] );
+$image_id               = gutenberg_lab_blocks_get_image_id_from_attributes( $attributes );
 $image_url              = $attributes['imageUrl'] ?? '';
 $image_alt              = $attributes['imageAlt'] ?? '';
 $gallery_images         = $attributes['galleryImages'] ?? array();
@@ -104,6 +105,9 @@ $gallery_images = array_values(
 							'iframe_class'  => 'split-content__media-asset',
 							'poster_alt'    => $video_data['poster_alt'],
 							'poster_class'  => 'split-content__media-asset',
+							'poster_id'     => $video_data['poster_id'],
+							'poster_size'   => 'gutenberg-lab-hero',
+							'poster_sizes'  => '(max-width: 782px) 100vw, 50vw',
 							'poster_url'    => $video_data['poster_url'],
 							'shell_class'   => 'split-content__vimeo-shell',
 							'title'         => __( 'Split content Vimeo video', 'gutenberg-lab-blocks' ),
@@ -118,11 +122,18 @@ $gallery_images = array_values(
 						<div class="split-content__slides">
 							<?php foreach ( $gallery_images as $gallery_image ) : ?>
 								<figure class="split-content__slide">
-									<img
-										class="split-content__media-asset"
-										src="<?php echo esc_url( $gallery_image['url'] ); ?>"
-										alt="<?php echo esc_attr( $gallery_image['alt'] ); ?>"
-									/>
+									<?php
+									echo gutenberg_lab_blocks_render_responsive_image(
+										array(
+											'alt'           => $gallery_image['alt'],
+											'attachment_id' => $gallery_image['id'],
+											'class'         => 'split-content__media-asset',
+											'fallback_url'  => $gallery_image['url'],
+											'size'          => 'gutenberg-lab-hero',
+											'sizes'         => '(max-width: 782px) 100vw, 50vw',
+										)
+									); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+									?>
 								</figure>
 							<?php endforeach; ?>
 						</div>
@@ -158,17 +169,31 @@ $gallery_images = array_values(
 						<?php endif; ?>
 					</div>
 				<?php elseif ( 'video' === $media_type && '' !== $video_data['poster_url'] ) : ?>
-					<img
-						class="split-content__media-asset"
-						src="<?php echo esc_url( $video_data['poster_url'] ); ?>"
-						alt="<?php echo esc_attr( $video_data['poster_alt'] ); ?>"
-					/>
+					<?php
+					echo gutenberg_lab_blocks_render_responsive_image(
+						array(
+							'alt'           => $video_data['poster_alt'],
+							'attachment_id' => $video_data['poster_id'],
+							'class'         => 'split-content__media-asset',
+							'fallback_url'  => $video_data['poster_url'],
+							'size'          => 'gutenberg-lab-hero',
+							'sizes'         => '(max-width: 782px) 100vw, 50vw',
+						)
+					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				<?php elseif ( '' !== $image_url ) : ?>
-					<img
-						class="split-content__media-asset"
-						src="<?php echo esc_url( $image_url ); ?>"
-						alt="<?php echo esc_attr( $image_alt ); ?>"
-					/>
+					<?php
+					echo gutenberg_lab_blocks_render_responsive_image(
+						array(
+							'alt'           => $image_alt,
+							'attachment_id' => $image_id,
+							'class'         => 'split-content__media-asset',
+							'fallback_url'  => $image_url,
+							'size'          => 'gutenberg-lab-hero',
+							'sizes'         => '(max-width: 782px) 100vw, 50vw',
+						)
+					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				<?php else : ?>
 					<div class="split-content__media-placeholder">
 						<p><?php esc_html_e( 'Select a media item to complete this layout.', 'gutenberg-lab-blocks' ); ?></p>

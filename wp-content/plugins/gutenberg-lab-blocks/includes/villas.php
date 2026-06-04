@@ -1067,6 +1067,7 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 		'descriptor' => $descriptor,
 		'facts'     => $facts,
 		'amenities' => gutenberg_lab_blocks_get_villa_amenities( $villa_id ),
+		'image_id'  => $image_id,
 		'image_url' => $image_url,
 		'image_alt' => $image_alt,
 		'cta'       => gutenberg_lab_blocks_get_villa_card_cta( $villa_id ),
@@ -1114,15 +1115,6 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 			? 'vvm-card-grid__card-media--background'
 			: 'vvm-card-grid__card-media--placeholder',
 	);
-	$media_styles  = '';
-
-	if ( '' !== $villa_data['image_url'] ) {
-		$media_styles = sprintf(
-			"background-image:url('%s');",
-			esc_url_raw( $villa_data['image_url'] )
-		);
-	}
-
 	ob_start();
 	?>
 	<article class="vvm-card-grid__card vvm-card-grid__card--villa">
@@ -1130,11 +1122,21 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 			class="<?php echo esc_attr( implode( ' ', $media_classes ) ); ?>"
 			href="<?php echo esc_url( $villa_data['permalink'] ); ?>"
 			aria-label="<?php echo esc_attr( sprintf( __( 'View %s', 'gutenberg-lab-blocks' ), $villa_data['title'] ) ); ?>"
-			<?php if ( '' !== $media_styles ) : ?>
-				style="<?php echo esc_attr( $media_styles ); ?>"
-			<?php endif; ?>
 		>
-			<?php if ( '' === $villa_data['image_url'] ) : ?>
+			<?php if ( '' !== $villa_data['image_url'] ) : ?>
+				<?php
+				echo gutenberg_lab_blocks_render_responsive_image(
+					array(
+						'alt'           => $villa_data['image_alt'],
+						'attachment_id' => $villa_data['image_id'],
+						'class'         => 'vvm-card-grid__card-image',
+						'fallback_url'  => $villa_data['image_url'],
+						'size'          => 'gutenberg-lab-card-landscape',
+						'sizes'         => '(max-width: 782px) 100vw, 33vw',
+					)
+				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
+			<?php else : ?>
 				<span class="vvm-card-grid__card-placeholder-label">
 					<?php esc_html_e( 'Villa image coming soon', 'gutenberg-lab-blocks' ); ?>
 				</span>
@@ -1206,11 +1208,18 @@ function gutenberg_lab_blocks_render_villa_carousel_slide( $villa_id ) {
 	<article class="vvm-card-carousel__slide vvm-card-carousel__slide--villa">
 		<div class="vvm-card-carousel__slide-media<?php echo $has_image ? '' : ' vvm-card-carousel__slide-media--placeholder'; ?>">
 			<?php if ( $has_image ) : ?>
-				<img
-					class="vvm-card-carousel__slide-image"
-					src="<?php echo esc_url( $villa_data['image_url'] ); ?>"
-					alt="<?php echo esc_attr( $villa_data['image_alt'] ); ?>"
-				/>
+				<?php
+				echo gutenberg_lab_blocks_render_responsive_image(
+					array(
+						'alt'           => $villa_data['image_alt'],
+						'attachment_id' => $villa_data['image_id'],
+						'class'         => 'vvm-card-carousel__slide-image',
+						'fallback_url'  => $villa_data['image_url'],
+						'size'          => 'gutenberg-lab-card-portrait',
+						'sizes'         => '(max-width: 782px) 82vw, 28vw',
+					)
+				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
 			<?php else : ?>
 				<span class="vvm-card-carousel__slide-placeholder-label">
 					<?php esc_html_e( 'Villa image coming soon', 'gutenberg-lab-blocks' ); ?>

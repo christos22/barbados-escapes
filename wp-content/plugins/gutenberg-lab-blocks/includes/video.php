@@ -205,6 +205,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_video_data' ) ) {
 				'video_source_key' => 'videoSource',
 				'video_url_key'    => 'videoUrl',
 				'vimeo_url_key'    => 'vimeoUrl',
+				'poster_id_key'    => 'posterImageId',
 				'poster_url_key'   => 'posterImageUrl',
 				'poster_alt_key'   => 'posterImageAlt',
 				'poster_required'  => true,
@@ -216,6 +217,11 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_video_data' ) ) {
 		);
 		$video_url    = trim( (string) ( $attributes[ $args['video_url_key'] ] ?? '' ) );
 		$vimeo_url    = trim( (string) ( $attributes[ $args['vimeo_url_key'] ] ?? '' ) );
+		$poster_id    = gutenberg_lab_blocks_get_image_id_from_attributes(
+			$attributes,
+			$args['poster_id_key'],
+			$args['poster_url_key']
+		);
 		$poster_url   = trim( (string) ( $attributes[ $args['poster_url_key'] ] ?? '' ) );
 		$poster_alt   = trim( (string) ( $attributes[ $args['poster_alt_key'] ] ?? '' ) );
 		$vimeo_id     = 'vimeo' === $video_source
@@ -232,6 +238,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_video_data' ) ) {
 			'vimeo_url'          => esc_url_raw( $vimeo_url ),
 			'vimeo_id'           => sanitize_text_field( $vimeo_id ),
 			'vimeo_hash'         => sanitize_text_field( $vimeo_hash ),
+			'poster_id'          => $poster_id,
 			'poster_url'         => esc_url_raw( $poster_url ),
 			'poster_alt'         => sanitize_text_field( $poster_alt ),
 			'has_uploaded_video' => 'uploaded' === $video_source && '' !== $video_url,
@@ -264,6 +271,9 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 				'lazy_load'      => false,
 				'poster_alt'     => '',
 				'poster_class'   => '',
+				'poster_id'      => 0,
+				'poster_size'    => 'gutenberg-lab-hero',
+				'poster_sizes'   => '100vw',
 				'poster_attrs'   => array(),
 				'poster_url'     => '',
 				'shell_class'    => '',
@@ -289,22 +299,17 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 		);
 		$wrapper_markup     = gutenberg_lab_blocks_get_html_attributes( $wrapper_attributes );
 
-		$poster_attributes = array_merge(
+		$poster_markup = gutenberg_lab_blocks_render_responsive_image(
 			array(
-				'class' => trim( 'vvm-vimeo-shell__poster ' . $args['poster_class'] ),
-				'src'   => $args['poster_url'],
-				'alt'   => $args['poster_alt'],
-			),
-			array_diff_key(
-				(array) $args['poster_attrs'],
-				array(
-					'class' => true,
-					'src'   => true,
-					'alt'   => true,
-				)
+				'alt'           => $args['poster_alt'],
+				'attachment_id' => (int) $args['poster_id'],
+				'attrs'         => (array) $args['poster_attrs'],
+				'class'         => trim( 'vvm-vimeo-shell__poster ' . $args['poster_class'] ),
+				'fallback_url'  => $args['poster_url'],
+				'size'          => $args['poster_size'],
+				'sizes'         => $args['poster_sizes'],
 			)
 		);
-		$poster_markup     = gutenberg_lab_blocks_get_html_attributes( $poster_attributes );
 
 		ob_start();
 		?>
@@ -330,7 +335,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_vimeo_shell' ) ) {
 				class="vvm-vimeo-shell__poster-shell"
 				data-vimeo-poster-shell
 			>
-				<img<?php echo $poster_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
+				<?php echo $poster_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
 			<?php
 			echo gutenberg_lab_blocks_get_vimeo_video_control_button(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped

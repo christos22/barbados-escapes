@@ -17,6 +17,7 @@ if ( file_exists( $gutenberg_lab_blocks_autoload ) ) {
 }
 
 require_once __DIR__ . '/includes/video.php';
+require_once __DIR__ . '/includes/images.php';
 require_once __DIR__ . '/includes/packages.php';
 require_once __DIR__ . '/includes/package-rendering.php';
 require_once __DIR__ . '/includes/peeking-carousel.php';

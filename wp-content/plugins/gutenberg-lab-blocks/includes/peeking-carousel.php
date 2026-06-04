@@ -62,7 +62,8 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_slide_has_content' ) ) {
 			return false;
 		}
 
-		$image_url = trim( (string) ( $slide_block['attrs']['imageUrl'] ?? '' ) );
+		$attrs     = is_array( $slide_block['attrs'] ?? null ) ? $slide_block['attrs'] : array();
+		$image_url = trim( (string) ( $attrs['imageUrl'] ?? '' ) );
 
 		if ( '' !== $image_url ) {
 			return true;
@@ -120,8 +121,10 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render_media_slide' ) ) 
 			return '';
 		}
 
-		$image_url = trim( (string) ( $slide_block['attrs']['imageUrl'] ?? '' ) );
-		$image_alt = trim( (string) ( $slide_block['attrs']['imageAlt'] ?? '' ) );
+		$attrs     = is_array( $slide_block['attrs'] ?? null ) ? $slide_block['attrs'] : array();
+		$image_id  = gutenberg_lab_blocks_get_image_id_from_attributes( $attrs );
+		$image_url = trim( (string) ( $attrs['imageUrl'] ?? '' ) );
+		$image_alt = trim( (string) ( $attrs['imageAlt'] ?? '' ) );
 		$has_image = '' !== $image_url;
 		$loading   = 0 === $index ? 'eager' : 'lazy';
 
@@ -130,14 +133,20 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render_media_slide' ) ) 
 		<li class="splide__slide vvm-feature-carousel__media-slide<?php echo 0 === $index ? ' is-active' : ''; ?>" <?php echo esc_attr( $slide_data_attribute ); ?>>
 			<div class="vvm-feature-carousel__media<?php echo $has_image ? '' : ' vvm-feature-carousel__media--placeholder'; ?>">
 				<?php if ( $has_image ) : ?>
-					<img
-						class="vvm-feature-carousel__image"
-						src="<?php echo esc_url( $image_url ); ?>"
-						alt="<?php echo esc_attr( $image_alt ); ?>"
-						loading="<?php echo esc_attr( $loading ); ?>"
-						decoding="async"
-						fetchpriority="<?php echo esc_attr( 0 === $index ? 'high' : 'auto' ); ?>"
-					/>
+					<?php
+					echo gutenberg_lab_blocks_render_responsive_image(
+						array(
+							'alt'           => $image_alt,
+							'attachment_id' => $image_id,
+							'class'         => 'vvm-feature-carousel__image',
+							'fallback_url'  => $image_url,
+							'fetchpriority' => 0 === $index ? 'high' : '',
+							'loading'       => $loading,
+							'size'          => 'gutenberg-lab-hero',
+							'sizes'         => '(max-width: 782px) 100vw, 72vw',
+						)
+					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				<?php else : ?>
 					<span class="vvm-feature-carousel__placeholder-label">
 						<?php esc_html_e( 'Slide image coming soon', 'gutenberg-lab-blocks' ); ?>

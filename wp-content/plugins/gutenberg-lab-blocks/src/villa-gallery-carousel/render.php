@@ -162,6 +162,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 					<?php foreach ( $slide_blocks as $index => $slide_block ) : ?>
 						<?php
 						$slide_attributes = is_array( $slide_block['attrs'] ?? null ) ? $slide_block['attrs'] : array();
+						$image_id = gutenberg_lab_blocks_get_image_id_from_attributes( $slide_attributes );
 						$image_url = trim( (string) ( $slide_attributes['imageUrl'] ?? '' ) );
 						$image_alt = trim( (string) ( $slide_attributes['imageAlt'] ?? '' ) );
 						$eyebrow = trim( (string) ( $slide_attributes['eyebrow'] ?? '' ) );
@@ -187,11 +188,18 @@ $wrapper_attributes = get_block_wrapper_attributes(
 							<?php endif; ?>
 								<div class="vvm-villa-gallery-carousel__slide-media<?php echo '' !== $image_url ? '' : ' vvm-villa-gallery-carousel__slide-media--placeholder'; ?>">
 									<?php if ( '' !== $image_url ) : ?>
-										<img
-											class="vvm-villa-gallery-carousel__slide-image"
-											src="<?php echo esc_url( $image_url ); ?>"
-											alt="<?php echo esc_attr( $image_alt ); ?>"
-										/>
+										<?php
+										echo gutenberg_lab_blocks_render_responsive_image(
+											array(
+												'alt'           => $image_alt,
+												'attachment_id' => $image_id,
+												'class'         => 'vvm-villa-gallery-carousel__slide-image',
+												'fallback_url'  => $image_url,
+												'size'          => 'gutenberg-lab-gallery-card',
+												'sizes'         => '(max-width: 782px) 72vw, 22vw',
+											)
+										); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+										?>
 									<?php else : ?>
 										<span class="vvm-villa-gallery-carousel__slide-placeholder">
 											<?php esc_html_e( 'Add image', 'gutenberg-lab-blocks' ); ?>

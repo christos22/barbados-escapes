@@ -28,9 +28,11 @@ if ( ! function_exists( 'gutenberg_lab_two_up_carousel_render_slide' ) ) {
 			)
 		);
 
-		$image_url = trim( (string) ( $slide_block['attrs']['imageUrl'] ?? '' ) );
-		$image_alt = trim( (string) ( $slide_block['attrs']['imageAlt'] ?? '' ) );
-		$villa_id  = (int) ( $slide_block['attrs']['villaId'] ?? 0 );
+		$attrs     = is_array( $slide_block['attrs'] ?? null ) ? $slide_block['attrs'] : array();
+		$image_id  = gutenberg_lab_blocks_get_image_id_from_attributes( $attrs );
+		$image_url = trim( (string) ( $attrs['imageUrl'] ?? '' ) );
+		$image_alt = trim( (string) ( $attrs['imageAlt'] ?? '' ) );
+		$villa_id  = (int) ( $attrs['villaId'] ?? 0 );
 		$has_image = '' !== $image_url;
 		$loading   = $args['is_active'] ? 'eager' : 'lazy';
 		$content   = gutenberg_lab_peeking_carousel_render_nested_blocks( $slide_block['innerBlocks'] ?? array() );
@@ -77,14 +79,20 @@ if ( ! function_exists( 'gutenberg_lab_two_up_carousel_render_slide' ) ) {
 		>
 			<div class="vvm-two-up-carousel__slide-media<?php echo $has_image ? '' : ' vvm-two-up-carousel__slide-media--placeholder'; ?>">
 				<?php if ( $has_image ) : ?>
-					<img
-						class="vvm-two-up-carousel__slide-image"
-						src="<?php echo esc_url( $image_url ); ?>"
-						alt="<?php echo esc_attr( $image_alt ); ?>"
-						loading="<?php echo esc_attr( $loading ); ?>"
-						decoding="async"
-						fetchpriority="<?php echo esc_attr( $args['is_priority'] ? 'high' : 'auto' ); ?>"
-					/>
+					<?php
+					echo gutenberg_lab_blocks_render_responsive_image(
+						array(
+							'alt'           => $image_alt,
+							'attachment_id' => $image_id,
+							'class'         => 'vvm-two-up-carousel__slide-image',
+							'fallback_url'  => $image_url,
+							'fetchpriority' => $args['is_priority'] ? 'high' : '',
+							'loading'       => $loading,
+							'size'          => 'gutenberg-lab-card-landscape',
+							'sizes'         => '(max-width: 782px) 86vw, 42vw',
+						)
+					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				<?php else : ?>
 					<span class="vvm-two-up-carousel__slide-placeholder-label">
 						<?php esc_html_e( 'Slide image coming soon', 'gutenberg-lab-blocks' ); ?>

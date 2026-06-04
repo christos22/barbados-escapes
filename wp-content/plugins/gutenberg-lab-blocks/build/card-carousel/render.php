@@ -60,8 +60,10 @@ if ( ! function_exists( 'gutenberg_lab_card_carousel_render_manual_slide' ) ) {
 			return '';
 		}
 
-		$image_url = trim( (string) ( $slide_block['attrs']['imageUrl'] ?? '' ) );
-		$image_alt = trim( (string) ( $slide_block['attrs']['imageAlt'] ?? '' ) );
+		$attrs     = is_array( $slide_block['attrs'] ?? null ) ? $slide_block['attrs'] : array();
+		$image_id  = gutenberg_lab_blocks_get_image_id_from_attributes( $attrs );
+		$image_url = trim( (string) ( $attrs['imageUrl'] ?? '' ) );
+		$image_alt = trim( (string) ( $attrs['imageAlt'] ?? '' ) );
 		$content   = gutenberg_lab_card_carousel_render_nested_blocks( $slide_block['innerBlocks'] ?? array() );
 
 		ob_start();
@@ -69,11 +71,18 @@ if ( ! function_exists( 'gutenberg_lab_card_carousel_render_manual_slide' ) ) {
 		<article class="vvm-card-carousel__slide">
 			<div class="vvm-card-carousel__slide-media<?php echo '' !== $image_url ? '' : ' vvm-card-carousel__slide-media--placeholder'; ?>">
 				<?php if ( '' !== $image_url ) : ?>
-					<img
-						class="vvm-card-carousel__slide-image"
-						src="<?php echo esc_url( $image_url ); ?>"
-						alt="<?php echo esc_attr( $image_alt ); ?>"
-					/>
+					<?php
+					echo gutenberg_lab_blocks_render_responsive_image(
+						array(
+							'alt'           => $image_alt,
+							'attachment_id' => $image_id,
+							'class'         => 'vvm-card-carousel__slide-image',
+							'fallback_url'  => $image_url,
+							'size'          => 'gutenberg-lab-card-portrait',
+							'sizes'         => '(max-width: 782px) 82vw, 28vw',
+						)
+					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				<?php else : ?>
 					<span class="vvm-card-carousel__slide-placeholder-label">
 						<?php esc_html_e( 'Slide image coming soon', 'gutenberg-lab-blocks' ); ?>

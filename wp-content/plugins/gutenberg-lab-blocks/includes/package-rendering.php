@@ -159,6 +159,7 @@ function gutenberg_lab_blocks_get_package_data( $package_id ) {
 		'permalink'     => get_permalink( $package_id ),
 		'excerpt'       => $excerpt,
 		'price'         => get_post_meta( $package_id, 'package_price', true ),
+		'image_id'      => $image_id,
 		'image_url'     => $image_url,
 		'image_alt'     => $image_alt,
 		'package_type'  => $term_name,
@@ -300,11 +301,18 @@ function gutenberg_lab_blocks_render_package_card( $package_id, $args = array() 
 	<article class="vvm-package-card">
 		<a class="vvm-package-card__media-link" href="<?php echo esc_url( $package_data['permalink'] ); ?>">
 			<?php if ( '' !== $package_data['image_url'] ) : ?>
-				<img
-					class="vvm-package-card__image"
-					src="<?php echo esc_url( $package_data['image_url'] ); ?>"
-					alt="<?php echo esc_attr( $package_data['image_alt'] ); ?>"
-				/>
+				<?php
+				echo gutenberg_lab_blocks_render_responsive_image(
+					array(
+						'alt'           => $package_data['image_alt'],
+						'attachment_id' => $package_data['image_id'],
+						'class'         => 'vvm-package-card__image',
+						'fallback_url'  => $package_data['image_url'],
+						'size'          => 'gutenberg-lab-card-landscape',
+						'sizes'         => '(max-width: 782px) 100vw, 33vw',
+					)
+				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
 			<?php else : ?>
 				<span class="vvm-package-card__image-placeholder"></span>
 			<?php endif; ?>
