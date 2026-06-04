@@ -210,7 +210,7 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_filename' )
 
 if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_generated_url_filename' ) ) {
 	/**
-	 * Resolves a generated-size URL by matching the original filename.
+	 * Resolves a generated-size or scaled URL by matching the original filename.
 	 *
 	 * @param string $image_url Saved or rewritten image URL.
 	 * @return int
@@ -234,8 +234,9 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_generated_u
 		}
 
 		$original_path = preg_replace( '/-\d+x\d+(?=\.(?:jpe?g|png|gif|webp|avif)$)/i', '', $path );
+		$original_path = preg_replace( '/-scaled(?=\.(?:jpe?g|png|gif|webp|avif)$)/i', '', (string) $original_path );
 
-		if ( ! is_string( $original_path ) || $original_path === $path ) {
+		if ( ! is_string( $original_path ) || '' === $original_path ) {
 			return 0;
 		}
 
