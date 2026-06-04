@@ -40,6 +40,16 @@ if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_url' ) ) {
 			return 0;
 		}
 
+		$decoded_url = rawurldecode( $image_url );
+
+		if ( false !== strpos( $decoded_url, '/wp-content/uploads/' ) ) {
+			$upload_path = preg_replace( '#^.*?(/wp-content/uploads/)#i', '$1', $decoded_url );
+
+			if ( is_string( $upload_path ) && $upload_path !== $decoded_url ) {
+				$image_url = home_url( $upload_path );
+			}
+		}
+
 		$attachment_id = attachment_url_to_postid( $image_url );
 
 		if ( $attachment_id && wp_attachment_is_image( (int) $attachment_id ) ) {
