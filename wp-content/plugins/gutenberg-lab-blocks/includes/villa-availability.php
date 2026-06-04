@@ -779,18 +779,26 @@ function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival
 		$lookup_start = gutenberg_lab_blocks_shift_iso_date( $arrival_date, -1 );
 		$lookup_end   = gutenberg_lab_blocks_shift_iso_date( $departure_date, 1 );
 		$unavailable  = gutenberg_lab_blocks_get_villa_unavailable_dates( $villa_id, $lookup_start, $lookup_end );
+		$buffer_dates = gutenberg_lab_blocks_get_villa_checkout_buffer_dates( $villa_id, $lookup_start, $lookup_end );
 		$lookup       = array_fill_keys( $unavailable, true );
+		$buffer_lookup = array_fill_keys( $buffer_dates, true );
 
 		if (
 			isset( $lookup[ $arrival_date ] ) &&
-			! gutenberg_lab_blocks_is_unavailable_range_end( $arrival_date, $lookup )
+			(
+				isset( $buffer_lookup[ $arrival_date ] ) ||
+				! gutenberg_lab_blocks_is_unavailable_range_end( $arrival_date, $lookup )
+			)
 		) {
 			return false;
 		}
 
 		if (
 			isset( $lookup[ $departure_date ] ) &&
-			! gutenberg_lab_blocks_is_unavailable_range_start( $departure_date, $lookup )
+			(
+				isset( $buffer_lookup[ $departure_date ] ) ||
+				! gutenberg_lab_blocks_is_unavailable_range_start( $departure_date, $lookup )
+			)
 		) {
 			return false;
 		}
@@ -808,6 +816,7 @@ function gutenberg_lab_blocks_is_villa_date_range_available( $villa_id, $arrival
 				isset( $lookup[ $date ] ) &&
 				! (
 					$date === $arrival_date &&
+					! isset( $buffer_lookup[ $date ] ) &&
 					gutenberg_lab_blocks_is_unavailable_range_end( $date, $lookup )
 				)
 			) {
@@ -1826,7 +1835,7 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 									$classes[] = 'is-checkout-buffer';
 								}
 
-								if ( $allow_unavailable_endpoints ) {
+								if ( $allow_unavailable_endpoints && ! $is_buffer ) {
 									$date_context  = new DateTimeImmutable( $date, wp_timezone() );
 									$previous_date = $date_context->modify( '-1 day' )->format( 'Y-m-d' );
 									$next_date     = $date_context->modify( '+1 day' )->format( 'Y-m-d' );

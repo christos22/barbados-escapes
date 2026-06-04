@@ -290,13 +290,19 @@ const initializeCalendar = ( root ) => {
 	const isUnavailableRangeEnd = ( date ) =>
 		isUnavailableDate( date ) && ! isUnavailableDate( addDays( date, 1 ) );
 
+	const isSelectableUnavailableRangeStart = ( date ) =>
+		isUnavailableRangeStart( date ) && ! isCheckoutBufferDate( date );
+
+	const isSelectableUnavailableRangeEnd = ( date ) =>
+		isUnavailableRangeEnd( date ) && ! isCheckoutBufferDate( date );
+
 	const canSelectArrivalDate = ( date ) =>
 		! isUnavailableDate( date ) ||
-		( allowUnavailableEndpoints && isUnavailableRangeEnd( date ) );
+		( allowUnavailableEndpoints && isSelectableUnavailableRangeEnd( date ) );
 
 	const canSelectDepartureDate = ( date ) =>
 		! isUnavailableDate( date ) ||
-		( allowUnavailableEndpoints && isUnavailableRangeStart( date ) );
+		( allowUnavailableEndpoints && isSelectableUnavailableRangeStart( date ) );
 
 	const rangeIsAvailable = ( arrival, departure ) => {
 		const arrivalKey = parseDateKey( arrival );
@@ -317,13 +323,13 @@ const initializeCalendar = ( root ) => {
 			// allowed if it is the final date in a blocked run.
 			if (
 				isUnavailableDate( cursorDate ) &&
-				! (
-					allowUnavailableEndpoints &&
-					cursorDate === arrival &&
-					isUnavailableRangeEnd( cursorDate )
-				)
-			) {
-				return false;
+					! (
+						allowUnavailableEndpoints &&
+						cursorDate === arrival &&
+						isSelectableUnavailableRangeEnd( cursorDate )
+					)
+				) {
+					return false;
 			}
 		}
 
@@ -351,19 +357,19 @@ const initializeCalendar = ( root ) => {
 			const isRangeStart =
 				allowUnavailableEndpoints &&
 				isUnavailable &&
-				isUnavailableRangeStart( date );
+				isSelectableUnavailableRangeStart( date );
 			const isRangeEnd =
 				allowUnavailableEndpoints &&
 				isUnavailable &&
-				isUnavailableRangeEnd( date );
+				isSelectableUnavailableRangeEnd( date );
 			const isArrival = date === selectedArrival;
 			const isDeparture = date === selectedDeparture;
 			const canSelectBoundary =
 				allowUnavailableEndpoints &&
 				isUnavailable &&
 				( selectedArrival && ! selectedDeparture && date > selectedArrival
-					? isUnavailableRangeStart( date )
-					: isUnavailableRangeEnd( date ) );
+					? isSelectableUnavailableRangeStart( date )
+					: isSelectableUnavailableRangeEnd( date ) );
 			const isInRange =
 				arrivalKey !== null &&
 				departureKey !== null &&
@@ -796,16 +802,17 @@ const initializeCalendar = ( root ) => {
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-unavailable-start',
-						allowUnavailableEndpoints && isUnavailableRangeStart( date )
+						allowUnavailableEndpoints && isSelectableUnavailableRangeStart( date )
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-unavailable-end',
-						allowUnavailableEndpoints && isUnavailableRangeEnd( date )
+						allowUnavailableEndpoints && isSelectableUnavailableRangeEnd( date )
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-boundary-selectable',
 						allowUnavailableEndpoints &&
-							( isUnavailableRangeStart( date ) || isUnavailableRangeEnd( date ) )
+							( isSelectableUnavailableRangeStart( date ) ||
+								isSelectableUnavailableRangeEnd( date ) )
 					);
 					dayElement.setAttribute(
 						'title',
