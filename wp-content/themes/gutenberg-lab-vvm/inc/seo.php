@@ -670,6 +670,184 @@ function gutenberg_lab_vvm_seo_get_villa_amenity_schema( $villa_id ) {
 }
 
 /**
+ * Collects visible villa spec labels from the villa-spec-item blocks.
+ *
+ * @param array[] $blocks  Parsed block tree.
+ * @param string[] $sources Accumulated fact sources.
+ */
+function gutenberg_lab_vvm_seo_collect_villa_spec_sources( $blocks, &$sources ) {
+	foreach ( (array) $blocks as $block ) {
+		if ( 'gutenberg-lab-blocks/villa-spec-item' === ( $block['blockName'] ?? '' ) ) {
+			$attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+			$value = isset( $attrs['value'] ) ? sanitize_text_field( (string) $attrs['value'] ) : '';
+			$label = isset( $attrs['label'] ) ? sanitize_text_field( (string) $attrs['label'] ) : '';
+
+			if ( '' !== $value && '' !== $label ) {
+				$sources[] = trim( $value . ' ' . $label );
+			}
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			gutenberg_lab_vvm_seo_collect_villa_spec_sources( $block['innerBlocks'], $sources );
+		}
+	}
+}
+
+/**
+ * Returns text values that may contain villa capacity facts.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return string[]
+ */
+function gutenberg_lab_vvm_seo_get_villa_fact_sources( $villa_id ) {
+	$sources = array_filter(
+		array(
+			get_post_meta( $villa_id, 'villa_card_facts', true ),
+		)
+	);
+
+	gutenberg_lab_vvm_seo_collect_villa_spec_sources( parse_blocks( get_post_field( 'post_content', $villa_id ) ), $sources );
+
+	if ( function_exists( 'gutenberg_lab_blocks_get_villa_amenities' ) ) {
+		foreach ( gutenberg_lab_blocks_get_villa_amenities( $villa_id ) as $amenity ) {
+			if ( ! empty( $amenity['name'] ) ) {
+				$sources[] = $amenity['name'];
+			}
+		}
+	}
+
+	return array_values( array_filter( array_map( 'sanitize_text_field', $sources ) ) );
+}
+
+/**
+ * Finds a numeric villa fact from card facts or assigned amenity names.
+ *
+ * @param int    $villa_id Villa post ID.
+ * @param string $pattern  Regular expression with the value in capture group 1.
+ * @param bool   $integer  Whether to cast the value as an integer.
+ * @return int|float|null
+ */
+function gutenberg_lab_vvm_seo_get_villa_numeric_fact( $villa_id, $pattern, $integer = true ) {
+	foreach ( gutenberg_lab_vvm_seo_get_villa_fact_sources( $villa_id ) as $source ) {
+		if ( preg_match( $pattern, $source, $matches ) ) {
+			$value = $integer ? absint( $matches[1] ) : (float) $matches[1];
+
+			return $value > 0 ? $value : null;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Returns a validated coordinate for Google VacationRental schema.
+ *
+ * Google requires at least five decimal places. We require that precision in
+ * the stored value rather than fabricating trailing zeroes.
+ *
+ * @param int    $villa_id Villa post ID.
+ * @param string $meta_key Coordinate post meta key.
+ * @param float  $min      Minimum valid value.
+ * @param float  $max      Maximum valid value.
+ * @return float|null
+ */
+function gutenberg_lab_vvm_seo_get_villa_coordinate( $villa_id, $meta_key, $min, $max ) {
+	$raw = trim( (string) get_post_meta( $villa_id, $meta_key, true ) );
+
+	if ( ! preg_match( '/^-?\d+\.\d{5,}$/', $raw ) ) {
+		return null;
+	}
+
+	$value = (float) $raw;
+
+	if ( $value < $min || $value > $max ) {
+		return null;
+	}
+
+	return $value;
+}
+
+/**
+ * Collects image attachment IDs referenced by a parsed block tree.
+ *
+ * @param array[] $blocks Parsed block tree.
+ * @param int[]   $ids    Accumulated attachment IDs.
+ */
+function gutenberg_lab_vvm_seo_collect_block_image_ids( $blocks, &$ids ) {
+	foreach ( (array) $blocks as $block ) {
+		$attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+
+		foreach ( array( 'id', 'mediaId', 'imageId', 'backgroundImageId', 'posterImageId' ) as $key ) {
+			if ( ! empty( $attrs[ $key ] ) && wp_attachment_is_image( (int) $attrs[ $key ] ) ) {
+				$ids[] = (int) $attrs[ $key ];
+			}
+		}
+
+		if ( ! empty( $block['innerHTML'] ) && preg_match_all( '/wp-image-(\d+)/', $block['innerHTML'], $matches ) ) {
+			foreach ( $matches[1] as $image_id ) {
+				if ( wp_attachment_is_image( (int) $image_id ) ) {
+					$ids[] = (int) $image_id;
+				}
+			}
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			gutenberg_lab_vvm_seo_collect_block_image_ids( $block['innerBlocks'], $ids );
+		}
+	}
+}
+
+/**
+ * Returns villa image URLs for VacationRental structured data.
+ *
+ * @param WP_Post                   $post  Current villa post.
+ * @param array<string, mixed>|null $image Primary image data.
+ * @return string[]
+ */
+function gutenberg_lab_vvm_seo_get_villa_schema_images( $post, $image ) {
+	$image_ids = array();
+
+	if ( get_post_thumbnail_id( $post ) ) {
+		$image_ids[] = (int) get_post_thumbnail_id( $post );
+	}
+
+	gutenberg_lab_vvm_seo_collect_block_image_ids( parse_blocks( $post->post_content ), $image_ids );
+
+	if ( count( array_unique( $image_ids ) ) < 8 ) {
+		$attached_image_ids = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'post_parent'    => $post->ID,
+				'post_mime_type' => 'image',
+				'posts_per_page' => 20,
+				'fields'         => 'ids',
+				'orderby'        => 'menu_order ID',
+				'order'          => 'ASC',
+			)
+		);
+
+		$image_ids = array_merge( $image_ids, array_map( 'absint', $attached_image_ids ) );
+	}
+
+	$urls = array();
+
+	if ( ! empty( $image['url'] ) ) {
+		$urls[] = esc_url_raw( $image['url'] );
+	}
+
+	foreach ( array_unique( array_filter( $image_ids ) ) as $image_id ) {
+		$url = wp_get_attachment_image_url( $image_id, 'full' );
+
+		if ( $url ) {
+			$urls[] = esc_url_raw( $url );
+		}
+	}
+
+	return array_slice( array_values( array_unique( array_filter( $urls ) ) ), 0, 24 );
+}
+
+/**
  * Returns schema for a villa page.
  *
  * @param array<string, mixed>      $context SEO context.
@@ -688,30 +866,57 @@ function gutenberg_lab_vvm_seo_get_villa_schema( $context, $image ) {
 	$locality = '' !== $known_location ? $known_location : ( $locations[0] ?? 'Barbados' );
 	$facts = get_post_meta( $post->ID, 'villa_card_facts', true );
 	$price_range = '';
+	$latitude    = gutenberg_lab_vvm_seo_get_villa_coordinate( $post->ID, 'villa_schema_latitude', -90, 90 );
+	$longitude   = gutenberg_lab_vvm_seo_get_villa_coordinate( $post->ID, 'villa_schema_longitude', -180, 180 );
+	$occupancy   = gutenberg_lab_vvm_seo_get_villa_numeric_fact( $post->ID, '/sleeps\s+([0-9]+)/i' )
+		?: gutenberg_lab_vvm_seo_get_villa_numeric_fact( $post->ID, '/([0-9]+)\s+sleeps/i' );
+	$bedrooms    = gutenberg_lab_vvm_seo_get_villa_numeric_fact( $post->ID, '/([0-9]+)\s+bedrooms?/i' );
+	$bathrooms   = gutenberg_lab_vvm_seo_get_villa_numeric_fact( $post->ID, '/([0-9]+(?:\.[0-9]+)?)\s+bathrooms?/i', false );
+	$image_urls  = gutenberg_lab_vvm_seo_get_villa_schema_images( $post, $image );
 
 	if ( is_string( $facts ) && preg_match( '/From\s+\$[0-9,]+/i', $facts, $matches ) ) {
 		$price_range = $matches[0];
+	}
+
+	if ( null === $latitude || null === $longitude || null === $occupancy || count( $image_urls ) < 8 ) {
+		return null;
 	}
 
 	return gutenberg_lab_vvm_seo_remove_empty(
 		array(
 			'@type'          => 'VacationRental',
 			'@id'            => $context['url'] . '#vacation-rental',
+			'identifier'     => 'barbados-escapes-villa-' . (int) $post->ID,
 			'name'           => get_the_title( $post ),
 			'url'            => $context['url'],
 			'description'    => $context['description'],
-			'image'          => ! empty( $image['url'] ) ? array( $image['url'] ) : null,
+			'image'          => $image_urls,
+			'geo'            => array(
+				'@type'     => 'GeoCoordinates',
+				'latitude'  => $latitude,
+				'longitude' => $longitude,
+			),
 			'address'        => array(
 				'@type'           => 'PostalAddress',
+				'streetAddress'   => get_post_meta( $post->ID, 'villa_schema_street_address', true ),
 				'addressLocality' => $locality,
 				'addressRegion'   => 'Barbados',
+				'postalCode'      => get_post_meta( $post->ID, 'villa_schema_postal_code', true ),
 				'addressCountry'  => 'BB',
 			),
-			'containedInPlace' => array(
-				'@type' => 'Place',
-				'name'  => 'Barbados',
+			'containsPlace'  => array(
+				'@type'          => 'Accommodation',
+				'@id'            => $context['url'] . '#accommodation',
+				'name'           => get_the_title( $post ),
+				'additionalType' => 'EntirePlace',
+				'occupancy'      => array(
+					'@type' => 'QuantitativeValue',
+					'value' => $occupancy,
+				),
+				'numberOfBedrooms' => $bedrooms,
+				'numberOfBathroomsTotal' => $bathrooms,
+				'amenityFeature' => gutenberg_lab_vvm_seo_get_villa_amenity_schema( $post->ID ),
 			),
-			'amenityFeature' => gutenberg_lab_vvm_seo_get_villa_amenity_schema( $post->ID ),
 			'additionalProperty' => '' !== trim( (string) $facts )
 				? array(
 					array(

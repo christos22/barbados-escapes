@@ -132,6 +132,26 @@ function gutenberg_lab_blocks_sanitize_villa_amenity_icon_key( $icon_key ) {
 }
 
 /**
+ * Sanitizes decimal coordinate input for schema metadata.
+ *
+ * We store coordinates as strings so WordPress does not trim meaningful
+ * decimal precision before the SEO renderer validates them.
+ *
+ * @param string $coordinate Raw latitude or longitude.
+ * @return string
+ */
+function gutenberg_lab_blocks_sanitize_villa_schema_coordinate( $coordinate ) {
+	$coordinate = sanitize_text_field( (string) $coordinate );
+	$coordinate = trim( $coordinate );
+
+	if ( '' === $coordinate ) {
+		return '';
+	}
+
+	return preg_match( '/^-?\d+(?:\.\d+)?$/', $coordinate ) ? $coordinate : '';
+}
+
+/**
  * Registers the reusable Amenity taxonomy for villa posts.
  */
 function gutenberg_lab_blocks_register_villa_amenity_taxonomy() {
@@ -304,6 +324,26 @@ function gutenberg_lab_blocks_get_villa_meta_schema() {
 			'default'           => '',
 			'sanitize_callback' => 'esc_url_raw',
 		),
+		'villa_schema_latitude' => array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'gutenberg_lab_blocks_sanitize_villa_schema_coordinate',
+		),
+		'villa_schema_longitude' => array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'gutenberg_lab_blocks_sanitize_villa_schema_coordinate',
+		),
+		'villa_schema_street_address' => array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
+		'villa_schema_postal_code' => array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
 	);
 }
 
@@ -344,6 +384,15 @@ function gutenberg_lab_blocks_add_villa_meta_boxes() {
 		'gutenberg-lab-villa-card-cta',
 		__( 'Card CTA', 'gutenberg-lab-blocks' ),
 		'gutenberg_lab_blocks_render_villa_card_cta_meta_box',
+		'villa',
+		'side',
+		'default'
+	);
+
+	add_meta_box(
+		'gutenberg-lab-villa-schema',
+		__( 'Holiday Rental Schema', 'gutenberg-lab-blocks' ),
+		'gutenberg_lab_blocks_render_villa_schema_meta_box',
 		'villa',
 		'side',
 		'default'
@@ -467,6 +516,84 @@ function gutenberg_lab_blocks_render_villa_card_cta_meta_box( $post ) {
 }
 
 /**
+ * Renders the Google Holiday rental schema fields.
+ *
+ * Google requires real coordinates for VacationRental rich-result eligibility.
+ * These fields keep that precise property data in the CMS instead of PHP.
+ *
+ * @param WP_Post $post Current villa post object.
+ */
+function gutenberg_lab_blocks_render_villa_schema_meta_box( $post ) {
+	$latitude       = get_post_meta( $post->ID, 'villa_schema_latitude', true );
+	$longitude      = get_post_meta( $post->ID, 'villa_schema_longitude', true );
+	$street_address = get_post_meta( $post->ID, 'villa_schema_street_address', true );
+	$postal_code    = get_post_meta( $post->ID, 'villa_schema_postal_code', true );
+
+	wp_nonce_field( 'gutenberg_lab_blocks_save_villa_fields', 'gutenberg_lab_blocks_villa_fields_nonce' );
+	?>
+	<p>
+		<label for="gutenberg-lab-villa-schema-latitude">
+			<?php esc_html_e( 'Latitude', 'gutenberg-lab-blocks' ); ?>
+		</label>
+	</p>
+	<input
+		type="text"
+		id="gutenberg-lab-villa-schema-latitude"
+		name="gutenberg_lab_villa_schema_latitude"
+		class="widefat"
+		value="<?php echo esc_attr( $latitude ); ?>"
+		placeholder="<?php echo esc_attr__( '13.19345', 'gutenberg-lab-blocks' ); ?>"
+	/>
+
+	<p>
+		<label for="gutenberg-lab-villa-schema-longitude">
+			<?php esc_html_e( 'Longitude', 'gutenberg-lab-blocks' ); ?>
+		</label>
+	</p>
+	<input
+		type="text"
+		id="gutenberg-lab-villa-schema-longitude"
+		name="gutenberg_lab_villa_schema_longitude"
+		class="widefat"
+		value="<?php echo esc_attr( $longitude ); ?>"
+		placeholder="<?php echo esc_attr__( '-59.63721', 'gutenberg-lab-blocks' ); ?>"
+	/>
+	<p class="description">
+		<?php esc_html_e( 'Use real coordinates with at least five decimal places. Leave blank if the exact villa location should not be public.', 'gutenberg-lab-blocks' ); ?>
+	</p>
+
+	<p>
+		<label for="gutenberg-lab-villa-schema-street-address">
+			<?php esc_html_e( 'Street address', 'gutenberg-lab-blocks' ); ?>
+		</label>
+	</p>
+	<input
+		type="text"
+		id="gutenberg-lab-villa-schema-street-address"
+		name="gutenberg_lab_villa_schema_street_address"
+		class="widefat"
+		value="<?php echo esc_attr( $street_address ); ?>"
+	/>
+
+	<p>
+		<label for="gutenberg-lab-villa-schema-postal-code">
+			<?php esc_html_e( 'Postal code', 'gutenberg-lab-blocks' ); ?>
+		</label>
+	</p>
+	<input
+		type="text"
+		id="gutenberg-lab-villa-schema-postal-code"
+		name="gutenberg_lab_villa_schema_postal_code"
+		class="widefat"
+		value="<?php echo esc_attr( $postal_code ); ?>"
+	/>
+	<p class="description">
+		<?php esc_html_e( 'Street address and postal code are optional, but improve Google structured data completeness.', 'gutenberg-lab-blocks' ); ?>
+	</p>
+	<?php
+}
+
+/**
  * Saves the focused villa CTA fields.
  *
  * @param int $post_id Current villa ID.
@@ -500,6 +627,10 @@ function gutenberg_lab_blocks_save_villa_meta( $post_id ) {
 		'villa_card_facts'      => 'gutenberg_lab_villa_card_facts',
 		'villa_card_cta_label'  => 'gutenberg_lab_villa_card_cta_label',
 		'villa_card_cta_url'    => 'gutenberg_lab_villa_card_cta_url',
+		'villa_schema_latitude' => 'gutenberg_lab_villa_schema_latitude',
+		'villa_schema_longitude' => 'gutenberg_lab_villa_schema_longitude',
+		'villa_schema_street_address' => 'gutenberg_lab_villa_schema_street_address',
+		'villa_schema_postal_code' => 'gutenberg_lab_villa_schema_postal_code',
 	);
 	$meta_schema = gutenberg_lab_blocks_get_villa_meta_schema();
 
