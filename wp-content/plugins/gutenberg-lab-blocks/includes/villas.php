@@ -290,6 +290,42 @@ add_action( 'created_villa_amenity', 'gutenberg_lab_blocks_save_villa_amenity_ic
 add_action( 'edited_villa_amenity', 'gutenberg_lab_blocks_save_villa_amenity_icon_field' );
 
 /**
+ * Exposes the amenity icon registry to block editor scripts.
+ *
+ * Spec Item blocks use the same semantic icon keys as amenity terms. Passing
+ * the registry through PHP keeps the block selector and taxonomy selector in
+ * one source of truth.
+ */
+function gutenberg_lab_blocks_enqueue_villa_amenity_icon_editor_settings() {
+	$choices = array();
+	$icons   = array();
+
+	foreach ( gutenberg_lab_blocks_get_villa_amenity_icon_choices() as $icon_key => $icon_label ) {
+		$choices[] = array(
+			'value' => $icon_key,
+			'label' => $icon_label,
+		);
+
+		$icons[ $icon_key ] = gutenberg_lab_blocks_get_villa_amenity_icon_svg( $icon_key );
+	}
+
+	wp_add_inline_script(
+		'wp-blocks',
+		sprintf(
+			'window.gutenbergLabBlocksVillaAmenityIcons = %s;',
+			wp_json_encode(
+				array(
+					'choices' => $choices,
+					'icons'   => $icons,
+				)
+			)
+		),
+		'after'
+	);
+}
+add_action( 'enqueue_block_editor_assets', 'gutenberg_lab_blocks_enqueue_villa_amenity_icon_editor_settings' );
+
+/**
  * Returns the registered villa meta schema.
  *
  * Keeping the CTA override in explicit post meta makes the card-grid query

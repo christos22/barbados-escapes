@@ -24,10 +24,40 @@
 	position: relative;
 }
 
+.vvm-villa-specs__item--has-icon {
+	text-align: center;
+}
+
 .vvm-villa-specs__value,
 .vvm-villa-specs__label {
 	margin: 0;
 	min-width: 0;
+}
+
+.vvm-villa-specs__icon {
+	color: var(--wp--preset--color--gold);
+	display: grid;
+	inline-size: clamp(1.75rem, 2.083vw, 2.5rem);
+	block-size: clamp(1.75rem, 2.083vw, 2.5rem);
+	margin-block-end: 0.65rem;
+	margin-inline: auto;
+	place-items: center;
+}
+
+.vvm-villa-specs__icon .vvm-villa-amenity-icon {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	fill: none;
+	stroke: currentColor;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 1.35;
+}
+
+.vvm-villa-specs__icon + .vvm-villa-specs__value,
+.vvm-villa-specs__icon + .vvm-villa-specs__label {
+	margin-top: 0;
 }
 
 .vvm-villa-specs__value {

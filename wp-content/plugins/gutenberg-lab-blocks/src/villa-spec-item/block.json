@@ -16,6 +16,10 @@
 		"label": {
 			"type": "string",
 			"default": ""
+		},
+		"iconSlug": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"supports": {
@@ -23,5 +27,6 @@
 		"reusable": false
 	},
 	"textdomain": "gutenberg-lab-blocks",
-	"editorScript": "file:./index.js"
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
 }

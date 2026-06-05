@@ -7,21 +7,33 @@ import metadata from './block.json';
 registerBlockType( metadata.name, {
 	edit: Edit,
 
-	// Keep each item as plain saved markup so the parent can stay lightweight
-	// and the authored values remain easy to inspect in post content.
+	// PHP renders the live block. This saved markup remains as a readable
+	// fallback and keeps existing saved Spec Items valid in the editor.
 	save( { attributes } ) {
-		const { value, label } = attributes;
+		const { value, label, iconSlug } = attributes;
 
-		if ( ! value && ! label ) {
+		if ( ! value && ! label && ! iconSlug ) {
 			return null;
 		}
 
 		const blockProps = useBlockProps.save( {
-			className: 'vvm-villa-specs__item',
+			className: [
+				'vvm-villa-specs__item',
+				iconSlug ? 'vvm-villa-specs__item--has-icon' : '',
+			]
+				.filter( Boolean )
+				.join( ' ' ),
 		} );
 
 		return (
 			<div { ...blockProps }>
+				{ iconSlug ? (
+					<span
+						className="vvm-villa-specs__icon"
+						aria-hidden="true"
+						data-icon={ iconSlug }
+					/>
+				) : null }
 				{ value ? (
 					<RichText.Content
 						tagName="p"
