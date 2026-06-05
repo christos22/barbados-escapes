@@ -749,7 +749,7 @@ function gutenberg_lab_vvm_seo_get_villa_numeric_fact( $villa_id, $pattern, $int
  * @param string $meta_key Coordinate post meta key.
  * @param float  $min      Minimum valid value.
  * @param float  $max      Maximum valid value.
- * @return float|null
+ * @return string|null
  */
 function gutenberg_lab_vvm_seo_get_villa_coordinate( $villa_id, $meta_key, $min, $max ) {
 	$raw = trim( (string) get_post_meta( $villa_id, $meta_key, true ) );
@@ -764,7 +764,7 @@ function gutenberg_lab_vvm_seo_get_villa_coordinate( $villa_id, $meta_key, $min,
 		return null;
 	}
 
-	return $value;
+	return $raw;
 }
 
 /**
