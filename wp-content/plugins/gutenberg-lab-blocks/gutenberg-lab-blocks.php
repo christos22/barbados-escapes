@@ -394,6 +394,8 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/value-pillars' );
 	register_block_type( __DIR__ . '/build/value-pillar' );
 	register_block_type( __DIR__ . '/build/split-content' );
+	register_block_type( __DIR__ . '/build/editorial-feature' );
+	register_block_type( __DIR__ . '/build/editorial-feature-slide' );
 	register_block_type( __DIR__ . '/build/feature-carousel' );
 	register_block_type( __DIR__ . '/build/feature-carousel-slide' );
 	register_block_type( __DIR__ . '/build/two-up-carousel' );

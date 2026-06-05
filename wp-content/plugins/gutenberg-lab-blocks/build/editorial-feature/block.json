@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "gutenberg-lab-blocks/editorial-feature",
+  "version": "0.1.0",
+  "title": "Editorial Feature",
+  "category": "design",
+  "icon": "align-wide",
+  "description": "A refined two-column editorial intro section with an optional slider mode.",
+  "keywords": [
+    "editorial",
+    "feature",
+    "intro",
+    "slider"
+  ],
+  "attributes": {
+    "enableSlider": {
+      "type": "boolean",
+      "default": false
+    },
+    "arrowPositionPreset": {
+      "type": "string",
+      "default": "center"
+    },
+    "arrowOffsetX": {
+      "type": "number",
+      "default": 0
+    },
+    "arrowOffsetY": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "supports": {
+    "anchor": true,
+    "html": false,
+    "align": [
+      "wide",
+      "full"
+    ],
+    "spacing": {
+      "margin": [
+        "top",
+        "bottom"
+      ],
+      "padding": true,
+      "blockGap": true
+    },
+    "color": {
+      "background": true,
+      "text": true
+    }
+  },
+  "textdomain": "gutenberg-lab-blocks",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js"
+}

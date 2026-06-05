@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/editorial-feature-slide",
+	"version": "0.1.0",
+	"title": "Editorial Feature Item",
+	"category": "design",
+	"icon": "editor-alignleft",
+	"description": "A single editable item used inside the Editorial Feature block.",
+	"parent": [ "gutenberg-lab-blocks/editorial-feature" ],
+	"supports": {
+		"html": false,
+		"reusable": false
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

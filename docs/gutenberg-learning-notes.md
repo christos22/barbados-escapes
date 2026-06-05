@@ -28,6 +28,7 @@
 - When editors need responsive type choices, define fluid `fontSizes` in `theme.json` and avoid hardcoding heading sizes in block CSS.
 - When a hero needs to affect shared chrome like the header, prefer a body class or first-block detection over hardcoding header markup into the block itself.
 - When a complex hero needs different editor regions but one precise frontend shell, keep the regions as child blocks and let the dynamic parent parse those nested blocks into the final markup.
+- Static and slider modes can share the same child block markup when the only change is the parent wrapper and frontend enhancement.
 - The editor can preview PHP fallbacks, like an inherited post title, without storing extra block content or recreating the exact frontend layering.
 - When hero copy needs to align with shared chrome like the header menu, use the same layout gutter token on both systems instead of centering one and nudging it by eye.
 - Block inspector controls are a good fit for product-specific behavior toggles like optional slider arrows; the saved attribute can stay small while PHP decides whether to emit the interactive markup.
