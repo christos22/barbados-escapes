@@ -163,6 +163,57 @@ function gutenberg_lab_vvm_remove_classic_menus_screen() {
 add_action( 'admin_menu', 'gutenberg_lab_vvm_remove_classic_menus_screen', 100 );
 
 /**
+ * Replaces WordPress' default password form with the branded page treatment.
+ *
+ * Password-protected pages render this form instead of their saved block content,
+ * so the hero and form shell need to live in PHP rather than inside the editor.
+ *
+ * @param string       $output Default password form HTML.
+ * @param WP_Post|null $post   Protected post, when provided by WordPress.
+ * @return string
+ */
+function gutenberg_lab_vvm_render_password_form( $output, $post = null ) {
+	$post       = $post instanceof WP_Post ? $post : get_post();
+	$post_title = $post instanceof WP_Post ? get_post_field( 'post_title', $post ) : __( 'Protected content', 'gutenberg-lab-vvm' );
+	$post_title = $post_title ? $post_title : __( 'Protected content', 'gutenberg-lab-vvm' );
+	$label_id   = 'pwbox-' . ( $post instanceof WP_Post ? (int) $post->ID : wp_rand() );
+
+	ob_start();
+	?>
+	<section class="vvm-password-hero alignfull">
+		<div class="vvm-password-hero__inner">
+			<p class="vvm-password-hero__eyebrow"><?php esc_html_e( 'Private Preview', 'gutenberg-lab-vvm' ); ?></p>
+			<h1 class="vvm-password-hero__title"><?php echo esc_html( $post_title ); ?></h1>
+			<p class="vvm-password-hero__copy"><?php esc_html_e( 'This page is password protected.', 'gutenberg-lab-vvm' ); ?></p>
+		</div>
+	</section>
+
+	<section class="vvm-password-panel alignfull">
+		<div class="vvm-password-panel__inner">
+			<form class="post-password-form vvm-password-form" action="<?php echo esc_url( site_url( 'wp-login.php?action=postpass', 'login_post' ) ); ?>" method="post">
+				<p class="vvm-password-form__eyebrow"><?php esc_html_e( 'Password Required', 'gutenberg-lab-vvm' ); ?></p>
+				<h2 class="vvm-password-form__title"><?php esc_html_e( 'Enter the preview password', 'gutenberg-lab-vvm' ); ?></h2>
+				<p class="vvm-password-form__copy"><?php esc_html_e( 'Use the password shared with you to view this page.', 'gutenberg-lab-vvm' ); ?></p>
+
+				<div class="vvm-password-form__label-row">
+					<label class="vvm-password-form__label" for="<?php echo esc_attr( $label_id ); ?>"><?php esc_html_e( 'Password', 'gutenberg-lab-vvm' ); ?></label>
+				</div>
+				<div class="vvm-password-form__fields">
+					<input class="vvm-password-form__input" name="post_password" id="<?php echo esc_attr( $label_id ); ?>" type="password" autocomplete="current-password" required />
+					<button class="vvm-password-form__submit" type="submit"><?php esc_html_e( 'Enter', 'gutenberg-lab-vvm' ); ?></button>
+				</div>
+			</form>
+		</div>
+	</section>
+	<?php
+
+	// Collapse template whitespace so wpautop does not inject paragraphs or
+	// line breaks into the generated form controls.
+	return trim( preg_replace( '/>\s+</', '><', ob_get_clean() ) );
+}
+add_filter( 'the_password_form', 'gutenberg_lab_vvm_render_password_form', 10, 2 );
+
+/**
  * Registers VVM-specific button styles for the core Button block.
  *
  * The original headless site exposes multiple link/button variants in ACF.
@@ -1052,6 +1103,12 @@ function gutenberg_lab_vvm_current_view_has_hero() {
 	$post = get_queried_object();
 
 	if ( ! $post instanceof WP_Post || empty( $post->post_content ) ) {
+		return false;
+	}
+
+	// Protected content is replaced by the password form, so do not let a hidden
+	// saved hero switch the header into overlay mode above the password screen.
+	if ( post_password_required( $post ) ) {
 		return false;
 	}
 

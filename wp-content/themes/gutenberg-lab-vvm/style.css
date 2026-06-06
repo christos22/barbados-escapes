@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.37
+Version: 0.1.38
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -61,6 +61,177 @@ body.single-villa {
 body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 	max-inline-size: min(100%, 1280px);
 	margin-inline: auto;
+}
+
+/*
+ * WordPress replaces protected post content with the password form, so style
+ * that generated markup as a complete page section rather than a raw form.
+ */
+.wp-site-blocks .vvm-password-hero {
+	background: var(--wp--preset--color--dark-green, #1e3d2f);
+	color: var(--wp--preset--color--light-gold, #f5ecd7);
+	margin-block: 0;
+	padding: var(--wp--preset--spacing--section-lg) var(--wp--custom--layout--gutter-current);
+}
+
+.vvm-password-hero__inner {
+	inline-size: min(100%, 1180px);
+	margin-inline: auto;
+}
+
+.vvm-password-hero__eyebrow,
+.vvm-password-form__eyebrow,
+.vvm-password-form__label {
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
+	font-weight: 400;
+	letter-spacing: 0.28em;
+	line-height: 1rem;
+	text-transform: uppercase;
+}
+
+.vvm-password-hero__eyebrow {
+	color: var(--wp--preset--color--gold, #c4922a);
+	margin: 0 0 1rem;
+}
+
+.vvm-password-hero__title {
+	color: var(--wp--preset--color--light-gold, #f5ecd7);
+	font-size: var(--wp--preset--font-size--five-xl);
+	line-height: 1.05;
+	margin: 0;
+	max-inline-size: 820px;
+}
+
+.vvm-password-hero__copy {
+	color: rgba(245, 236, 215, 0.82);
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: var(--wp--preset--font-size--xl);
+	line-height: 1.55;
+	margin: 1.25rem 0 0;
+	max-inline-size: 680px;
+}
+
+.wp-site-blocks .vvm-password-panel {
+	background: var(--wp--preset--color--ivory, #fbf8f2);
+	margin-block: 0;
+	padding: var(--wp--preset--spacing--section-md) var(--wp--custom--layout--gutter-current) var(--wp--preset--spacing--section-lg);
+}
+
+.vvm-password-panel__inner {
+	inline-size: min(100%, 720px);
+	margin-inline: auto;
+}
+
+.vvm-password-form {
+	background: #ffffff;
+	border: 1px solid rgba(30, 61, 47, 0.14);
+	box-sizing: border-box;
+	box-shadow: 0 24px 70px rgba(30, 61, 47, 0.1);
+	color: var(--wp--preset--color--dark-green, #1e3d2f);
+	margin: 0;
+	padding: clamp(2rem, 4vw, 3rem);
+}
+
+.vvm-password-form p {
+	margin: 0;
+}
+
+.vvm-password-form__eyebrow {
+	color: var(--wp--preset--color--gold, #c4922a);
+	margin-bottom: 0.75rem;
+}
+
+.vvm-password-form__title {
+	color: var(--wp--preset--color--dark-green, #1e3d2f);
+	font-size: var(--wp--preset--font-size--three-xl);
+	line-height: 1.15;
+	margin: 0;
+}
+
+.vvm-password-form__copy {
+	color: rgba(30, 61, 47, 0.74);
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: var(--wp--preset--font-size--lg);
+	line-height: 1.65;
+	margin-top: 1rem;
+	max-inline-size: 34rem;
+}
+
+.vvm-password-form__label {
+	color: var(--wp--preset--color--dark-green, #1e3d2f);
+	display: block;
+}
+
+.vvm-password-form__label-row {
+	margin: 2rem 0 0.75rem;
+}
+
+.vvm-password-form__fields {
+	align-items: stretch;
+	display: flex;
+	gap: 0.75rem;
+}
+
+.vvm-password-form__input {
+	background: var(--wp--preset--color--ivory, #fbf8f2);
+	border: 1px solid rgba(30, 61, 47, 0.22);
+	border-radius: 0;
+	box-sizing: border-box;
+	color: var(--wp--preset--color--dark-green, #1e3d2f);
+	flex: 1 1 220px;
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 1rem;
+	min-block-size: 3.125rem;
+	min-inline-size: 0;
+	padding: 0 1rem;
+}
+
+.vvm-password-form__input:focus {
+	background: #ffffff;
+	border-color: var(--wp--preset--color--gold, #c4922a);
+	outline: 2px solid var(--wp--preset--color--gold, #c4922a);
+	outline-offset: 2px;
+}
+
+.vvm-password-form__submit {
+	background: var(--wp--preset--color--gold, #c4922a);
+	border: 1px solid var(--wp--preset--color--gold, #c4922a);
+	border-radius: 0;
+	box-sizing: border-box;
+	color: var(--wp--preset--color--dark-green, #1e3d2f);
+	cursor: pointer;
+	font-family: var(--wp--preset--font-family--site-primary);
+	font-size: 1rem;
+	font-weight: 600;
+	letter-spacing: 0.15em;
+	line-height: 1;
+	min-block-size: 3.125rem;
+	padding: 0 2rem;
+	text-transform: uppercase;
+	transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.vvm-password-form__submit:hover,
+.vvm-password-form__submit:focus-visible {
+	background: var(--wp--preset--color--dark-green, #1e3d2f);
+	border-color: var(--wp--preset--color--dark-green, #1e3d2f);
+	color: var(--wp--preset--color--light-gold, #f5ecd7);
+}
+
+@media (max-width: 600px) {
+	.vvm-password-form__fields {
+		flex-direction: column;
+	}
+
+	.vvm-password-form__input {
+		flex: 0 0 auto;
+		inline-size: 100%;
+	}
+
+	.vvm-password-form__submit {
+		inline-size: 100%;
+	}
 }
 
 /*
