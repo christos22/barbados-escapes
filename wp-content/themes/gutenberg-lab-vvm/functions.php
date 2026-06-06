@@ -163,6 +163,79 @@ function gutenberg_lab_vvm_remove_classic_menus_screen() {
 add_action( 'admin_menu', 'gutenberg_lab_vvm_remove_classic_menus_screen', 100 );
 
 /**
+ * Returns the queried post when it is protected by a WordPress post password.
+ *
+ * @return WP_Post|null
+ */
+function gutenberg_lab_vvm_get_password_protected_queried_post() {
+	if ( ! is_singular() ) {
+		return null;
+	}
+
+	$post = get_queried_object();
+
+	if ( ! $post instanceof WP_Post || '' === (string) $post->post_password ) {
+		return null;
+	}
+
+	return $post;
+}
+
+/**
+ * Marks password-protected views as uncacheable for WordPress and proxy caches.
+ */
+function gutenberg_lab_vvm_disable_password_page_cache() {
+	if ( ! gutenberg_lab_vvm_get_password_protected_queried_post() ) {
+		return;
+	}
+
+	foreach ( array( 'DONOTCACHEPAGE', 'DONOTCACHEOBJECT', 'DONOTCACHEDB' ) as $constant ) {
+		if ( ! defined( $constant ) ) {
+			define( $constant, true );
+		}
+	}
+
+	nocache_headers();
+	header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private', true );
+	header( 'Pragma: no-cache', true );
+	header( 'Expires: Wed, 11 Jan 1984 05:00:00 GMT', true );
+	header( 'X-Accel-Expires: 0', true );
+	header( 'Surrogate-Control: no-store', true );
+}
+add_action( 'send_headers', 'gutenberg_lab_vvm_disable_password_page_cache', 0 );
+
+/**
+ * Cache-busts the post-password redirect after WordPress sets the unlock cookie.
+ *
+ * The production proxy cache does not vary on the wp-postpass cookie, so a fresh
+ * query string prevents the locked-page cache entry from replaying after submit.
+ *
+ * @param string $location Redirect destination.
+ * @param int    $status   HTTP redirect status.
+ * @return string
+ */
+function gutenberg_lab_vvm_cache_bust_postpass_redirect( $location, $status ) {
+	$action = isset( $_GET['action'] ) && is_string( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
+
+	if ( 'postpass' !== $action || empty( $_POST['post_password'] ) || ! is_string( $_POST['post_password'] ) ) {
+		return $location;
+	}
+
+	$post_id = url_to_postid( $location );
+
+	if ( ! $post_id || '' === (string) get_post_field( 'post_password', $post_id ) ) {
+		return $location;
+	}
+
+	return add_query_arg(
+		'vvm-postpass',
+		wp_generate_password( 12, false, false ),
+		remove_query_arg( 'vvm-postpass', $location )
+	);
+}
+add_filter( 'wp_redirect', 'gutenberg_lab_vvm_cache_bust_postpass_redirect', 10, 2 );
+
+/**
  * Replaces WordPress' default password form with the branded page treatment.
  *
  * Password-protected pages render this form instead of their saved block content,
@@ -173,10 +246,15 @@ add_action( 'admin_menu', 'gutenberg_lab_vvm_remove_classic_menus_screen', 100 )
  * @return string
  */
 function gutenberg_lab_vvm_render_password_form( $output, $post = null ) {
-	$post       = $post instanceof WP_Post ? $post : get_post();
-	$post_title = $post instanceof WP_Post ? get_post_field( 'post_title', $post ) : __( 'Protected content', 'gutenberg-lab-vvm' );
-	$post_title = $post_title ? $post_title : __( 'Protected content', 'gutenberg-lab-vvm' );
-	$label_id   = 'pwbox-' . ( $post instanceof WP_Post ? (int) $post->ID : wp_rand() );
+	$post                 = $post instanceof WP_Post ? $post : get_post();
+	$post_title           = $post instanceof WP_Post ? get_post_field( 'post_title', $post ) : __( 'Protected content', 'gutenberg-lab-vvm' );
+	$post_title           = $post_title ? $post_title : __( 'Protected content', 'gutenberg-lab-vvm' );
+	$label_id             = 'pwbox-' . ( $post instanceof WP_Post ? (int) $post->ID : wp_rand() );
+	$error_id             = 'error-' . $label_id;
+	$description_id       = 'description-' . $label_id;
+	$redirect_to          = $post instanceof WP_Post ? add_query_arg( 'vvm-postpass', wp_generate_password( 12, false, false ), get_permalink( $post ) ) : '';
+	$has_invalid_password = $post instanceof WP_Post && isset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] ) && post_password_required( $post );
+	$describedby          = $has_invalid_password ? $error_id . ' ' . $description_id : $description_id;
 
 	ob_start();
 	?>
@@ -191,16 +269,33 @@ function gutenberg_lab_vvm_render_password_form( $output, $post = null ) {
 	<section class="vvm-password-panel alignfull">
 		<div class="vvm-password-panel__inner">
 			<form class="post-password-form vvm-password-form" action="<?php echo esc_url( site_url( 'wp-login.php?action=postpass', 'login_post' ) ); ?>" method="post">
+				<?php if ( $redirect_to ) : ?>
+					<div class="vvm-password-form__redirect">
+						<input type="hidden" name="redirect_to" value="<?php echo esc_url( $redirect_to ); ?>" />
+					</div>
+				<?php endif; ?>
+
 				<p class="vvm-password-form__eyebrow"><?php esc_html_e( 'Password Required', 'gutenberg-lab-vvm' ); ?></p>
 				<h2 class="vvm-password-form__title"><?php esc_html_e( 'Enter the preview password', 'gutenberg-lab-vvm' ); ?></h2>
-				<p class="vvm-password-form__copy"><?php esc_html_e( 'Use the password shared with you to view this page.', 'gutenberg-lab-vvm' ); ?></p>
+				<p class="vvm-password-form__copy" id="<?php echo esc_attr( $description_id ); ?>"><?php esc_html_e( 'Use the password shared with you to view this page.', 'gutenberg-lab-vvm' ); ?></p>
+
+				<?php if ( $has_invalid_password ) : ?>
+					<div class="vvm-password-form__error" role="alert">
+						<p id="<?php echo esc_attr( $error_id ); ?>"><?php esc_html_e( 'The password you entered was incorrect. Please try again.', 'gutenberg-lab-vvm' ); ?></p>
+					</div>
+				<?php endif; ?>
 
 				<div class="vvm-password-form__label-row">
 					<label class="vvm-password-form__label" for="<?php echo esc_attr( $label_id ); ?>"><?php esc_html_e( 'Password', 'gutenberg-lab-vvm' ); ?></label>
 				</div>
 				<div class="vvm-password-form__fields">
-					<input class="vvm-password-form__input" name="post_password" id="<?php echo esc_attr( $label_id ); ?>" type="password" autocomplete="current-password" required />
-					<button class="vvm-password-form__submit" type="submit"><?php esc_html_e( 'Enter', 'gutenberg-lab-vvm' ); ?></button>
+					<div class="vvm-password-form__input-wrap">
+						<input class="vvm-password-form__input" name="post_password" id="<?php echo esc_attr( $label_id ); ?>" type="password" autocomplete="current-password" spellcheck="false" required aria-describedby="<?php echo esc_attr( $describedby ); ?>" />
+						<button class="vvm-password-form__toggle" type="button" aria-controls="<?php echo esc_attr( $label_id ); ?>" aria-pressed="false" data-vvm-password-toggle><?php esc_html_e( 'Show', 'gutenberg-lab-vvm' ); ?></button>
+					</div>
+					<div class="vvm-password-form__submit-wrap">
+						<button class="vvm-password-form__submit" type="submit"><?php esc_html_e( 'Enter', 'gutenberg-lab-vvm' ); ?></button>
+					</div>
 				</div>
 			</form>
 		</div>
@@ -212,6 +307,58 @@ function gutenberg_lab_vvm_render_password_form( $output, $post = null ) {
 	return trim( preg_replace( '/>\s+</', '><', ob_get_clean() ) );
 }
 add_filter( 'the_password_form', 'gutenberg_lab_vvm_render_password_form', 10, 2 );
+
+/**
+ * Adds progressive enhancement for the password visibility toggle and redirect.
+ */
+function gutenberg_lab_vvm_render_password_form_script() {
+	$post = gutenberg_lab_vvm_get_password_protected_queried_post();
+
+	if ( ! $post || ! post_password_required( $post ) ) {
+		return;
+	}
+	?>
+	<script>
+		(() => {
+			document.addEventListener('submit', (event) => {
+				if (!event.target.matches('.vvm-password-form')) {
+					return;
+				}
+
+				const redirect = event.target.querySelector('input[name="redirect_to"]');
+
+				if (!redirect || !redirect.value) {
+					return;
+				}
+
+				const url = new URL(redirect.value, window.location.origin);
+				url.searchParams.set('vvm-postpass', Date.now().toString(36));
+				redirect.value = url.toString();
+			}, true);
+
+			document.addEventListener('click', (event) => {
+				const button = event.target.closest('[data-vvm-password-toggle]');
+
+				if (!button) {
+					return;
+				}
+
+				const input = document.getElementById(button.getAttribute('aria-controls'));
+
+				if (!input) {
+					return;
+				}
+
+				const shouldShow = input.type === 'password';
+				input.type = shouldShow ? 'text' : 'password';
+				button.textContent = shouldShow ? 'Hide' : 'Show';
+				button.setAttribute('aria-pressed', shouldShow ? 'true' : 'false');
+			});
+		})();
+	</script>
+	<?php
+}
+add_action( 'wp_footer', 'gutenberg_lab_vvm_render_password_form_script', 20 );
 
 /**
  * Registers VVM-specific button styles for the core Button block.
