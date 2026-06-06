@@ -375,11 +375,6 @@ function gutenberg_lab_blocks_enqueue_shared_assets() {
 		gutenberg_lab_blocks_asset_version( 'assets/css/frontend.css' )
 	);
 
-	// Dashicons ship with WordPress core, but guest-facing pages do not load the
-	// font by default. The temporary Value Pillars icons need it on the front end.
-	if ( ! is_admin() ) {
-		wp_enqueue_style( 'dashicons' );
-	}
 }
 add_action( 'enqueue_block_assets', 'gutenberg_lab_blocks_enqueue_shared_assets' );
 
