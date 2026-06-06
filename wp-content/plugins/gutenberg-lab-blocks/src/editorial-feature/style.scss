@@ -10,6 +10,8 @@
 	--vvm-editorial-feature-body-width: 33rem;
 	--vvm-editorial-feature-control-outset: clamp(4.25rem, 7vw, 6.5rem);
 	--vvm-editorial-feature-control-screen-inset: clamp(0.75rem, 2vw, 1.25rem);
+	--vvm-editorial-feature-accent-border: 8px solid
+		var(--wp--preset--color--gold, #c4922a);
 
 	box-sizing: border-box;
 	margin: 0;
@@ -19,6 +21,16 @@
 	);
 	padding-inline: var(--wp--custom--layout--gutter-current, 20px);
 	color: var(--wp--preset--color--deep-forest, #1e3d2f);
+
+	&.vvm-editorial-feature--accent-border-top,
+	&.vvm-editorial-feature--accent-border-both {
+		border-top: var(--vvm-editorial-feature-accent-border);
+	}
+
+	&.vvm-editorial-feature--accent-border-bottom,
+	&.vvm-editorial-feature--accent-border-both {
+		border-bottom: var(--vvm-editorial-feature-accent-border);
+	}
 
 	.vvm-editorial-feature__inner {
 		width: min(100%, var(--vvm-editorial-feature-max-width));

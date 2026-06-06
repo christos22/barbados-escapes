@@ -6,6 +6,7 @@
 	--vvm-testimonial-overlay-opacity: 0.7;
 	--vvm-testimonial-control-outset: clamp(2.5rem, 6vw, 5.5rem);
 	--vvm-testimonial-control-screen-inset: clamp(0.75rem, 2vw, 1.25rem);
+	--vvm-testimonial-accent-border: 8px solid var(--wp--preset--color--gold, #c4922a);
 	background-color: var(--wp--preset--color--ivory, #f7f3eb);
 	box-sizing: border-box;
 	color: var(--wp--preset--color--deep-forest, #1e3d2f);
@@ -16,6 +17,16 @@
 	padding-block: var(--wp--preset--spacing--section-md, clamp(3.125rem, 5vw, 4.375rem));
 	padding-inline: var(--wp--custom--layout--gutter-current, 20px);
 	position: relative;
+}
+
+.wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel.vvm-testimonial-carousel--accent-border-top,
+.wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel.vvm-testimonial-carousel--accent-border-both {
+	border-top: var(--vvm-testimonial-accent-border);
+}
+
+.wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel.vvm-testimonial-carousel--accent-border-bottom,
+.wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel.vvm-testimonial-carousel--accent-border-both {
+	border-bottom: var(--vvm-testimonial-accent-border);
 }
 
 .wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel .vvm-testimonial-carousel__background-image {

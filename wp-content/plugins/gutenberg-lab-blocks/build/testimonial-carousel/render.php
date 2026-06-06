@@ -120,6 +120,7 @@ if ( empty( $slide_blocks ) ) {
 }
 
 $use_slider           = count( $slide_blocks ) > 1;
+$accent_border        = $attributes['accentBorder'] ?? 'none';
 $background_image_url = isset( $attributes['backgroundImageUrl'] ) && is_string( $attributes['backgroundImageUrl'] )
 	? esc_url_raw( $attributes['backgroundImageUrl'] )
 	: '';
@@ -128,6 +129,7 @@ $wrapper_class_names  = array(
 	'vvm-testimonial-carousel',
 	$use_slider ? 'vvm-testimonial-carousel--display-slider' : 'vvm-testimonial-carousel--display-static',
 	'' !== $background_image_url ? 'vvm-testimonial-carousel--has-background-image' : '',
+	'none' !== $accent_border ? 'vvm-testimonial-carousel--accent-border-' . sanitize_html_class( $accent_border ) : '',
 	empty( $attributes['align'] ) ? 'alignfull' : '',
 );
 $style_vars           = array(

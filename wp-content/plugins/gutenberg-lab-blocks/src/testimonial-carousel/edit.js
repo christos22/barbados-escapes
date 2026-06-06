@@ -11,6 +11,7 @@ import {
 	Button,
 	PanelBody,
 	RangeControl,
+	SelectControl,
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 
@@ -27,6 +28,13 @@ const TEMPLATE = [
 	[ 'gutenberg-lab-blocks/testimonial-carousel-slide' ],
 ];
 
+const ACCENT_BORDER_OPTIONS = [
+	{ label: __( 'None', 'gutenberg-lab-blocks' ), value: 'none' },
+	{ label: __( 'Top', 'gutenberg-lab-blocks' ), value: 'top' },
+	{ label: __( 'Bottom', 'gutenberg-lab-blocks' ), value: 'bottom' },
+	{ label: __( 'Top and Bottom', 'gutenberg-lab-blocks' ), value: 'both' },
+];
+
 function normalizeOpacity( value, fallback = 0 ) {
 	const numericValue = Number.parseInt( value, 10 );
 
@@ -39,6 +47,7 @@ function normalizeOpacity( value, fallback = 0 ) {
 
 export default function Edit( { attributes, clientId, setAttributes } ) {
 	const {
+		accentBorder = 'none',
 		align,
 		backgroundImageId,
 		backgroundImageUrl = '',
@@ -68,6 +77,9 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 				: 'vvm-testimonial-carousel--display-static',
 			backgroundImageUrl
 				? 'vvm-testimonial-carousel--has-background-image'
+				: '',
+			'none' !== accentBorder
+				? `vvm-testimonial-carousel--accent-border-${ accentBorder }`
 				: '',
 			align ? '' : 'alignfull',
 		]
@@ -203,6 +215,18 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 					title={ __( 'Carousel', 'gutenberg-lab-blocks' ) }
 					initialOpen={ false }
 				>
+					<SelectControl
+						label={ __( 'Accent Border', 'gutenberg-lab-blocks' ) }
+						value={ accentBorder }
+						options={ ACCENT_BORDER_OPTIONS }
+						onChange={ ( value ) =>
+							setAttributes( { accentBorder: value } )
+						}
+						help={ __(
+							'Adds an 8px gold rule at the top, bottom, or both edges of the section.',
+							'gutenberg-lab-blocks'
+						) }
+					/>
 					<p className="components-base-control__help">
 						{ willUseSlider
 							? __(

@@ -5,7 +5,7 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import { PanelBody, SelectControl, ToggleControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 
 import {
@@ -18,8 +18,19 @@ const ALLOWED_BLOCKS = [ 'gutenberg-lab-blocks/editorial-feature-slide' ];
 
 const TEMPLATE = [ [ 'gutenberg-lab-blocks/editorial-feature-slide' ] ];
 
+const ACCENT_BORDER_OPTIONS = [
+	{ label: __( 'None', 'gutenberg-lab-blocks' ), value: 'none' },
+	{ label: __( 'Top', 'gutenberg-lab-blocks' ), value: 'top' },
+	{ label: __( 'Bottom', 'gutenberg-lab-blocks' ), value: 'bottom' },
+	{ label: __( 'Top and Bottom', 'gutenberg-lab-blocks' ), value: 'both' },
+];
+
 export default function Edit( { attributes, clientId, setAttributes } ) {
-	const { align, enableSlider = false } = attributes;
+	const {
+		accentBorder = 'none',
+		align,
+		enableSlider = false,
+	} = attributes;
 	const slideCount = useSelect(
 		( select ) =>
 			(
@@ -43,6 +54,9 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 			willUseSlider
 				? 'vvm-editorial-feature--display-slider'
 				: 'vvm-editorial-feature--display-static',
+			'none' !== accentBorder
+				? `vvm-editorial-feature--accent-border-${ accentBorder }`
+				: '',
 			align ? '' : 'alignfull',
 		]
 			.filter( Boolean )
@@ -85,6 +99,18 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 										'gutenberg-lab-blocks'
 								  )
 						}
+					/>
+					<SelectControl
+						label={ __( 'Accent Border', 'gutenberg-lab-blocks' ) }
+						value={ accentBorder }
+						options={ ACCENT_BORDER_OPTIONS }
+						onChange={ ( value ) =>
+							setAttributes( { accentBorder: value } )
+						}
+						help={ __(
+							'Adds an 8px gold rule at the top, bottom, or both edges of the section.',
+							'gutenberg-lab-blocks'
+						) }
 					/>
 				</PanelBody>
 				{ enableSlider ? (

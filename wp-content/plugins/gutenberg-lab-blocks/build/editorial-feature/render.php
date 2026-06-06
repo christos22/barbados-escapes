@@ -105,11 +105,13 @@ if ( empty( $slide_blocks ) ) {
 
 $enable_slider       = ! empty( $attributes['enableSlider'] );
 $use_slider          = $enable_slider && count( $slide_blocks ) > 1;
+$accent_border       = $attributes['accentBorder'] ?? 'none';
 $slide_markup        = '';
 $wrapper_class_names = array(
 	'vvm-editorial-feature',
 	$enable_slider ? 'vvm-editorial-feature--slider-enabled' : 'vvm-editorial-feature--slider-disabled',
 	$use_slider ? 'vvm-editorial-feature--display-slider' : 'vvm-editorial-feature--display-static',
+	'none' !== $accent_border ? 'vvm-editorial-feature--accent-border-' . sanitize_html_class( $accent_border ) : '',
 	empty( $attributes['align'] ) ? 'alignfull' : '',
 );
 

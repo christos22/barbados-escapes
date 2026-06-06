@@ -24,6 +24,10 @@
 		"arrowOffsetY": {
 			"type": "number",
 			"default": 0
+		},
+		"accentBorder": {
+			"type": "string",
+			"default": "none"
 		}
 	},
 	"supports": {
