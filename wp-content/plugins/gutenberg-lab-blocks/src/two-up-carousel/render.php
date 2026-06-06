@@ -34,7 +34,10 @@ if ( ! function_exists( 'gutenberg_lab_two_up_carousel_render_slide' ) ) {
 		$image_alt = trim( (string) ( $attrs['imageAlt'] ?? '' ) );
 		$villa_id  = (int) ( $attrs['villaId'] ?? 0 );
 		$has_image = '' !== $image_url;
-		$loading   = $args['is_active'] ? 'eager' : 'lazy';
+		$should_prioritize_image = $args['is_priority'] && $has_image && function_exists( 'gutenberg_lab_blocks_claim_frontend_priority_image' )
+			? gutenberg_lab_blocks_claim_frontend_priority_image()
+			: false;
+		$loading   = $should_prioritize_image ? 'eager' : 'lazy';
 		$content   = gutenberg_lab_peeking_carousel_render_nested_blocks( $slide_block['innerBlocks'] ?? array() );
 		$content   = preg_replace(
 			'/class="([^"]*\bwp-block-heading\b[^"]*)"/',
@@ -86,7 +89,7 @@ if ( ! function_exists( 'gutenberg_lab_two_up_carousel_render_slide' ) ) {
 							'attachment_id' => $image_id,
 							'class'         => 'vvm-two-up-carousel__slide-image',
 							'fallback_url'  => $image_url,
-							'fetchpriority' => $args['is_priority'] ? 'high' : '',
+							'fetchpriority' => $should_prioritize_image ? 'high' : '',
 							'loading'       => $loading,
 							'size'          => 'gutenberg-lab-card-landscape',
 							'sizes'         => '(max-width: 782px) 86vw, 42vw',

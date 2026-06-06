@@ -32,6 +32,38 @@ if ( ! function_exists( 'gutenberg_lab_blocks_register_image_sizes' ) ) {
 }
 add_action( 'after_setup_theme', 'gutenberg_lab_blocks_register_image_sizes' );
 
+if ( ! function_exists( 'gutenberg_lab_blocks_claim_frontend_priority_image' ) ) {
+	/**
+	 * Allows only one custom block image to opt into eager/high-priority loading.
+	 *
+	 * Browser priority hints are global for the page. If every dynamic block marks
+	 * its first image as high priority, below-the-fold carousels compete with the
+	 * actual hero during the critical mobile render path.
+	 *
+	 * @return bool Whether the caller should render high-priority image attributes.
+	 */
+	function gutenberg_lab_blocks_claim_frontend_priority_image() {
+		static $priority_image_claimed = false;
+
+		if (
+			is_admin() ||
+			wp_doing_ajax() ||
+			( function_exists( 'wp_is_serving_rest_request' ) && wp_is_serving_rest_request() ) ||
+			( defined( 'REST_REQUEST' ) && REST_REQUEST )
+		) {
+			return false;
+		}
+
+		if ( $priority_image_claimed ) {
+			return false;
+		}
+
+		$priority_image_claimed = true;
+
+		return true;
+	}
+}
+
 if ( ! function_exists( 'gutenberg_lab_blocks_get_attachment_id_from_url' ) ) {
 	/**
 	 * Resolves a saved image URL to a local attachment ID when possible.

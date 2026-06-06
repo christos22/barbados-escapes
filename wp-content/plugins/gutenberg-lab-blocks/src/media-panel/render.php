@@ -67,6 +67,21 @@ if ( $current_post_id && ( ! $image_url || ! $fallback_image_url ) && has_post_t
 	}
 }
 
+$has_priority_candidate = ( 'video' === $media_type && ! empty( $video_data['has_vimeo_video'] ) && ! empty( $video_data['poster_url'] ) ) ||
+	( 'video' === $media_type && empty( $video_data['has_uploaded_video'] ) && ! empty( $fallback_image_url ) ) ||
+	( 'image' === $media_type && ! empty( $image_url ) );
+$should_prioritize_image = $has_priority_candidate && function_exists( 'gutenberg_lab_blocks_claim_frontend_priority_image' )
+	? gutenberg_lab_blocks_claim_frontend_priority_image()
+	: false;
+$image_loading_attrs     = $should_prioritize_image
+	? array(
+		'fetchpriority' => 'high',
+		'loading'       => 'eager',
+	)
+	: array(
+		'loading' => 'lazy',
+	);
+
 $classes = array(
 	'media-panel',
 	'media-panel--height-' . sanitize_html_class( $container_height ),
@@ -137,10 +152,9 @@ $wrapper_attributes = get_block_wrapper_attributes(
 						'iframe_class'  => 'media-panel__video',
 						'lazy_load'     => true,
 						'poster_alt'    => $video_data['poster_alt'],
-						'poster_attrs'  => array(
-							'decoding'      => 'async',
-							'fetchpriority' => 'high',
-							'loading'       => 'eager',
+						'poster_attrs'  => array_merge(
+							array( 'decoding' => 'async' ),
+							$image_loading_attrs
 						),
 						'poster_class'  => 'media-panel__image',
 						'poster_id'     => $video_data['poster_id'],
@@ -163,8 +177,8 @@ $wrapper_attributes = get_block_wrapper_attributes(
 						'attachment_id' => $fallback_image_id,
 						'class'         => 'media-panel__image',
 						'fallback_url'  => $fallback_image_url,
-						'fetchpriority' => 'high',
-						'loading'       => 'eager',
+						'fetchpriority' => $image_loading_attrs['fetchpriority'] ?? '',
+						'loading'       => $image_loading_attrs['loading'],
 						'size'          => 'gutenberg-lab-hero',
 						'sizes'         => '100vw',
 					)
@@ -178,8 +192,8 @@ $wrapper_attributes = get_block_wrapper_attributes(
 						'attachment_id' => $image_id,
 						'class'         => 'media-panel__image',
 						'fallback_url'  => $image_url,
-						'fetchpriority' => 'high',
-						'loading'       => 'eager',
+						'fetchpriority' => $image_loading_attrs['fetchpriority'] ?? '',
+						'loading'       => $image_loading_attrs['loading'],
 						'size'          => 'gutenberg-lab-hero',
 						'sizes'         => '100vw',
 					)

@@ -539,51 +539,66 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 				class="vvm-villa-gallery-hero__stage splide"
 				data-villa-gallery-stage
 				aria-label="<?php esc_attr_e( 'Villa gallery hero', 'gutenberg-lab-blocks' ); ?>"
-			>
-				<div class="splide__track">
-					<ul class="splide__list">
-						<?php foreach ( $slides as $slide_index => $slide ) : ?>
-							<li class="splide__slide">
-								<figure class="vvm-villa-gallery-hero__stage-slide">
-									<?php if ( 'video' === $slide['media_type'] ) : ?>
-										<?php if ( 'vimeo' === $slide['video_source'] ) : ?>
-											<?php
+				>
+					<div class="splide__track">
+						<ul class="splide__list">
+							<?php foreach ( $slides as $slide_index => $slide ) : ?>
+								<?php
+								$has_priority_candidate = ( 'video' === $slide['media_type'] && 'vimeo' === $slide['video_source'] && ! empty( $slide['poster_url'] ) ) ||
+									( 'image' === $slide['media_type'] && ! empty( $slide['image_url'] ) );
+								$should_prioritize_slide = 0 === $slide_index && $has_priority_candidate && function_exists( 'gutenberg_lab_blocks_claim_frontend_priority_image' )
+									? gutenberg_lab_blocks_claim_frontend_priority_image()
+									: false;
+								$slide_loading_attrs     = $should_prioritize_slide
+									? array(
+										'fetchpriority' => 'high',
+										'loading'       => 'eager',
+									)
+									: array(
+										'loading' => 'lazy',
+									);
+								?>
+								<li class="splide__slide">
+									<figure class="vvm-villa-gallery-hero__stage-slide">
+										<?php if ( 'video' === $slide['media_type'] ) : ?>
+											<?php if ( 'vimeo' === $slide['video_source'] ) : ?>
+												<?php
 												echo gutenberg_lab_blocks_render_vimeo_shell(
 													array(
-														'autoplay_url'     => gutenberg_lab_blocks_get_vimeo_embed_url(
+														'autoplay_url'  => gutenberg_lab_blocks_get_vimeo_embed_url(
 															$slide['vimeo_id'],
 															'autoplay',
 															$slide['vimeo_hash'] ?? ''
 														),
-														'manual_url'       => gutenberg_lab_blocks_get_vimeo_embed_url(
+														'manual_url'    => gutenberg_lab_blocks_get_vimeo_embed_url(
 															$slide['vimeo_id'],
 															'manual',
 															$slide['vimeo_hash'] ?? ''
 														),
-														'iframe_class'     => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--video',
-														'lazy_load'        => true,
-														'poster_alt'       => $slide['poster_alt'],
-														'poster_attrs'     => array_filter(
+														'iframe_class'  => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--video',
+														'lazy_load'     => true,
+														'poster_alt'    => $slide['poster_alt'],
+														'poster_attrs'  => array_filter(
 															array(
 																'decoding'      => 'async',
-																'fetchpriority' => 0 === $slide_index ? 'high' : '',
-																'loading'       => 0 === $slide_index ? 'eager' : 'lazy',
+																'fetchpriority' => $slide_loading_attrs['fetchpriority'] ?? '',
+																'loading'       => $slide_loading_attrs['loading'],
 															)
 														),
-														'poster_class'     => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
-														'poster_id'        => $slide['poster_id'],
-														'poster_size'      => 'gutenberg-lab-hero',
-														'poster_sizes'     => '100vw',
-														'poster_url'       => $slide['poster_url'],
-														'shell_class'      => 'vvm-villa-gallery-hero__stage-media-shell',
-														'title'            => __( 'Villa gallery Vimeo video', 'gutenberg-lab-blocks' ),
-														'wrapper_attrs'    => array(
+														'poster_class'  => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
+														'poster_id'     => $slide['poster_id'],
+														'poster_size'   => 'gutenberg-lab-hero',
+														'poster_sizes'  => '100vw',
+														'poster_url'    => $slide['poster_url'],
+														'shell_class'   => 'vvm-villa-gallery-hero__stage-media-shell',
+														'title'         => __( 'Villa gallery Vimeo video', 'gutenberg-lab-blocks' ),
+														'wrapper_attrs' => array(
 															'data-villa-gallery-vimeo' => '',
 														),
 													)
 												); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-											?>
-										<?php else : ?>
+												?>
+											<?php else : ?>
 											<video
 												class="vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--video"
 												src="<?php echo esc_url( $slide['video_url'] ); ?>"
@@ -602,27 +617,27 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 											?>
 										<?php endif; ?>
 										<?php else : ?>
-										<?php
-										echo gutenberg_lab_blocks_render_responsive_image(
-											array(
-												'alt'           => $slide['image_alt'],
-												'attachment_id' => $slide['image_id'],
-												'class'         => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
-												'fallback_url'  => $slide['image_url'],
-												'fetchpriority' => 0 === $slide_index ? 'high' : '',
-												'loading'       => 0 === $slide_index ? 'eager' : 'lazy',
-												'size'          => 'gutenberg-lab-hero',
-												'sizes'         => '100vw',
-											)
-										); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-										?>
-									<?php endif; ?>
-								</figure>
-							</li>
-						<?php endforeach; ?>
-					</ul>
+											<?php
+											echo gutenberg_lab_blocks_render_responsive_image(
+												array(
+													'alt'           => $slide['image_alt'],
+													'attachment_id' => $slide['image_id'],
+													'class'         => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
+													'fallback_url'  => $slide['image_url'],
+													'fetchpriority' => $slide_loading_attrs['fetchpriority'] ?? '',
+													'loading'       => $slide_loading_attrs['loading'],
+													'size'          => 'gutenberg-lab-hero',
+													'sizes'         => '100vw',
+												)
+											); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+											?>
+										<?php endif; ?>
+									</figure>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
 				</div>
-			</div>
 			<?php if ( $show_arrows ) : ?>
 				<div
 					<?php
@@ -652,48 +667,63 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 					</button>
 				</div>
 			<?php endif; ?>
-		<?php else : ?>
-			<div class="vvm-villa-gallery-hero__stage-static">
-				<?php if ( ! empty( $slides ) ) : ?>
-					<?php $slide = $slides[0]; ?>
-					<div class="vvm-villa-gallery-hero__stage-static-media">
-						<?php if ( 'video' === $slide['media_type'] ) : ?>
-							<?php if ( 'vimeo' === $slide['video_source'] ) : ?>
-								<?php
+			<?php else : ?>
+				<div class="vvm-villa-gallery-hero__stage-static">
+					<?php if ( ! empty( $slides ) ) : ?>
+						<?php
+						$slide                  = $slides[0];
+						$has_priority_candidate = ( 'video' === $slide['media_type'] && 'vimeo' === $slide['video_source'] && ! empty( $slide['poster_url'] ) ) ||
+							( 'image' === $slide['media_type'] && ! empty( $slide['image_url'] ) );
+						$should_prioritize_slide = $has_priority_candidate && function_exists( 'gutenberg_lab_blocks_claim_frontend_priority_image' )
+							? gutenberg_lab_blocks_claim_frontend_priority_image()
+							: false;
+						$slide_loading_attrs     = $should_prioritize_slide
+							? array(
+								'fetchpriority' => 'high',
+								'loading'       => 'eager',
+							)
+							: array(
+								'loading' => 'lazy',
+							);
+						?>
+						<div class="vvm-villa-gallery-hero__stage-static-media">
+							<?php if ( 'video' === $slide['media_type'] ) : ?>
+								<?php if ( 'vimeo' === $slide['video_source'] ) : ?>
+									<?php
 									echo gutenberg_lab_blocks_render_vimeo_shell(
 										array(
-											'autoplay_url'     => gutenberg_lab_blocks_get_vimeo_embed_url(
+											'autoplay_url'  => gutenberg_lab_blocks_get_vimeo_embed_url(
 												$slide['vimeo_id'],
 												'autoplay',
 												$slide['vimeo_hash'] ?? ''
 											),
-											'manual_url'       => gutenberg_lab_blocks_get_vimeo_embed_url(
+											'manual_url'    => gutenberg_lab_blocks_get_vimeo_embed_url(
 												$slide['vimeo_id'],
 												'manual',
 												$slide['vimeo_hash'] ?? ''
 											),
-											'iframe_class'     => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--video',
-											'lazy_load'        => true,
-											'poster_alt'       => $slide['poster_alt'],
-											'poster_attrs'     => array(
+											'iframe_class'  => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--video',
+											'lazy_load'     => true,
+											'poster_alt'    => $slide['poster_alt'],
+											'poster_attrs'  => array(
 												'decoding'      => 'async',
-												'fetchpriority' => 'high',
-												'loading'       => 'eager',
+												'fetchpriority' => $slide_loading_attrs['fetchpriority'] ?? '',
+												'loading'       => $slide_loading_attrs['loading'],
 											),
-											'poster_class'     => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
-											'poster_id'        => $slide['poster_id'],
-											'poster_size'      => 'gutenberg-lab-hero',
-											'poster_sizes'     => '100vw',
-											'poster_url'       => $slide['poster_url'],
-											'shell_class'      => 'vvm-villa-gallery-hero__stage-media-shell',
-											'title'            => __( 'Villa gallery Vimeo video', 'gutenberg-lab-blocks' ),
-											'wrapper_attrs'    => array(
+											'poster_class'  => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
+											'poster_id'     => $slide['poster_id'],
+											'poster_size'   => 'gutenberg-lab-hero',
+											'poster_sizes'  => '100vw',
+											'poster_url'    => $slide['poster_url'],
+											'shell_class'   => 'vvm-villa-gallery-hero__stage-media-shell',
+											'title'         => __( 'Villa gallery Vimeo video', 'gutenberg-lab-blocks' ),
+											'wrapper_attrs' => array(
 												'data-villa-gallery-vimeo' => '',
 											),
 										)
 									); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-								?>
-							<?php else : ?>
+									?>
+								<?php else : ?>
 								<video
 									class="vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--video"
 									src="<?php echo esc_url( $slide['video_url'] ); ?>"
@@ -719,8 +749,8 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 									'attachment_id' => $slide['image_id'],
 									'class'         => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
 									'fallback_url'  => $slide['image_url'],
-									'fetchpriority' => 'high',
-									'loading'       => 'eager',
+									'fetchpriority' => $slide_loading_attrs['fetchpriority'] ?? '',
+									'loading'       => $slide_loading_attrs['loading'],
 									'size'          => 'gutenberg-lab-hero',
 									'sizes'         => '100vw',
 								)

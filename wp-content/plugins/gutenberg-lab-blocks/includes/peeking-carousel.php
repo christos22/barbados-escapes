@@ -126,7 +126,10 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render_media_slide' ) ) 
 		$image_url = trim( (string) ( $attrs['imageUrl'] ?? '' ) );
 		$image_alt = trim( (string) ( $attrs['imageAlt'] ?? '' ) );
 		$has_image = '' !== $image_url;
-		$loading   = 0 === $index ? 'eager' : 'lazy';
+		$should_prioritize_image = 0 === $index && $has_image && function_exists( 'gutenberg_lab_blocks_claim_frontend_priority_image' )
+			? gutenberg_lab_blocks_claim_frontend_priority_image()
+			: false;
+		$loading   = $should_prioritize_image ? 'eager' : 'lazy';
 
 		ob_start();
 		?>
@@ -140,7 +143,7 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render_media_slide' ) ) 
 							'attachment_id' => $image_id,
 							'class'         => 'vvm-feature-carousel__image',
 							'fallback_url'  => $image_url,
-							'fetchpriority' => 0 === $index ? 'high' : '',
+							'fetchpriority' => $should_prioritize_image ? 'high' : '',
 							'loading'       => $loading,
 							'size'          => 'gutenberg-lab-hero',
 							'sizes'         => '(max-width: 782px) 100vw, 72vw',
