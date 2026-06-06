@@ -99,7 +99,10 @@
 }
 
 .editor-styles-wrapper .wp-block-gutenberg-lab-blocks-media-panel.media-panel--curtain-parallax ~ * {
-	position: static;
+	// Gutenberg uses a positioned block wrapper to keep the selected-block
+	// outline pseudo-element inside the selected block. Keep that positioning
+	// intact while removing the front-end stacking layer in the editor.
+	position: relative;
 	z-index: auto;
 }
 
