@@ -25,7 +25,7 @@ function gutenberg_lab_vvm_seo_known_metadata() {
 			'description' => 'Discover luxury Barbados villa rentals, from beachfront Sandy Lane estates to private retreats with curated island experiences.',
 		),
 		'pages'  => array(
-			'barbados-experiences' => array(
+			'experiences'          => array(
 				'title'       => 'Private Barbados Experiences & Concierge Services | Barbados Escapes',
 				'description' => 'Plan private Barbados experiences with Barbados Escapes, from island dining and boat days to tailored concierge moments around your villa stay.',
 				'schema'      => 'service',
