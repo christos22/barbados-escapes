@@ -1,0 +1,35 @@
+.wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel--editor {
+	border: 1px dashed rgba(30, 61, 47, 0.2);
+}
+
+.wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel--editor .vvm-testimonial-carousel__background-image,
+.wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel--editor .vvm-testimonial-carousel__overlay {
+	user-select: none;
+}
+
+.wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel--editor .vvm-testimonial-carousel__track.block-editor-block-list__layout {
+	min-height: 0;
+}
+
+.wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel--editor.vvm-testimonial-carousel--display-slider .vvm-testimonial-carousel__track.block-editor-block-list__layout {
+	display: flex;
+	overflow: visible;
+}
+
+.wp-block-gutenberg-lab-blocks-testimonial-carousel.vvm-testimonial-carousel--editor.vvm-testimonial-carousel--display-slider .vvm-testimonial-carousel__slide {
+	flex: 0 0 100%;
+}
+
+.vvm-testimonial-carousel__media-control {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.vvm-testimonial-carousel__media-control img {
+	aspect-ratio: 16 / 9;
+	border: 1px solid #ddd;
+	display: block;
+	height: auto;
+	object-fit: cover;
+	width: 100%;
+}
