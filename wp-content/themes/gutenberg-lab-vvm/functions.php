@@ -291,7 +291,22 @@ function gutenberg_lab_vvm_render_password_form( $output, $post = null ) {
 				<div class="vvm-password-form__fields">
 					<div class="vvm-password-form__input-wrap">
 						<input class="vvm-password-form__input" name="post_password" id="<?php echo esc_attr( $label_id ); ?>" type="password" autocomplete="current-password" spellcheck="false" required aria-describedby="<?php echo esc_attr( $describedby ); ?>" />
-						<button class="vvm-password-form__toggle" type="button" aria-controls="<?php echo esc_attr( $label_id ); ?>" aria-pressed="false" data-vvm-password-toggle><?php esc_html_e( 'Show', 'gutenberg-lab-vvm' ); ?></button>
+						<button class="vvm-password-form__toggle" type="button" aria-controls="<?php echo esc_attr( $label_id ); ?>" aria-label="<?php esc_attr_e( 'Show password', 'gutenberg-lab-vvm' ); ?>" aria-pressed="false" data-vvm-password-toggle>
+							<span class="screen-reader-text" data-vvm-password-toggle-label><?php esc_html_e( 'Show password', 'gutenberg-lab-vvm' ); ?></span>
+							<span class="vvm-password-form__icon vvm-password-form__icon--show" aria-hidden="true">
+								<svg viewBox="0 0 24 24" focusable="false">
+									<path d="M2.06 12a10.75 10.75 0 0 1 19.88 0 10.75 10.75 0 0 1-19.88 0Z" />
+									<circle cx="12" cy="12" r="3" />
+								</svg>
+							</span>
+							<span class="vvm-password-form__icon vvm-password-form__icon--hide" aria-hidden="true">
+								<svg viewBox="0 0 24 24" focusable="false">
+									<path d="M2.06 12a10.75 10.75 0 0 1 19.88 0 10.75 10.75 0 0 1-19.88 0Z" />
+									<circle cx="12" cy="12" r="3" />
+									<path d="M4 4l16 16" />
+								</svg>
+							</span>
+						</button>
 					</div>
 					<div class="vvm-password-form__submit-wrap">
 						<button class="vvm-password-form__submit" type="submit"><?php esc_html_e( 'Enter', 'gutenberg-lab-vvm' ); ?></button>
@@ -351,8 +366,14 @@ function gutenberg_lab_vvm_render_password_form_script() {
 
 				const shouldShow = input.type === 'password';
 				input.type = shouldShow ? 'text' : 'password';
-				button.textContent = shouldShow ? 'Hide' : 'Show';
+				const label = shouldShow ? 'Hide password' : 'Show password';
+				const labelNode = button.querySelector('[data-vvm-password-toggle-label]');
+				button.setAttribute('aria-label', label);
 				button.setAttribute('aria-pressed', shouldShow ? 'true' : 'false');
+
+				if (labelNode) {
+					labelNode.textContent = label;
+				}
 			});
 		})();
 	</script>

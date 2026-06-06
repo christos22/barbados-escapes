@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.39
+Version: 0.1.40
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -137,6 +137,18 @@ body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 	margin: 0;
 }
 
+.vvm-password-form .screen-reader-text {
+	block-size: 1px;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	inline-size: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	white-space: nowrap;
+}
+
 .vvm-password-form__eyebrow {
 	color: var(--wp--preset--color--gold, #c4922a);
 	margin-bottom: 0.75rem;
@@ -217,20 +229,19 @@ body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 }
 
 .vvm-password-form__toggle {
+	align-items: center;
 	background: transparent;
 	border: 0;
 	color: var(--wp--preset--color--dark-green, #1e3d2f);
 	cursor: pointer;
-	font-family: var(--wp--preset--font-family--refined-sans);
-	font-size: 0.75rem;
-	font-weight: 700;
+	display: grid;
+	inline-size: 2.75rem;
 	inset-block-start: 50%;
-	inset-inline-end: 0.875rem;
-	letter-spacing: 0.14em;
-	line-height: 1;
-	padding: 0.375rem 0;
+	inset-inline-end: 0.3125rem;
+	justify-items: center;
+	min-block-size: 2.75rem;
+	padding: 0;
 	position: absolute;
-	text-transform: uppercase;
 	transform: translateY(-50%);
 }
 
@@ -241,8 +252,34 @@ body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 }
 
 .vvm-password-form__toggle:focus-visible {
-	text-decoration: underline;
-	text-underline-offset: 0.2em;
+	border-radius: 999px;
+	outline: 2px solid var(--wp--preset--color--gold, #c4922a);
+	outline-offset: -4px;
+}
+
+.vvm-password-form__icon {
+	block-size: 1.25rem;
+	inline-size: 1.25rem;
+}
+
+.vvm-password-form__icon svg {
+	block-size: 100%;
+	display: block;
+	fill: none;
+	inline-size: 100%;
+	stroke: currentColor;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 1.75;
+}
+
+.vvm-password-form__icon--hide,
+.vvm-password-form__toggle[aria-pressed="true"] .vvm-password-form__icon--show {
+	display: none;
+}
+
+.vvm-password-form__toggle[aria-pressed="true"] .vvm-password-form__icon--hide {
+	display: block;
 }
 
 .vvm-password-form__submit {
