@@ -175,14 +175,15 @@ function gutenberg_lab_blocks_register_villa_amenity_taxonomy() {
 				'not_found'                  => __( 'No amenities found.', 'gutenberg-lab-blocks' ),
 				'menu_name'                  => __( 'Amenities', 'gutenberg-lab-blocks' ),
 			),
-			'public'            => true,
+			// Amenities are reusable CMS metadata, not standalone landing pages.
+			// Keep them editable in admin/REST, but do not create public archives.
+			'public'            => false,
 			'hierarchical'      => false,
+			'show_ui'           => true,
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
-			'query_var'         => 'villa_amenity',
-			'rewrite'           => array(
-				'slug' => 'villa-amenity',
-			),
+			'query_var'         => false,
+			'rewrite'           => false,
 		)
 	);
 }
@@ -719,14 +720,15 @@ function gutenberg_lab_blocks_register_villa_location_taxonomy() {
 				'new_item_name'     => __( 'New Villa Location Name', 'gutenberg-lab-blocks' ),
 				'menu_name'         => __( 'Locations', 'gutenberg-lab-blocks' ),
 			),
-			'public'            => true,
+			// Locations power filtering/search today. They can become public SEO
+			// landing pages later, once we have real location archive templates.
+			'public'            => false,
 			'hierarchical'      => true,
+			'show_ui'           => true,
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
-			'query_var'         => 'villa_location',
-			'rewrite'           => array(
-				'slug' => 'villa-location',
-			),
+			'query_var'         => false,
+			'rewrite'           => false,
 		)
 	);
 }
