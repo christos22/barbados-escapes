@@ -90,10 +90,11 @@
 					"slug": "site-primary",
 					"fontFace": [
 						{
+							"fontDisplay": "swap",
 							"fontFamily": "Romely",
 							"fontStyle": "normal",
 							"fontWeight": "400",
-							"src": [ "file:./assets/fonts/romely/Romely Regular.ttf" ]
+							"src": [ "file:./assets/fonts/romely/Romely-Regular.woff2" ]
 						}
 					]
 				},
