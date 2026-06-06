@@ -1099,22 +1099,29 @@ function gutenberg_lab_vvm_asset_version( $relative_path ) {
 }
 
 /**
- * Enqueue the remaining remote display font for both the editor and the front end.
+ * Remove stale Google Font resource hints now that theme fonts are self-hosted.
  *
- * TT Norms now ships locally via `theme.json` font-face declarations so the
- * global sans stack is theme-native. We still enqueue the shared serif here
- * because the theme continues to use Cormorant Garamond as a separate preset.
+ * Autoptimize can keep printing a fonts.gstatic.com preconnect after the theme
+ * stops enqueueing Google Fonts, so we strip those hints at the theme boundary.
  */
-function gutenberg_lab_vvm_enqueue_fonts() {
-	wp_enqueue_style(
-		'gutenberg-lab-vvm-fonts',
-		'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap',
-		array(),
-		null
+function gutenberg_lab_vvm_remove_google_font_resource_hints( $urls, $relation_type ) {
+	if ( ! in_array( $relation_type, array( 'dns-prefetch', 'preconnect' ), true ) ) {
+		return $urls;
+	}
+
+	return array_values(
+		array_filter(
+			$urls,
+			static function ( $url ) {
+				$href = is_array( $url ) ? ( $url['href'] ?? '' ) : $url;
+				$host = wp_parse_url( $href, PHP_URL_HOST );
+
+				return ! in_array( $host, array( 'fonts.googleapis.com', 'fonts.gstatic.com' ), true );
+			}
+		)
 	);
 }
-add_action( 'wp_enqueue_scripts', 'gutenberg_lab_vvm_enqueue_fonts' );
-add_action( 'enqueue_block_editor_assets', 'gutenberg_lab_vvm_enqueue_fonts' );
+add_filter( 'wp_resource_hints', 'gutenberg_lab_vvm_remove_google_font_resource_hints', 20, 2 );
 
 /**
  * Keeps the editor button style picker aligned with the theme's design system.

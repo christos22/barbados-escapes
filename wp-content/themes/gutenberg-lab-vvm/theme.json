@@ -57,6 +57,34 @@
 					"slug": "display-serif"
 				},
 				{
+					"fontFamily": "\"Cormorant Garamond\", Georgia, serif",
+					"name": "Cormorant Garamond",
+					"slug": "heading",
+					"fontFace": [
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Cormorant Garamond",
+							"fontStyle": "normal",
+							"fontWeight": "400",
+							"src": [ "file:./assets/fonts/cormorant-garamond-v21-latin/cormorant-garamond-v21-latin-regular.woff2" ]
+						},
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Cormorant Garamond",
+							"fontStyle": "normal",
+							"fontWeight": "500",
+							"src": [ "file:./assets/fonts/cormorant-garamond-v21-latin/cormorant-garamond-v21-latin-500.woff2" ]
+						},
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Cormorant Garamond",
+							"fontStyle": "normal",
+							"fontWeight": "600",
+							"src": [ "file:./assets/fonts/cormorant-garamond-v21-latin/cormorant-garamond-v21-latin-600.woff2" ]
+						}
+					]
+				},
+				{
 					"fontFamily": "\"Romely\", Georgia, serif",
 					"name": "Romely",
 					"slug": "site-primary",
