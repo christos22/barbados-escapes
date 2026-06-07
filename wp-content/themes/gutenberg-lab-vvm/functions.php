@@ -1378,6 +1378,50 @@ function gutenberg_lab_vvm_enqueue_block_editor_script() {
 add_action( 'enqueue_block_editor_assets', 'gutenberg_lab_vvm_enqueue_block_editor_script' );
 
 /**
+ * Checks whether the current frontend request needs Contact Form 7 assets.
+ *
+ * Contact Form 7 loads its stylesheet globally by default. That stylesheet is
+ * render-blocking, so we only keep it on singular content that actually embeds
+ * a CF7 block or shortcode.
+ *
+ * @return bool
+ */
+function gutenberg_lab_vvm_should_load_contact_form_7_assets() {
+	if ( is_admin() || wp_doing_ajax() || is_preview() ) {
+		return true;
+	}
+
+	if ( ! is_singular() ) {
+		return false;
+	}
+
+	$post = get_post();
+
+	if ( ! $post instanceof WP_Post ) {
+		return false;
+	}
+
+	return has_block( 'contact-form-7/contact-form-selector', $post )
+		|| has_shortcode( $post->post_content, 'contact-form-7' );
+}
+
+/**
+ * Prevents unused Contact Form 7 CSS/JS from loading on pages without forms.
+ *
+ * @param bool $load Whether Contact Form 7 planned to load the asset.
+ * @return bool
+ */
+function gutenberg_lab_vvm_load_contact_form_7_assets_when_needed( $load ) {
+	if ( ! $load ) {
+		return false;
+	}
+
+	return gutenberg_lab_vvm_should_load_contact_form_7_assets();
+}
+add_filter( 'wpcf7_load_css', 'gutenberg_lab_vvm_load_contact_form_7_assets_when_needed', 20 );
+add_filter( 'wpcf7_load_js', 'gutenberg_lab_vvm_load_contact_form_7_assets_when_needed', 20 );
+
+/**
  * Enqueues the shared theme stylesheet and the minimal front-end chrome script.
  *
  * The editor does not need to reproduce every front-end behavior, but the

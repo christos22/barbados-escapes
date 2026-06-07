@@ -145,7 +145,7 @@ if ( ! function_exists( 'gutenberg_lab_peeking_carousel_render_media_slide' ) ) 
 							'fallback_url'  => $image_url,
 							'fetchpriority' => $should_prioritize_image ? 'high' : '',
 							'loading'       => $loading,
-							'size'          => 'gutenberg-lab-hero',
+							'size'          => 'gutenberg-lab-card-landscape',
 							'sizes'         => '(max-width: 782px) 100vw, 72vw',
 						)
 					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
