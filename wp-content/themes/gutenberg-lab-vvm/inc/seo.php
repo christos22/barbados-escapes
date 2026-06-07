@@ -102,6 +102,106 @@ function gutenberg_lab_vvm_seo_get_object_url( $object = null ) {
 }
 
 /**
+ * Checks whether a post should be treated as private preview content for SEO.
+ *
+ * WordPress stores password protection directly on the post. Using that field
+ * keeps noindex and sitemap exclusion automatic when editors change visibility.
+ *
+ * @param mixed $post Potential post object.
+ * @return bool
+ */
+function gutenberg_lab_vvm_seo_is_password_protected_post( $post ) {
+	return $post instanceof WP_Post && '' !== (string) $post->post_password;
+}
+
+/**
+ * Adds noindex/nofollow to password-protected singular views.
+ *
+ * Crawlers can still fetch the page and see the directive, while the content
+ * remains protected by WordPress' password form.
+ *
+ * @param array<string, mixed> $robots Existing robots directives.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_vvm_seo_password_protected_robots( $robots ) {
+	$post = is_singular() ? get_queried_object() : null;
+
+	if ( ! gutenberg_lab_vvm_seo_is_password_protected_post( $post ) ) {
+		return $robots;
+	}
+
+	unset( $robots['index'], $robots['follow'] );
+
+	$robots['noindex']  = true;
+	$robots['nofollow'] = true;
+
+	return $robots;
+}
+add_filter( 'wp_robots', 'gutenberg_lab_vvm_seo_password_protected_robots', 20 );
+
+/**
+ * Returns published password-protected IDs for a post type.
+ *
+ * @param string $post_type Post type currently being listed in a core sitemap.
+ * @return int[]
+ */
+function gutenberg_lab_vvm_seo_get_password_protected_post_ids( $post_type ) {
+	static $ids_by_type = array();
+
+	if ( isset( $ids_by_type[ $post_type ] ) ) {
+		return $ids_by_type[ $post_type ];
+	}
+
+	$ids = get_posts(
+		array(
+			'post_type'              => $post_type,
+			'post_status'            => 'publish',
+			'has_password'           => true,
+			'fields'                 => 'ids',
+			'posts_per_page'         => -1,
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		)
+	);
+
+	$ids_by_type[ $post_type ] = array_map( 'intval', $ids );
+
+	return $ids_by_type[ $post_type ];
+}
+
+/**
+ * Excludes password-protected content from WordPress core XML sitemaps.
+ *
+ * When an editor clears the post password, the post stops matching this query
+ * and automatically returns to the sitemap.
+ *
+ * @param array<string, mixed> $args      Sitemap WP_Query arguments.
+ * @param string              $post_type Post type currently being listed.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_vvm_seo_exclude_password_protected_posts_from_sitemaps( $args, $post_type ) {
+	$protected_ids = gutenberg_lab_vvm_seo_get_password_protected_post_ids( $post_type );
+
+	if ( empty( $protected_ids ) ) {
+		return $args;
+	}
+
+	$existing_exclusions  = isset( $args['post__not_in'] ) && is_array( $args['post__not_in'] ) ? $args['post__not_in'] : array();
+	$args['post__not_in'] = array_values(
+		array_unique(
+			array_merge(
+				array_map( 'intval', $existing_exclusions ),
+				$protected_ids
+			)
+		)
+	);
+
+	return $args;
+}
+add_filter( 'wp_sitemaps_posts_query_args', 'gutenberg_lab_vvm_seo_exclude_password_protected_posts_from_sitemaps', 10, 2 );
+
+/**
  * Returns normalized SEO context for the current request.
  *
  * @return array<string, mixed>|null
@@ -114,6 +214,10 @@ function gutenberg_lab_vvm_seo_get_context() {
 	$known = gutenberg_lab_vvm_seo_known_metadata();
 	$post  = is_singular() ? get_queried_object() : null;
 	$term  = is_tax() ? get_queried_object() : null;
+
+	if ( gutenberg_lab_vvm_seo_is_password_protected_post( $post ) ) {
+		return null;
+	}
 
 	$context = array(
 		'title'       => '',
@@ -659,6 +763,10 @@ function gutenberg_lab_vvm_seo_get_villa_amenity_schema( $villa_id ) {
 			continue;
 		}
 
+		if ( gutenberg_lab_vvm_seo_is_villa_capacity_fact_label( $amenity['name'] ) ) {
+			continue;
+		}
+
 		$features[] = array(
 			'@type' => 'LocationFeatureSpecification',
 			'name'  => $amenity['name'],
@@ -667,6 +775,26 @@ function gutenberg_lab_vvm_seo_get_villa_amenity_schema( $villa_id ) {
 	}
 
 	return $features;
+}
+
+/**
+ * Checks whether a label describes a capacity fact rather than an amenity.
+ *
+ * Bedrooms, bathrooms, and sleeps are already represented by dedicated
+ * VacationRental fields. Keeping matching taxonomy terms out of amenityFeature
+ * prevents schema from disagreeing with the facts visible on the villa page.
+ *
+ * @param string $label Candidate label.
+ * @return bool
+ */
+function gutenberg_lab_vvm_seo_is_villa_capacity_fact_label( $label ) {
+	$label = strtolower( trim( sanitize_text_field( (string) $label ) ) );
+
+	if ( '' === $label ) {
+		return false;
+	}
+
+	return (bool) preg_match( '/\b(?:sleeps?|guests?|bedrooms?|beds?|bathrooms?|baths?)\b/', $label );
 }
 
 /**
@@ -700,21 +828,11 @@ function gutenberg_lab_vvm_seo_collect_villa_spec_sources( $blocks, &$sources ) 
  * @return string[]
  */
 function gutenberg_lab_vvm_seo_get_villa_fact_sources( $villa_id ) {
-	$sources = array_filter(
-		array(
-			get_post_meta( $villa_id, 'villa_card_facts', true ),
-		)
-	);
+	$sources = array();
 
+	// Prefer the facts rendered on the villa page; card facts are a fallback.
 	gutenberg_lab_vvm_seo_collect_villa_spec_sources( parse_blocks( get_post_field( 'post_content', $villa_id ) ), $sources );
-
-	if ( function_exists( 'gutenberg_lab_blocks_get_villa_amenities' ) ) {
-		foreach ( gutenberg_lab_blocks_get_villa_amenities( $villa_id ) as $amenity ) {
-			if ( ! empty( $amenity['name'] ) ) {
-				$sources[] = $amenity['name'];
-			}
-		}
-	}
+	$sources[] = get_post_meta( $villa_id, 'villa_card_facts', true );
 
 	return array_values( array_filter( array_map( 'sanitize_text_field', $sources ) ) );
 }
