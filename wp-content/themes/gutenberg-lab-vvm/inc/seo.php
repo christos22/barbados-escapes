@@ -202,6 +202,152 @@ function gutenberg_lab_vvm_seo_exclude_password_protected_posts_from_sitemaps( $
 add_filter( 'wp_sitemaps_posts_query_args', 'gutenberg_lab_vvm_seo_exclude_password_protected_posts_from_sitemaps', 10, 2 );
 
 /**
+ * Adds the villa image sitemap to robots.txt for crawler discovery.
+ *
+ * @param string $output Existing robots.txt output.
+ * @param bool   $public Whether the site is public to search engines.
+ * @return string
+ */
+function gutenberg_lab_vvm_seo_add_villa_image_sitemap_to_robots( $output, $public ) {
+	if ( ! $public ) {
+		return $output;
+	}
+
+	$sitemap_url = esc_url_raw( home_url( '/villa-image-sitemap.xml' ) );
+
+	if ( str_contains( $output, $sitemap_url ) ) {
+		return $output;
+	}
+
+	return rtrim( $output ) . "\nSitemap: {$sitemap_url}\n";
+}
+add_filter( 'robots_txt', 'gutenberg_lab_vvm_seo_add_villa_image_sitemap_to_robots', 20, 2 );
+
+/**
+ * Lists public villa posts that should appear in the image sitemap.
+ *
+ * @return WP_Post[]
+ */
+function gutenberg_lab_vvm_seo_get_villa_image_sitemap_posts() {
+	$posts = get_posts(
+		array(
+			'post_type'              => 'villa',
+			'post_status'            => 'publish',
+			'has_password'           => false,
+			'posts_per_page'         => 100,
+			'orderby'                => 'modified',
+			'order'                  => 'DESC',
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => true,
+			'update_post_term_cache' => false,
+		)
+	);
+
+	return array_values(
+		array_filter(
+			$posts,
+			static function ( $post ) {
+				return $post instanceof WP_Post;
+			}
+		)
+	);
+}
+
+/**
+ * Registers the image sitemap in WordPress's sitemap index.
+ *
+ * Core's renderer does not support image tags inside normal post sitemaps, so
+ * the index points at our custom XML endpoint instead.
+ *
+ * @param WP_Sitemaps $wp_sitemaps Core sitemap server.
+ */
+function gutenberg_lab_vvm_seo_register_villa_image_sitemap_provider( $wp_sitemaps ) {
+	if ( ! $wp_sitemaps instanceof WP_Sitemaps || ! class_exists( 'WP_Sitemaps_Provider' ) ) {
+		return;
+	}
+
+	$provider = new class() extends WP_Sitemaps_Provider {
+		public function __construct() {
+			$this->name        = 'villa-images';
+			$this->object_type = 'villa-images';
+		}
+
+		public function get_url_list( $page_num, $object_subtype = '' ) {
+			return array();
+		}
+
+		public function get_max_num_pages( $object_subtype = '' ) {
+			return ! empty( gutenberg_lab_vvm_seo_get_villa_image_sitemap_posts() ) ? 1 : 0;
+		}
+
+		public function get_sitemap_url( $name, $page ) {
+			return home_url( '/villa-image-sitemap.xml' );
+		}
+	};
+
+	$wp_sitemaps->registry->add_provider( 'villa-images', $provider );
+}
+add_action( 'wp_sitemaps_init', 'gutenberg_lab_vvm_seo_register_villa_image_sitemap_provider', 20 );
+
+/**
+ * Checks whether the current request is for the custom villa image sitemap.
+ *
+ * @return bool
+ */
+function gutenberg_lab_vvm_seo_is_villa_image_sitemap_request() {
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+	$path        = wp_parse_url( $request_uri, PHP_URL_PATH );
+
+	return '/villa-image-sitemap.xml' === $path;
+}
+
+/**
+ * Renders a Google-compatible image sitemap for villa pages.
+ */
+function gutenberg_lab_vvm_seo_render_villa_image_sitemap() {
+	if ( ! gutenberg_lab_vvm_seo_is_villa_image_sitemap_request() ) {
+		return;
+	}
+
+	status_header( 200 );
+	header( 'Content-Type: application/xml; charset=UTF-8' );
+
+	echo '<?xml version="1.0" encoding="UTF-8" ?>' . "\n";
+	echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
+
+	foreach ( gutenberg_lab_vvm_seo_get_villa_image_sitemap_posts() as $post ) {
+		$permalink = get_permalink( $post );
+
+		if ( ! is_string( $permalink ) || '' === $permalink ) {
+			continue;
+		}
+
+		$image      = gutenberg_lab_vvm_seo_get_primary_image( $post );
+		$image_urls = gutenberg_lab_vvm_seo_get_villa_schema_images( $post, $image );
+
+		if ( empty( $image_urls ) ) {
+			continue;
+		}
+
+		echo "\t<url>\n";
+		printf( "\t\t<loc>%s</loc>\n", esc_url( $permalink ) );
+
+		foreach ( $image_urls as $image_url ) {
+			printf(
+				"\t\t<image:image><image:loc>%s</image:loc></image:image>\n",
+				esc_url( $image_url )
+			);
+		}
+
+		echo "\t</url>\n";
+	}
+
+	echo '</urlset>';
+	exit;
+}
+add_action( 'template_redirect', 'gutenberg_lab_vvm_seo_render_villa_image_sitemap', 0 );
+
+/**
  * Returns normalized SEO context for the current request.
  *
  * @return array<string, mixed>|null
@@ -1008,6 +1154,9 @@ function gutenberg_lab_vvm_seo_get_villa_schema( $context, $image ) {
 			'name'           => get_the_title( $post ),
 			'url'            => $context['url'],
 			'description'    => $context['description'],
+			'mainEntityOfPage' => array(
+				'@id' => $context['url'] . '#webpage',
+			),
 			'image'          => $image_urls,
 			'geo'            => array(
 				'@type'     => 'GeoCoordinates',
@@ -1120,6 +1269,11 @@ function gutenberg_lab_vvm_seo_get_schema_graph( $context, $image ) {
 					'@id' => $org_id,
 				),
 				'primaryImageOfPage' => gutenberg_lab_vvm_seo_get_image_schema( $image ),
+				'mainEntity'  => 'villa' === $context['kind']
+					? array(
+						'@id' => $context['url'] . '#vacation-rental',
+					)
+					: null,
 				'breadcrumb'  => array(
 					'@id' => $context['url'] . '#breadcrumbs',
 				),
