@@ -8,6 +8,7 @@
 	--vvm-editorial-feature-slide-width: 100%;
 	--vvm-editorial-feature-title-size: clamp(2.75rem, 6vw, 4.5rem);
 	--vvm-editorial-feature-body-width: 33rem;
+	--vvm-editorial-feature-icon-size: clamp(2rem, 3vw, 3rem);
 	--vvm-editorial-feature-control-outset: clamp(4.25rem, 7vw, 6.5rem);
 	--vvm-editorial-feature-control-screen-inset: clamp(0.75rem, 2vw, 1.25rem);
 	--vvm-editorial-feature-accent-border: 8px solid
@@ -16,8 +17,8 @@
 	box-sizing: border-box;
 	margin: 0;
 	padding-block: var(
-		--wp--preset--spacing--section-md,
-		clamp(3.125rem, 5vw, 4.375rem)
+		--wp--preset--spacing--section-sm,
+		clamp(1.5rem, 2vw, 2.25rem)
 	);
 	padding-inline: var(--wp--custom--layout--gutter-current, 20px);
 	color: var(--wp--preset--color--deep-forest, #1e3d2f);
@@ -67,6 +68,43 @@
 		column-gap: var(--vvm-editorial-feature-column-gap);
 		row-gap: clamp(1.5rem, 5vw, 3rem);
 		align-items: start;
+	}
+
+	.vvm-editorial-feature__slide--has-icon {
+		.vvm-editorial-feature__slide-grid {
+			row-gap: clamp(0.75rem, 1.5vw, 1.125rem);
+		}
+
+		.vvm-editorial-feature__heading-stack {
+			grid-column: 1;
+			grid-row: 2;
+		}
+
+		.vvm-editorial-feature__body-stack {
+			grid-column: 2;
+			grid-row: 1 / span 2;
+		}
+	}
+
+	.vvm-editorial-feature__icon {
+		color: var(--wp--preset--color--gold, #c4922a);
+		display: grid;
+		grid-column: 1;
+		grid-row: 1;
+		inline-size: var(--vvm-editorial-feature-icon-size);
+		block-size: var(--vvm-editorial-feature-icon-size);
+		place-items: center;
+	}
+
+	.vvm-editorial-feature__icon .vvm-villa-amenity-icon {
+		display: block;
+		inline-size: 100%;
+		block-size: 100%;
+		fill: none;
+		stroke: currentColor;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		stroke-width: 1.25;
 	}
 
 	.vvm-editorial-feature__heading-stack,
@@ -237,6 +275,15 @@
 @media (max-width: 781px) {
 	.wp-block-gutenberg-lab-blocks-editorial-feature.vvm-editorial-feature {
 		--vvm-editorial-feature-title-size: clamp(2.35rem, 13vw, 3.75rem);
+
+		.vvm-editorial-feature__slide--has-icon {
+			.vvm-editorial-feature__heading-stack,
+			.vvm-editorial-feature__body-stack,
+			.vvm-editorial-feature__icon {
+				grid-column: 1;
+				grid-row: auto;
+			}
+		}
 
 		.vvm-editorial-feature__slide-grid {
 			grid-template-columns: minmax(0, 1fr);

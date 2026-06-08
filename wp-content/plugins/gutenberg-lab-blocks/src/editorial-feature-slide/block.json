@@ -8,6 +8,12 @@
 	"icon": "editor-alignleft",
 	"description": "A single editable item used inside the Editorial Feature block.",
 	"parent": [ "gutenberg-lab-blocks/editorial-feature" ],
+	"attributes": {
+		"iconSlug": {
+			"type": "string",
+			"default": ""
+		}
+	},
 	"supports": {
 		"html": false,
 		"reusable": false

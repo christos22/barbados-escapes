@@ -10,6 +10,12 @@
   "parent": [
     "gutenberg-lab-blocks/editorial-feature"
   ],
+  "attributes": {
+    "iconSlug": {
+      "type": "string",
+      "default": ""
+    }
+  },
   "supports": {
     "html": false,
     "reusable": false
