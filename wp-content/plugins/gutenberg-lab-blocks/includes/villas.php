@@ -115,6 +115,35 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_choices() {
 		'sun-deck'           => __( 'Sun Deck', 'gutenberg-lab-blocks' ),
 		'yoga'               => __( 'Yoga', 'gutenberg-lab-blocks' ),
 		'yoga-pavilion'      => __( 'Yoga Pavilion', 'gutenberg-lab-blocks' ),
+		'aircon'             => __( 'Air Conditioning', 'gutenberg-lab-blocks' ),
+		'bathtub'            => __( 'Bathtub', 'gutenberg-lab-blocks' ),
+		'breakfast-bar'      => __( 'Breakfast Bar', 'gutenberg-lab-blocks' ),
+		'cafe-table'         => __( 'Cafe Table', 'gutenberg-lab-blocks' ),
+		'car'                => __( 'Car', 'gutenberg-lab-blocks' ),
+		'ceiling-fan'        => __( 'Ceiling Fan', 'gutenberg-lab-blocks' ),
+		'closet'             => __( 'Closet', 'gutenberg-lab-blocks' ),
+		'cooking-pot'        => __( 'Cooking Pot', 'gutenberg-lab-blocks' ),
+		'curated'            => __( 'Curated', 'gutenberg-lab-blocks' ),
+		'dishwasher'         => __( 'Dishwasher', 'gutenberg-lab-blocks' ),
+		'experience'         => __( 'Experience', 'gutenberg-lab-blocks' ),
+		'finance-and'        => __( 'Finance & Administration', 'gutenberg-lab-blocks' ),
+		'gym'                => __( 'Gym', 'gutenberg-lab-blocks' ),
+		'hair-dryer'         => __( 'Hair Dryer', 'gutenberg-lab-blocks' ),
+		'infinity-pool'      => __( 'Infinity Pool', 'gutenberg-lab-blocks' ),
+		'local'              => __( 'Local', 'gutenberg-lab-blocks' ),
+		'lounge-chair'       => __( 'Lounge Chair', 'gutenberg-lab-blocks' ),
+		'martin'             => __( 'Martini', 'gutenberg-lab-blocks' ),
+		'media-room'         => __( 'Media Room', 'gutenberg-lab-blocks' ),
+		'personal'           => __( 'Personal', 'gutenberg-lab-blocks' ),
+		'telephone'          => __( 'Telephone', 'gutenberg-lab-blocks' ),
+		'temple'             => __( 'Temple', 'gutenberg-lab-blocks' ),
+		'tennis'             => __( 'Tennis', 'gutenberg-lab-blocks' ),
+		'tropical'           => __( 'Tropical', 'gutenberg-lab-blocks' ),
+		'trusted'            => __( 'Trusted', 'gutenberg-lab-blocks' ),
+		'tv'                 => __( 'TV', 'gutenberg-lab-blocks' ),
+		'villa-partners-2'   => __( 'Villa Partners', 'gutenberg-lab-blocks' ),
+		'whatsapp'           => __( 'WhatsApp', 'gutenberg-lab-blocks' ),
+		'wifi'               => __( 'WiFi', 'gutenberg-lab-blocks' ),
 	);
 }
 
@@ -957,7 +986,8 @@ function gutenberg_lab_blocks_get_villa_amenities( $villa_id ) {
  * @return array<string, string>
  */
 function gutenberg_lab_blocks_get_villa_amenity_icon_asset_paths() {
-	$asset_dir = dirname( __DIR__ ) . '/assets/icons/villa-amenities/';
+	$asset_dir       = dirname( __DIR__ ) . '/assets/icons/villa-amenities/';
+	$theme_asset_dir = trailingslashit( get_stylesheet_directory() ) . 'assets/icons/';
 
 	return array(
 		'hillside-retreat'    => $asset_dir . 'hillside-retreat.svg',
@@ -988,6 +1018,35 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_asset_paths() {
 		'sun-deck'           => $asset_dir . 'sun-deck.svg',
 		'yoga'               => $asset_dir . 'yoga.svg',
 		'yoga-pavilion'      => $asset_dir . 'yoga-pavilion.svg',
+		'aircon'             => $theme_asset_dir . 'aircon.svg',
+		'bathtub'            => $theme_asset_dir . 'bathtub.svg',
+		'breakfast-bar'      => $theme_asset_dir . 'breakfast-bar.svg',
+		'cafe-table'         => $theme_asset_dir . 'cafe-table.svg',
+		'car'                => $theme_asset_dir . 'car.svg',
+		'ceiling-fan'        => $theme_asset_dir . 'ceiling-fan.svg',
+		'closet'             => $theme_asset_dir . 'closet.svg',
+		'cooking-pot'        => $theme_asset_dir . 'cooking-pot.svg',
+		'curated'            => $theme_asset_dir . 'Curated.svg',
+		'dishwasher'         => $theme_asset_dir . 'dishwasher.svg',
+		'experience'         => $theme_asset_dir . 'Experience.svg',
+		'finance-and'        => $theme_asset_dir . 'Finance and.svg',
+		'gym'                => $theme_asset_dir . 'gym.svg',
+		'hair-dryer'         => $theme_asset_dir . 'hair-dryer.svg',
+		'infinity-pool'      => $theme_asset_dir . 'infinity-pool.svg',
+		'local'              => $theme_asset_dir . 'Local.svg',
+		'lounge-chair'       => $theme_asset_dir . 'lounge-chair.svg',
+		'martin'             => $theme_asset_dir . 'martin.svg',
+		'media-room'         => $theme_asset_dir . 'media-room.svg',
+		'personal'           => $theme_asset_dir . 'Personal.svg',
+		'telephone'          => $theme_asset_dir . 'telephone.svg',
+		'temple'             => $theme_asset_dir . 'temple.svg',
+		'tennis'             => $theme_asset_dir . 'tennis.svg',
+		'tropical'           => $theme_asset_dir . 'tropical.svg',
+		'trusted'            => $theme_asset_dir . 'Trusted.svg',
+		'tv'                 => $theme_asset_dir . 'tv.svg',
+		'villa-partners-2'   => $theme_asset_dir . 'Villa Partners 2.svg',
+		'whatsapp'           => $theme_asset_dir . 'whatsapp.svg',
+		'wifi'               => $theme_asset_dir . 'wifi.svg',
 	);
 }
 
