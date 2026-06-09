@@ -56,6 +56,13 @@ if ( '' !== $icon_slug && function_exists( 'gutenberg_lab_blocks_get_villa_ameni
 	$icon_markup = gutenberg_lab_blocks_get_villa_amenity_icon_svg( $icon_slug );
 }
 
+$icon_style = function_exists( 'gutenberg_lab_blocks_get_icon_size_css_var_style' )
+	? gutenberg_lab_blocks_get_icon_size_css_var_style(
+		'--vvm-editorial-feature-icon-size',
+		$attributes['iconSize'] ?? 0
+	)
+	: '';
+
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
 		'class' => implode(
@@ -74,7 +81,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 <article <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<div class="vvm-editorial-feature__slide-grid">
 		<?php if ( '' !== $icon_markup ) : ?>
-			<span class="vvm-editorial-feature__icon" aria-hidden="true">
+			<span class="vvm-editorial-feature__icon" aria-hidden="true"<?php echo '' !== $icon_style ? ' style="' . esc_attr( $icon_style ) . '"' : ''; ?>>
 				<?php echo $icon_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</span>
 		<?php endif; ?>

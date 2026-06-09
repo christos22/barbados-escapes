@@ -6,6 +6,7 @@ import {
 } from '@wordpress/block-editor';
 import { PanelBody, SelectControl } from '@wordpress/components';
 
+import IconSizeControl, { getIconSizeStyle } from '../shared/icon-size-control';
 import {
 	getValuePillarDashiconClass,
 	VALUE_PILLAR_DEFINITIONS,
@@ -24,7 +25,10 @@ const TEMPLATE = [
 	[
 		'core/paragraph',
 		{
-			placeholder: __( 'Add pillar description…', 'gutenberg-lab-blocks' ),
+			placeholder: __(
+				'Add pillar description…',
+				'gutenberg-lab-blocks'
+			),
 		},
 	],
 ];
@@ -35,7 +39,7 @@ const ICON_OPTIONS = VALUE_PILLAR_DEFINITIONS.map( ( definition ) => ( {
 } ) );
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { iconSlug } = attributes;
+	const { iconSlug, iconSize } = attributes;
 	const dashiconClass = getValuePillarDashiconClass( iconSlug );
 	const blockProps = useBlockProps( {
 		className: 'vvm-value-pillars__item',
@@ -63,17 +67,35 @@ export default function Edit( { attributes, setAttributes } ) {
 						label={ __( 'Pillar icon', 'gutenberg-lab-blocks' ) }
 						value={ iconSlug }
 						options={ ICON_OPTIONS }
-						onChange={ ( value ) => setAttributes( { iconSlug: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { iconSlug: value } )
+						}
 						help={ __(
 							'This stores a semantic icon choice so the temporary Dashicons can be replaced later without changing saved content.',
 							'gutenberg-lab-blocks'
 						) }
 					/>
+					<IconSizeControl
+						defaultSize={ 1.75 }
+						iconSize={ iconSize }
+						max={ 3.5 }
+						onChange={ ( nextIconSize ) =>
+							setAttributes( { iconSize: nextIconSize } )
+						}
+						onReset={ () => setAttributes( { iconSize: 0 } ) }
+					/>
 				</PanelBody>
 			</InspectorControls>
 
 			<article { ...blockProps }>
-				<div className="vvm-value-pillars__icon-wrap" aria-hidden="true">
+				<div
+					className="vvm-value-pillars__icon-wrap"
+					aria-hidden="true"
+					style={ getIconSizeStyle(
+						iconSize,
+						'--vvm-value-pillars-icon-size'
+					) }
+				>
 					<span
 						className={ [
 							'vvm-value-pillars__icon',

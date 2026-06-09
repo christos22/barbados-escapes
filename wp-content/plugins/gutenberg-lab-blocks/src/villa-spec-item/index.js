@@ -3,6 +3,7 @@ import { RichText, useBlockProps } from '@wordpress/block-editor';
 
 import Edit from './edit';
 import metadata from './block.json';
+import { getAmenityIconSizeStyle } from '../shared/amenity-icon-controls';
 
 registerBlockType( metadata.name, {
 	edit: Edit,
@@ -10,7 +11,7 @@ registerBlockType( metadata.name, {
 	// PHP renders the live block. This saved markup remains as a readable
 	// fallback and keeps existing saved Spec Items valid in the editor.
 	save( { attributes } ) {
-		const { value, label, iconSlug } = attributes;
+		const { value, label, iconSlug, iconSize } = attributes;
 
 		if ( ! value && ! label && ! iconSlug ) {
 			return null;
@@ -32,6 +33,10 @@ registerBlockType( metadata.name, {
 						className="vvm-villa-specs__icon"
 						aria-hidden="true"
 						data-icon={ iconSlug }
+						style={ getAmenityIconSizeStyle(
+							iconSize,
+							'--vvm-villa-spec-icon-size'
+						) }
 					/>
 				) : null }
 				{ value ? (

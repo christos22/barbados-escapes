@@ -12,6 +12,10 @@
 		"iconSlug": {
 			"type": "string",
 			"default": ""
+		},
+		"iconSize": {
+			"type": "number",
+			"default": 0
 		}
 	},
 	"supports": {

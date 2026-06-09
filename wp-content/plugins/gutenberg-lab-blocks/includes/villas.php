@@ -161,6 +161,56 @@ function gutenberg_lab_blocks_sanitize_villa_amenity_icon_key( $icon_key ) {
 }
 
 /**
+ * Sanitizes icon size controls before rendering them as CSS.
+ *
+ * A saved value of 0 means "use the block's responsive default". Positive
+ * values are rem units clamped to the range exposed in the editor controls.
+ *
+ * @param mixed $icon_size Raw block attribute value.
+ * @param float $min       Smallest allowed custom size.
+ * @param float $max       Largest allowed custom size.
+ * @return float
+ */
+function gutenberg_lab_blocks_sanitize_icon_size( $icon_size, $min = 1.0, $max = 12.0 ) {
+	if ( ! is_numeric( $icon_size ) ) {
+		return 0.0;
+	}
+
+	$icon_size = (float) $icon_size;
+
+	if ( $icon_size <= 0 ) {
+		return 0.0;
+	}
+
+	return min( (float) $max, max( (float) $min, $icon_size ) );
+}
+
+/**
+ * Builds a CSS custom-property style for a block icon size.
+ *
+ * @param string $css_variable_name CSS custom property name, including `--`.
+ * @param mixed  $icon_size         Raw block attribute value.
+ * @param float  $min               Smallest allowed custom size.
+ * @param float  $max               Largest allowed custom size.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_icon_size_css_var_style( $css_variable_name, $icon_size, $min = 1.0, $max = 12.0 ) {
+	if ( ! is_string( $css_variable_name ) || ! preg_match( '/^--[a-z0-9_-]+$/i', $css_variable_name ) ) {
+		return '';
+	}
+
+	$icon_size = gutenberg_lab_blocks_sanitize_icon_size( $icon_size, $min, $max );
+
+	if ( $icon_size <= 0 ) {
+		return '';
+	}
+
+	$formatted_size = rtrim( rtrim( number_format( $icon_size, 2, '.', '' ), '0' ), '.' );
+
+	return sprintf( '%1$s:%2$srem;', $css_variable_name, $formatted_size );
+}
+
+/**
  * Sanitizes decimal coordinate input for schema metadata.
  *
  * We store coordinates as strings so WordPress does not trim meaningful
