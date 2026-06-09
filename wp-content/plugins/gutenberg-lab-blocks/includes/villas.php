@@ -79,7 +79,7 @@ add_action( 'init', 'gutenberg_lab_blocks_register_villas_post_type' );
  * @return array<string, string>
  */
 function gutenberg_lab_blocks_get_villa_amenity_icon_choices() {
-	return array(
+	$choices = array(
 		'default'             => __( 'Default', 'gutenberg-lab-blocks' ),
 		'view'                => __( 'View', 'gutenberg-lab-blocks' ),
 		'ocean'               => __( 'Ocean', 'gutenberg-lab-blocks' ),
@@ -129,6 +129,7 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_choices() {
 		'finance-and'        => __( 'Finance & Administration', 'gutenberg-lab-blocks' ),
 		'gym'                => __( 'Gym', 'gutenberg-lab-blocks' ),
 		'hair-dryer'         => __( 'Hair Dryer', 'gutenberg-lab-blocks' ),
+		'handpicked'         => __( 'Handpicked', 'gutenberg-lab-blocks' ),
 		'infinity-pool'      => __( 'Infinity Pool', 'gutenberg-lab-blocks' ),
 		'local'              => __( 'Local', 'gutenberg-lab-blocks' ),
 		'lounge-chair'       => __( 'Lounge Chair', 'gutenberg-lab-blocks' ),
@@ -145,6 +146,15 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_choices() {
 		'whatsapp'           => __( 'WhatsApp', 'gutenberg-lab-blocks' ),
 		'wifi'               => __( 'WiFi', 'gutenberg-lab-blocks' ),
 	);
+
+	uasort(
+		$choices,
+		static function ( $first_label, $second_label ) {
+			return strnatcasecmp( (string) $first_label, (string) $second_label );
+		}
+	);
+
+	return $choices;
 }
 
 /**
@@ -1082,6 +1092,7 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_asset_paths() {
 		'finance-and'        => $theme_asset_dir . 'Finance and.svg',
 		'gym'                => $theme_asset_dir . 'gym.svg',
 		'hair-dryer'         => $theme_asset_dir . 'hair-dryer.svg',
+		'handpicked'         => $theme_asset_dir . 'handpicked.svg',
 		'infinity-pool'      => $theme_asset_dir . 'infinity-pool.svg',
 		'local'              => $theme_asset_dir . 'Local.svg',
 		'lounge-chair'       => $theme_asset_dir . 'lounge-chair.svg',
