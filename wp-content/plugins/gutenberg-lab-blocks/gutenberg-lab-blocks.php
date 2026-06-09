@@ -77,6 +77,64 @@ function gutenberg_lab_blocks_asset_version( $relative_path ) {
 }
 
 /**
+ * Versions generated block assets from their built files.
+ *
+ * WordPress uses the static `version` value in block.json for file-based block
+ * styles. Production caches those URLs aggressively, so we replace that static
+ * value with the newest mtime from the block's generated CSS/JS files.
+ *
+ * @param array<string, mixed> $metadata Block metadata read from block.json.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_blocks_version_block_metadata_assets( $metadata ) {
+	if (
+		empty( $metadata['name'] ) ||
+		! is_string( $metadata['name'] ) ||
+		! str_starts_with( $metadata['name'], 'gutenberg-lab-blocks/' ) ||
+		empty( $metadata['file'] )
+	) {
+		return $metadata;
+	}
+
+	$block_dir    = dirname( $metadata['file'] );
+	$asset_fields = array(
+		'editorScript',
+		'script',
+		'viewScript',
+		'viewScriptModule',
+		'editorStyle',
+		'style',
+		'viewStyle',
+	);
+	$asset_times  = array();
+
+	foreach ( $asset_fields as $asset_field ) {
+		if ( empty( $metadata[ $asset_field ] ) ) {
+			continue;
+		}
+
+		foreach ( (array) $metadata[ $asset_field ] as $asset_reference ) {
+			if ( ! is_string( $asset_reference ) || ! str_starts_with( $asset_reference, 'file:' ) ) {
+				continue;
+			}
+
+			$asset_path = realpath( $block_dir . '/' . substr( $asset_reference, 5 ) );
+
+			if ( $asset_path && file_exists( $asset_path ) ) {
+				$asset_times[] = filemtime( $asset_path );
+			}
+		}
+	}
+
+	if ( ! empty( $asset_times ) ) {
+		$metadata['version'] = (string) max( $asset_times );
+	}
+
+	return $metadata;
+}
+add_filter( 'block_type_metadata', 'gutenberg_lab_blocks_version_block_metadata_assets' );
+
+/**
  * Shared chevron icon used by every slider arrow button in the plugin.
  *
  * Keeping the SVG in one PHP helper makes it easier to reuse across blocks
