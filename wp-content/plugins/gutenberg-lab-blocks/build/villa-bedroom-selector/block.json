@@ -1,0 +1,29 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "gutenberg-lab-blocks/villa-bedroom-selector",
+  "version": "0.1.0",
+  "title": "Villa Bedroom Selector",
+  "category": "widgets",
+  "icon": "admin-home",
+  "description": "Lets guests choose a villa bedroom configuration and keeps the enquiry form synchronized.",
+  "attributes": {
+    "minimumBedrooms": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "usesContext": [
+    "postId",
+    "postType"
+  ],
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "textdomain": "gutenberg-lab-blocks",
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php"
+}

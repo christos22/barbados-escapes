@@ -1,0 +1,89 @@
+.vvm-villa-pricing__intro--has-bedroom-selector {
+	align-items: end;
+	column-gap: clamp(1rem, 2vw, 1.5rem);
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(13rem, auto);
+	row-gap: 0.6rem;
+}
+
+.vvm-villa-pricing__intro--has-bedroom-selector > .vvm-villa-amenities__eyebrow {
+	grid-column: 1 / -1;
+}
+
+.vvm-villa-pricing__intro--has-bedroom-selector > .vvm-villa-bedroom-selector {
+	grid-column: 2;
+	grid-row: 2;
+	margin: 0;
+	transform: translateY(-0.65rem);
+}
+
+.vvm-villa-bedroom-selector__select,
+.vvm-villa-contact-form select.wpcf7-select[name="villa-bedrooms"] {
+	appearance: none;
+	background-position: right 1rem center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
+.vvm-villa-bedroom-selector__select {
+	--vvm-bedroom-select-border: rgba(77, 72, 68, 0.14);
+	--vvm-bedroom-select-focus: #84ad9f;
+	--vvm-bedroom-select-surface: #fbf8f2;
+	--vvm-bedroom-select-text: #57524e;
+
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 3.35rem;
+	margin: 0;
+	padding: 0.75rem 2.8rem 0.75rem 1rem;
+	border: 1px solid var(--vvm-bedroom-select-border);
+	border-radius: 6px;
+	background-color: var(--vvm-bedroom-select-surface);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpath fill='none' stroke='%2357524e' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m1 1 6 6 6-6'/%3E%3C/svg%3E");
+	color: var(--vvm-bedroom-select-text);
+	color-scheme: light;
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 0.88rem;
+	line-height: 1.4;
+}
+
+.vvm-villa-contact-form select.wpcf7-select[name="villa-bedrooms"] {
+	padding-right: 2.8rem;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpath fill='none' stroke='%23f7f2e8' stroke-opacity='.45' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m1 1 6 6 6-6'/%3E%3C/svg%3E");
+	color: rgb(247 241 231 / 0.45);
+}
+
+.vvm-villa-bedroom-selector__select:focus {
+	border-color: var(--vvm-bedroom-select-focus);
+	outline: 2px solid rgb(132 173 159 / 0.24);
+	outline-offset: 0;
+}
+
+.vvm-villa-contact-form select.wpcf7-select[name="villa-bedrooms"] option {
+	background: #f7f1e7;
+	color: #57524e;
+	color-scheme: light;
+}
+
+.editor-styles-wrapper .vvm-villa-bedroom-selector__select:disabled {
+	cursor: default;
+	opacity: 0.72;
+}
+
+@media (max-width: 781px) {
+
+	.vvm-villa-pricing__header:has(.vvm-villa-bedroom-selector) {
+		row-gap: 0.75rem;
+	}
+
+	.vvm-villa-pricing__intro--has-bedroom-selector {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.vvm-villa-pricing__intro--has-bedroom-selector > .vvm-villa-bedroom-selector {
+		grid-column: 1;
+		grid-row: auto;
+		transform: none;
+		width: 100%;
+	}
+}

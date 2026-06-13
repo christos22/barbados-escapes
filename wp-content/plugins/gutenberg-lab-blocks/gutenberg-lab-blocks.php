@@ -23,6 +23,7 @@ require_once __DIR__ . '/includes/package-rendering.php';
 require_once __DIR__ . '/includes/peeking-carousel.php';
 require_once __DIR__ . '/includes/site-messages.php';
 require_once __DIR__ . '/includes/villas.php';
+require_once __DIR__ . '/includes/villa-bedroom-selector.php';
 require_once __DIR__ . '/includes/villa-availability.php';
 require_once __DIR__ . '/includes/mcp-abilities.php';
 
@@ -465,6 +466,7 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/site-alerts' );
 	register_block_type( __DIR__ . '/build/villa-hero-search' );
 	register_block_type( __DIR__ . '/build/villa-availability-calendar' );
+	register_block_type( __DIR__ . '/build/villa-bedroom-selector' );
 	register_block_type( __DIR__ . '/build/villa-gallery-hero' );
 	register_block_type( __DIR__ . '/build/villa-gallery-hero-media' );
 	register_block_type( __DIR__ . '/build/villa-gallery-hero-content' );
