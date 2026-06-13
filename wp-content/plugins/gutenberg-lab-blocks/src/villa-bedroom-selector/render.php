@@ -30,7 +30,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 
 <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<label class="screen-reader-text" for="<?php echo esc_attr( $select_id ); ?>">
-		<?php esc_html_e( 'Bedrooms requested', 'gutenberg-lab-blocks' ); ?>
+		<?php esc_html_e( 'Bedrooms for seasonal pricing', 'gutenberg-lab-blocks' ); ?>
 	</label>
 	<select
 		id="<?php echo esc_attr( $select_id ); ?>"

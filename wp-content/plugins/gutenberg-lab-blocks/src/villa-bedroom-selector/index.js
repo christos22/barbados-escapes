@@ -47,7 +47,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 				<select
 					className="vvm-villa-bedroom-selector__select"
 					aria-label={ __(
-						'Bedrooms requested',
+						'Bedrooms for seasonal pricing',
 						'gutenberg-lab-blocks'
 					) }
 					disabled
