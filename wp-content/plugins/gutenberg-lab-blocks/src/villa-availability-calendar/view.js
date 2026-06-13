@@ -291,10 +291,10 @@ const initializeCalendar = ( root ) => {
 		isUnavailableDate( date ) && ! isUnavailableDate( addDays( date, 1 ) );
 
 	const isSelectableUnavailableRangeStart = ( date ) =>
-		isUnavailableRangeStart( date ) && ! isCheckoutBufferDate( date );
+		isUnavailableRangeStart( date );
 
 	const isSelectableUnavailableRangeEnd = ( date ) =>
-		isUnavailableRangeEnd( date ) && ! isCheckoutBufferDate( date );
+		isUnavailableRangeEnd( date );
 
 	const canSelectArrivalDate = ( date ) =>
 		! isUnavailableDate( date ) ||
