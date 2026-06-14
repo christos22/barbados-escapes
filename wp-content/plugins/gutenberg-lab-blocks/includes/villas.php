@@ -692,6 +692,27 @@ function gutenberg_lab_blocks_get_villa_meta_schema() {
 			'default'           => false,
 			'sanitize_callback' => 'rest_sanitize_boolean',
 		),
+		'villa_bedroom_selector_choices' => array(
+			'type'              => 'array',
+			'default'           => array(),
+			'sanitize_callback' => 'gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows',
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'     => 'array',
+					'maxItems' => 30,
+					'items'    => array(
+						'type'                 => 'object',
+						'additionalProperties' => false,
+						'properties'           => array(
+							'label' => array(
+								'type'      => 'string',
+								'maxLength' => 120,
+							),
+						),
+					),
+				),
+			),
+		),
 	);
 }
 
@@ -700,13 +721,20 @@ function gutenberg_lab_blocks_get_villa_meta_schema() {
  */
 function gutenberg_lab_blocks_register_villa_meta() {
 	foreach ( gutenberg_lab_blocks_get_villa_meta_schema() as $meta_key => $meta_args ) {
+		$show_in_rest = true;
+
+		if ( array_key_exists( 'show_in_rest', $meta_args ) ) {
+			$show_in_rest = $meta_args['show_in_rest'];
+			unset( $meta_args['show_in_rest'] );
+		}
+
 		register_post_meta(
 			'villa',
 			$meta_key,
 			array_merge(
 				$meta_args,
 				array(
-					'show_in_rest' => true,
+					'show_in_rest' => $show_in_rest,
 					'single'       => true,
 				)
 			)

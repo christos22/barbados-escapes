@@ -48,40 +48,76 @@ function gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id ) {
 }
 
 /**
+ * Sanitizes one editor-managed bedroom choice label.
+ *
+ * @param mixed $label Raw choice label.
+ * @return string
+ */
+function gutenberg_lab_blocks_sanitize_villa_bedroom_choice_label( $label ) {
+	$label = sanitize_text_field( (string) $label );
+	$label = trim( preg_replace( '/\s+/', ' ', $label ) );
+
+	if ( function_exists( 'mb_substr' ) ) {
+		return mb_substr( $label, 0, 120 );
+	}
+
+	return substr( $label, 0, 120 );
+}
+
+/**
  * Sanitizes editor-managed bedroom choices.
  *
- * Bedroom counts are unique because they are also the submitted form values.
- * Keeping the labels derived from numeric data avoids trusting editor text in
- * the CF7 allowlist.
+ * New choices are custom text labels. Legacy numeric bedroom/sleeps rows are
+ * still accepted so existing block content keeps rendering.
  *
  * @param mixed $rows Raw block attribute value.
- * @return array<int, array{bedrooms:int,sleeps:int}>
+ * @return array<int, array{label:string}>
  */
 function gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows( $rows ) {
 	$choices = array();
+	$seen    = array();
 
 	if ( ! is_array( $rows ) ) {
 		return $choices;
 	}
 
 	foreach ( $rows as $row ) {
-		if ( ! is_array( $row ) ) {
+		if ( count( $choices ) >= 30 ) {
+			break;
+		}
+
+		$label = '';
+
+		if ( is_scalar( $row ) ) {
+			$label = gutenberg_lab_blocks_sanitize_villa_bedroom_choice_label( $row );
+		} elseif ( is_array( $row ) ) {
+			if ( isset( $row['label'] ) ) {
+				$label = gutenberg_lab_blocks_sanitize_villa_bedroom_choice_label(
+					$row['label']
+				);
+			} else {
+				$bedrooms = min( 30, absint( $row['bedrooms'] ?? 0 ) );
+
+				if ( $bedrooms > 0 ) {
+					$label = gutenberg_lab_blocks_format_villa_bedroom_choice(
+						$bedrooms,
+						min( 100, absint( $row['sleeps'] ?? 0 ) )
+					);
+				}
+			}
+		}
+
+		$dedupe_key = strtolower( $label );
+
+		if ( '' === $label || isset( $seen[ $dedupe_key ] ) ) {
 			continue;
 		}
 
-		$bedrooms = min( 30, absint( $row['bedrooms'] ?? 0 ) );
-
-		if ( $bedrooms < 1 || isset( $choices[ $bedrooms ] ) ) {
-			continue;
-		}
-
-		$choices[ $bedrooms ] = array(
-			'bedrooms' => $bedrooms,
-			'sleeps'   => min( 100, absint( $row['sleeps'] ?? 0 ) ),
-		);
+		$choices[]           = array( 'label' => $label );
+		$seen[ $dedupe_key ] = true;
 	}
 
-	return array_values( $choices );
+	return $choices;
 }
 
 /**
@@ -143,18 +179,30 @@ function gutenberg_lab_blocks_get_villa_bedroom_selector_attributes( $attributes
 }
 
 /**
+ * Returns the neutral bedroom selector placeholder label.
+ *
+ * @return string
+ */
+function gutenberg_lab_blocks_get_villa_bedroom_choice_placeholder() {
+	return __( 'Select room number', 'gutenberg-lab-blocks' );
+}
+
+/**
  * Returns option markup for a villa bedroom select.
  *
- * @param array<int, string> $choices Bedroom values and labels.
+ * @param array<int, string> $choices Bedroom choice labels.
  * @return string
  */
 function gutenberg_lab_blocks_render_villa_bedroom_choice_options( $choices ) {
-	$markup = '';
+	$markup = sprintf(
+		'<option value="">%s</option>',
+		esc_html( gutenberg_lab_blocks_get_villa_bedroom_choice_placeholder() )
+	);
 
-	foreach ( $choices as $value => $label ) {
+	foreach ( $choices as $label ) {
 		$markup .= sprintf(
 			'<option value="%1$s">%2$s</option>',
-			esc_attr( (string) $value ),
+			esc_attr( $label ),
 			esc_html( $label )
 		);
 	}
@@ -275,11 +323,11 @@ function gutenberg_lab_blocks_render_villa_bedroom_selector( $villa_id, $minimum
 /**
  * Collects booking data from structured villa blocks.
  *
- * The visible Villa Specs block is the source of truth. Reading its attributes
- * avoids duplicating bedroom and guest capacity in another settings screen.
+ * The visible Villa Specs block supplies the fallback bedroom range. Explicit
+ * bedroom choices can override that range when a villa needs bespoke labels.
  *
  * @param array<int, array<string, mixed>> $blocks Parsed Gutenberg blocks.
- * @param array<string, int>               $data   Collected booking data.
+ * @param array<string, mixed>             $data   Collected booking data.
  */
 function gutenberg_lab_blocks_collect_villa_booking_data( $blocks, &$data ) {
 	foreach ( $blocks as $parsed_block ) {
@@ -296,10 +344,6 @@ function gutenberg_lab_blocks_collect_villa_booking_data( $blocks, &$data ) {
 
 			if ( $value && preg_match( '/^bedrooms?$/', $label ) ) {
 				$data['bedrooms'] = min( 30, $value );
-			}
-
-			if ( $value && preg_match( '/^(?:sleeps?|guests?)$/', $label ) ) {
-				$data['sleeps'] = min( 100, $value );
 			}
 		}
 
@@ -329,15 +373,14 @@ function gutenberg_lab_blocks_collect_villa_booking_data( $blocks, &$data ) {
 }
 
 /**
- * Returns bedroom capacity and selector settings for a villa.
+ * Returns bedroom selector settings for a villa.
  *
  * @param int $villa_id Villa post ID.
  * @return array{
  *     bedrooms:int,
- *     sleeps:int,
  *     minimum_bedrooms:int,
  *     has_custom_bedroom_choices:bool,
- *     bedroom_choices:array<int, array{bedrooms:int,sleeps:int}>
+ *     bedroom_choices:array<int, array{label:string}>
  * }
  */
 function gutenberg_lab_blocks_get_villa_booking_data( $villa_id ) {
@@ -351,7 +394,6 @@ function gutenberg_lab_blocks_get_villa_booking_data( $villa_id ) {
 	) {
 		return array(
 			'bedrooms'                   => 0,
-			'sleeps'                     => 0,
 			'minimum_bedrooms'           => 1,
 			'has_custom_bedroom_choices' => false,
 			'bedroom_choices'            => array(),
@@ -364,7 +406,6 @@ function gutenberg_lab_blocks_get_villa_booking_data( $villa_id ) {
 
 	$data = array(
 		'bedrooms'                   => 0,
-		'sleeps'                     => 0,
 		'minimum_bedrooms'           => 1,
 		'has_custom_bedroom_choices' => false,
 		'bedroom_choices'            => array(),
@@ -378,6 +419,15 @@ function gutenberg_lab_blocks_get_villa_booking_data( $villa_id ) {
 		);
 	}
 
+	$meta_choices = gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows(
+		get_post_meta( $villa_id, 'villa_bedroom_selector_choices', true )
+	);
+
+	if ( ! empty( $meta_choices ) ) {
+		$data['has_custom_bedroom_choices'] = true;
+		$data['bedroom_choices']            = $meta_choices;
+	}
+
 	$data['minimum_bedrooms'] = min(
 		max( 1, $data['minimum_bedrooms'] ),
 		max( 1, $data['bedrooms'] )
@@ -388,7 +438,7 @@ function gutenberg_lab_blocks_get_villa_booking_data( $villa_id ) {
 }
 
 /**
- * Returns allowed bedroom values and visitor-facing labels.
+ * Returns allowed bedroom labels.
  *
  * @param int      $villa_id         Villa post ID.
  * @param int|null $minimum_override Optional block-level minimum.
@@ -400,17 +450,11 @@ function gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id, $minimum_ove
 	$minimum  = null === $minimum_override
 		? (int) $data['minimum_bedrooms']
 		: max( 1, min( $maximum, absint( $minimum_override ) ) );
-	$capacity = 0;
 	$choices  = array();
 
 	if ( ! empty( $data['has_custom_bedroom_choices'] ) ) {
 		foreach ( $data['bedroom_choices'] as $choice ) {
-			$bedrooms = (int) $choice['bedrooms'];
-
-			$choices[ $bedrooms ] = gutenberg_lab_blocks_format_villa_bedroom_choice(
-				$bedrooms,
-				(int) $choice['sleeps']
-			);
+			$choices[] = (string) $choice['label'];
 		}
 
 		return $choices;
@@ -420,18 +464,9 @@ function gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id, $minimum_ove
 		return $choices;
 	}
 
-	// Only show sleeping capacity when it scales cleanly per bedroom.
-	if (
-		$data['sleeps'] > 0 &&
-		0 === $data['sleeps'] % $maximum
-	) {
-		$capacity = (int) ( $data['sleeps'] / $maximum );
-	}
-
 	for ( $bedrooms = $maximum; $bedrooms >= $minimum; --$bedrooms ) {
-		$choices[ $bedrooms ] = gutenberg_lab_blocks_format_villa_bedroom_choice(
-			$bedrooms,
-			$bedrooms * $capacity
+		$choices[] = gutenberg_lab_blocks_format_villa_bedroom_choice(
+			$bedrooms
 		);
 	}
 
@@ -591,17 +626,16 @@ function gutenberg_lab_blocks_filter_cf7_villa_bedroom_tag( $tag, $_replace ) {
 	 * validation still use the current villa's smaller, exact choice set.
 	 */
 	if ( empty( $choices ) && ! $villa_id ) {
-		$generic_values = range( 1, 30 );
-		$choices = array_combine(
-			$generic_values,
-			array_map( 'strval', $generic_values )
+		$choices = array_map(
+			'gutenberg_lab_blocks_format_villa_bedroom_choice',
+			range( 1, 30 )
 		);
 	}
 
-	$values            = array_map( 'strval', array_keys( $choices ) );
-	$tag['raw_values'] = $values;
-	$tag['values']     = $values;
-	$tag['labels']     = array_values( $choices );
+	$placeholder       = gutenberg_lab_blocks_get_villa_bedroom_choice_placeholder();
+	$tag['raw_values'] = array_merge( array( '' ), $choices );
+	$tag['values']     = array_merge( array( '' ), $choices );
+	$tag['labels']     = array_merge( array( $placeholder ), $choices );
 	$tag['pipes']      = null;
 
 	return $tag;
@@ -777,17 +811,14 @@ function gutenberg_lab_blocks_validate_cf7_injected_villa_bedrooms( $result, $ta
 
 	$choices = gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id );
 
-	if (
-		! ctype_digit( $submitted ) ||
-		! isset( $choices[ (int) $submitted ] )
-	) {
+	if ( ! in_array( $submitted, $choices, true ) ) {
 		$result->invalidate(
 			array(
 				'type'    => 'select',
 				'name'    => 'villa-bedrooms',
 				'options' => array( 'id:villa-bedrooms' ),
 			),
-			__( 'Please choose a valid number of bedrooms.', 'gutenberg-lab-blocks' )
+			__( 'Please choose a valid bedroom option.', 'gutenberg-lab-blocks' )
 		);
 	}
 
@@ -827,8 +858,7 @@ function gutenberg_lab_blocks_add_villa_bedrooms_to_mail( $components, $contact_
 	$choices   = gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id );
 
 	if (
-		! ctype_digit( $submitted ) ||
-		! isset( $choices[ (int) $submitted ] ) ||
+		! in_array( $submitted, $choices, true ) ||
 		empty( $components['body'] ) ||
 		! is_string( $components['body'] ) ||
 		false !== stripos( $components['body'], 'Bedrooms:' )
@@ -839,7 +869,7 @@ function gutenberg_lab_blocks_add_villa_bedrooms_to_mail( $components, $contact_
 	$line = sprintf(
 		/* translators: %s is the selected bedroom label. */
 		__( 'Bedrooms: %s', 'gutenberg-lab-blocks' ),
-		$choices[ (int) $submitted ]
+		$submitted
 	) . "\n";
 
 	$updated_body = preg_replace(
@@ -904,7 +934,7 @@ function gutenberg_lab_blocks_validate_cf7_villa_bedrooms( $result, $tag ) {
 	if ( $has_mismatched_villa ) {
 		$result->invalidate(
 			$tag,
-			__( 'Please choose a valid number of bedrooms.', 'gutenberg-lab-blocks' )
+			__( 'Please choose a valid bedroom option.', 'gutenberg-lab-blocks' )
 		);
 
 		return $result;
@@ -919,13 +949,10 @@ function gutenberg_lab_blocks_validate_cf7_villa_bedrooms( $result, $tag ) {
 
 	$choices  = gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id );
 
-	if (
-		! ctype_digit( $submitted ) ||
-		! isset( $choices[ (int) $submitted ] )
-	) {
+	if ( ! in_array( $submitted, $choices, true ) ) {
 		$result->invalidate(
 			$tag,
-			__( 'Please choose a valid number of bedrooms.', 'gutenberg-lab-blocks' )
+			__( 'Please choose a valid bedroom option.', 'gutenberg-lab-blocks' )
 		);
 	}
 
