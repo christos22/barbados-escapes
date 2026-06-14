@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.42
+Version: 0.1.43
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -1959,13 +1959,8 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	--vvm-button-line-height: 1;
 	--vvm-button-border-width: 1px;
 	--vvm-button-padding-inline: 32px;
-	--vvm-button-padding-block-base: calc(
-		(
-			var(--vvm-button-height) -
-			(var(--vvm-button-font-size) * var(--vvm-button-line-height)) -
-			(var(--vvm-button-border-width) * 2)
-		) / 2
-	);
+	--vvm-button-padding-block-start: 12px;
+	--vvm-button-padding-block-end: 7px;
 
 	display: inline-flex;
 	align-items: center;
@@ -1974,7 +1969,8 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	box-sizing: border-box;
 	min-height: var(--vvm-button-height);
 	min-width: max-content;
-	padding-block: var(--vvm-button-padding-block-base);
+	padding-block-start: var(--vvm-button-padding-block-start);
+	padding-block-end: var(--vvm-button-padding-block-end);
 	padding-inline: var(--vvm-button-padding-inline);
 	border-radius: 0;
 	font-family: "Romely", sans-serif;

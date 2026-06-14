@@ -200,7 +200,7 @@
 				"spacing": {
 					"padding": {
 						"top": "12px",
-						"bottom": "12px",
+						"bottom": "7px",
 						"left": "32px",
 						"right": "32px"
 					}
@@ -210,7 +210,8 @@
 					"fontWeight": "600",
 					"letterSpacing": "0.15em",
 					"textTransform": "uppercase",
-					"fontSize": "18px"
+					"fontSize": "18px",
+					"lineHeight": "1"
 				},
 				"color": {
 					"text": "var(--wp--preset--color--dark-green)",
