@@ -103,7 +103,7 @@ const useBedroomSelectorEnabled = () =>
 
 		const meta = editor.getEditedPostAttribute( 'meta' ) || {};
 
-		return meta[ BEDROOM_SELECTOR_META_KEY ] ?? true;
+		return meta[ BEDROOM_SELECTOR_META_KEY ] ?? false;
 	}, [] );
 
 const BedroomSelectorToggleControl = () => {

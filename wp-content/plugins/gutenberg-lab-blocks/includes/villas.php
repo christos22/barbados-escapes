@@ -60,6 +60,7 @@ function gutenberg_lab_blocks_register_villas_post_type() {
 				'excerpt',
 				'thumbnail',
 				'page-attributes',
+				'custom-fields',
 			),
 			'taxonomies'   => array(
 				'villa_amenity',
@@ -688,7 +689,7 @@ function gutenberg_lab_blocks_get_villa_meta_schema() {
 		),
 		'villa_bedroom_selector_enabled' => array(
 			'type'              => 'boolean',
-			'default'           => true,
+			'default'           => false,
 			'sanitize_callback' => 'rest_sanitize_boolean',
 		),
 	);

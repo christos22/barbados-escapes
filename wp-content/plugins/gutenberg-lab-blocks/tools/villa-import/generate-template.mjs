@@ -49,7 +49,7 @@ const keyValueSheets = [
 			[ 'bedrooms', 'Number of bedrooms', true, 'Whole number only.', 'whole' ],
 			[ 'bathrooms', 'Number of bathrooms', true, 'Decimals such as 4.5 are allowed.', 'decimal' ],
 			[ 'sleeps', 'Maximum guests', true, 'Whole number only.', 'whole' ],
-			[ 'bedroom_selector_enabled', 'Show bedroom selector?', true, 'Choose Yes when guests can enquire for a bedroom configuration. Choose No when the villa is only offered as a fixed whole-villa stay.', 'yesNo', 'Yes' ],
+			[ 'bedroom_selector_enabled', 'Show bedroom selector?', true, 'Choose Yes when guests can enquire for a bedroom configuration. Choose No when the villa is only offered as a fixed whole-villa stay.', 'yesNo', 'No' ],
 			[ 'minimum_bedroom_choice', 'Lowest bedroom option to show', false, 'Leave blank for 1. If a 7-bedroom villa only rents from 5 bedrooms upward, enter 5.', 'whole' ],
 			[ 'pool_summary', 'Pool summary', true, 'Example: 1 Private Pool or 2 Pools.' ],
 			[ 'starting_rate_usd', 'Starting nightly rate (USD)', true, 'Enter numbers only. Do not type a currency symbol.', 'currency' ],

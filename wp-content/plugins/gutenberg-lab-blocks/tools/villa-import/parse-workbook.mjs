@@ -280,7 +280,7 @@ const bedroomCount = integerValue( overview.bedrooms );
 const bathroomCount = numberValue( overview.bathrooms );
 const sleepsCount = integerValue( overview.sleeps );
 const startingRate = numberValue( overview.starting_rate_usd );
-const bedroomSelectorEnabled = yesNoValue( overview.bedroom_selector_enabled, true );
+const bedroomSelectorEnabled = yesNoValue( overview.bedroom_selector_enabled, false );
 const minimumBedroomChoice = integerValue( overview.minimum_bedroom_choice ) || 1;
 
 if ( ! bedroomCount || bedroomCount < 1 ) {

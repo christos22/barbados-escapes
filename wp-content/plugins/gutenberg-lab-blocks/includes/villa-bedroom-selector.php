@@ -12,8 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Checks whether bedroom selection is enabled for a villa.
  *
- * Existing villas predate the setting, so a missing meta row intentionally
- * preserves the feature's current enabled behavior.
+ * A villa must explicitly opt in. Missing meta means the bedroom selectors are
+ * disabled.
  *
  * @param int $villa_id Villa post ID.
  * @return bool
@@ -35,7 +35,7 @@ function gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id ) {
 			'villa_bedroom_selector_enabled'
 		)
 	) {
-		return true;
+		return false;
 	}
 
 	return rest_sanitize_boolean(

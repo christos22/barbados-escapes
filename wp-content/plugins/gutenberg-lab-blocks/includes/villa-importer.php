@@ -1559,8 +1559,8 @@ function gutenberg_lab_blocks_villa_importer_meta( $data ) {
 			'villa_schema_street_address'  => $overview['display_address'] ?? '',
 			'villa_schema_postal_code'     => $overview['postal_code'] ?? '',
 			'villa_bedroom_selector_enabled' => gutenberg_lab_blocks_villa_importer_boolean(
-				$overview['bedroom_selector_enabled'] ?? true,
-				true
+				$overview['bedroom_selector_enabled'] ?? false,
+				false
 			) ? '1' : '0',
 			'_gutenberg_lab_villa_import_managed' => '1',
 			'_gutenberg_lab_villa_import_schema_version' => $data['schema_version'],

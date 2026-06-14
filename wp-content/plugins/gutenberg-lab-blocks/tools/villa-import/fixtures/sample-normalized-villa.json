@@ -11,7 +11,7 @@
     "bedrooms": 2,
     "bathrooms": 2.5,
     "sleeps": 4,
-    "bedroom_selector_enabled": true,
+    "bedroom_selector_enabled": false,
     "minimum_bedroom_choice": 1,
     "pool_summary": "1 Private Pool",
     "starting_rate_usd": 1200,
