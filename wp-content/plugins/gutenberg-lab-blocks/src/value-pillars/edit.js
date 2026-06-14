@@ -11,6 +11,7 @@ const SMALL_ALLOWED_BLOCKS = [
 	'core/list',
 	'core/buttons',
 	'core/image',
+	'gutenberg-lab-blocks/icon',
 	'core/group',
 	'core/quote',
 	'core/separator',

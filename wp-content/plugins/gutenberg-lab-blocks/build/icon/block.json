@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "gutenberg-lab-blocks/icon",
+  "version": "0.1.0",
+  "title": "Shared Icon",
+  "category": "design",
+  "icon": "star-filled",
+  "description": "Displays one responsive SVG icon from the shared synced icon registry.",
+  "keywords": [
+    "icon",
+    "svg",
+    "amenity"
+  ],
+  "attributes": {
+    "iconSlug": {
+      "type": "string",
+      "default": "default"
+    },
+    "sizePreset": {
+      "type": "string",
+      "default": "md"
+    },
+    "customSize": {
+      "type": "number",
+      "default": 0
+    },
+    "alignment": {
+      "type": "string",
+      "default": "left"
+    },
+    "ariaLabel": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false,
+    "anchor": true,
+    "spacing": {
+      "margin": [
+        "top",
+        "bottom"
+      ]
+    },
+    "color": {
+      "text": true
+    }
+  },
+  "textdomain": "gutenberg-lab-blocks",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php"
+}

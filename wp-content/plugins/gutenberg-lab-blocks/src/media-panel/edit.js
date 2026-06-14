@@ -87,6 +87,7 @@ const ALLOWED_INNER_BLOCKS = [
 	'core/list',
 	'core/buttons',
 	'core/image',
+	'gutenberg-lab-blocks/icon',
 	'core/quote',
 	'core/group',
 	'core/separator',

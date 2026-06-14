@@ -71,6 +71,283 @@ function gutenberg_lab_blocks_register_villas_post_type() {
 add_action( 'init', 'gutenberg_lab_blocks_register_villas_post_type' );
 
 /**
+ * Returns the shared icon registry used by amenity terms and icon-capable blocks.
+ *
+ * To add a new asset-backed icon, add one entry here with its label and asset
+ * path. The term selector, block selectors, editor previews, and front-end
+ * renderers all derive their options from this registry.
+ *
+ * @return array<string, array<string, string>>
+ */
+function gutenberg_lab_blocks_get_villa_amenity_icon_registry() {
+	$asset_dir       = dirname( __DIR__ ) . '/assets/icons/villa-amenities/';
+	$theme_asset_dir = trailingslashit( get_stylesheet_directory() ) . 'assets/icons/';
+
+	return array(
+		'aircon'             => array(
+			'label' => __( 'Air Conditioning', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'aircon.svg',
+		),
+		'bathtub'            => array(
+			'label' => __( 'Bathtub', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'bathtub.svg',
+		),
+		'bbq'                => array(
+			'label' => __( 'BBQ', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'bbq.svg',
+		),
+		'beach-club-access'  => array(
+			'label' => __( 'Beach Club Access', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'beach-club-access.svg',
+		),
+		'bed'                => array(
+			'label' => __( 'Bed', 'gutenberg-lab-blocks' ),
+			'paths' => '<path d="M4 11.5V7.8c0-.9.7-1.6 1.6-1.6h4.1c1 0 1.8.8 1.8 1.8v3.5"></path><path d="M11.5 11.5V9.2h5.3c1.8 0 3.2 1.4 3.2 3.2v4.1"></path><path d="M4 16.5h16"></path><path d="M4 18.5v-7"></path><path d="M20 18.5v-2"></path>',
+		),
+		'breakfast-bar'      => array(
+			'label' => __( 'Breakfast Bar', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'breakfast-bar.svg',
+		),
+		'cafe-table'         => array(
+			'label' => __( 'Cafe Table', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'cafe-table.svg',
+		),
+		'car'                => array(
+			'label' => __( 'Car', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'car.svg',
+		),
+		'ceiling-fan'        => array(
+			'label' => __( 'Ceiling Fan', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'ceiling-fan.svg',
+		),
+		'closet'             => array(
+			'label' => __( 'Closet', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'closet.svg',
+		),
+		'cooking-pot'        => array(
+			'label' => __( 'Cooking Pot', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'cooking-pot.svg',
+		),
+		'covered-terrace'    => array(
+			'label' => __( 'Covered Terrace', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'covered-terrace.svg',
+		),
+		'curated'            => array(
+			'label' => __( 'Curated', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'Curated.svg',
+		),
+		'default'            => array(
+			'label' => __( 'Default', 'gutenberg-lab-blocks' ),
+			'paths' => '<circle cx="12" cy="12" r="6.5"></circle><path d="M12 5.5v13M5.5 12h13"></path>',
+		),
+		'desk'               => array(
+			'label' => __( 'Desk', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'desk.svg',
+		),
+		'dishwasher'         => array(
+			'label' => __( 'Dishwasher', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'dishwasher.svg',
+		),
+		'dvd'                => array(
+			'label' => __( 'DVD', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'dvd.svg',
+		),
+		'ev-charging'        => array(
+			'label' => __( 'EV Charging', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'ev-charging.svg',
+		),
+		'experience'         => array(
+			'label' => __( 'Experience', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'Experience.svg',
+		),
+		'finance-and'        => array(
+			'label' => __( 'Finance & Administration', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'Finance and.svg',
+		),
+		'fitness-studio'     => array(
+			'label' => __( 'Fitness Studio', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'fitness-studio.svg',
+		),
+		'golf'               => array(
+			'label' => __( 'Golf', 'gutenberg-lab-blocks' ),
+			'paths' => '<path d="M10 21V4"></path><path d="M10 4l8 2.3-8 2.4"></path><ellipse cx="10" cy="21" rx="6.5" ry="1.7"></ellipse><circle cx="17.5" cy="18.8" r="1"></circle>',
+		),
+		'gym'                => array(
+			'label' => __( 'Gym', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'gym.svg',
+		),
+		'hair-dryer'         => array(
+			'label' => __( 'Hair Dryer', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'hair-dryer.svg',
+		),
+		'handpicked'         => array(
+			'label' => __( 'Handpicked', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'handpicked.svg',
+		),
+		'hillside-retreat'   => array(
+			'label' => __( 'Hillside Retreat', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'hillside-retreat.svg',
+		),
+		'ice-maker'          => array(
+			'label' => __( 'Ice Maker', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'ice-maker.svg',
+		),
+		'infinity-pool'      => array(
+			'label' => __( 'Infinity Pool', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'infinity-pool.svg',
+		),
+		'in-room-safe'       => array(
+			'label' => __( 'In-room Safe', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'in-room-safe.svg',
+		),
+		'ipod'               => array(
+			'label' => __( 'iPod', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'ipod.svg',
+		),
+		'local'              => array(
+			'label' => __( 'Local', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'Local.svg',
+		),
+		'lounge-chair'       => array(
+			'label' => __( 'Lounge Chair', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'lounge-chair.svg',
+		),
+		'martin'             => array(
+			'label' => __( 'Martini', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'martin.svg',
+		),
+		'media-room'         => array(
+			'label' => __( 'Media Room', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'media-room.svg',
+		),
+		'ocean'              => array(
+			'label' => __( 'Ocean', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'ocean.svg',
+		),
+		'ocean-front'        => array(
+			'label' => __( 'Ocean Front', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'ocean-front.svg',
+		),
+		'ocean-view'         => array(
+			'label' => __( 'Ocean View', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'ocean-view.svg',
+		),
+		'outdoor-shower'     => array(
+			'label' => __( 'Outdoor Shower', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'outdoor-shower.svg',
+		),
+		'people'             => array(
+			'label' => __( 'People', 'gutenberg-lab-blocks' ),
+			'paths' => '<circle cx="12" cy="7.5" r="3"></circle><path d="M7.2 18.8c.7-3 2.3-4.5 4.8-4.5s4.1 1.5 4.8 4.5"></path><circle cx="5.8" cy="10" r="2.1"></circle><path d="M2.8 18.2c.3-2 1.3-3.2 3-3.7"></path><circle cx="18.2" cy="10" r="2.1"></circle><path d="M21.2 18.2c-.3-2-1.3-3.2-3-3.7"></path>',
+		),
+		'pergola'            => array(
+			'label' => __( 'Pergola', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'pergola.svg',
+		),
+		'personal-new'       => array(
+			'label' => __( 'Personal New', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'personal-new.svg',
+		),
+		'pool'               => array(
+			'label' => __( 'Pool', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'pool.svg',
+		),
+		'pool-bar'           => array(
+			'label' => __( 'Pool Bar', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'pool-bar.svg',
+		),
+		'poolside-washroom'  => array(
+			'label' => __( 'Poolside Washroom', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'poolside-washroom.svg',
+		),
+		'private-entry-gates' => array(
+			'label' => __( 'Private Entry Gates', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'private-entry-gates.svg',
+		),
+		'saltwater-pool'     => array(
+			'label' => __( 'Saltwater Pool', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'saltwater-pool.svg',
+		),
+		'sauna'              => array(
+			'label' => __( 'Sauna', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'sauna.svg',
+		),
+		'security-cameras'   => array(
+			'label' => __( 'Security Cameras', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'security-cameras.svg',
+		),
+		'security-system'    => array(
+			'label' => __( 'Security System', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'security-system.svg',
+		),
+		'shower'             => array(
+			'label' => __( 'Shower', 'gutenberg-lab-blocks' ),
+			'paths' => '<path d="M8 5.5c1.1-1.5 2.5-2.2 4.1-2.2 2.7 0 4.9 2.2 4.9 4.9v1.1"></path><path d="M12 9.5h8"></path><path d="M13.2 12.8l-1 1.7"></path><path d="M16 12.8l-1 1.7"></path><path d="M18.8 12.8l-1 1.7"></path><path d="M12 18.2l-1 1.7"></path><path d="M14.8 18.2l-1 1.7"></path><path d="M17.6 18.2l-1 1.7"></path>',
+		),
+		'speakers'           => array(
+			'label' => __( 'Speakers', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'speakers.svg',
+		),
+		'sun-deck'           => array(
+			'label' => __( 'Sun Deck', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'sun-deck.svg',
+		),
+		'telephone'          => array(
+			'label' => __( 'Telephone', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'telephone.svg',
+		),
+		'temple'             => array(
+			'label' => __( 'Temple', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'temple.svg',
+		),
+		'tennis'             => array(
+			'label' => __( 'Tennis', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'tennis.svg',
+		),
+		'tropical'           => array(
+			'label' => __( 'Tropical', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'tropical.svg',
+		),
+		'trusted'            => array(
+			'label' => __( 'Trusted', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'Trusted.svg',
+		),
+		'tv'                 => array(
+			'label' => __( 'TV', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'tv.svg',
+		),
+		'view'               => array(
+			'label' => __( 'View', 'gutenberg-lab-blocks' ),
+			'paths' => '<path d="M3.5 13c2.2-4.1 5-6.2 8.5-6.2s6.3 2.1 8.5 6.2"></path><path d="M5.8 14.5c1.7 1.8 3.8 2.7 6.2 2.7s4.5-.9 6.2-2.7"></path><path d="M8.5 12.8c.9.7 2.1 1.1 3.5 1.1s2.6-.4 3.5-1.1"></path>',
+		),
+		'villa-partners-2'   => array(
+			'label' => __( 'Villa Partners', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'Villa Partners 2.svg',
+		),
+		'wellness'           => array(
+			'label' => __( 'Wellness', 'gutenberg-lab-blocks' ),
+			'paths' => '<path d="M12 19.5c-3.8-2-5.7-4.6-5.7-7.8 0-2.3 1.5-4.1 3.5-4.1 1.1 0 1.9.4 2.2 1.1.3-.7 1.1-1.1 2.2-1.1 2 0 3.5 1.8 3.5 4.1 0 3.2-1.9 5.8-5.7 7.8Z"></path><path d="M4.5 11.2c-1.3.8-2 2-2 3.6 0 2.1 1.8 3.8 4.1 3.8"></path><path d="M19.5 11.2c1.3.8 2 2 2 3.6 0 2.1-1.8 3.8-4.1 3.8"></path>',
+		),
+		'whatsapp'           => array(
+			'label' => __( 'WhatsApp', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'whatsapp.svg',
+		),
+		'wifi'               => array(
+			'label' => __( 'WiFi', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'wifi.svg',
+		),
+		'yoga'               => array(
+			'label' => __( 'Yoga', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'yoga.svg',
+		),
+		'yoga-pavilion'      => array(
+			'label' => __( 'Yoga Pavilion', 'gutenberg-lab-blocks' ),
+			'asset' => $asset_dir . 'yoga-pavilion.svg',
+		),
+	);
+}
+
+/**
  * Returns the fixed icon choices for villa amenity terms.
  *
  * The selected icon belongs to the term, not the block instance. That keeps the
@@ -79,73 +356,11 @@ add_action( 'init', 'gutenberg_lab_blocks_register_villas_post_type' );
  * @return array<string, string>
  */
 function gutenberg_lab_blocks_get_villa_amenity_icon_choices() {
-	$choices = array(
-		'aircon'             => __( 'Air Conditioning', 'gutenberg-lab-blocks' ),
-		'bathtub'            => __( 'Bathtub', 'gutenberg-lab-blocks' ),
-		'bbq'                 => __( 'BBQ', 'gutenberg-lab-blocks' ),
-		'beach-club-access'   => __( 'Beach Club Access', 'gutenberg-lab-blocks' ),
-		'bed'                 => __( 'Bed', 'gutenberg-lab-blocks' ),
-		'breakfast-bar'      => __( 'Breakfast Bar', 'gutenberg-lab-blocks' ),
-		'cafe-table'         => __( 'Cafe Table', 'gutenberg-lab-blocks' ),
-		'car'                => __( 'Car', 'gutenberg-lab-blocks' ),
-		'ceiling-fan'        => __( 'Ceiling Fan', 'gutenberg-lab-blocks' ),
-		'closet'             => __( 'Closet', 'gutenberg-lab-blocks' ),
-		'cooking-pot'        => __( 'Cooking Pot', 'gutenberg-lab-blocks' ),
-		'covered-terrace'     => __( 'Covered Terrace', 'gutenberg-lab-blocks' ),
-		'curated'            => __( 'Curated', 'gutenberg-lab-blocks' ),
-		'default'             => __( 'Default', 'gutenberg-lab-blocks' ),
-		'desk'                => __( 'Desk', 'gutenberg-lab-blocks' ),
-		'dishwasher'         => __( 'Dishwasher', 'gutenberg-lab-blocks' ),
-		'dvd'                 => __( 'DVD', 'gutenberg-lab-blocks' ),
-		'ev-charging'         => __( 'EV Charging', 'gutenberg-lab-blocks' ),
-		'experience'         => __( 'Experience', 'gutenberg-lab-blocks' ),
-		'finance-and'        => __( 'Finance & Administration', 'gutenberg-lab-blocks' ),
-		'fitness-studio'      => __( 'Fitness Studio', 'gutenberg-lab-blocks' ),
-		'golf'                => __( 'Golf', 'gutenberg-lab-blocks' ),
-		'gym'                => __( 'Gym', 'gutenberg-lab-blocks' ),
-		'hair-dryer'         => __( 'Hair Dryer', 'gutenberg-lab-blocks' ),
-		'handpicked'         => __( 'Handpicked', 'gutenberg-lab-blocks' ),
-		'hillside-retreat'    => __( 'Hillside Retreat', 'gutenberg-lab-blocks' ),
-		'ice-maker'           => __( 'Ice Maker', 'gutenberg-lab-blocks' ),
-		'infinity-pool'      => __( 'Infinity Pool', 'gutenberg-lab-blocks' ),
-		'in-room-safe'        => __( 'In-room Safe', 'gutenberg-lab-blocks' ),
-		'ipod'                => __( 'iPod', 'gutenberg-lab-blocks' ),
-		'local'              => __( 'Local', 'gutenberg-lab-blocks' ),
-		'lounge-chair'       => __( 'Lounge Chair', 'gutenberg-lab-blocks' ),
-		'martin'             => __( 'Martini', 'gutenberg-lab-blocks' ),
-		'media-room'         => __( 'Media Room', 'gutenberg-lab-blocks' ),
-		'ocean'               => __( 'Ocean', 'gutenberg-lab-blocks' ),
-		'ocean-front'         => __( 'Ocean Front', 'gutenberg-lab-blocks' ),
-		'ocean-view'          => __( 'Ocean View', 'gutenberg-lab-blocks' ),
-		'outdoor-shower'      => __( 'Outdoor Shower', 'gutenberg-lab-blocks' ),
-		'people'              => __( 'People', 'gutenberg-lab-blocks' ),
-		'pergola'             => __( 'Pergola', 'gutenberg-lab-blocks' ),
-		'personal-new'       => __( 'Personal New', 'gutenberg-lab-blocks' ),
-		'pool'                => __( 'Pool', 'gutenberg-lab-blocks' ),
-		'pool-bar'            => __( 'Pool Bar', 'gutenberg-lab-blocks' ),
-		'poolside-washroom'   => __( 'Poolside Washroom', 'gutenberg-lab-blocks' ),
-		'private-entry-gates' => __( 'Private Entry Gates', 'gutenberg-lab-blocks' ),
-		'saltwater-pool'     => __( 'Saltwater Pool', 'gutenberg-lab-blocks' ),
-		'sauna'              => __( 'Sauna', 'gutenberg-lab-blocks' ),
-		'security-cameras'   => __( 'Security Cameras', 'gutenberg-lab-blocks' ),
-		'security-system'    => __( 'Security System', 'gutenberg-lab-blocks' ),
-		'shower'              => __( 'Shower', 'gutenberg-lab-blocks' ),
-		'speakers'           => __( 'Speakers', 'gutenberg-lab-blocks' ),
-		'sun-deck'           => __( 'Sun Deck', 'gutenberg-lab-blocks' ),
-		'telephone'          => __( 'Telephone', 'gutenberg-lab-blocks' ),
-		'temple'             => __( 'Temple', 'gutenberg-lab-blocks' ),
-		'tennis'             => __( 'Tennis', 'gutenberg-lab-blocks' ),
-		'tropical'           => __( 'Tropical', 'gutenberg-lab-blocks' ),
-		'trusted'            => __( 'Trusted', 'gutenberg-lab-blocks' ),
-		'tv'                 => __( 'TV', 'gutenberg-lab-blocks' ),
-		'view'                => __( 'View', 'gutenberg-lab-blocks' ),
-		'villa-partners-2'   => __( 'Villa Partners', 'gutenberg-lab-blocks' ),
-		'wellness'            => __( 'Wellness', 'gutenberg-lab-blocks' ),
-		'whatsapp'           => __( 'WhatsApp', 'gutenberg-lab-blocks' ),
-		'wifi'               => __( 'WiFi', 'gutenberg-lab-blocks' ),
-		'yoga'               => __( 'Yoga', 'gutenberg-lab-blocks' ),
-		'yoga-pavilion'      => __( 'Yoga Pavilion', 'gutenberg-lab-blocks' ),
-	);
+	$choices = array();
+
+	foreach ( gutenberg_lab_blocks_get_villa_amenity_icon_registry() as $icon_key => $icon_definition ) {
+		$choices[ $icon_key ] = $icon_definition['label'] ?? ucwords( str_replace( '-', ' ', $icon_key ) );
+	}
 
 	// Keep translated editor labels alphabetized even when localization changes.
 	uasort(
@@ -1052,70 +1267,15 @@ function gutenberg_lab_blocks_get_villa_amenities( $villa_id ) {
  * @return array<string, string>
  */
 function gutenberg_lab_blocks_get_villa_amenity_icon_asset_paths() {
-	$asset_dir       = dirname( __DIR__ ) . '/assets/icons/villa-amenities/';
-	$theme_asset_dir = trailingslashit( get_stylesheet_directory() ) . 'assets/icons/';
+	$asset_paths = array();
 
-	return array(
-		'hillside-retreat'    => $asset_dir . 'hillside-retreat.svg',
-		'ocean'               => $asset_dir . 'ocean.svg',
-		'ocean-front'         => $asset_dir . 'ocean-front.svg',
-		'bbq'                 => $asset_dir . 'bbq.svg',
-		'beach-club-access'   => $asset_dir . 'beach-club-access.svg',
-		'covered-terrace'     => $asset_dir . 'covered-terrace.svg',
-		'desk'                => $asset_dir . 'desk.svg',
-		'dvd'                 => $asset_dir . 'dvd.svg',
-		'ev-charging'         => $asset_dir . 'ev-charging.svg',
-		'fitness-studio'      => $asset_dir . 'fitness-studio.svg',
-		'ice-maker'           => $asset_dir . 'ice-maker.svg',
-		'in-room-safe'        => $asset_dir . 'in-room-safe.svg',
-		'ipod'                => $asset_dir . 'ipod.svg',
-		'ocean-view'          => $asset_dir . 'ocean-view.svg',
-		'outdoor-shower'      => $asset_dir . 'outdoor-shower.svg',
-		'pergola'             => $asset_dir . 'pergola.svg',
-		'pool'                => $asset_dir . 'pool.svg',
-		'pool-bar'            => $asset_dir . 'pool-bar.svg',
-		'poolside-washroom'   => $asset_dir . 'poolside-washroom.svg',
-		'private-entry-gates' => $asset_dir . 'private-entry-gates.svg',
-		'saltwater-pool'     => $asset_dir . 'saltwater-pool.svg',
-		'sauna'              => $asset_dir . 'sauna.svg',
-		'security-cameras'   => $asset_dir . 'security-cameras.svg',
-		'security-system'    => $asset_dir . 'security-system.svg',
-		'speakers'           => $asset_dir . 'speakers.svg',
-		'sun-deck'           => $asset_dir . 'sun-deck.svg',
-		'yoga'               => $asset_dir . 'yoga.svg',
-		'yoga-pavilion'      => $asset_dir . 'yoga-pavilion.svg',
-		'aircon'             => $theme_asset_dir . 'aircon.svg',
-		'bathtub'            => $theme_asset_dir . 'bathtub.svg',
-		'breakfast-bar'      => $theme_asset_dir . 'breakfast-bar.svg',
-		'cafe-table'         => $theme_asset_dir . 'cafe-table.svg',
-		'car'                => $theme_asset_dir . 'car.svg',
-		'ceiling-fan'        => $theme_asset_dir . 'ceiling-fan.svg',
-		'closet'             => $theme_asset_dir . 'closet.svg',
-		'cooking-pot'        => $theme_asset_dir . 'cooking-pot.svg',
-		'curated'            => $theme_asset_dir . 'Curated.svg',
-		'dishwasher'         => $theme_asset_dir . 'dishwasher.svg',
-		'experience'         => $theme_asset_dir . 'Experience.svg',
-		'finance-and'        => $theme_asset_dir . 'Finance and.svg',
-		'gym'                => $theme_asset_dir . 'gym.svg',
-		'hair-dryer'         => $theme_asset_dir . 'hair-dryer.svg',
-		'handpicked'         => $theme_asset_dir . 'handpicked.svg',
-		'infinity-pool'      => $theme_asset_dir . 'infinity-pool.svg',
-		'local'              => $theme_asset_dir . 'Local.svg',
-		'lounge-chair'       => $theme_asset_dir . 'lounge-chair.svg',
-		'martin'             => $theme_asset_dir . 'martin.svg',
-		'media-room'         => $theme_asset_dir . 'media-room.svg',
-		'personal'           => $theme_asset_dir . 'Personal.svg',
-		'personal-new'       => $theme_asset_dir . 'personal-new.svg',
-		'telephone'          => $theme_asset_dir . 'telephone.svg',
-		'temple'             => $theme_asset_dir . 'temple.svg',
-		'tennis'             => $theme_asset_dir . 'tennis.svg',
-		'tropical'           => $theme_asset_dir . 'tropical.svg',
-		'trusted'            => $theme_asset_dir . 'Trusted.svg',
-		'tv'                 => $theme_asset_dir . 'tv.svg',
-		'villa-partners-2'   => $theme_asset_dir . 'Villa Partners 2.svg',
-		'whatsapp'           => $theme_asset_dir . 'whatsapp.svg',
-		'wifi'               => $theme_asset_dir . 'wifi.svg',
-	);
+	foreach ( gutenberg_lab_blocks_get_villa_amenity_icon_registry() as $icon_key => $icon_definition ) {
+		if ( ! empty( $icon_definition['asset'] ) && is_string( $icon_definition['asset'] ) ) {
+			$asset_paths[ $icon_key ] = $icon_definition['asset'];
+		}
+	}
+
+	return $asset_paths;
 }
 
 /**
@@ -1206,20 +1366,14 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_svg( $icon_key ) {
 		return $asset_svg;
 	}
 
-	$paths    = array(
-		'default'  => '<circle cx="12" cy="12" r="6.5"></circle><path d="M12 5.5v13M5.5 12h13"></path>',
-		'view'     => '<path d="M3.5 13c2.2-4.1 5-6.2 8.5-6.2s6.3 2.1 8.5 6.2"></path><path d="M5.8 14.5c1.7 1.8 3.8 2.7 6.2 2.7s4.5-.9 6.2-2.7"></path><path d="M8.5 12.8c.9.7 2.1 1.1 3.5 1.1s2.6-.4 3.5-1.1"></path>',
-		'bed'      => '<path d="M4 11.5V7.8c0-.9.7-1.6 1.6-1.6h4.1c1 0 1.8.8 1.8 1.8v3.5"></path><path d="M11.5 11.5V9.2h5.3c1.8 0 3.2 1.4 3.2 3.2v4.1"></path><path d="M4 16.5h16"></path><path d="M4 18.5v-7"></path><path d="M20 18.5v-2"></path>',
-		'people'   => '<circle cx="12" cy="7.5" r="3"></circle><path d="M7.2 18.8c.7-3 2.3-4.5 4.8-4.5s4.1 1.5 4.8 4.5"></path><circle cx="5.8" cy="10" r="2.1"></circle><path d="M2.8 18.2c.3-2 1.3-3.2 3-3.7"></path><circle cx="18.2" cy="10" r="2.1"></circle><path d="M21.2 18.2c-.3-2-1.3-3.2-3-3.7"></path>',
-		'shower'   => '<path d="M8 5.5c1.1-1.5 2.5-2.2 4.1-2.2 2.7 0 4.9 2.2 4.9 4.9v1.1"></path><path d="M12 9.5h8"></path><path d="M13.2 12.8l-1 1.7"></path><path d="M16 12.8l-1 1.7"></path><path d="M18.8 12.8l-1 1.7"></path><path d="M12 18.2l-1 1.7"></path><path d="M14.8 18.2l-1 1.7"></path><path d="M17.6 18.2l-1 1.7"></path>',
-		'golf'     => '<path d="M10 21V4"></path><path d="M10 4l8 2.3-8 2.4"></path><ellipse cx="10" cy="21" rx="6.5" ry="1.7"></ellipse><circle cx="17.5" cy="18.8" r="1"></circle>',
-		'wellness' => '<path d="M12 19.5c-3.8-2-5.7-4.6-5.7-7.8 0-2.3 1.5-4.1 3.5-4.1 1.1 0 1.9.4 2.2 1.1.3-.7 1.1-1.1 2.2-1.1 2 0 3.5 1.8 3.5 4.1 0 3.2-1.9 5.8-5.7 7.8Z"></path><path d="M4.5 11.2c-1.3.8-2 2-2 3.6 0 2.1 1.8 3.8 4.1 3.8"></path><path d="M19.5 11.2c1.3.8 2 2 2 3.6 0 2.1-1.8 3.8-4.1 3.8"></path>',
-	);
+	$icon_registry = gutenberg_lab_blocks_get_villa_amenity_icon_registry();
+	$default_paths = $icon_registry['default']['paths'] ?? '';
+	$icon_paths    = $icon_registry[ $icon_key ]['paths'] ?? $default_paths;
 
 	return sprintf(
 		'<svg class="vvm-villa-amenity-icon vvm-villa-amenity-icon--%1$s" viewBox="0 0 24 24" aria-hidden="true" focusable="false">%2$s</svg>',
 		esc_attr( $icon_key ),
-		$paths[ $icon_key ] ?? $paths['default']
+		$icon_paths
 	);
 }
 

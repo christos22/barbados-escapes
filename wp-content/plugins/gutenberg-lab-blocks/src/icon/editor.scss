@@ -1,0 +1,15 @@
+.wp-block-gutenberg-lab-blocks-icon.vvm-icon--is-empty {
+	align-items: center;
+	min-block-size: 3rem;
+
+	.vvm-icon__placeholder {
+		border: 1px dashed rgba(30, 61, 47, 0.28);
+		border-radius: 4px;
+		color: var(--wp--preset--color--dark-green, #1e3d2f);
+		display: inline-flex;
+		font-family: var(--wp--preset--font-family--refined-sans, system-ui, sans-serif);
+		font-size: 0.875rem;
+		line-height: 1.3;
+		padding: 0.55rem 0.7rem;
+	}
+}
