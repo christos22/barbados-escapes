@@ -145,12 +145,13 @@ function gutenberg_lab_blocks_collect_villa_booking_data( $blocks, &$data ) {
 				min( 30, absint( $attributes['minimumBedrooms'] ?? 1 ) )
 			);
 
-			$custom_choices = gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows(
-				$attributes['bedroomChoices'] ?? array()
-			);
+			$raw_custom_choices = $attributes['bedroomChoices'] ?? array();
 
-			if ( ! empty( $custom_choices ) ) {
-				$data['bedroom_choices'] = $custom_choices;
+			if ( is_array( $raw_custom_choices ) && ! empty( $raw_custom_choices ) ) {
+				$data['has_custom_bedroom_choices'] = true;
+				$data['bedroom_choices']            = gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows(
+					$raw_custom_choices
+				);
 			}
 		}
 
@@ -171,6 +172,7 @@ function gutenberg_lab_blocks_collect_villa_booking_data( $blocks, &$data ) {
  *     bedrooms:int,
  *     sleeps:int,
  *     minimum_bedrooms:int,
+ *     has_custom_bedroom_choices:bool,
  *     bedroom_choices:array<int, array{bedrooms:int,sleeps:int}>
  * }
  */
@@ -184,10 +186,11 @@ function gutenberg_lab_blocks_get_villa_booking_data( $villa_id ) {
 		'villa' !== get_post_type( $villa_id )
 	) {
 		return array(
-			'bedrooms'         => 0,
-			'sleeps'           => 0,
-			'minimum_bedrooms' => 1,
-			'bedroom_choices'  => array(),
+			'bedrooms'                   => 0,
+			'sleeps'                     => 0,
+			'minimum_bedrooms'           => 1,
+			'has_custom_bedroom_choices' => false,
+			'bedroom_choices'            => array(),
 		);
 	}
 
@@ -196,10 +199,11 @@ function gutenberg_lab_blocks_get_villa_booking_data( $villa_id ) {
 	}
 
 	$data = array(
-		'bedrooms'         => 0,
-		'sleeps'           => 0,
-		'minimum_bedrooms' => 1,
-		'bedroom_choices'  => array(),
+		'bedrooms'                   => 0,
+		'sleeps'                     => 0,
+		'minimum_bedrooms'           => 1,
+		'has_custom_bedroom_choices' => false,
+		'bedroom_choices'            => array(),
 	);
 	$post = get_post( $villa_id );
 
@@ -235,7 +239,7 @@ function gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id, $minimum_ove
 	$capacity = 0;
 	$choices  = array();
 
-	if ( ! empty( $data['bedroom_choices'] ) ) {
+	if ( ! empty( $data['has_custom_bedroom_choices'] ) ) {
 		foreach ( $data['bedroom_choices'] as $choice ) {
 			$bedrooms = (int) $choice['bedrooms'];
 
@@ -268,6 +272,23 @@ function gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id, $minimum_ove
 	}
 
 	return $choices;
+}
+
+/**
+ * Checks whether a villa has an active bedroom choice list.
+ *
+ * This gates both selectors and CF7 posted data. If the feature is disabled,
+ * or the editor has no valid choices, the bedroom field should disappear and
+ * submitted bedroom data should not be trusted.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return bool
+ */
+function gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id ) {
+	return (
+		gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id ) &&
+		! empty( gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id ) )
+	);
 }
 
 /**
@@ -327,7 +348,7 @@ function gutenberg_lab_blocks_filter_cf7_villa_bedroom_tag( $tag, $_replace ) {
 		! $_replace ||
 		(
 			$villa_id &&
-			! gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id )
+			! gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id )
 		)
 	) {
 		$tag['type'] = 'select';
@@ -338,7 +359,7 @@ function gutenberg_lab_blocks_filter_cf7_villa_bedroom_tag( $tag, $_replace ) {
 	 * Give that schema a bounded generic allowlist; page rendering and submit
 	 * validation still use the current villa's smaller, exact choice set.
 	 */
-	if ( empty( $choices ) ) {
+	if ( empty( $choices ) && ! $villa_id ) {
 		$generic_values = range( 1, 30 );
 		$choices = array_combine(
 			$generic_values,
@@ -375,7 +396,7 @@ function gutenberg_lab_blocks_filter_cf7_villa_bedroom_elements( $html ) {
 
 	if (
 		! $villa_id ||
-		gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id )
+		gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id )
 	) {
 		return $html;
 	}
@@ -392,6 +413,33 @@ function gutenberg_lab_blocks_filter_cf7_villa_bedroom_elements( $html ) {
 add_filter(
 	'wpcf7_form_elements',
 	'gutenberg_lab_blocks_filter_cf7_villa_bedroom_elements',
+	20
+);
+
+/**
+ * Removes inactive bedroom values from CF7 mail data.
+ *
+ * A hidden or disabled bedroom feature should not accept attacker-supplied
+ * fields, even when the raw request includes a villa-bedrooms value.
+ *
+ * @param array<string, mixed> $posted_data Sanitized CF7 posted data.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_blocks_filter_cf7_villa_bedroom_posted_data( $posted_data ) {
+	$villa_id = gutenberg_lab_blocks_resolve_villa_booking_post_id();
+
+	if (
+		$villa_id &&
+		! gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id )
+	) {
+		unset( $posted_data['villa-bedrooms'] );
+	}
+
+	return $posted_data;
+}
+add_filter(
+	'wpcf7_posted_data',
+	'gutenberg_lab_blocks_filter_cf7_villa_bedroom_posted_data',
 	20
 );
 
@@ -445,7 +493,7 @@ function gutenberg_lab_blocks_validate_cf7_villa_bedrooms( $result, $tag ) {
 
 	if (
 		$villa_id &&
-		! gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id )
+		! gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id )
 	) {
 		return $result;
 	}

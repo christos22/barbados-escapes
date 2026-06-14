@@ -20,6 +20,7 @@
 	"usesContext": [ "postId", "postType" ],
 	"supports": {
 		"html": false,
+		"multiple": false,
 		"reusable": false
 	},
 	"textdomain": "gutenberg-lab-blocks",

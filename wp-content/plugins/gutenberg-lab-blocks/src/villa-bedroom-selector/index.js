@@ -8,6 +8,9 @@ import {
 	ToggleControl,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
+// WordPress provides this package as an editor script dependency.
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { useEffect } from '@wordpress/element';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { __, sprintf } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
@@ -17,6 +20,8 @@ import './style.scss';
 import metadata from './block.json';
 
 const BEDROOM_SELECTOR_META_KEY = 'villa_bedroom_selector_enabled';
+const BEDROOM_SELECTOR_LOCK_KEY =
+	'gutenberg-lab-villa-bedroom-selector-choices';
 
 const toInteger = ( value, maximum ) => {
 	const number = Number.parseInt( value, 10 );
@@ -73,6 +78,21 @@ const collectVillaSpecs = ( blocks, data ) => {
 	} );
 };
 
+const getBedroomFieldHelp = ( invalid, duplicate ) => {
+	if ( invalid ) {
+		return __(
+			'Enter a bedroom number from 1 to 30.',
+			'gutenberg-lab-blocks'
+		);
+	}
+
+	if ( duplicate ) {
+		return __( 'Bedroom numbers must be unique.', 'gutenberg-lab-blocks' );
+	}
+
+	return undefined;
+};
+
 const useBedroomSelectorEnabled = () =>
 	useSelect( ( select ) => {
 		const editor = select( 'core/editor' );
@@ -125,7 +145,7 @@ const useAutomaticBedroomChoices = ( minimumBedrooms ) =>
 		[ minimumBedrooms ]
 	);
 
-const Edit = ( { attributes, setAttributes } ) => {
+const Edit = ( { attributes, clientId, setAttributes } ) => {
 	const { bedroomChoices = [], minimumBedrooms } = attributes;
 	const isEnabled = useBedroomSelectorEnabled();
 	const automaticChoices = useAutomaticBedroomChoices( minimumBedrooms );
@@ -134,15 +154,43 @@ const Edit = ( { attributes, setAttributes } ) => {
 	const validPreviewChoices = displayedChoices.filter(
 		( choice ) => toInteger( choice.bedrooms, 30 ) > 0
 	);
+	const duplicatedBedrooms = new Set(
+		validPreviewChoices
+			.map( ( choice ) => toInteger( choice.bedrooms, 30 ) )
+			.filter(
+				( bedrooms, index, choices ) =>
+					choices.indexOf( bedrooms ) !== index
+			)
+	);
 	const usedBedroomCount = new Set(
 		validPreviewChoices.map( ( choice ) =>
 			toInteger( choice.bedrooms, 30 )
 		)
 	).size;
 	const canAddChoice = usedBedroomCount < 30;
+	const hasChoiceErrors =
+		isEnabled &&
+		isCustom &&
+		( validPreviewChoices.length < 1 ||
+			displayedChoices.some(
+				( choice ) => toInteger( choice.bedrooms, 30 ) < 1
+			) ||
+			duplicatedBedrooms.size > 0 );
 	const blockProps = useBlockProps( {
 		className: 'vvm-villa-bedroom-selector',
 	} );
+	const { lockPostSaving, unlockPostSaving } = useDispatch( 'core/editor' );
+	const postLockKey = `${ BEDROOM_SELECTOR_LOCK_KEY }-${ clientId }`;
+
+	useEffect( () => {
+		if ( hasChoiceErrors ) {
+			lockPostSaving( postLockKey );
+		} else {
+			unlockPostSaving( postLockKey );
+		}
+
+		return () => unlockPostSaving( postLockKey );
+	}, [ hasChoiceErrors, lockPostSaving, postLockKey, unlockPostSaving ] );
 
 	const updateChoice = ( index, property, value ) => {
 		const choices = displayedChoices.map( ( choice ) => ( {
@@ -230,15 +278,19 @@ const Edit = ( { attributes, setAttributes } ) => {
 						</Notice>
 					) }
 
+					{ hasChoiceErrors && (
+						<Notice status="error" isDismissible={ false }>
+							{ __(
+								'Fix the bedroom choices before saving this villa.',
+								'gutenberg-lab-blocks'
+							) }
+						</Notice>
+					) }
+
 					{ displayedChoices.map( ( choice, index ) => {
 						const bedrooms = toInteger( choice.bedrooms, 30 );
-						const duplicate = displayedChoices.some(
-							( comparedChoice, comparedIndex ) =>
-								comparedIndex !== index &&
-								bedrooms > 0 &&
-								toInteger( comparedChoice.bedrooms, 30 ) ===
-									bedrooms
-						);
+						const invalid = bedrooms < 1;
+						const duplicate = duplicatedBedrooms.has( bedrooms );
 
 						return (
 							<fieldset key={ index }>
@@ -261,14 +313,10 @@ const Edit = ( { attributes, setAttributes } ) => {
 									min="1"
 									max="30"
 									value={ choice.bedrooms }
-									help={
+									help={ getBedroomFieldHelp(
+										invalid,
 										duplicate
-											? __(
-													'Bedroom numbers must be unique.',
-													'gutenberg-lab-blocks'
-											  )
-											: undefined
-									}
+									) }
 									onChange={ ( value ) =>
 										updateChoice( index, 'bedrooms', value )
 									}
