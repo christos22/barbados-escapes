@@ -19,15 +19,14 @@
 ) :is(.wp-block-button__link, .wp-element-button) {
 	/*
 	 * Keep one shared shell spec so every filled/outlined button variant gets
-	 * the same height, with a small optical vertical offset for the Romely caps.
+	 * the same height and centered text across button variants.
 	 */
 	--vvm-button-height: 44px;
 	--vvm-button-font-size: 18px;
 	--vvm-button-line-height: 1;
 	--vvm-button-border-width: 1px;
 	--vvm-button-padding-inline: 32px;
-	--vvm-button-padding-block-start: 12px;
-	--vvm-button-padding-block-end: 7px;
+	--vvm-button-padding-block: 12px;
 
 	display: inline-flex;
 	align-items: center;
@@ -37,8 +36,7 @@
 	z-index: 0;
 	box-sizing: border-box;
 	min-block-size: var(--vvm-button-height);
-	padding-block-start: var(--vvm-button-padding-block-start);
-	padding-block-end: var(--vvm-button-padding-block-end);
+	padding-block: var(--vvm-button-padding-block);
 	padding-inline: var(--vvm-button-padding-inline);
 	border: var(--vvm-button-border-width) solid transparent;
 	border-radius: 0;
