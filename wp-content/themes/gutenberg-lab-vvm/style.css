@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.40
+Version: 0.1.41
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -1818,6 +1818,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	grid-template-areas:
 		"intro intro intro"
 		"form form form"
+		"turnstile turnstile turnstile"
 		"submit whatsapp ."
 		"response response response";
 	column-gap: 0.75rem;
@@ -1910,6 +1911,26 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	padding-top: clamp(1.15rem, 2vw, 1.55rem);
 }
 
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__actions:empty {
+	display: none;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form > .cf7-cf-turnstile,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form > [id^="cf-turnstile-cf7-"] {
+	grid-area: turnstile;
+	justify-self: start;
+	max-width: 100%;
+	margin: 0 !important;
+	padding-top: clamp(1.25rem, 2vw, 1.6rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form > .vvm-villa-contact-form__submit,
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__actions .vvm-villa-contact-form__submit {
+	grid-area: submit;
+	align-self: start;
+	margin-top: clamp(1.15rem, 2vw, 1.55rem);
+}
+
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp-row {
 	grid-area: whatsapp;
 	align-self: start;
@@ -1919,22 +1940,37 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit,
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link {
+	--vvm-button-height: 44px;
+	--vvm-button-font-size: 18px;
+	--vvm-button-line-height: 1;
+	--vvm-button-border-width: 1px;
+	--vvm-button-padding-inline: 32px;
+	--vvm-button-padding-block-base: calc(
+		(
+			var(--vvm-button-height) -
+			(var(--vvm-button-font-size) * var(--vvm-button-line-height)) -
+			(var(--vvm-button-border-width) * 2)
+		) / 2
+	);
+
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 0.55rem;
 	box-sizing: border-box;
-	min-height: 3rem;
-	min-width: min(100%, 12.5rem);
-	padding: 0.85rem 1.35rem;
+	min-height: var(--vvm-button-height);
+	min-width: max-content;
+	padding-block: var(--vvm-button-padding-block-base);
+	padding-inline: var(--vvm-button-padding-inline);
 	border-radius: 0;
-	font-family: var(--wp--preset--font-family--refined-sans);
-	font-size: 0.62rem;
-	font-weight: 400;
-	letter-spacing: 0.24em;
-	line-height: 1.15;
+	font-family: "Romely", sans-serif;
+	font-size: var(--vvm-button-font-size);
+	font-weight: 600;
+	letter-spacing: 0.15em;
+	line-height: var(--vvm-button-line-height);
 	text-transform: uppercase;
 	text-decoration: none;
+	white-space: nowrap;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit {
@@ -2207,6 +2243,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 		grid-template-areas:
 			"intro"
 			"form"
+			"turnstile"
 			"submit"
 			"whatsapp"
 			"response";
@@ -2223,6 +2260,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit,
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link {
+		min-width: 0;
 		width: 100%;
 	}
 
