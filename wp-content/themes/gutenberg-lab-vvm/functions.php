@@ -937,11 +937,8 @@ function gutenberg_lab_vvm_get_template_part_content( $slug, $navigation_refs ) 
 	}
 
 	if ( 'header' === $slug && ! empty( $navigation_refs['primary'] ) ) {
-		$header_navigation_id = ! empty( $navigation_refs['header'] )
-			? (int) $navigation_refs['header']
-			: (int) $navigation_refs['primary'];
-
-		$content = preg_replace( '/"ref":\d+/', '"ref":' . $header_navigation_id, $content, 1 );
+		// Keep the public header aligned with the Site Editor's Primary Navigation.
+		$content = preg_replace( '/"ref":\d+/', '"ref":' . (int) $navigation_refs['primary'], $content, 1 );
 	}
 
 	if ( 'footer' === $slug ) {
