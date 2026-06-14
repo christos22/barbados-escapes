@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.44
+Version: 0.1.45
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -1813,7 +1813,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__form-card {
-	--vvm-villa-contact-action-gap: clamp(0.55rem, 1vw, 0.75rem);
+	--vvm-villa-contact-action-gap: clamp(0.75rem, 1.25vw, 1rem);
 	--vvm-villa-contact-turnstile-gap: clamp(1.25rem, 2vw, 1.6rem);
 
 	display: grid;
@@ -1928,7 +1928,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form > .cf7-cf-turnstile {
 	line-height: 0;
-	margin: 0 0 -1rem !important;
+	margin: 0 !important;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form > [id^="cf-turnstile-cf7-"] {
