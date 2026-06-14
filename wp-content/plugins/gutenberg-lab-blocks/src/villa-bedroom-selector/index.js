@@ -106,6 +106,37 @@ const useBedroomSelectorEnabled = () =>
 		return meta[ BEDROOM_SELECTOR_META_KEY ] ?? true;
 	}, [] );
 
+const BedroomSelectorToggleControl = () => {
+	const isEnabled = useBedroomSelectorEnabled();
+	const { editPost } = useDispatch( 'core/editor' );
+
+	return (
+		<ToggleControl
+			label={ __( 'Enable bedroom selectors', 'gutenberg-lab-blocks' ) }
+			help={
+				isEnabled
+					? __(
+							'The pricing and enquiry form selectors are visible.',
+							'gutenberg-lab-blocks'
+					  )
+					: __(
+							'Both bedroom selectors are hidden and inactive.',
+							'gutenberg-lab-blocks'
+					  )
+			}
+			checked={ isEnabled }
+			onChange={ ( value ) =>
+				editPost( {
+					meta: {
+						[ BEDROOM_SELECTOR_META_KEY ]: value,
+					},
+				} )
+			}
+			__nextHasNoMarginBottom
+		/>
+	);
+};
+
 const useAutomaticBedroomChoices = ( minimumBedrooms ) =>
 	useSelect(
 		( select ) => {
@@ -268,6 +299,8 @@ const Edit = ( { attributes, clientId, setAttributes } ) => {
 							'gutenberg-lab-blocks'
 						) }
 					</p>
+
+					<BedroomSelectorToggleControl />
 
 					{ ! isCustom && automaticChoices.length > 0 && (
 						<Notice status="info" isDismissible={ false }>
@@ -438,8 +471,6 @@ const VillaBedroomSelectorSettings = () => {
 		( select ) => select( 'core/editor' ).getCurrentPostType(),
 		[]
 	);
-	const isEnabled = useBedroomSelectorEnabled();
-	const { editPost } = useDispatch( 'core/editor' );
 
 	if ( postType !== 'villa' ) {
 		return null;
@@ -450,32 +481,7 @@ const VillaBedroomSelectorSettings = () => {
 			name="villa-bedroom-selector"
 			title={ __( 'Bedroom selector', 'gutenberg-lab-blocks' ) }
 		>
-			<ToggleControl
-				label={ __(
-					'Enable bedroom selectors',
-					'gutenberg-lab-blocks'
-				) }
-				help={
-					isEnabled
-						? __(
-								'The pricing and enquiry form selectors are visible.',
-								'gutenberg-lab-blocks'
-						  )
-						: __(
-								'Both bedroom selectors are hidden and inactive.',
-								'gutenberg-lab-blocks'
-						  )
-				}
-				checked={ isEnabled }
-				onChange={ ( value ) =>
-					editPost( {
-						meta: {
-							[ BEDROOM_SELECTOR_META_KEY ]: value,
-						},
-					} )
-				}
-				__nextHasNoMarginBottom
-			/>
+			<BedroomSelectorToggleControl />
 		</PluginDocumentSettingPanel>
 	);
 };
