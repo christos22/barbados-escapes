@@ -9,6 +9,14 @@ $context_id = isset( $block->context['postId'] )
 	? absint( $block->context['postId'] )
 	: 0;
 $villa_id   = gutenberg_lab_blocks_resolve_villa_booking_post_id( $context_id );
+
+if (
+	! $villa_id ||
+	! gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id )
+) {
+	return '';
+}
+
 $minimum    = max( 1, absint( $attributes['minimumBedrooms'] ?? 1 ) );
 $choices    = gutenberg_lab_blocks_get_villa_bedroom_choices(
 	$villa_id,

@@ -471,6 +471,11 @@ function gutenberg_lab_blocks_get_villa_meta_schema() {
 			'default'           => '',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
+		'villa_bedroom_selector_enabled' => array(
+			'type'              => 'boolean',
+			'default'           => true,
+			'sanitize_callback' => 'rest_sanitize_boolean',
+		),
 	);
 }
 

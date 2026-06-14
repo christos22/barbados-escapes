@@ -1,14 +1,38 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody, RangeControl } from '@wordpress/components';
+import {
+	Notice,
+	PanelBody,
+	RangeControl,
+	ToggleControl,
+} from '@wordpress/components';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
+import { registerPlugin } from '@wordpress/plugins';
 
 import './style.scss';
 
 import metadata from './block.json';
 
+const BEDROOM_SELECTOR_META_KEY = 'villa_bedroom_selector_enabled';
+
+const useBedroomSelectorEnabled = () =>
+	useSelect( ( select ) => {
+		const editor = select( 'core/editor' );
+
+		if ( editor.getCurrentPostType() !== 'villa' ) {
+			return true;
+		}
+
+		const meta = editor.getEditedPostAttribute( 'meta' ) || {};
+
+		return meta[ BEDROOM_SELECTOR_META_KEY ] ?? true;
+	}, [] );
+
 const Edit = ( { attributes, setAttributes } ) => {
 	const { minimumBedrooms } = attributes;
+	const isEnabled = useBedroomSelectorEnabled();
 	const blockProps = useBlockProps( {
 		className: 'vvm-villa-bedroom-selector',
 	} );
@@ -44,23 +68,79 @@ const Edit = ( { attributes, setAttributes } ) => {
 			</InspectorControls>
 
 			<div { ...blockProps }>
-				<select
-					className="vvm-villa-bedroom-selector__select"
-					aria-label={ __(
-						'Bedrooms for seasonal pricing',
-						'gutenberg-lab-blocks'
-					) }
-					disabled
-				>
-					<option>
-						{ __(
-							'Choices use the current Villa Specs block',
+				{ isEnabled ? (
+					<select
+						className="vvm-villa-bedroom-selector__select"
+						aria-label={ __(
+							'Bedrooms for seasonal pricing',
 							'gutenberg-lab-blocks'
 						) }
-					</option>
-				</select>
+						disabled
+					>
+						<option>
+							{ __(
+								'Choices use the current Villa Specs block',
+								'gutenberg-lab-blocks'
+							) }
+						</option>
+					</select>
+				) : (
+					<Notice status="info" isDismissible={ false }>
+						{ __(
+							'Bedroom selectors are disabled for this villa.',
+							'gutenberg-lab-blocks'
+						) }
+					</Notice>
+				) }
 			</div>
 		</>
+	);
+};
+
+const VillaBedroomSelectorSettings = () => {
+	const postType = useSelect(
+		( select ) => select( 'core/editor' ).getCurrentPostType(),
+		[]
+	);
+	const isEnabled = useBedroomSelectorEnabled();
+	const { editPost } = useDispatch( 'core/editor' );
+
+	if ( postType !== 'villa' ) {
+		return null;
+	}
+
+	return (
+		<PluginDocumentSettingPanel
+			name="villa-bedroom-selector"
+			title={ __( 'Bedroom selector', 'gutenberg-lab-blocks' ) }
+		>
+			<ToggleControl
+				label={ __(
+					'Enable bedroom selectors',
+					'gutenberg-lab-blocks'
+				) }
+				help={
+					isEnabled
+						? __(
+								'The pricing and enquiry form selectors are visible.',
+								'gutenberg-lab-blocks'
+						  )
+						: __(
+								'Both bedroom selectors are hidden and inactive.',
+								'gutenberg-lab-blocks'
+						  )
+				}
+				checked={ isEnabled }
+				onChange={ ( value ) =>
+					editPost( {
+						meta: {
+							[ BEDROOM_SELECTOR_META_KEY ]: value,
+						},
+					} )
+				}
+				__nextHasNoMarginBottom
+			/>
+		</PluginDocumentSettingPanel>
 	);
 };
 
@@ -71,4 +151,8 @@ registerBlockType( metadata.name, {
 	save() {
 		return null;
 	},
+} );
+
+registerPlugin( 'gutenberg-lab-villa-bedroom-selector-settings', {
+	render: VillaBedroomSelectorSettings,
 } );

@@ -10,6 +10,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Checks whether bedroom selection is enabled for a villa.
+ *
+ * Existing villas predate the setting, so a missing meta row intentionally
+ * preserves the feature's current enabled behavior.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return bool
+ */
+function gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id ) {
+	$villa_id = absint( $villa_id );
+
+	if (
+		! $villa_id ||
+		'villa' !== get_post_type( $villa_id )
+	) {
+		return false;
+	}
+
+	if (
+		! metadata_exists(
+			'post',
+			$villa_id,
+			'villa_bedroom_selector_enabled'
+		)
+	) {
+		return true;
+	}
+
+	return rest_sanitize_boolean(
+		get_post_meta(
+			$villa_id,
+			'villa_bedroom_selector_enabled',
+			true
+		)
+	);
+}
+
+/**
  * Collects booking data from structured villa blocks.
  *
  * The visible Villa Specs block is the source of truth. Reading its attributes
@@ -201,6 +239,22 @@ function gutenberg_lab_blocks_filter_cf7_villa_bedroom_tag( $tag, $_replace ) {
 	$choices  = gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id );
 
 	/*
+	 * CF7 builds its browser-validation schema without page context. Making
+	 * this one scanned tag optional prevents a disabled villa from inheriting
+	 * a generic required rule; the villa-aware validator below remains the
+	 * server-side authority when the feature is enabled.
+	 */
+	if (
+		! $_replace ||
+		(
+			$villa_id &&
+			! gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id )
+		)
+	) {
+		$tag['type'] = 'select';
+	}
+
+	/*
 	 * CF7 fetches its browser-validation schema without page/post context.
 	 * Give that schema a bounded generic allowlist; page rendering and submit
 	 * validation still use the current villa's smaller, exact choice set.
@@ -226,6 +280,40 @@ add_filter(
 	'gutenberg_lab_blocks_filter_cf7_villa_bedroom_tag',
 	20,
 	2
+);
+
+/**
+ * Removes the form's bedroom row when the current villa disables the feature.
+ *
+ * CF7 does not expose a form-tag removal API. The pattern is deliberately
+ * limited to one paragraph containing its generated villa-bedrooms wrapper.
+ *
+ * @param string $html Rendered CF7 form HTML.
+ * @return string
+ */
+function gutenberg_lab_blocks_filter_cf7_villa_bedroom_elements( $html ) {
+	$villa_id = gutenberg_lab_blocks_resolve_villa_booking_post_id();
+
+	if (
+		! $villa_id ||
+		gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id )
+	) {
+		return $html;
+	}
+
+	$filtered_html = preg_replace(
+		'~<p\b[^>]*>(?:(?!</p>).)*?\bdata-name=(["\'])villa-bedrooms\1(?:(?!</p>).)*?</p>~is',
+		'',
+		$html,
+		1
+	);
+
+	return null === $filtered_html ? $html : $filtered_html;
+}
+add_filter(
+	'wpcf7_form_elements',
+	'gutenberg_lab_blocks_filter_cf7_villa_bedroom_elements',
+	20
 );
 
 /**
@@ -266,10 +354,26 @@ function gutenberg_lab_blocks_validate_cf7_villa_bedrooms( $result, $tag ) {
 		$container_id !== $submitted_villa_id
 	);
 	$villa_id = gutenberg_lab_blocks_resolve_villa_booking_post_id();
+
+	if ( $has_mismatched_villa ) {
+		$result->invalidate(
+			$tag,
+			__( 'Please choose a valid number of bedrooms.', 'gutenberg-lab-blocks' )
+		);
+
+		return $result;
+	}
+
+	if (
+		$villa_id &&
+		! gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id )
+	) {
+		return $result;
+	}
+
 	$choices  = gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id );
 
 	if (
-		$has_mismatched_villa ||
 		! ctype_digit( $submitted ) ||
 		! isset( $choices[ (int) $submitted ] )
 	) {
