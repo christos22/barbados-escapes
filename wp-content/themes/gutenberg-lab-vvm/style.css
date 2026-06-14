@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.41
+Version: 0.1.42
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -1813,6 +1813,9 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__form-card {
+	--vvm-villa-contact-action-gap: clamp(0.55rem, 1vw, 0.75rem);
+	--vvm-villa-contact-turnstile-gap: clamp(1.25rem, 2vw, 1.6rem);
+
 	display: grid;
 	grid-template-columns: auto auto minmax(0, 1fr);
 	grid-template-areas:
@@ -1901,14 +1904,14 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__actions,
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp-row {
-	margin-top: clamp(1.25rem, 2vw, 1.6rem);
+	margin-top: 0;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__actions {
 	grid-area: submit;
 	position: relative;
 	width: max-content;
-	padding-top: clamp(1.15rem, 2vw, 1.55rem);
+	padding-top: var(--vvm-villa-contact-action-gap);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__actions:empty {
@@ -1920,22 +1923,33 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	grid-area: turnstile;
 	justify-self: start;
 	max-width: 100%;
+	padding-top: var(--vvm-villa-contact-turnstile-gap);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form > .cf7-cf-turnstile {
+	line-height: 0;
+	margin: 0 0 -1rem !important;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form > [id^="cf-turnstile-cf7-"] {
 	margin: 0 !important;
-	padding-top: clamp(1.25rem, 2vw, 1.6rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form > .cf7-cf-turnstile > .cf-turnstile-br {
+	display: none;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form > .vvm-villa-contact-form__submit,
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__actions .vvm-villa-contact-form__submit {
 	grid-area: submit;
 	align-self: start;
-	margin-top: clamp(1.15rem, 2vw, 1.55rem);
+	margin-top: var(--vvm-villa-contact-action-gap);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp-row {
 	grid-area: whatsapp;
 	align-self: start;
-	margin-top: 0;
-	padding-top: clamp(1.15rem, 2vw, 1.55rem);
+	padding-top: var(--vvm-villa-contact-action-gap);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit,
