@@ -340,6 +340,52 @@ body.page-id-555 .vvm-two-up-carousel .vvm-two-up-carousel__amenities__label {
 	color: rgba(255, 253, 247, 0.72);
 }
 
+/*
+ * About page team rows are authored as a simple icon/role/copy sequence. Grid
+ * keeps the paragraph track aligned instead of letting each flex row center
+ * itself around a different copy length.
+ */
+body.page-id-1724 .wp-site-blocks .vvm-about-team-row {
+	--vvm-about-team-icon-width: 2.5rem;
+	--vvm-about-team-label-width: 13.75rem;
+
+	align-items: center;
+	column-gap: clamp(1rem, 2vw, 1.5rem);
+	display: grid !important;
+	grid-template-columns:
+		var(--vvm-about-team-icon-width)
+		var(--vvm-about-team-label-width)
+		minmax(0, 1fr);
+	justify-content: stretch !important;
+	margin-block: 0;
+	row-gap: 0.5rem;
+}
+
+body.page-id-1724 .wp-site-blocks .vvm-about-team-row > * {
+	margin-block: 0;
+	min-inline-size: 0;
+}
+
+body.page-id-1724 .wp-site-blocks .vvm-about-team-row > .wp-block-heading {
+	inline-size: auto !important;
+	max-inline-size: none;
+}
+
+body.page-id-1724 .wp-site-blocks .vvm-about-team-row > .wp-block-paragraph {
+	overflow-wrap: anywhere;
+}
+
+@media (max-width: 781px) {
+	body.page-id-1724 .wp-site-blocks .vvm-about-team-row {
+		align-items: start;
+		grid-template-columns: var(--vvm-about-team-icon-width) minmax(0, 1fr);
+	}
+
+	body.page-id-1724 .wp-site-blocks .vvm-about-team-row > .wp-block-paragraph {
+		grid-column: 1 / -1;
+	}
+}
+
 .wp-site-blocks {
 	padding-top: 0;
 	--wp--style--block-gap: 0;
