@@ -1,14 +1,15 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import {
+	Button,
 	Notice,
 	PanelBody,
-	RangeControl,
+	TextControl,
 	ToggleControl,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 
 import './style.scss';
@@ -16,6 +17,61 @@ import './style.scss';
 import metadata from './block.json';
 
 const BEDROOM_SELECTOR_META_KEY = 'villa_bedroom_selector_enabled';
+
+const toInteger = ( value, maximum ) => {
+	const number = Number.parseInt( value, 10 );
+
+	if ( ! Number.isFinite( number ) || number < 1 ) {
+		return 0;
+	}
+
+	return Math.min( maximum, number );
+};
+
+const formatBedroomChoice = ( choice ) => {
+	const bedrooms = toInteger( choice.bedrooms, 30 );
+	const sleeps = toInteger( choice.sleeps, 100 );
+	const bedroomLabel =
+		bedrooms === 1
+			? __( '1 Bedroom', 'gutenberg-lab-blocks' )
+			: sprintf(
+					/* translators: %d is the number of bedrooms. */
+					__( '%d Bedrooms', 'gutenberg-lab-blocks' ),
+					bedrooms
+			  );
+
+	return sleeps
+		? sprintf(
+				/* translators: 1: Bedroom label. 2: Number of guests. */
+				__( '%1$s (sleeps %2$d)', 'gutenberg-lab-blocks' ),
+				bedroomLabel,
+				sleeps
+		  )
+		: bedroomLabel;
+};
+
+const collectVillaSpecs = ( blocks, data ) => {
+	blocks.forEach( ( block ) => {
+		if ( block.name === 'gutenberg-lab-blocks/villa-spec-item' ) {
+			const label = String( block.attributes.label || '' )
+				.trim()
+				.toLowerCase();
+			const value = toInteger( block.attributes.value, 100 );
+
+			if ( /^bedrooms?$/.test( label ) ) {
+				data.bedrooms = Math.min( 30, value );
+			}
+
+			if ( /^(sleeps?|guests?)$/.test( label ) ) {
+				data.sleeps = value;
+			}
+		}
+
+		if ( block.innerBlocks?.length ) {
+			collectVillaSpecs( block.innerBlocks, data );
+		}
+	} );
+};
 
 const useBedroomSelectorEnabled = () =>
 	useSelect( ( select ) => {
@@ -30,12 +86,127 @@ const useBedroomSelectorEnabled = () =>
 		return meta[ BEDROOM_SELECTOR_META_KEY ] ?? true;
 	}, [] );
 
+const useAutomaticBedroomChoices = ( minimumBedrooms ) =>
+	useSelect(
+		( select ) => {
+			const data = { bedrooms: 0, sleeps: 0 };
+			collectVillaSpecs(
+				select( 'core/block-editor' ).getBlocks(),
+				data
+			);
+
+			if ( data.bedrooms < 1 ) {
+				return [];
+			}
+
+			const minimum = Math.min(
+				data.bedrooms,
+				Math.max( 1, toInteger( minimumBedrooms, 30 ) )
+			);
+			const capacity =
+				data.bedrooms > 0 && data.sleeps % data.bedrooms === 0
+					? data.sleeps / data.bedrooms
+					: 0;
+			const choices = [];
+
+			for (
+				let bedrooms = data.bedrooms;
+				bedrooms >= minimum;
+				bedrooms--
+			) {
+				choices.push( {
+					bedrooms,
+					sleeps: bedrooms * capacity || '',
+				} );
+			}
+
+			return choices;
+		},
+		[ minimumBedrooms ]
+	);
+
 const Edit = ( { attributes, setAttributes } ) => {
-	const { minimumBedrooms } = attributes;
+	const { bedroomChoices = [], minimumBedrooms } = attributes;
 	const isEnabled = useBedroomSelectorEnabled();
+	const automaticChoices = useAutomaticBedroomChoices( minimumBedrooms );
+	const isCustom = bedroomChoices.length > 0;
+	const displayedChoices = isCustom ? bedroomChoices : automaticChoices;
+	const validPreviewChoices = displayedChoices.filter(
+		( choice ) => toInteger( choice.bedrooms, 30 ) > 0
+	);
+	const usedBedroomCount = new Set(
+		validPreviewChoices.map( ( choice ) =>
+			toInteger( choice.bedrooms, 30 )
+		)
+	).size;
+	const canAddChoice = usedBedroomCount < 30;
 	const blockProps = useBlockProps( {
 		className: 'vvm-villa-bedroom-selector',
 	} );
+
+	const updateChoice = ( index, property, value ) => {
+		const choices = displayedChoices.map( ( choice ) => ( {
+			...choice,
+		} ) );
+		choices[ index ][ property ] = value;
+		setAttributes( { bedroomChoices: choices } );
+	};
+
+	const removeChoice = ( index ) => {
+		setAttributes( {
+			bedroomChoices: displayedChoices.filter(
+				( _, choiceIndex ) => choiceIndex !== index
+			),
+		} );
+	};
+
+	const addChoice = () => {
+		if ( ! canAddChoice ) {
+			return;
+		}
+
+		const usedBedrooms = new Set(
+			displayedChoices.map( ( choice ) =>
+				toInteger( choice.bedrooms, 30 )
+			)
+		);
+		const maximum = Math.max( 0, ...usedBedrooms );
+		let bedrooms = maximum;
+
+		while ( bedrooms > 0 && usedBedrooms.has( bedrooms ) ) {
+			bedrooms--;
+		}
+
+		if ( bedrooms < 1 ) {
+			bedrooms = Math.min( 30, maximum + 1 || 1 );
+		}
+
+		const reference = displayedChoices.find( ( choice ) => {
+			const choiceBedrooms = toInteger( choice.bedrooms, 30 );
+			const choiceSleeps = toInteger( choice.sleeps, 100 );
+
+			return (
+				choiceBedrooms > 0 &&
+				choiceSleeps > 0 &&
+				choiceSleeps % choiceBedrooms === 0
+			);
+		} );
+		const capacity = reference
+			? toInteger( reference.sleeps, 100 ) /
+			  toInteger( reference.bedrooms, 30 )
+			: 0;
+		const newChoice = {
+			bedrooms,
+			sleeps: bedrooms * capacity || '',
+		};
+		const choices = [ ...displayedChoices, newChoice ].sort(
+			( first, second ) =>
+				toInteger( second.bedrooms, 30 ) -
+				toInteger( first.bedrooms, 30 )
+		);
+
+		setAttributes( { bedroomChoices: choices } );
+	};
 
 	return (
 		<>
@@ -43,27 +214,134 @@ const Edit = ( { attributes, setAttributes } ) => {
 				<PanelBody
 					title={ __( 'Bedroom choices', 'gutenberg-lab-blocks' ) }
 				>
-					<RangeControl
-						label={ __(
-							'Minimum bedrooms',
+					<p>
+						{ __(
+							'These options populate both the pricing selector and the enquiry form. Sleeps is optional.',
 							'gutenberg-lab-blocks'
 						) }
-						help={ __(
-							'The maximum comes from the villa’s Bedroom spec.',
-							'gutenberg-lab-blocks'
-						) }
-						value={ minimumBedrooms }
-						onChange={ ( value ) =>
-							setAttributes( {
-								minimumBedrooms: Math.max(
-									1,
-									Number( value ) || 1
-								),
-							} )
-						}
-						min={ 1 }
-						max={ 30 }
-					/>
+					</p>
+
+					{ ! isCustom && automaticChoices.length > 0 && (
+						<Notice status="info" isDismissible={ false }>
+							{ __(
+								'Currently generated from the Villa Specs block. Editing a row creates a custom list.',
+								'gutenberg-lab-blocks'
+							) }
+						</Notice>
+					) }
+
+					{ displayedChoices.map( ( choice, index ) => {
+						const bedrooms = toInteger( choice.bedrooms, 30 );
+						const duplicate = displayedChoices.some(
+							( comparedChoice, comparedIndex ) =>
+								comparedIndex !== index &&
+								bedrooms > 0 &&
+								toInteger( comparedChoice.bedrooms, 30 ) ===
+									bedrooms
+						);
+
+						return (
+							<fieldset key={ index }>
+								<legend>
+									{ sprintf(
+										/* translators: %d is the choice number. */
+										__(
+											'Choice %d',
+											'gutenberg-lab-blocks'
+										),
+										index + 1
+									) }
+								</legend>
+								<TextControl
+									label={ __(
+										'Bedrooms',
+										'gutenberg-lab-blocks'
+									) }
+									type="number"
+									min="1"
+									max="30"
+									value={ choice.bedrooms }
+									help={
+										duplicate
+											? __(
+													'Bedroom numbers must be unique.',
+													'gutenberg-lab-blocks'
+											  )
+											: undefined
+									}
+									onChange={ ( value ) =>
+										updateChoice( index, 'bedrooms', value )
+									}
+									__nextHasNoMarginBottom
+								/>
+								<TextControl
+									label={ __(
+										'Sleeps',
+										'gutenberg-lab-blocks'
+									) }
+									type="number"
+									min="1"
+									max="100"
+									value={ choice.sleeps }
+									onChange={ ( value ) =>
+										updateChoice( index, 'sleeps', value )
+									}
+									__nextHasNoMarginBottom
+								/>
+								<Button
+									variant="link"
+									isDestructive
+									disabled={ displayedChoices.length < 2 }
+									aria-label={ sprintf(
+										/* translators: %d is the choice number. */
+										__(
+											'Remove choice %d',
+											'gutenberg-lab-blocks'
+										),
+										index + 1
+									) }
+									onClick={ () => removeChoice( index ) }
+								>
+									{ __(
+										'Remove choice',
+										'gutenberg-lab-blocks'
+									) }
+								</Button>
+								<hr />
+							</fieldset>
+						);
+					} ) }
+
+					{ displayedChoices.length === 0 && (
+						<Notice status="warning" isDismissible={ false }>
+							{ __(
+								'Add Bedroom and Sleeps values to the Villa Specs block, or add a custom choice here.',
+								'gutenberg-lab-blocks'
+							) }
+						</Notice>
+					) }
+
+					<Button
+						variant="secondary"
+						disabled={ ! canAddChoice }
+						onClick={ addChoice }
+					>
+						{ __( 'Add choice', 'gutenberg-lab-blocks' ) }
+					</Button>
+
+					{ isCustom && automaticChoices.length > 0 && (
+						<Button
+							variant="tertiary"
+							onClick={ () =>
+								setAttributes( { bedroomChoices: [] } )
+							}
+						>
+							{ __(
+								'Reset to Villa Specs',
+								'gutenberg-lab-blocks'
+							) }
+						</Button>
+					) }
 				</PanelBody>
 			</InspectorControls>
 
@@ -77,12 +355,22 @@ const Edit = ( { attributes, setAttributes } ) => {
 						) }
 						disabled
 					>
-						<option>
-							{ __(
-								'Choices use the current Villa Specs block',
-								'gutenberg-lab-blocks'
-							) }
-						</option>
+						{ validPreviewChoices.length > 0 ? (
+							validPreviewChoices.map( ( choice, index ) => (
+								<option
+									key={ `${ choice.bedrooms }-${ index }` }
+								>
+									{ formatBedroomChoice( choice ) }
+								</option>
+							) )
+						) : (
+							<option>
+								{ __(
+									'Add at least one bedroom choice',
+									'gutenberg-lab-blocks'
+								) }
+							</option>
+						) }
 					</select>
 				) : (
 					<Notice status="info" isDismissible={ false }>

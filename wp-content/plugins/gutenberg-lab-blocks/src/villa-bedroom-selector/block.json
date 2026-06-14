@@ -11,6 +11,10 @@
 		"minimumBedrooms": {
 			"type": "number",
 			"default": 1
+		},
+		"bedroomChoices": {
+			"type": "array",
+			"default": []
 		}
 	},
 	"usesContext": [ "postId", "postType" ],
