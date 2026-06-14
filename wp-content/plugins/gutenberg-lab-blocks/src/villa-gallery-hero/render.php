@@ -35,6 +35,55 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_render_nested_b
 	}
 }
 
+if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_defer_stage_image_markup' ) ) {
+	/**
+	 * Moves inactive stage image sources into data attributes until JS activates them.
+	 *
+	 * Native lazy loading can still queue off-screen slides in a top-of-page
+	 * carousel. Removing `src`/`srcset` during render keeps hidden stage images
+	 * from competing with visible content on slow connections.
+	 *
+	 * @param string $markup Rendered media markup.
+	 * @return string
+	 */
+	function gutenberg_lab_blocks_villa_gallery_hero_defer_stage_image_markup( $markup ) {
+		if ( '' === trim( $markup ) || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			return $markup;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $markup );
+
+		if ( ! $processor->next_tag( 'img' ) ) {
+			return $markup;
+		}
+
+		$src = $processor->get_attribute( 'src' );
+
+		if ( ! is_string( $src ) || '' === trim( $src ) || str_starts_with( $src, 'data:' ) ) {
+			return $markup;
+		}
+
+		$srcset = $processor->get_attribute( 'srcset' );
+		$sizes  = $processor->get_attribute( 'sizes' );
+
+		$processor->set_attribute( 'data-villa-gallery-deferred-image', '' );
+		$processor->set_attribute( 'data-villa-gallery-deferred-src', $src );
+		$processor->remove_attribute( 'src' );
+
+		if ( is_string( $srcset ) && '' !== trim( $srcset ) ) {
+			$processor->set_attribute( 'data-villa-gallery-deferred-srcset', $srcset );
+			$processor->remove_attribute( 'srcset' );
+		}
+
+		if ( is_string( $sizes ) && '' !== trim( $sizes ) ) {
+			$processor->set_attribute( 'data-villa-gallery-deferred-sizes', $sizes );
+			$processor->remove_attribute( 'sizes' );
+		}
+
+		return $processor->get_updated_html();
+	}
+}
+
 if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_get_current_post_id' ) ) {
 	/**
 	 * Returns the current singular post ID when the hero sits inside a template.
@@ -555,7 +604,8 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 										'loading'       => 'eager',
 									)
 									: array(
-										'loading' => 'lazy',
+										'fetchpriority' => 'low',
+										'loading'       => 'lazy',
 									);
 								?>
 								<li class="splide__slide">
@@ -563,7 +613,7 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 										<?php if ( 'video' === $slide['media_type'] ) : ?>
 											<?php if ( 'vimeo' === $slide['video_source'] ) : ?>
 												<?php
-												echo gutenberg_lab_blocks_render_vimeo_shell(
+												$stage_media_markup = gutenberg_lab_blocks_render_vimeo_shell(
 													array(
 														'autoplay_url'  => gutenberg_lab_blocks_get_vimeo_embed_url(
 															$slide['vimeo_id'],
@@ -596,7 +646,11 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 															'data-villa-gallery-vimeo' => '',
 														),
 													)
-												); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+												);
+
+												echo $should_prioritize_slide
+													? $stage_media_markup
+													: gutenberg_lab_blocks_villa_gallery_hero_defer_stage_image_markup( $stage_media_markup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 												?>
 											<?php else : ?>
 											<video
@@ -618,7 +672,7 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 										<?php endif; ?>
 										<?php else : ?>
 											<?php
-											echo gutenberg_lab_blocks_render_responsive_image(
+											$stage_media_markup = gutenberg_lab_blocks_render_responsive_image(
 												array(
 													'alt'           => $slide['image_alt'],
 													'attachment_id' => $slide['image_id'],
@@ -629,7 +683,11 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 													'size'          => 'gutenberg-lab-hero',
 													'sizes'         => '100vw',
 												)
-											); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+											);
+
+											echo $should_prioritize_slide
+												? $stage_media_markup
+												: gutenberg_lab_blocks_villa_gallery_hero_defer_stage_image_markup( $stage_media_markup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 											?>
 										<?php endif; ?>
 									</figure>

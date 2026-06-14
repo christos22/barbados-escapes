@@ -118,6 +118,39 @@ function bindPageIntentAutoplay( callback ) {
 	return removeListeners;
 }
 
+function loadDeferredStageImage( image ) {
+	if ( ! image || ! image.dataset.villaGalleryDeferredSrc ) {
+		return;
+	}
+
+	const { villaGalleryDeferredSrc, villaGalleryDeferredSrcset, villaGalleryDeferredSizes } =
+		image.dataset;
+
+	if ( villaGalleryDeferredSizes ) {
+		image.setAttribute( 'sizes', villaGalleryDeferredSizes );
+		delete image.dataset.villaGalleryDeferredSizes;
+	}
+
+	if ( villaGalleryDeferredSrcset ) {
+		image.setAttribute( 'srcset', villaGalleryDeferredSrcset );
+		delete image.dataset.villaGalleryDeferredSrcset;
+	}
+
+	image.src = villaGalleryDeferredSrc;
+	delete image.dataset.villaGalleryDeferredSrc;
+	delete image.dataset.villaGalleryDeferredImage;
+}
+
+function loadStageSlideMedia( stageElement, activeIndex ) {
+	const activeSlide = stageElement?.querySelectorAll( '.splide__slide' )?.[
+		activeIndex
+	];
+
+	activeSlide
+		?.querySelectorAll( '[data-villa-gallery-deferred-image]' )
+		.forEach( loadDeferredStageImage );
+}
+
 function syncStageNativeVideos( stageElement, shouldAutoplay ) {
 	if ( ! stageElement ) {
 		return;
@@ -286,6 +319,7 @@ function syncActiveGalleryState(
 	shouldAutoplayVimeo,
 	prefersReducedMotion
 ) {
+	loadStageSlideMedia( stageElement, activeIndex );
 	syncStageNativeVideos( stageElement, shouldAutoplayNativeVideo );
 	syncStageVimeoShells( stageElement, shouldAutoplayVimeo );
 	syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion );

@@ -110,6 +110,9 @@ $first_title = trim( (string) ( $first_slide['title'] ?? '' ) );
 $first_detail = trim( (string) ( $first_slide['detail'] ?? '' ) );
 $is_card_interactive = false !== ( $attributes['isCardInteractive'] ?? true );
 $show_caption = false !== ( $attributes['showCaption'] ?? true );
+$gallery_card_sizes = $is_card_interactive
+	? '(max-width: 600px) 72vw, (max-width: 782px) 56vw, (max-width: 960px) 30vw, 18rem'
+	: '(max-width: 600px) 72vw, (max-width: 782px) 56vw, 25vw';
 $wrapper_class = 'vvm-villa-gallery-carousel' . ( $is_card_interactive ? '' : ' vvm-villa-gallery-carousel--noninteractive' );
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
@@ -195,8 +198,8 @@ $wrapper_attributes = get_block_wrapper_attributes(
 												'attachment_id' => $image_id,
 												'class'         => 'vvm-villa-gallery-carousel__slide-image',
 												'fallback_url'  => $image_url,
-												'size'          => 'gutenberg-lab-gallery-card',
-												'sizes'         => '(max-width: 782px) 72vw, 22vw',
+												'size'          => 'gutenberg-lab-card-landscape',
+												'sizes'         => $gallery_card_sizes,
 											)
 										); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 										?>
