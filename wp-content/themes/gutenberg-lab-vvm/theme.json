@@ -284,6 +284,11 @@
 					"textTransform": "uppercase"
 				}
 			},
+			"core/paragraph": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--refined-sans)"
+				}
+			},
 			"core/button": {
 				"border": {
 					"radius": "0"
