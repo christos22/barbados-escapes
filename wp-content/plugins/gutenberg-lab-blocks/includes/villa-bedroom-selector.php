@@ -109,6 +109,170 @@ function gutenberg_lab_blocks_format_villa_bedroom_choice( $bedrooms, $sleeps = 
 }
 
 /**
+ * Serializes trusted selector attributes.
+ *
+ * @param array<string, mixed> $attributes Attribute map.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_villa_bedroom_selector_attributes( $attributes ) {
+	$markup = '';
+
+	foreach ( $attributes as $name => $value ) {
+		if (
+			! is_string( $name ) ||
+			! preg_match( '/^[a-zA-Z_:][-a-zA-Z0-9_:.]*$/', $name ) ||
+			false === $value ||
+			null === $value
+		) {
+			continue;
+		}
+
+		if ( true === $value || '' === $value ) {
+			$markup .= ' ' . $name;
+			continue;
+		}
+
+		$markup .= sprintf(
+			' %1$s="%2$s"',
+			$name,
+			esc_attr( (string) $value )
+		);
+	}
+
+	return trim( $markup );
+}
+
+/**
+ * Returns option markup for a villa bedroom select.
+ *
+ * @param array<int, string> $choices Bedroom values and labels.
+ * @return string
+ */
+function gutenberg_lab_blocks_render_villa_bedroom_choice_options( $choices ) {
+	$markup = '';
+
+	foreach ( $choices as $value => $label ) {
+		$markup .= sprintf(
+			'<option value="%1$s">%2$s</option>',
+			esc_attr( (string) $value ),
+			esc_html( $label )
+		);
+	}
+
+	return $markup;
+}
+
+/**
+ * Enqueues selector assets when markup is injected outside the block parser.
+ */
+function gutenberg_lab_blocks_enqueue_villa_bedroom_selector_assets() {
+	$block_type = WP_Block_Type_Registry::get_instance()->get_registered(
+		'gutenberg-lab-blocks/villa-bedroom-selector'
+	);
+
+	if ( ! $block_type instanceof WP_Block_Type ) {
+		return;
+	}
+
+	foreach ( (array) $block_type->style_handles as $style_handle ) {
+		wp_enqueue_style( $style_handle );
+	}
+
+	foreach ( (array) $block_type->view_script_handles as $script_handle ) {
+		wp_enqueue_script( $script_handle );
+	}
+}
+
+/**
+ * Enqueues selector assets for enabled villa pages even when legacy content is
+ * missing the selector block.
+ */
+function gutenberg_lab_blocks_enqueue_villa_bedroom_selector_assets_for_current_villa() {
+	if ( ! is_singular( 'villa' ) ) {
+		return;
+	}
+
+	$villa_id = absint( get_queried_object_id() );
+
+	if ( gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id ) ) {
+		gutenberg_lab_blocks_enqueue_villa_bedroom_selector_assets();
+	}
+}
+add_action(
+	'wp_enqueue_scripts',
+	'gutenberg_lab_blocks_enqueue_villa_bedroom_selector_assets_for_current_villa',
+	20
+);
+
+/**
+ * Renders the visitor-facing pricing selector.
+ *
+ * @param int             $villa_id           Villa post ID.
+ * @param int|null        $minimum_override   Optional minimum bedroom override.
+ * @param array|string    $wrapper_attributes Wrapper attributes or a prepared attribute string.
+ * @return string
+ */
+function gutenberg_lab_blocks_render_villa_bedroom_selector( $villa_id, $minimum_override = null, $wrapper_attributes = array() ) {
+	$villa_id = absint( $villa_id );
+
+	if (
+		! $villa_id ||
+		! gutenberg_lab_blocks_is_villa_bedroom_selector_enabled( $villa_id )
+	) {
+		return '';
+	}
+
+	$choices = gutenberg_lab_blocks_get_villa_bedroom_choices(
+		$villa_id,
+		$minimum_override
+	);
+
+	if ( empty( $choices ) ) {
+		return '';
+	}
+
+	gutenberg_lab_blocks_enqueue_villa_bedroom_selector_assets();
+
+	if ( is_array( $wrapper_attributes ) ) {
+		$classes = preg_split(
+			'/\s+/',
+			(string) ( $wrapper_attributes['class'] ?? '' ),
+			-1,
+			PREG_SPLIT_NO_EMPTY
+		);
+		$classes[] = 'vvm-villa-bedroom-selector';
+
+		$wrapper_attributes['class']                          = implode(
+			' ',
+			array_unique( $classes )
+		);
+		$wrapper_attributes['data-vvm-bedroom-selector-root'] = '';
+		$wrapper_attributes = gutenberg_lab_blocks_get_villa_bedroom_selector_attributes(
+			$wrapper_attributes
+		);
+	}
+
+	if ( ! is_string( $wrapper_attributes ) || '' === trim( $wrapper_attributes ) ) {
+		$wrapper_attributes = gutenberg_lab_blocks_get_villa_bedroom_selector_attributes(
+			array(
+				'class'                          => 'vvm-villa-bedroom-selector',
+				'data-vvm-bedroom-selector-root' => '',
+			)
+		);
+	}
+
+	$select_id = wp_unique_id( 'vvm-villa-bedroom-selector-' );
+
+	return sprintf(
+		'<div %1$s><label class="screen-reader-text" for="%2$s">%3$s</label><select id="%2$s" class="vvm-villa-bedroom-selector__select" data-vvm-bedroom-selector>%4$s</select></div>',
+		$wrapper_attributes, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		esc_attr( $select_id ),
+		esc_html__( 'Bedrooms for seasonal pricing', 'gutenberg-lab-blocks' ),
+		gutenberg_lab_blocks_render_villa_bedroom_choice_options( $choices ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	);
+}
+
+/**
  * Collects booking data from structured villa blocks.
  *
  * The visible Villa Specs block is the source of truth. Reading its attributes
@@ -292,6 +456,73 @@ function gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id ) 
 }
 
 /**
+ * Injects a pricing selector into legacy villa pricing groups when enabled.
+ *
+ * @param string               $block_content Rendered block markup.
+ * @param array<string, mixed> $block         Parsed block.
+ * @return string
+ */
+function gutenberg_lab_blocks_inject_villa_bedroom_selector_block( $block_content, $block ) {
+	$class_name = (string) ( $block['attrs']['className'] ?? '' );
+	$has_selector = str_contains( $block_content, 'data-vvm-bedroom-selector' );
+
+	if (
+		'core/group' !== ( $block['blockName'] ?? '' ) ||
+		! preg_match( '/(?:^|\s)vvm-villa-pricing__intro(?:\s|$)/', $class_name )
+	) {
+		return $block_content;
+	}
+
+	$selector = '';
+
+	if ( ! $has_selector ) {
+		$villa_id = gutenberg_lab_blocks_resolve_villa_booking_post_id(
+			absint( $block['context']['postId'] ?? 0 )
+		);
+
+		if ( ! gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id ) ) {
+			return $block_content;
+		}
+
+		$selector = gutenberg_lab_blocks_render_villa_bedroom_selector( $villa_id );
+
+		if ( '' === $selector ) {
+			return $block_content;
+		}
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	if ( $processor->next_tag() ) {
+		$processor->add_class( 'vvm-villa-pricing__intro--has-bedroom-selector' );
+		$block_content = $processor->get_updated_html();
+	}
+
+	if ( $has_selector ) {
+		return $block_content;
+	}
+
+	$closing_position = strripos( $block_content, '</div>' );
+
+	if ( false === $closing_position ) {
+		return $block_content;
+	}
+
+	return substr_replace(
+		$block_content,
+		$selector,
+		$closing_position,
+		0
+	);
+}
+add_filter(
+	'render_block',
+	'gutenberg_lab_blocks_inject_villa_bedroom_selector_block',
+	20,
+	2
+);
+
+/**
  * Resolves a villa ID during page rendering or a CF7 REST submission.
  *
  * @param int $preferred_id Preferred villa post ID.
@@ -383,6 +614,32 @@ add_filter(
 );
 
 /**
+ * Renders the villa bedroom select row for forms without a stored CF7 tag.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return string
+ */
+function gutenberg_lab_blocks_render_cf7_villa_bedroom_field( $villa_id ) {
+	if ( ! gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id ) ) {
+		return '';
+	}
+
+	$choices = gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id );
+
+	if ( empty( $choices ) ) {
+		return '';
+	}
+
+	gutenberg_lab_blocks_enqueue_villa_bedroom_selector_assets();
+
+	return sprintf(
+		'<p data-name="villa-bedrooms"><label class="screen-reader-text" for="villa-bedrooms">%1$s</label><span class="wpcf7-form-control-wrap" data-name="villa-bedrooms"><select id="villa-bedrooms" name="villa-bedrooms" class="wpcf7-form-control wpcf7-select vvm-villa-contact-form__field" aria-required="true" aria-invalid="false">%2$s</select></span></p>',
+		esc_html__( 'Bedrooms', 'gutenberg-lab-blocks' ),
+		gutenberg_lab_blocks_render_villa_bedroom_choice_options( $choices ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	);
+}
+
+/**
  * Removes the form's bedroom row when the current villa disables the feature.
  *
  * CF7 does not expose a form-tag removal API. The pattern is deliberately
@@ -393,11 +650,57 @@ add_filter(
  */
 function gutenberg_lab_blocks_filter_cf7_villa_bedroom_elements( $html ) {
 	$villa_id = gutenberg_lab_blocks_resolve_villa_booking_post_id();
+	$has_bedroom_field = preg_match(
+		'/\bname=(["\'])villa-bedrooms\1/i',
+		$html
+	);
 
 	if (
 		! $villa_id ||
 		gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id )
 	) {
+		if ( ! $villa_id || $has_bedroom_field ) {
+			return $html;
+		}
+
+		$field = gutenberg_lab_blocks_render_cf7_villa_bedroom_field( $villa_id );
+
+		if ( '' === $field ) {
+			return $html;
+		}
+
+		if (
+			preg_match(
+				'~<p\b[^>]*>(?:(?!</p>).)*?\bfor=(["\'])your-name\1(?:(?!</p>).)*?</p>~is',
+				$html,
+				$matches,
+				PREG_OFFSET_CAPTURE
+			)
+		) {
+			return substr_replace(
+				$html,
+				$field,
+				(int) $matches[0][1],
+				0
+			);
+		}
+
+		if (
+			preg_match(
+				'~<div\b[^>]*class=(["\'])(?:(?!\1).)*\bvvm-villa-contact-form__grid\b(?:(?!\1).)*\1[^>]*>~i',
+				$html,
+				$matches,
+				PREG_OFFSET_CAPTURE
+			)
+		) {
+			$grid_start = (int) $matches[0][1];
+			$grid_close = stripos( $html, '</div>', $grid_start );
+
+			if ( false !== $grid_close ) {
+				return substr_replace( $html, $field, $grid_close, 0 );
+			}
+		}
+
 		return $html;
 	}
 
@@ -441,6 +744,122 @@ add_filter(
 	'wpcf7_posted_data',
 	'gutenberg_lab_blocks_filter_cf7_villa_bedroom_posted_data',
 	20
+);
+
+/**
+ * Validates injected bedroom fields when the CF7 form has no saved tag.
+ *
+ * @param WPCF7_Validation       $result Current validation result.
+ * @param array<int, WPCF7_FormTag> $tags Scanned form tags.
+ * @return WPCF7_Validation
+ */
+function gutenberg_lab_blocks_validate_cf7_injected_villa_bedrooms( $result, $tags ) {
+	foreach ( $tags as $tag ) {
+		if (
+			$tag instanceof WPCF7_FormTag &&
+			'villa-bedrooms' === $tag->name
+		) {
+			return $result;
+		}
+	}
+
+	$submitted = isset( $_POST['villa-bedrooms'] )
+		? sanitize_text_field( wp_unslash( $_POST['villa-bedrooms'] ) )
+		: '';
+	$villa_id = gutenberg_lab_blocks_resolve_villa_booking_post_id();
+
+	if (
+		! $villa_id ||
+		! gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id )
+	) {
+		return $result;
+	}
+
+	$choices = gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id );
+
+	if (
+		! ctype_digit( $submitted ) ||
+		! isset( $choices[ (int) $submitted ] )
+	) {
+		$result->invalidate(
+			array(
+				'type'    => 'select',
+				'name'    => 'villa-bedrooms',
+				'options' => array( 'id:villa-bedrooms' ),
+			),
+			__( 'Please choose a valid number of bedrooms.', 'gutenberg-lab-blocks' )
+		);
+	}
+
+	return $result;
+}
+add_filter(
+	'wpcf7_validate',
+	'gutenberg_lab_blocks_validate_cf7_injected_villa_bedrooms',
+	30,
+	2
+);
+
+/**
+ * Adds the selected bedroom label to villa enquiry emails when the form body
+ * does not already include it.
+ *
+ * @param array<string, mixed> $components   Mail components.
+ * @param WPCF7_ContactForm    $contact_form Current form.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_blocks_add_villa_bedrooms_to_mail( $components, $contact_form ) {
+	$submission = class_exists( 'WPCF7_Submission' )
+		? WPCF7_Submission::get_instance()
+		: null;
+
+	if ( ! $submission instanceof WPCF7_Submission ) {
+		return $components;
+	}
+
+	$villa_id = absint( $submission->get_meta( 'container_post_id' ) );
+
+	if ( ! gutenberg_lab_blocks_should_render_villa_bedroom_selector( $villa_id ) ) {
+		return $components;
+	}
+
+	$submitted = (string) $submission->get_posted_data( 'villa-bedrooms' );
+	$choices   = gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id );
+
+	if (
+		! ctype_digit( $submitted ) ||
+		! isset( $choices[ (int) $submitted ] ) ||
+		empty( $components['body'] ) ||
+		! is_string( $components['body'] ) ||
+		false !== stripos( $components['body'], 'Bedrooms:' )
+	) {
+		return $components;
+	}
+
+	$line = sprintf(
+		/* translators: %s is the selected bedroom label. */
+		__( 'Bedrooms: %s', 'gutenberg-lab-blocks' ),
+		$choices[ (int) $submitted ]
+	) . "\n";
+
+	$updated_body = preg_replace(
+		'/^(Preferred departure date:[^\r\n]*(?:\r?\n))/m',
+		'$1' . $line,
+		$components['body'],
+		1
+	);
+
+	$components['body'] = null === $updated_body
+		? $components['body'] . "\n" . $line
+		: $updated_body;
+
+	return $components;
+}
+add_filter(
+	'wpcf7_mail_components',
+	'gutenberg_lab_blocks_add_villa_bedrooms_to_mail',
+	20,
+	2
 );
 
 /**
