@@ -13,6 +13,8 @@
 
 # Keep local-only sync credentials out of Git.
 .ddev/.env.sync-remote
+.ddev/.villa-import.*.json
+.ddev/villa-import-backups/
 wp-config-ddev-local.php
 
 # Keep future Composer manifests if the project moves to Composer-managed WordPress.

@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+## Description: Validate a villa workbook and create or update a local WordPress villa draft
+## Usage: import-villa <workbook.xlsx> [--dry-run] [--update=ID] [--yes]
+## Example: "ddev import-villa ~/Downloads/villa-content.xlsx --dry-run"
+
+set -euo pipefail
+
+APPROOT="${DDEV_APPROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+PARSER="${APPROOT}/wp-content/plugins/gutenberg-lab-blocks/tools/villa-import/parse-workbook.mjs"
+BACKUP_DIR="${APPROOT}/.ddev/villa-import-backups"
+workbook_path=""
+dry_run=0
+update_id=""
+confirmed=0
+temp_json=""
+
+usage() {
+	cat <<'EOF'
+Usage:
+  ddev import-villa <workbook.xlsx> --dry-run
+  ddev import-villa <workbook.xlsx>
+  ddev import-villa <workbook.xlsx> --update=ID --yes
+
+The normal command creates a new draft. Existing villas are never changed
+unless an importer-managed draft ID is supplied with both --update and --yes.
+EOF
+}
+
+fail() {
+	printf 'Error: %s\n' "$*" >&2
+	exit 1
+}
+
+for argument in "$@"; do
+	case "${argument}" in
+		--dry-run)
+			dry_run=1
+			;;
+		--update=*)
+			update_id="${argument#*=}"
+			;;
+		--yes)
+			confirmed=1
+			;;
+		-h|--help)
+			usage
+			exit 0
+			;;
+		-*)
+			fail "Unknown option ${argument}"
+			;;
+		*)
+			if [[ -n "${workbook_path}" ]]; then
+				fail "Only one workbook may be imported at a time."
+			fi
+			workbook_path="${argument}"
+			;;
+	esac
+done
+
+[[ -n "${workbook_path}" ]] || {
+	usage
+	exit 1
+}
+
+[[ -f "${workbook_path}" ]] || fail "Workbook not found: ${workbook_path}"
+[[ -f "${PARSER}" ]] || fail "Workbook parser not found: ${PARSER}"
+
+if [[ -n "${update_id}" && ! "${update_id}" =~ ^[1-9][0-9]*$ ]]; then
+	fail "--update expects a numeric villa draft ID."
+fi
+
+if [[ -n "${update_id}" && "${dry_run}" -eq 0 && "${confirmed}" -ne 1 ]]; then
+	fail "Updating a draft requires --yes after reviewing a dry run."
+fi
+
+temp_json="$(mktemp "${APPROOT}/.ddev/.villa-import.XXXXXX.json")"
+trap 'rm -f "${temp_json}"' EXIT
+
+printf '\n==> Reading and validating %s\n' "${workbook_path}"
+node "${PARSER}" "${workbook_path}" > "${temp_json}"
+
+mkdir -p "${BACKUP_DIR}"
+
+container_json="/var/www/html/.ddev/$(basename "${temp_json}")"
+container_backup_dir="/var/www/html/.ddev/villa-import-backups"
+wp_args=(
+	barbados villa import-json
+	"${container_json}"
+	"--backup-dir=${container_backup_dir}"
+)
+
+if [[ "${dry_run}" -eq 1 ]]; then
+	wp_args+=(--dry-run)
+fi
+
+if [[ -n "${update_id}" ]]; then
+	wp_args+=("--update=${update_id}")
+fi
+
+if [[ "${confirmed}" -eq 1 ]]; then
+	wp_args+=(--yes)
+fi
+
+printf '\n==> %s villa import\n' "$([[ "${dry_run}" -eq 1 ]] && printf 'Previewing' || printf 'Running')"
+ddev wp "${wp_args[@]}"

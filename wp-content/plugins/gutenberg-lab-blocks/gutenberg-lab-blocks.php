@@ -25,6 +25,7 @@ require_once __DIR__ . '/includes/site-messages.php';
 require_once __DIR__ . '/includes/villas.php';
 require_once __DIR__ . '/includes/villa-bedroom-selector.php';
 require_once __DIR__ . '/includes/villa-availability.php';
+require_once __DIR__ . '/includes/villa-importer.php';
 require_once __DIR__ . '/includes/mcp-abilities.php';
 
 /**
