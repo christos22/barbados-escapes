@@ -28,23 +28,30 @@
 .vvm-villa-bedroom-selector__select {
 	--vvm-bedroom-select-border: #918b85;
 	--vvm-bedroom-select-focus: #1e3d2f;
-	--vvm-bedroom-select-surface: #fbf8f2;
-	--vvm-bedroom-select-text: #57524e;
+	--vvm-bedroom-select-surface: #1e3d2f;
+	--vvm-bedroom-select-text: #f7f1e7;
 
 	box-sizing: border-box;
 	width: 100%;
-	min-height: 3.35rem;
 	margin: 0;
 	padding: 0.75rem 2.8rem 0.75rem 1rem;
 	border: 1px solid var(--vvm-bedroom-select-border);
-	border-radius: 6px;
+	border-radius: 0;
 	background-color: var(--vvm-bedroom-select-surface);
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpath fill='none' stroke='%2357524e' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m1 1 6 6 6-6'/%3E%3C/svg%3E");
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpath fill='none' stroke='%23f7f1e7' stroke-opacity='.68' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m1 1 6 6 6-6'/%3E%3C/svg%3E");
 	color: var(--vvm-bedroom-select-text);
 	color-scheme: light;
 	font-family: var(--wp--preset--font-family--refined-sans);
-	font-size: 0.88rem;
+	font-size: 0.62rem;
+	letter-spacing: 0.18em;
 	line-height: 1.4;
+	text-transform: uppercase;
+}
+
+.vvm-villa-bedroom-selector__select option {
+	background: var(--vvm-bedroom-select-surface);
+	color: var(--vvm-bedroom-select-text);
+	color-scheme: light;
 }
 
 .vvm-villa-contact-form select.wpcf7-select[name="villa-bedrooms"] {
