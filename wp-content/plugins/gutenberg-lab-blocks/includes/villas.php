@@ -1074,6 +1074,22 @@ function gutenberg_lab_blocks_register_villa_location_taxonomy() {
 add_action( 'init', 'gutenberg_lab_blocks_register_villa_location_taxonomy' );
 
 /**
+ * Returns the normalized public request path.
+ *
+ * @return string|null
+ */
+function gutenberg_lab_blocks_get_current_request_path() {
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+	$path        = wp_parse_url( $request_uri, PHP_URL_PATH );
+
+	if ( ! is_string( $path ) ) {
+		return null;
+	}
+
+	return trim( strtolower( $path ), '/' );
+}
+
+/**
  * Checks whether the current request is for a removed public villa taxonomy URL.
  *
  * Villa amenities and locations remain useful CMS metadata, but their public
@@ -1086,14 +1102,11 @@ function gutenberg_lab_blocks_is_legacy_public_villa_taxonomy_request() {
 		return false;
 	}
 
-	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
-	$path        = wp_parse_url( $request_uri, PHP_URL_PATH );
-
-	if ( ! is_string( $path ) ) {
+	$path = gutenberg_lab_blocks_get_current_request_path();
+	if ( null === $path ) {
 		return false;
 	}
 
-	$path     = trim( strtolower( $path ), '/' );
 	$segments = explode( '/', $path );
 	$base     = $segments[0] ?? '';
 
@@ -1101,13 +1114,36 @@ function gutenberg_lab_blocks_is_legacy_public_villa_taxonomy_request() {
 }
 
 /**
- * Adds explicit noindex/nofollow metadata to retired taxonomy URL responses.
+ * Checks whether the current request is for the removed legacy lander URL.
+ *
+ * @return bool
+ */
+function gutenberg_lab_blocks_is_legacy_lander_request() {
+	if ( is_admin() || wp_doing_ajax() ) {
+		return false;
+	}
+
+	return 'lander' === gutenberg_lab_blocks_get_current_request_path();
+}
+
+/**
+ * Checks whether the current request is for a retired public URL.
+ *
+ * @return bool
+ */
+function gutenberg_lab_blocks_is_retired_public_url_request() {
+	return gutenberg_lab_blocks_is_legacy_public_villa_taxonomy_request()
+		|| gutenberg_lab_blocks_is_legacy_lander_request();
+}
+
+/**
+ * Adds explicit noindex/nofollow metadata to retired public URL responses.
  *
  * @param array<string, mixed> $robots Existing robots directives.
  * @return array<string, mixed>
  */
-function gutenberg_lab_blocks_legacy_public_villa_taxonomy_robots( $robots ) {
-	if ( ! gutenberg_lab_blocks_is_legacy_public_villa_taxonomy_request() ) {
+function gutenberg_lab_blocks_retired_public_url_robots( $robots ) {
+	if ( ! gutenberg_lab_blocks_is_retired_public_url_request() ) {
 		return $robots;
 	}
 
@@ -1118,13 +1154,13 @@ function gutenberg_lab_blocks_legacy_public_villa_taxonomy_robots( $robots ) {
 
 	return $robots;
 }
-add_filter( 'wp_robots', 'gutenberg_lab_blocks_legacy_public_villa_taxonomy_robots', 20 );
+add_filter( 'wp_robots', 'gutenberg_lab_blocks_retired_public_url_robots', 20 );
 
 /**
- * Serves retired villa taxonomy URLs as 410 Gone before canonical redirects run.
+ * Serves retired public URLs as 410 Gone before canonical redirects run.
  */
-function gutenberg_lab_blocks_serve_legacy_public_villa_taxonomy_gone() {
-	if ( ! gutenberg_lab_blocks_is_legacy_public_villa_taxonomy_request() ) {
+function gutenberg_lab_blocks_serve_retired_public_url_gone() {
+	if ( ! gutenberg_lab_blocks_is_retired_public_url_request() ) {
 		return;
 	}
 
@@ -1145,12 +1181,12 @@ function gutenberg_lab_blocks_serve_legacy_public_villa_taxonomy_gone() {
 	}
 
 	wp_die(
-		esc_html__( 'This villa taxonomy page is no longer available.', 'gutenberg-lab-blocks' ),
+		esc_html__( 'This page is no longer available.', 'gutenberg-lab-blocks' ),
 		esc_html__( 'Gone', 'gutenberg-lab-blocks' ),
 		array( 'response' => 410 )
 	);
 }
-add_action( 'template_redirect', 'gutenberg_lab_blocks_serve_legacy_public_villa_taxonomy_gone', 0 );
+add_action( 'template_redirect', 'gutenberg_lab_blocks_serve_retired_public_url_gone', 0 );
 
 /**
  * Returns the selected villa location slug from the current request.
