@@ -105,6 +105,10 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_registry() {
 			'label' => __( 'Bed', 'gutenberg-lab-blocks' ),
 			'paths' => '<path d="M4 11.5V7.8c0-.9.7-1.6 1.6-1.6h4.1c1 0 1.8.8 1.8 1.8v3.5"></path><path d="M11.5 11.5V9.2h5.3c1.8 0 3.2 1.4 3.2 3.2v4.1"></path><path d="M4 16.5h16"></path><path d="M4 18.5v-7"></path><path d="M20 18.5v-2"></path>',
 		),
+		'bedrooms'           => array(
+			'label' => __( 'Bedrooms', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'bedrooms.svg',
+		),
 		'breakfast-bar'      => array(
 			'label' => __( 'Breakfast Bar', 'gutenberg-lab-blocks' ),
 			'asset' => $theme_asset_dir . 'breakfast-bar.svg',
