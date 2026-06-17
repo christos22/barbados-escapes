@@ -153,6 +153,10 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_registry() {
 			'label' => __( 'Dishwasher', 'gutenberg-lab-blocks' ),
 			'asset' => $theme_asset_dir . 'dishwasher.svg',
 		),
+		'dollar'             => array(
+			'label' => __( 'Dollar', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'dollar.svg',
+		),
 		'dvd'                => array(
 			'label' => __( 'DVD', 'gutenberg-lab-blocks' ),
 			'asset' => $asset_dir . 'dvd.svg',
@@ -256,6 +260,10 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_registry() {
 		'pool'               => array(
 			'label' => __( 'Pool', 'gutenberg-lab-blocks' ),
 			'asset' => $asset_dir . 'pool.svg',
+		),
+		'pool-alternative'   => array(
+			'label' => __( 'Pool Alternative', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'pool-alternative.svg',
 		),
 		'pool-bar'           => array(
 			'label' => __( 'Pool Bar', 'gutenberg-lab-blocks' ),
