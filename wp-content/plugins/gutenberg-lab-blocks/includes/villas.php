@@ -97,6 +97,10 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_registry() {
 			'label' => __( 'Bathtub Alt', 'gutenberg-lab-blocks' ),
 			'asset' => $theme_asset_dir . 'bathtub-alt.svg',
 		),
+		'bathtub-thick'      => array(
+			'label' => __( 'Bathtub Thick', 'gutenberg-lab-blocks' ),
+			'asset' => $theme_asset_dir . 'bathtub-thick.svg',
+		),
 		'bbq'                => array(
 			'label' => __( 'BBQ', 'gutenberg-lab-blocks' ),
 			'asset' => $asset_dir . 'bbq.svg',
