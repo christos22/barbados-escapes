@@ -1728,7 +1728,7 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 		<div class="vvm-villa-availability-calendar__header">
 			<h2 class="vvm-villa-availability-calendar__title"><?php echo esc_html( $heading ); ?></h2>
 			<p class="vvm-villa-availability-calendar__status" data-vvm-calendar-status aria-live="polite">
-				<?php esc_html_e( 'Choose your check-in date. 24 hours is reserved for arrival preparation between bookings next to the calendar ', 'gutenberg-lab-blocks' ); ?>
+				<?php esc_html_e( 'Choose your check-in date. 24 hours is reserved for arrival preparation between bookings.', 'gutenberg-lab-blocks' ); ?>
 			</p>
 		</div>
 		<nav class="vvm-villa-availability-calendar__navigation" aria-label="<?php esc_attr_e( 'Availability calendar navigation', 'gutenberg-lab-blocks' ); ?>">
