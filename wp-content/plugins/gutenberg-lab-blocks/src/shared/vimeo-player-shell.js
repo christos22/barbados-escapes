@@ -1,3 +1,5 @@
+import VimeoPlayer from '@vimeo/player';
+
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 const MIN_AUTOPLAY_POSTER_MS = 900;
 const POSTER_FADE_MS = 350;
@@ -209,9 +211,7 @@ async function loadVimeoPlayerConstructor() {
 		return vimeoPlayerConstructorPromise;
 	}
 
-	vimeoPlayerConstructorPromise = import( '@vimeo/player' ).then(
-		( module ) => module.default || module
-	);
+	vimeoPlayerConstructorPromise = Promise.resolve( VimeoPlayer );
 
 	return vimeoPlayerConstructorPromise;
 }
