@@ -2690,6 +2690,17 @@ function gutenberg_lab_blocks_villa_importer_source_perspective_block( $source_b
 
 	$columns    = $source_block['innerBlocks'];
 	$first_col  = $columns[0];
+	$attributes = $source_block['attrs'] ?? array();
+	$class_name = trim(
+		gutenberg_lab_blocks_villa_importer_classes(
+			( $attributes['className'] ?? '' ) . ' vvm-villa-perspective'
+		)
+	);
+
+	if ( '' !== $class_name ) {
+		$attributes['className'] = $class_name;
+	}
+
 	$replacement = gutenberg_lab_blocks_villa_importer_core_wrapper_block(
 		'column',
 		$first_col['attrs'] ?? array(),
@@ -2703,7 +2714,7 @@ function gutenberg_lab_blocks_villa_importer_source_perspective_block( $source_b
 
 	return gutenberg_lab_blocks_villa_importer_core_wrapper_block(
 		'columns',
-		$source_block['attrs'] ?? array(),
+		$attributes,
 		'wp-block-columns',
 		serialize_blocks( $columns )
 	);

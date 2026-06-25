@@ -2155,6 +2155,29 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	display: none;
 }
 
+@media (min-width: 782px) {
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns {
+		align-items: stretch;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) {
+		display: flex;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) > .wp-block-image {
+		flex: 1;
+		margin: 0;
+		width: 100%;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) > .wp-block-image img {
+		display: block;
+		height: 100%;
+		object-fit: cover;
+		width: 100%;
+	}
+}
+
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-staff.wp-block-columns {
 	align-items: stretch;
 	gap: var(--wp--preset--spacing--sm, 1rem);
