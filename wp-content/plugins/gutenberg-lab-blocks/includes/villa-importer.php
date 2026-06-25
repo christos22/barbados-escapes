@@ -2378,24 +2378,16 @@ function gutenberg_lab_blocks_villa_importer_build_pricing_contact_location( $da
 		);
 	}
 
-	$location = '';
-
-	if ( '' !== $map_markup ) {
-		$location .= gutenberg_lab_blocks_villa_importer_group(
-			$map_markup,
-			array( 'className' => 'vvm-villa-contact__media-slot' )
-		);
-	}
-
-	$location .= gutenberg_lab_blocks_villa_importer_group(
-		$location_details,
-		array( 'className' => 'vvm-villa-contact__location' )
-	);
-
 	return $pricing_contact . "\n\n" .
 		gutenberg_lab_blocks_villa_importer_group(
 			gutenberg_lab_blocks_villa_importer_group(
-				$location,
+				gutenberg_lab_blocks_villa_importer_group(
+					$map_markup . $location_details,
+					array(
+						'className' => 'vvm-villa-contact__media-slot',
+						'layout'    => array( 'type' => 'constrained' ),
+					)
+				),
 				array( 'className' => 'vvm-villa-contact__location-card' )
 			),
 			array( 'className' => 'vvm-villa-amenities vvm-villa-contact' )
