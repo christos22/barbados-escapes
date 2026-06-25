@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.47
+Version: 0.1.48
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -1727,8 +1727,8 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__location-card:has(> .vvm-villa-contact__media-slot > .vvm-villa-amenities__eyebrow) {
-	align-self: stretch;
-	grid-template-rows: minmax(0, 1fr);
+	align-self: start;
+	grid-template-rows: auto;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot {
@@ -1815,13 +1815,14 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 /* When editors add map text directly under the map, treat it as the location panel. */
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) {
 	align-content: start;
-	grid-template-rows: minmax(18rem, 1fr) auto auto;
-	height: 100%;
+	grid-template-rows: minmax(18rem, clamp(18rem, 34vw, 30rem)) auto auto auto;
+	height: auto;
+	min-height: 0;
 	background: #ffffff;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > :first-child {
-	height: 100%;
+	height: clamp(18rem, 34vw, 30rem);
 	min-height: clamp(18rem, 34vw, 30rem);
 }
 
@@ -1847,7 +1848,18 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > .vvm-villa-amenities__item {
 	margin-top: 0.8rem;
-	margin-bottom: clamp(1.5rem, 2vw, 2rem);
+	margin-bottom: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__media-slot:has(> .vvm-villa-amenities__eyebrow) > .wp-block-buttons {
+	justify-self: stretch;
+	width: auto;
+	max-width: none;
+	height: auto;
+	min-height: 0;
+	margin: 0.8rem clamp(1.5rem, 2vw, 2rem) clamp(1.5rem, 2vw, 2rem) !important;
+	padding: 0;
+	align-self: start;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__location {
