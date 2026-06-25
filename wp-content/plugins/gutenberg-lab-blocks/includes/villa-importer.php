@@ -1925,18 +1925,9 @@ function gutenberg_lab_blocks_villa_importer_build_pricing_contact_location( $da
 		$season = '' !== $rate_label
 			? sprintf( '%s (%s)', $rate_label, $date_range )
 			: $date_range;
-		$bedroom_count = gutenberg_lab_blocks_get_villa_bedroom_count_from_label( $rate_label );
-		$row_attrs     = array();
-
-		if ( $bedroom_count ) {
-			$row_attrs['data-vvm-bedroom-pricing-key'] = gutenberg_lab_blocks_get_villa_bedroom_pricing_key(
-				$bedroom_count
-			);
-		}
 
 		$rate_rows[] = array(
-			'attributes' => $row_attrs,
-			'cells'      => array(
+			'cells' => array(
 				$season,
 				gutenberg_lab_blocks_villa_importer_format_usd( $rate['nightly_rate_usd'] ),
 				sprintf( '%d nights', (int) $rate['minimum_nights'] ),
@@ -3201,6 +3192,28 @@ function gutenberg_lab_blocks_villa_importer_backup_draft( $post_id, $backup_dir
 }
 
 /**
+ * Builds the pricing-row key map used by the frontend selector.
+ *
+ * @param array<int, array<string, mixed>> $rates Normalized workbook rates.
+ * @return array<int, string>
+ */
+function gutenberg_lab_blocks_villa_importer_pricing_row_keys( $rates ) {
+	$keys = array();
+
+	foreach ( $rates as $rate ) {
+		$rate_label = gutenberg_lab_blocks_villa_importer_text(
+			$rate['rate_label'] ?? ( $rate['season'] ?? '' )
+		);
+
+		$keys[] = gutenberg_lab_blocks_get_villa_bedroom_pricing_key_from_label(
+			$rate_label
+		);
+	}
+
+	return array_filter( $keys ) ? $keys : array();
+}
+
+/**
  * Builds post meta from normalized workbook content.
  *
  * @param array<string, mixed> $data Normalized workbook data.
@@ -3224,6 +3237,9 @@ function gutenberg_lab_blocks_villa_importer_meta( $data ) {
 	$bedroom_selector_choices = gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows(
 		$overview['bedroom_selector_choices'] ?? array()
 	);
+	$pricing_row_keys = gutenberg_lab_blocks_villa_importer_pricing_row_keys(
+		$data['rates'] ?? array()
+	);
 
 	$meta = array(
 		'villa_card_eyebrow'           => '',
@@ -3243,6 +3259,7 @@ function gutenberg_lab_blocks_villa_importer_meta( $data ) {
 			false
 		) ? '1' : '0',
 		'villa_bedroom_selector_choices' => $bedroom_selector_choices,
+		'villa_pricing_row_bedroom_keys' => $pricing_row_keys,
 		'_gutenberg_lab_villa_import_managed' => '1',
 		'_gutenberg_lab_villa_import_schema_version' => $data['schema_version'],
 		'_gutenberg_lab_villa_import_source_file' => $data['source_file'] ?? '',

@@ -157,6 +157,50 @@ function gutenberg_lab_blocks_get_villa_bedroom_pricing_key( $bedrooms ) {
 }
 
 /**
+ * Sanitizes a stored pricing row key.
+ *
+ * @param mixed $key Raw pricing key.
+ * @return string
+ */
+function gutenberg_lab_blocks_sanitize_villa_bedroom_pricing_key( $key ) {
+	$key = sanitize_key( (string) $key );
+
+	return preg_match( '/^(?:bedrooms-\d+|choice-[a-z0-9_-]+)$/', $key ) ? $key : '';
+}
+
+/**
+ * Returns saved pricing row keys for one villa.
+ *
+ * These keys are stored in post meta rather than the core/table HTML so the
+ * editor can keep validating the table block normally.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return array<int, string>
+ */
+function gutenberg_lab_blocks_get_villa_pricing_row_key_map( $villa_id ) {
+	$villa_id = absint( $villa_id );
+
+	if ( ! $villa_id || 'villa' !== get_post_type( $villa_id ) ) {
+		return array();
+	}
+
+	$raw_keys = get_post_meta( $villa_id, 'villa_pricing_row_bedroom_keys', true );
+
+	if ( ! is_array( $raw_keys ) ) {
+		return array();
+	}
+
+	$keys = array();
+
+	foreach ( $raw_keys as $key ) {
+		// Keep empty slots so row indexes stay aligned with the pricing table.
+		$keys[] = gutenberg_lab_blocks_sanitize_villa_bedroom_pricing_key( $key );
+	}
+
+	return $keys;
+}
+
+/**
  * Extracts a bedroom count from legacy labels.
  *
  * @param string $label Bedroom or rate label.
@@ -640,8 +684,8 @@ add_filter(
 /**
  * Adds pricing keys to legacy saved villa pricing table rows.
  *
- * Newly imported rows include these attributes in saved content. This render
- * backfill keeps older tables on the same frontend data contract.
+ * Keys are injected at render time rather than saved inside the core/table
+ * markup. Gutenberg's table block does not validate arbitrary row attributes.
  *
  * @param string               $block_content Rendered block markup.
  * @param array<string, mixed> $block         Parsed block.
@@ -660,9 +704,15 @@ function gutenberg_lab_blocks_add_villa_pricing_row_keys( $block_content, $block
 		return $block_content;
 	}
 
+	$villa_id = gutenberg_lab_blocks_resolve_villa_booking_post_id(
+		absint( $block['context']['postId'] ?? 0 )
+	);
+	$row_keys = gutenberg_lab_blocks_get_villa_pricing_row_key_map( $villa_id );
+	$row_index = 0;
+
 	$updated = preg_replace_callback(
 		'~<tr\b([^>]*)>(.*?)</tr>~is',
-		static function ( $matches ) {
+		static function ( $matches ) use ( $row_keys, &$row_index ) {
 			if ( preg_match( '/\bdata-vvm-bedroom-pricing-key\s*=/i', $matches[1] ) ) {
 				return $matches[0];
 			}
@@ -671,22 +721,33 @@ function gutenberg_lab_blocks_add_villa_pricing_row_keys( $block_content, $block
 				return $matches[0];
 			}
 
-			$bedrooms = gutenberg_lab_blocks_get_villa_bedroom_count_from_label(
-				html_entity_decode(
-					wp_strip_all_tags( $cell_matches[1] ),
-					ENT_QUOTES | ENT_HTML5,
-					get_bloginfo( 'charset' ) ?: 'UTF-8'
-				)
-			);
+			$pricing_key = $row_keys[ $row_index ] ?? '';
+			++$row_index;
 
-			if ( ! $bedrooms ) {
+			if ( '' === $pricing_key ) {
+				$bedrooms = gutenberg_lab_blocks_get_villa_bedroom_count_from_label(
+					html_entity_decode(
+						wp_strip_all_tags( $cell_matches[1] ),
+						ENT_QUOTES | ENT_HTML5,
+						get_bloginfo( 'charset' ) ?: 'UTF-8'
+					)
+				);
+
+				if ( $bedrooms ) {
+					$pricing_key = gutenberg_lab_blocks_get_villa_bedroom_pricing_key(
+						$bedrooms
+					);
+				}
+			}
+
+			if ( '' === $pricing_key ) {
 				return $matches[0];
 			}
 
 			return sprintf(
 				'<tr%1$s data-vvm-bedroom-pricing-key="%2$s">%3$s</tr>',
 				$matches[1],
-				esc_attr( gutenberg_lab_blocks_get_villa_bedroom_pricing_key( $bedrooms ) ),
+				esc_attr( $pricing_key ),
 				$matches[2]
 			);
 		},
