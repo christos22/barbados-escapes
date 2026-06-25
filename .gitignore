@@ -10,6 +10,7 @@
 !.cpanel.yml
 !docs/
 !docs/**
+!villa-content-template.xlsx
 
 # Keep local-only sync credentials out of Git.
 .ddev/.env.sync-remote

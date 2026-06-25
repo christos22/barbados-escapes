@@ -2,7 +2,7 @@ const FORM_SELECTOR = '.vvm-villa-contact-form';
 const FORM_FIELD_SELECTOR = 'select[name="villa-bedrooms"]';
 const PRICING_SCOPE_SELECTOR = '.vvm-villa-pricing__card, #request-availability';
 const PRICING_TABLE_SELECTOR = '.vvm-villa-pricing__table table';
-const BEDROOM_COUNT_PATTERN = /(^|[^\d])(\d+)\s*[-–—]?\s*bedrooms?\b/i;
+const PRICING_KEY_DATASET = 'vvmBedroomPricingKey';
 
 const hasOption = ( select, value ) =>
 	Array.from( select.options ).some( ( option ) => option.value === value );
@@ -15,30 +15,32 @@ const updateSelect = ( select, value ) => {
 	select.value = value;
 };
 
-const getBedroomCount = ( text ) => {
-	const match = String( text ?? '' ).match( BEDROOM_COUNT_PATTERN );
-
-	return match ? Number.parseInt( match[ 2 ], 10 ) : null;
-};
-
 const getPricingTable = ( select ) => {
 	const scope = select.closest( PRICING_SCOPE_SELECTOR ) ?? document;
 
 	return scope.querySelector( PRICING_TABLE_SELECTOR );
 };
 
+const getSelectedPricingKey = ( select, value ) => {
+	const option = Array.from( select?.options ?? [] ).find(
+		( currentOption ) => currentOption.value === value
+	);
+
+	return option?.dataset?.[ PRICING_KEY_DATASET ] ?? '';
+};
+
 const updatePricingTable = ( select, value ) => {
-	const selectedBedroomCount = getBedroomCount( value );
+	const selectedPricingKey = getSelectedPricingKey( select, value );
 	const rows = Array.from( getPricingTable( select )?.tBodies?.[ 0 ]?.rows ?? [] );
 
 	rows.forEach( ( row ) => {
-		// Rows without a bedroom count are generic seasonal notes, so keep them visible.
-		const rowBedroomCount = getBedroomCount( row.cells[ 0 ]?.textContent );
+		// Rows without a pricing key are generic seasonal notes, so keep them visible.
+		const rowPricingKey = row.dataset?.[ PRICING_KEY_DATASET ] ?? '';
 
 		row.hidden = Boolean(
-			selectedBedroomCount &&
-				rowBedroomCount &&
-				rowBedroomCount !== selectedBedroomCount
+			selectedPricingKey &&
+				rowPricingKey &&
+				rowPricingKey !== selectedPricingKey
 		);
 	} );
 };

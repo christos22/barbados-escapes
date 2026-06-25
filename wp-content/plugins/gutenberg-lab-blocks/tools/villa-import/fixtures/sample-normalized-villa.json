@@ -5,22 +5,24 @@
     "villa_name": "Importer Sample Villa",
     "property_area": "Sugar Hill",
     "parish": "St. James",
-    "short_summary": "A private west coast retreat created to verify the villa workbook import workflow.",
     "hero_location_line": "Sugar Hill, St. James, Barbados",
     "hero_statement": "A calm private villa with generous living spaces and long Caribbean views.",
     "bedrooms": 2,
     "bathrooms": 2.5,
     "sleeps": 4,
-    "bedroom_selector_enabled": false,
-    "minimum_bedroom_choice": 1,
+    "bedroom_selector_enabled": true,
+    "bedroom_selector_choices": [
+      "2 Bedrooms",
+      "1 Bedroom"
+    ],
     "pool_summary": "1 Private Pool",
     "starting_rate_usd": 1200,
     "display_address": "Sugar Hill, St. James, Barbados",
+    "map_address": "Sample Villa 1234+AB, Sugar Hill, Saint James Barbados",
     "google_maps_link": "https://www.google.com/maps/@13.2074218,-59.6356083,15z",
-    "primary_view": "Ocean View",
-    "card_small_label": "Private West Coast Villa",
-    "card_short_description": "Sugar Hill, St. James",
-    "card_cta_label": "Explore villa"
+    "coordinates": "13.2074218, -59.6356083",
+    "ical_link": "https://example.com/sample-villa.ics",
+    "card_short_description": "Sugar Hill, St. James"
   },
   "story": {
     "story_eyebrow": "A Private Island Retreat",
@@ -30,23 +32,15 @@
     "expanded_paragraph_1": "Living and dining spaces open directly to the terrace, keeping the garden and pool present throughout the day.",
     "expanded_paragraph_2": "Both bedrooms are designed as calm private suites with generous storage and air conditioning.",
     "why_love_headline": "An easy villa to settle into from the moment you arrive.",
-    "natalie_title": "Natalie's Villa Perspective",
     "natalie_quote": "A peaceful base for a Barbados escape.",
     "natalie_paragraph_1": "This is the kind of villa I recommend when guests value privacy, comfort, and an easy west coast location."
   },
   "extras": {
     "contact_eyebrow": "Plan Your Stay",
-    "contact_heading": "Request availability and let us take care of the details.",
-    "contact_text": "Tell us your preferred dates and what matters most to you.",
-    "whatsapp_label": "WhatsApp Us",
-    "pricing_heading": "Seasonal Pricing",
-    "pricing_helper": "We can advise on the best dates, rates, and villa fit for your stay.",
     "tax_note": "Rates exclude applicable Barbados taxes and service charges.",
     "security_deposit_note": "A refundable security deposit may be required.",
     "booking_terms_1": "A deposit is required to confirm the reservation.",
-    "booking_terms_2": "The remaining balance is due before arrival.",
-    "location_description": "Conveniently positioned for west coast beaches, restaurants, and shopping.",
-    "related_heading": "Other villas in our collection"
+    "booking_terms_2": "The remaining balance is due before arrival."
   },
   "bedrooms": [
     {
@@ -73,23 +67,19 @@
   "amenities": [
     {
       "group": "Inside the Villa",
-      "item": "Air conditioning throughout",
-      "featured": "Yes"
+      "item": "Air conditioning throughout"
     },
     {
       "group": "Inside the Villa",
-      "item": "Fully equipped kitchen",
-      "featured": "No"
+      "item": "Fully equipped kitchen"
     },
     {
       "group": "Outdoor Living",
-      "item": "Private swimming pool",
-      "featured": "Yes"
+      "item": "Private swimming pool"
     },
     {
       "group": "Outdoor Living",
-      "item": "Covered outdoor dining",
-      "featured": "Yes"
+      "item": "Covered outdoor dining"
     }
   ],
   "staff": [
@@ -101,14 +91,14 @@
   ],
   "rates": [
     {
-      "season": "Summer",
+      "rate_label": "Summer rate",
       "start_date": "2026-04-16",
       "end_date": "2026-12-14",
       "nightly_rate_usd": 1200,
       "minimum_nights": 5
     },
     {
-      "season": "Winter",
+      "rate_label": "Winter rate",
       "start_date": "2026-12-15",
       "end_date": "2027-04-15",
       "nightly_rate_usd": 1600,

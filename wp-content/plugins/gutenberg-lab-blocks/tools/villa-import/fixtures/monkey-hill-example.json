@@ -1,0 +1,364 @@
+{
+  "schema_version": "1.0",
+  "source_file": "monkey-hill-example.xlsx",
+  "overview": {
+    "villa_name": "Monkey Hill",
+    "property_area": "Sugar Hill Resort",
+    "parish": "St. James",
+    "hero_location_line": "Sugar Hill Resort, St James, Barbados",
+    "hero_statement": "A grand private estate with sweeping sea views, rare seclusion, and the kind of effortless West Coast elegance that stays with you.",
+    "bedrooms": 8,
+    "bathrooms": 8.5,
+    "sleeps": 16,
+    "bedroom_selector_enabled": false,
+    "pool_summary": "1 Infinity Pool",
+    "starting_rate_usd": 2000,
+    "display_address": "Sugar Hill Resort, St James, Barbados",
+    "map_address": "Monkey Hill Villa 6947+XQ6, Ocean Ridge, Mount Standfast, Saint James Barbados",
+    "google_maps_link": "https://www.google.com/maps/@13.2074218,-59.6356083,15z",
+    "coordinates": "13.2074218, -59.6356083",
+    "ical_link": "Full Airbnb/Vrbo .ics URL supplied separately",
+    "card_short_description": "Sugar Hill Resort, St James"
+  },
+  "story": {
+    "story_eyebrow": "A Private Hilltop Haven",
+    "story_headline": "One of Barbados' most extraordinary private villas, perfect for long stays, large gatherings, and total tranquility.",
+    "intro_paragraph_1": "Set within the prestigious Sugar Hill Resort, Monkey Hill spans nearly two acres of lush tropical gardens and occupies a rare ridge-front position with sweeping Caribbean Sea views.",
+    "intro_paragraph_2": "The main residence offers six beautifully appointed en-suite bedrooms, including a luxurious master suite and a junior master, while a detached two-bedroom guest cottage adds flexibility for extended family, teenagers, staff, or guests seeking additional privacy.",
+    "intro_paragraph_3": "Expansive interiors, covered terraces, outdoor entertaining areas, and an infinity-edge pool all come together to create a villa that feels both grand and deeply welcoming.",
+    "expanded_paragraph_1": "The villa sits on one of the few ridge-front lots in Sugar Hill, enjoying cooling sea breezes and uninterrupted Caribbean Sea views from nearly every room.",
+    "expanded_paragraph_2": "Complementing the main house is a charming two-bedroom detached guest cottage, complete with its own living space and kitchenette, ideal for extended family, teenagers, or accompanying staff.",
+    "expanded_paragraph_3": "The interiors are spacious and inviting, blending classic Caribbean architecture with refined finishes. Expansive living and dining areas flow seamlessly onto covered terraces and outdoor entertaining spaces.",
+    "expanded_paragraph_4": "Outdoors, a stunning infinity-edge pool stretches toward the horizon, framed by manicured tropical gardens and sun-drenched terraces.",
+    "expanded_paragraph_5": "As part of the exclusive Sugar Hill community, guests benefit from 24-hour security and access to premium estate amenities including tennis courts, fitness facilities, and a clubhouse.",
+    "expanded_paragraph_6": "Grand yet welcoming, private yet perfectly positioned, Monkey Hill offers an elevated West Coast lifestyle for discerning travellers seeking space, views, and refined island living.",
+    "why_love_headline": "A peaceful haven with breathtaking views.",
+    "natalie_quote": "A Sugar Hill Gem",
+    "natalie_paragraph_1": "For me, Monkey Hill is one of the most beautiful expressions of Barbados living. Private, elevated, and beautifully positioned within Sugar Hill, it offers space, calm, and a remarkable sense of ease in one of the island's most desirable communities.",
+    "natalie_paragraph_2": "Having lived and worked in Barbados for over a decade, I know how rare it is to find a home that feels both impressive and deeply easy to live in."
+  },
+  "extras": {
+    "contact_eyebrow": "Plan Your Stay At Monkey Hill",
+    "tax_note": "All prices exclude tax. A 10% Barbados government tax and 2.5% service charge will be added to every rental price.",
+    "security_deposit_note": "A security deposit of US$2,000 will be required on or before arrival. Price subject to confirmation by property owner.",
+    "booking_terms_1": "Summer and Winter Payment terms: For bookings over the Summer and Winter period there is typically a 5 night minimum stay upwards. The deposit payable is 25% of the total rental price and the balance is due before 60 days of the arrival date.",
+    "booking_terms_2": "Christmas and New Year Pricing Information: Bookings over the Christmas and New Year period tend to have stricter payment terms and higher room rates than at other times of year. Typically bookings are subject to a 14 night minimum stay.",
+    "booking_terms_3": "All prices quoted above have been calculated based on information provided by the owners but are subject to confirmation during December and January."
+  },
+  "bedrooms": [
+    {
+      "area": "Ground Floor",
+      "room_name": "Coral Room",
+      "room_label": "Master suite",
+      "bed_configuration": "King bed",
+      "ensuite": "Yes",
+      "views": "Sea views",
+      "features": "Walk-in dressing room, AC + ceiling fan, Private terrace",
+      "description": "A serene principal suite with tranquil garden outlook and a calm sense of privacy."
+    },
+    {
+      "area": "Ground Floor",
+      "room_name": "Turtle Room",
+      "room_label": "Bedroom two",
+      "bed_configuration": "Queen bed",
+      "ensuite": "Yes",
+      "views": "Sea views",
+      "features": "AC + ceiling fan, Hair dryer, Private terrace",
+      "description": "Beautifully appointed and quietly positioned for effortless comfort."
+    },
+    {
+      "area": "Ground Floor",
+      "room_name": "Seahorse Room",
+      "room_label": "Bedroom three",
+      "bed_configuration": "Queen bed",
+      "ensuite": "Yes",
+      "views": "Sea views",
+      "features": "AC + ceiling fan, Hair dryer, Private terrace",
+      "description": "Relaxed, elegant, and ideal for guests who appreciate understated luxury."
+    },
+    {
+      "area": "First Floor",
+      "room_name": "Silverback Room",
+      "room_label": "Junior master suite",
+      "bed_configuration": "King bed",
+      "ensuite": "Yes",
+      "views": "Sea views",
+      "features": "AC + ceiling fan, Hair dryer, Private balcony",
+      "description": "Spacious proportions and a bright, airy atmosphere throughout."
+    },
+    {
+      "area": "First Floor",
+      "room_name": "Reef Room",
+      "room_label": "Bedroom five",
+      "bed_configuration": "King bed",
+      "ensuite": "Yes",
+      "views": "Sea views",
+      "features": "AC + ceiling fan, Hair dryer, Private balcony",
+      "description": "Generous in scale, with a wonderful sense of outlook and retreat."
+    },
+    {
+      "area": "First Floor",
+      "room_name": "Alligator Room",
+      "room_label": "Bedroom six",
+      "bed_configuration": "Queen bed",
+      "ensuite": "Yes",
+      "views": "Sea views",
+      "features": "Walk-in dressing room, AC + ceiling fan, Hair dryer",
+      "description": "A superb second master that works beautifully for another lead guest or couple."
+    },
+    {
+      "area": "Private Guest Cottage",
+      "room_name": "Cottage Bedroom 7",
+      "room_label": "Private guest cottage",
+      "bed_configuration": "Twin beds / convertible king",
+      "ensuite": "No",
+      "views": "Cottage setting",
+      "features": "Private bathroom, Independent cottage, AC + ceiling fan, Hair dryer",
+      "description": "Part of the detached guest cottage, ideal for teenagers, staff, or extended family."
+    },
+    {
+      "area": "Private Guest Cottage",
+      "room_name": "Cottage Bedroom 8",
+      "room_label": "Private guest cottage",
+      "bed_configuration": "Twin beds / convertible king",
+      "ensuite": "No",
+      "views": "Cottage setting",
+      "features": "Private bathroom, Kitchenette access, AC + ceiling fan, Hair dryer",
+      "description": "Flexible cottage accommodation with privacy from the main residence."
+    }
+  ],
+  "amenities": [
+    {
+      "group": "Inside the Villa",
+      "item": "Air conditioning in all bedrooms, kitchen, and living areas"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "Ceiling fans in all bedrooms"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "TVs in Master and Junior Master Suites"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "Walk-in dressing rooms in master and junior master"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "Ensuite bathrooms throughout"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "Media room"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "Fully equipped gourmet kitchen"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "Hair dryers in all bathrooms"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "Flexible bed configurations on request"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "Breakfast bar"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "Dishwasher"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "Telephone"
+    },
+    {
+      "group": "Inside the Villa",
+      "item": "High-speed WiFi"
+    },
+    {
+      "group": "Outdoor Living",
+      "item": "Infinity-edge pool with expansive deck"
+    },
+    {
+      "group": "Outdoor Living",
+      "item": "Sun loungers and umbrellas"
+    },
+    {
+      "group": "Outdoor Living",
+      "item": "Poolside BBQ"
+    },
+    {
+      "group": "Outdoor Living",
+      "item": "Outdoor dining"
+    },
+    {
+      "group": "Outdoor Living",
+      "item": "Landscaped tropical gardens across nearly 2 acres"
+    },
+    {
+      "group": "Resort & Community",
+      "item": "Private parking"
+    },
+    {
+      "group": "Resort & Community",
+      "item": "Sugar Hill Resort clubhouse access"
+    },
+    {
+      "group": "Resort & Community",
+      "item": "Resort fitness facilities"
+    },
+    {
+      "group": "Resort & Community",
+      "item": "Resort tennis court"
+    },
+    {
+      "group": "Resort & Community",
+      "item": "Resort on-site restaurant and bar"
+    }
+  ],
+  "staff": [
+    {
+      "role": "Housekeeping and laundry",
+      "arrangement": "Included 6 days per week",
+      "description": "Included 6 days per week for daily care and a consistently polished villa environment."
+    },
+    {
+      "role": "Private Chef",
+      "arrangement": "Available on request; fees apply",
+      "description": "Available 6 days per week on request for private breakfasts, lunches, and dinners."
+    }
+  ],
+  "rates": [
+    {
+      "start_date": "2026-04-16",
+      "end_date": "2026-12-14",
+      "nightly_rate_usd": 2000,
+      "minimum_nights": 5
+    },
+    {
+      "start_date": "2026-01-10",
+      "end_date": "2026-04-15",
+      "nightly_rate_usd": 2500,
+      "minimum_nights": 7
+    },
+    {
+      "start_date": "2026-12-15",
+      "end_date": "2026-12-19",
+      "nightly_rate_usd": 2500,
+      "minimum_nights": 7
+    },
+    {
+      "start_date": "2026-12-19",
+      "end_date": "2027-01-09",
+      "nightly_rate_usd": 3300,
+      "minimum_nights": 14
+    }
+  ],
+  "rules": [
+    {
+      "rule": "Check-in",
+      "details": "From 4pm"
+    },
+    {
+      "rule": "Check-out",
+      "details": "11am standard"
+    },
+    {
+      "rule": "Minimum stay",
+      "details": "5 nights Summer, 7 nights Winter, 14 nights Christmas"
+    },
+    {
+      "rule": "Children",
+      "details": "Warmly welcomed, pool supervision required"
+    },
+    {
+      "rule": "Pets",
+      "details": "Please enquire, subject to owner approval"
+    },
+    {
+      "rule": "Smoking",
+      "details": "Not permitted inside the villa"
+    },
+    {
+      "rule": "Late checkout",
+      "details": "Available on request, additional costs apply"
+    }
+  ],
+  "reviews": [
+    {
+      "title": "Paradise",
+      "review": "A fantastically positioned villa within Sugar Hill. The whole place was luxurious, clean and comfortable. Sonia our host was amazing, always there if we needed her.",
+      "guest_name": "Beverly M."
+    },
+    {
+      "title": "AMAZING week at Monkey Hill",
+      "review": "Thank you Monkey Hill, Sonia and Nikita for an unforgettable week! The photos do not do this villa justice, it is simply spectacular.",
+      "guest_name": "Kat A."
+    },
+    {
+      "title": "Family reunion",
+      "review": "The Monkey Hill Estate was a dream come true for our family. The location, staff, living space, pool, and everything about it were absolutely perfect.",
+      "guest_name": "Ami S."
+    }
+  ],
+  "nearby": [
+    {
+      "place": "Sandy Lane Beach",
+      "travel_time": "8 minutes"
+    },
+    {
+      "place": "Holetown",
+      "travel_time": "8 minutes"
+    },
+    {
+      "place": "Limegrove Centre",
+      "travel_time": "8 minutes"
+    },
+    {
+      "place": "Speightstown",
+      "travel_time": "20 minutes"
+    },
+    {
+      "place": "Bridgetown",
+      "travel_time": "25 minutes"
+    },
+    {
+      "place": "Airport",
+      "travel_time": "40 minutes"
+    }
+  ],
+  "highlights": [
+    {
+      "highlight": "Stunning Caribbean Sea views from nearly every room"
+    },
+    {
+      "highlight": "Resident green monkeys visit the gardens"
+    },
+    {
+      "highlight": "Grand scale with genuine warmth - a real home"
+    },
+    {
+      "highlight": "24-hour security in an exclusive gated community"
+    },
+    {
+      "highlight": "The infinity pool at sunset is unforgettable"
+    }
+  ],
+  "related_villas": [
+    {
+      "villa_name": "Tara House"
+    },
+    {
+      "villa_name": "Ocean Heights"
+    },
+    {
+      "villa_name": "Landfall House"
+    }
+  ],
+  "warnings": []
+}

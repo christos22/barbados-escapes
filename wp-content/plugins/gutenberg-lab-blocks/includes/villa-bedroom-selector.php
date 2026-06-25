@@ -145,6 +145,102 @@ function gutenberg_lab_blocks_format_villa_bedroom_choice( $bedrooms, $sleeps = 
 }
 
 /**
+ * Returns a stable pricing key for one bedroom count.
+ *
+ * @param int $bedrooms Bedroom count.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_villa_bedroom_pricing_key( $bedrooms ) {
+	$bedrooms = absint( $bedrooms );
+
+	return $bedrooms ? 'bedrooms-' . $bedrooms : '';
+}
+
+/**
+ * Extracts a bedroom count from legacy labels.
+ *
+ * @param string $label Bedroom or rate label.
+ * @return int
+ */
+function gutenberg_lab_blocks_get_villa_bedroom_count_from_label( $label ) {
+	if (
+		preg_match(
+			'/(?:^|[^\d])(\d+)\s*[-–—]?\s*bedrooms?\b/i',
+			(string) $label,
+			$matches
+		)
+	) {
+		return absint( $matches[1] );
+	}
+
+	return 0;
+}
+
+/**
+ * Builds a pricing key from a selector or legacy rate label.
+ *
+ * @param string $label Bedroom or rate label.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_villa_bedroom_pricing_key_from_label( $label ) {
+	$bedrooms = gutenberg_lab_blocks_get_villa_bedroom_count_from_label( $label );
+
+	if ( $bedrooms ) {
+		return gutenberg_lab_blocks_get_villa_bedroom_pricing_key( $bedrooms );
+	}
+
+	$slug = sanitize_title( $label );
+
+	return $slug ? 'choice-' . $slug : '';
+}
+
+/**
+ * Returns labels and pricing keys for a villa's bedroom selector.
+ *
+ * @param int      $villa_id         Villa post ID.
+ * @param int|null $minimum_override Optional block-level minimum.
+ * @return array<int, array{label:string,pricingKey:string}>
+ */
+function gutenberg_lab_blocks_get_villa_bedroom_choice_data( $villa_id, $minimum_override = null ) {
+	$data     = gutenberg_lab_blocks_get_villa_booking_data( $villa_id );
+	$maximum  = (int) $data['bedrooms'];
+	$minimum  = null === $minimum_override
+		? (int) $data['minimum_bedrooms']
+		: max( 1, min( $maximum, absint( $minimum_override ) ) );
+	$choices  = array();
+
+	if ( ! empty( $data['has_custom_bedroom_choices'] ) ) {
+		foreach ( $data['bedroom_choices'] as $choice ) {
+			$label = (string) $choice['label'];
+
+			$choices[] = array(
+				'label'      => $label,
+				'pricingKey' => gutenberg_lab_blocks_get_villa_bedroom_pricing_key_from_label( $label ),
+			);
+		}
+
+		return $choices;
+	}
+
+	if ( $maximum < 1 ) {
+		return $choices;
+	}
+
+	for ( $bedrooms = $maximum; $bedrooms >= $minimum; --$bedrooms ) {
+		$choices[] = array(
+			'label'      => gutenberg_lab_blocks_format_villa_bedroom_choice(
+				$bedrooms
+			),
+			'pricingKey' => gutenberg_lab_blocks_get_villa_bedroom_pricing_key(
+				$bedrooms
+			),
+		);
+	}
+
+	return $choices;
+}
+
+/**
  * Serializes trusted selector attributes.
  *
  * @param array<string, mixed> $attributes Attribute map.
@@ -187,10 +283,25 @@ function gutenberg_lab_blocks_get_villa_bedroom_selector_attributes( $attributes
 function gutenberg_lab_blocks_render_villa_bedroom_choice_options( $choices ) {
 	$markup = '';
 
-	foreach ( $choices as $label ) {
+	foreach ( $choices as $choice ) {
+		$label       = is_array( $choice ) ? (string) ( $choice['label'] ?? '' ) : (string) $choice;
+		$pricing_key = is_array( $choice )
+			? (string) ( $choice['pricingKey'] ?? '' )
+			: gutenberg_lab_blocks_get_villa_bedroom_pricing_key_from_label( $label );
+
+		if ( '' === $label ) {
+			continue;
+		}
+
+		$attributes = array( 'value' => $label );
+
+		if ( '' !== $pricing_key ) {
+			$attributes['data-vvm-bedroom-pricing-key'] = $pricing_key;
+		}
+
 		$markup .= sprintf(
-			'<option value="%1$s">%2$s</option>',
-			esc_attr( $label ),
+			'<option %1$s>%2$s</option>',
+			gutenberg_lab_blocks_get_villa_bedroom_selector_attributes( $attributes ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			esc_html( $label )
 		);
 	}
@@ -258,7 +369,7 @@ function gutenberg_lab_blocks_render_villa_bedroom_selector( $villa_id, $minimum
 		return '';
 	}
 
-	$choices = gutenberg_lab_blocks_get_villa_bedroom_choices(
+	$choices = gutenberg_lab_blocks_get_villa_bedroom_choice_data(
 		$villa_id,
 		$minimum_override
 	);
@@ -433,29 +544,10 @@ function gutenberg_lab_blocks_get_villa_booking_data( $villa_id ) {
  * @return array<int, string>
  */
 function gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id, $minimum_override = null ) {
-	$data     = gutenberg_lab_blocks_get_villa_booking_data( $villa_id );
-	$maximum  = (int) $data['bedrooms'];
-	$minimum  = null === $minimum_override
-		? (int) $data['minimum_bedrooms']
-		: max( 1, min( $maximum, absint( $minimum_override ) ) );
-	$choices  = array();
+	$choices = array();
 
-	if ( ! empty( $data['has_custom_bedroom_choices'] ) ) {
-		foreach ( $data['bedroom_choices'] as $choice ) {
-			$choices[] = (string) $choice['label'];
-		}
-
-		return $choices;
-	}
-
-	if ( $maximum < 1 ) {
-		return $choices;
-	}
-
-	for ( $bedrooms = $maximum; $bedrooms >= $minimum; --$bedrooms ) {
-		$choices[] = gutenberg_lab_blocks_format_villa_bedroom_choice(
-			$bedrooms
-		);
+	foreach ( gutenberg_lab_blocks_get_villa_bedroom_choice_data( $villa_id, $minimum_override ) as $choice ) {
+		$choices[] = (string) $choice['label'];
 	}
 
 	return $choices;
@@ -541,6 +633,71 @@ function gutenberg_lab_blocks_inject_villa_bedroom_selector_block( $block_conten
 add_filter(
 	'render_block',
 	'gutenberg_lab_blocks_inject_villa_bedroom_selector_block',
+	20,
+	2
+);
+
+/**
+ * Adds pricing keys to legacy saved villa pricing table rows.
+ *
+ * Newly imported rows include these attributes in saved content. This render
+ * backfill keeps older tables on the same frontend data contract.
+ *
+ * @param string               $block_content Rendered block markup.
+ * @param array<string, mixed> $block         Parsed block.
+ * @return string
+ */
+function gutenberg_lab_blocks_add_villa_pricing_row_keys( $block_content, $block ) {
+	$class_name = (string) ( $block['attrs']['className'] ?? '' );
+
+	if (
+		'core/table' !== ( $block['blockName'] ?? '' ) ||
+		(
+			! preg_match( '/(?:^|\s)vvm-villa-pricing__table(?:\s|$)/', $class_name ) &&
+			! str_contains( $block_content, 'vvm-villa-pricing__table' )
+		)
+	) {
+		return $block_content;
+	}
+
+	$updated = preg_replace_callback(
+		'~<tr\b([^>]*)>(.*?)</tr>~is',
+		static function ( $matches ) {
+			if ( preg_match( '/\bdata-vvm-bedroom-pricing-key\s*=/i', $matches[1] ) ) {
+				return $matches[0];
+			}
+
+			if ( ! preg_match( '~<td\b[^>]*>(.*?)</td>~is', $matches[2], $cell_matches ) ) {
+				return $matches[0];
+			}
+
+			$bedrooms = gutenberg_lab_blocks_get_villa_bedroom_count_from_label(
+				html_entity_decode(
+					wp_strip_all_tags( $cell_matches[1] ),
+					ENT_QUOTES | ENT_HTML5,
+					get_bloginfo( 'charset' ) ?: 'UTF-8'
+				)
+			);
+
+			if ( ! $bedrooms ) {
+				return $matches[0];
+			}
+
+			return sprintf(
+				'<tr%1$s data-vvm-bedroom-pricing-key="%2$s">%3$s</tr>',
+				$matches[1],
+				esc_attr( gutenberg_lab_blocks_get_villa_bedroom_pricing_key( $bedrooms ) ),
+				$matches[2]
+			);
+		},
+		$block_content
+	);
+
+	return null === $updated ? $block_content : $updated;
+}
+add_filter(
+	'render_block',
+	'gutenberg_lab_blocks_add_villa_pricing_row_keys',
 	20,
 	2
 );
@@ -646,7 +803,7 @@ function gutenberg_lab_blocks_render_cf7_villa_bedroom_field( $villa_id ) {
 		return '';
 	}
 
-	$choices = gutenberg_lab_blocks_get_villa_bedroom_choices( $villa_id );
+	$choices = gutenberg_lab_blocks_get_villa_bedroom_choice_data( $villa_id );
 
 	if ( empty( $choices ) ) {
 		return '';
