@@ -12,6 +12,7 @@
 - `block.json` defines what a block supports.
 - Block code defines behavior, structure, and constraints.
 - Editors control content and styling only where those layers allow it.
+- Global block abilities can be editor attributes in JavaScript, but frontend behavior should still be enforced in PHP when it affects rendered markup.
 
 ## Practical Reading
 

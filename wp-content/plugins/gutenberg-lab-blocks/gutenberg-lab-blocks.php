@@ -27,6 +27,7 @@ require_once __DIR__ . '/includes/villa-bedroom-selector.php';
 require_once __DIR__ . '/includes/villa-availability.php';
 require_once __DIR__ . '/includes/villa-importer.php';
 require_once __DIR__ . '/includes/mcp-abilities.php';
+require_once __DIR__ . '/includes/block-visibility.php';
 
 /**
  * Registers rewrite-dependent content types before flushing plugin rules.

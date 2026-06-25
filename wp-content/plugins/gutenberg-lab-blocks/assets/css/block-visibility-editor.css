@@ -1,0 +1,5 @@
+.block-editor-block-list__block.is-vvm-hidden-on-frontend {
+	opacity: 0.55;
+	outline: 1px dashed #757575;
+	outline-offset: 2px;
+}
