@@ -421,6 +421,42 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_block_has_valid
 	}
 }
 
+if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_post_content_has_authored_hero' ) ) {
+	/**
+	 * Checks whether the current post content contains a villa hero block.
+	 *
+	 * This lets the template fallback avoid duplicating an importer-authored hero,
+	 * even before gallery media has been assigned.
+	 *
+	 * @param WP_Block|null $block Current block instance.
+	 * @return bool
+	 */
+	function gutenberg_lab_blocks_villa_gallery_hero_post_content_has_authored_hero( $block ) {
+		$current_post_id = gutenberg_lab_blocks_villa_gallery_hero_get_current_post_id( $block );
+
+		if ( ! $current_post_id ) {
+			return false;
+		}
+
+		$post_content = get_post_field( 'post_content', $current_post_id );
+
+		if ( ! is_string( $post_content ) || '' === trim( $post_content ) || ! has_blocks( $post_content ) ) {
+			return false;
+		}
+
+		foreach ( parse_blocks( $post_content ) as $parsed_block ) {
+			if (
+				is_array( $parsed_block ) &&
+				'gutenberg-lab-blocks/villa-gallery-hero' === ( $parsed_block['blockName'] ?? '' )
+			) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+}
+
 if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_post_content_has_authored_gallery' ) ) {
 	/**
 	 * Checks whether the current post content already contains a real gallery hero.
@@ -536,10 +572,15 @@ $overlay_style = in_array( $attributes['overlayStyle'] ?? 'brand-green', array( 
 $show_arrows   = ! empty( $attributes['showArrows'] );
 $hero_regions  = gutenberg_lab_blocks_villa_gallery_hero_get_regions( $block ?? null );
 $slides        = $hero_regions['slides'];
+$is_template_fallback = empty( $attributes['anchor'] );
 
 if (
 	empty( $slides ) &&
-	gutenberg_lab_blocks_villa_gallery_hero_post_content_has_authored_gallery( $block ?? null )
+	$is_template_fallback &&
+	(
+		gutenberg_lab_blocks_villa_gallery_hero_post_content_has_authored_gallery( $block ?? null ) ||
+		gutenberg_lab_blocks_villa_gallery_hero_post_content_has_authored_hero( $block ?? null )
+	)
 ) {
 	return '';
 }
@@ -816,13 +857,11 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 							?>
 						<?php endif; ?>
 					</div>
-				<?php else : ?>
-					<div class="vvm-villa-gallery-hero__stage-static-placeholder">
-						<?php esc_html_e( 'Add hero slides or set a featured image to complete this villa hero.', 'gutenberg-lab-blocks' ); ?>
-					</div>
-				<?php endif; ?>
-			</div>
-		<?php endif; ?>
+					<?php else : ?>
+						<div class="vvm-villa-gallery-hero__stage-static-placeholder" aria-hidden="true"></div>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
 
 		<div class="vvm-villa-gallery-hero__content">
 			<div class="vvm-villa-gallery-hero__content-inner">

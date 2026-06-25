@@ -13,6 +13,9 @@
     "gallery",
     "slider"
   ],
+  "usesContext": [
+    "postId"
+  ],
   "attributes": {
     "heroHeight": {
       "type": "string",

@@ -8,6 +8,7 @@
 	"icon": "format-gallery",
 	"description": "A synced villa hero with a main media stage, thumbnail rail, and native overlay content.",
 	"keywords": [ "villa", "hero", "gallery", "slider" ],
+	"usesContext": [ "postId" ],
 	"attributes": {
 		"heroHeight": {
 			"type": "string",
