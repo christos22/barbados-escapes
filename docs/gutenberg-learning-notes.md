@@ -63,3 +63,4 @@
 - Use PHP for availability storage, iCal sync, and final calendar markup so date rules are enforced outside the browser.
 - Use a dynamic block when the editor needs a pluggable calendar but the frontend data comes from villa meta, cron sync, and a custom lookup table.
 - Keep the frontend script small: it should only select dates, validate the visible range against the rendered unavailable dates, and fill the enquiry form.
+- When a calendar block controls related form fields, scan saved block attributes in PHP so hidden calendars also remove server-rendered CF7 fields and submit data.

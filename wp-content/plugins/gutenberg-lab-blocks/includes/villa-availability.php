@@ -15,6 +15,8 @@ const GUTENBERG_LAB_BLOCKS_VILLA_MANUAL_BLOCKS_META     = '_gutenberg_lab_villa_
 const GUTENBERG_LAB_BLOCKS_VILLA_CHECKOUT_BUFFER_META   = '_gutenberg_lab_villa_checkout_buffer_nights';
 const GUTENBERG_LAB_BLOCKS_VILLA_SYNC_STATUS_META       = '_gutenberg_lab_villa_availability_sync_status';
 const GUTENBERG_LAB_BLOCKS_VILLA_SYNC_HOOK              = 'gutenberg_lab_blocks_sync_villa_availability';
+const GUTENBERG_LAB_BLOCKS_VILLA_AVAILABILITY_BLOCK     = 'gutenberg-lab-blocks/villa-availability-calendar';
+const GUTENBERG_LAB_BLOCKS_VILLA_HIDE_DATE_FIELDS_ATTR  = 'hideCalendarAndDateFields';
 
 /**
  * Returns the normalized table name for day-level villa availability.
@@ -225,6 +227,92 @@ function gutenberg_lab_blocks_get_villa_ical_feeds( $villa_id ) {
 	}
 
 	return $clean;
+}
+
+/**
+ * Checks whether calendar attributes hide both calendar and form date fields.
+ *
+ * The block-specific attribute gives editors a clear calendar setting. The
+ * global `vvmHidden` flag is also honored so the shared block ability behaves
+ * correctly for this product-specific block.
+ *
+ * @param array<string, mixed> $attributes Calendar block attributes.
+ * @return bool
+ */
+function gutenberg_lab_blocks_villa_availability_attrs_hide_dates( $attributes ) {
+	if ( ! is_array( $attributes ) ) {
+		return false;
+	}
+
+	$global_hidden_attribute = defined( 'GUTENBERG_LAB_BLOCKS_VISIBILITY_ATTRIBUTE' )
+		? GUTENBERG_LAB_BLOCKS_VISIBILITY_ATTRIBUTE
+		: 'vvmHidden';
+
+	return ! empty( $attributes[ GUTENBERG_LAB_BLOCKS_VILLA_HIDE_DATE_FIELDS_ATTR ] )
+		|| ! empty( $attributes[ $global_hidden_attribute ] );
+}
+
+/**
+ * Recursively searches parsed blocks for a hidden availability calendar.
+ *
+ * @param array<int, array<string, mixed>> $blocks Parsed block tree.
+ * @return bool
+ */
+function gutenberg_lab_blocks_blocks_hide_villa_availability_dates( $blocks ) {
+	foreach ( (array) $blocks as $block ) {
+		if (
+			isset( $block['blockName'] ) &&
+			GUTENBERG_LAB_BLOCKS_VILLA_AVAILABILITY_BLOCK === $block['blockName'] &&
+			gutenberg_lab_blocks_villa_availability_attrs_hide_dates( $block['attrs'] ?? array() )
+		) {
+			return true;
+		}
+
+		if (
+			! empty( $block['innerBlocks'] ) &&
+			is_array( $block['innerBlocks'] ) &&
+			gutenberg_lab_blocks_blocks_hide_villa_availability_dates( $block['innerBlocks'] )
+		) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Checks whether one villa page hides availability date fields.
+ *
+ * @param int $villa_id Villa post ID.
+ * @return bool
+ */
+function gutenberg_lab_blocks_should_hide_villa_availability_date_fields( $villa_id = 0 ) {
+	static $cache = array();
+
+	$villa_id = function_exists( 'gutenberg_lab_blocks_resolve_villa_booking_post_id' )
+		? gutenberg_lab_blocks_resolve_villa_booking_post_id( $villa_id )
+		: absint( $villa_id );
+
+	if ( ! $villa_id || 'villa' !== get_post_type( $villa_id ) ) {
+		return false;
+	}
+
+	if ( array_key_exists( $villa_id, $cache ) ) {
+		return $cache[ $villa_id ];
+	}
+
+	$post = get_post( $villa_id );
+
+	if ( ! $post instanceof WP_Post ) {
+		$cache[ $villa_id ] = false;
+		return false;
+	}
+
+	$cache[ $villa_id ] = gutenberg_lab_blocks_blocks_hide_villa_availability_dates(
+		parse_blocks( $post->post_content )
+	);
+
+	return $cache[ $villa_id ];
 }
 
 /**
@@ -1652,6 +1740,10 @@ function gutenberg_lab_blocks_get_villa_availability_window_rest( WP_REST_Reques
  * @return string
  */
 function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $wrapper_attributes = '', $block = null ) {
+	if ( gutenberg_lab_blocks_villa_availability_attrs_hide_dates( $attributes ) ) {
+		return '';
+	}
+
 	$villa_id = isset( $attributes['villaId'] ) ? absint( $attributes['villaId'] ) : 0;
 
 	if ( ! $villa_id && is_a( $block, 'WP_Block' ) && isset( $block->context['postId'] ) ) {
@@ -1887,6 +1979,10 @@ function gutenberg_lab_blocks_validate_cf7_villa_availability( $result, $tag ) {
 		return $result;
 	}
 
+	if ( gutenberg_lab_blocks_should_hide_villa_availability_date_fields() ) {
+		return $result;
+	}
+
 	$arrival   = isset( $_POST['preferred-arrival'] ) ? gutenberg_lab_blocks_normalize_iso_date( sanitize_text_field( wp_unslash( $_POST['preferred-arrival'] ) ) ) : '';
 	$departure = isset( $_POST['preferred-departure'] ) ? gutenberg_lab_blocks_normalize_iso_date( sanitize_text_field( wp_unslash( $_POST['preferred-departure'] ) ) ) : '';
 	$villa_id  = isset( $_POST['villa-id'] ) ? absint( $_POST['villa-id'] ) : 0;
@@ -1905,3 +2001,180 @@ function gutenberg_lab_blocks_validate_cf7_villa_availability( $result, $tag ) {
 }
 add_filter( 'wpcf7_validate_date', 'gutenberg_lab_blocks_validate_cf7_villa_availability', 30, 2 );
 add_filter( 'wpcf7_validate_date*', 'gutenberg_lab_blocks_validate_cf7_villa_availability', 30, 2 );
+
+/**
+ * Makes hidden availability date tags optional before CF7 validation runs.
+ *
+ * @param array<string, mixed> $tag      Scanned CF7 form tag.
+ * @param bool                 $_replace Whether CF7 is rendering the tag.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_blocks_filter_cf7_villa_availability_date_tags( $tag, $_replace ) {
+	if (
+		! is_array( $tag ) ||
+		! in_array( $tag['name'] ?? '', array( 'preferred-arrival', 'preferred-departure' ), true )
+	) {
+		return $tag;
+	}
+
+	if ( gutenberg_lab_blocks_should_hide_villa_availability_date_fields() ) {
+		$tag['type'] = 'date';
+	}
+
+	return $tag;
+}
+add_filter(
+	'wpcf7_form_tag',
+	'gutenberg_lab_blocks_filter_cf7_villa_availability_date_tags',
+	15,
+	2
+);
+
+/**
+ * Removes one rendered CF7 paragraph that contains a named form field.
+ *
+ * @param string $html       Rendered CF7 form HTML.
+ * @param string $field_name Field name to remove.
+ * @return string
+ */
+function gutenberg_lab_blocks_remove_cf7_field_paragraph( $html, $field_name ) {
+	$field_name = preg_quote( $field_name, '~' );
+	$filtered   = preg_replace(
+		'~<p\b[^>]*>(?:(?!</p>).)*?\b(?:data-name|for|id|name)=(["\'])' . $field_name . '\1(?:(?!</p>).)*?</p>~is',
+		'',
+		$html,
+		1
+	);
+
+	return null === $filtered ? $html : $filtered;
+}
+
+/**
+ * Removes date rows from the villa CF7 form when the calendar is hidden.
+ *
+ * @param string $html Rendered CF7 form HTML.
+ * @return string
+ */
+function gutenberg_lab_blocks_filter_cf7_villa_availability_date_elements( $html ) {
+	if ( ! gutenberg_lab_blocks_should_hide_villa_availability_date_fields() ) {
+		return $html;
+	}
+
+	foreach ( array( 'preferred-arrival', 'preferred-departure' ) as $field_name ) {
+		$html = gutenberg_lab_blocks_remove_cf7_field_paragraph( $html, $field_name );
+	}
+
+	return $html;
+}
+add_filter(
+	'wpcf7_form_elements',
+	'gutenberg_lab_blocks_filter_cf7_villa_availability_date_elements',
+	15
+);
+
+/**
+ * Drops hidden availability request values before validation and mail handling.
+ */
+function gutenberg_lab_blocks_unset_hidden_villa_availability_request_fields() {
+	if ( ! gutenberg_lab_blocks_should_hide_villa_availability_date_fields() ) {
+		return;
+	}
+
+	foreach (
+		array(
+			'preferred-arrival',
+			'preferred-departure',
+			'allow-unavailable-endpoints',
+			'selected-dates-summary',
+		) as $field_name
+	) {
+		unset( $_POST[ $field_name ] );
+	}
+}
+
+/**
+ * Clears hidden date request values before other CF7 validators inspect them.
+ *
+ * @param WPCF7_Validation $result Current validation result.
+ * @param WPCF7_FormTag    $tag    Current form tag.
+ * @return WPCF7_Validation
+ */
+function gutenberg_lab_blocks_prepare_hidden_villa_availability_date_validation( $result, $tag ) {
+	if ( ! $tag instanceof WPCF7_FormTag && class_exists( 'WPCF7_FormTag' ) ) {
+		$tag = new WPCF7_FormTag( $tag );
+	}
+
+	if (
+		$tag instanceof WPCF7_FormTag &&
+		in_array( $tag->name, array( 'preferred-arrival', 'preferred-departure' ), true )
+	) {
+		gutenberg_lab_blocks_unset_hidden_villa_availability_request_fields();
+	}
+
+	return $result;
+}
+add_filter( 'wpcf7_validate_date', 'gutenberg_lab_blocks_prepare_hidden_villa_availability_date_validation', 5, 2 );
+add_filter( 'wpcf7_validate_date*', 'gutenberg_lab_blocks_prepare_hidden_villa_availability_date_validation', 5, 2 );
+
+/**
+ * Removes hidden availability values from CF7 posted data.
+ *
+ * @param array<string, mixed> $posted_data Sanitized CF7 posted data.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_blocks_filter_hidden_villa_availability_posted_data( $posted_data ) {
+	if ( ! gutenberg_lab_blocks_should_hide_villa_availability_date_fields() ) {
+		return $posted_data;
+	}
+
+	foreach (
+		array(
+			'preferred-arrival',
+			'preferred-departure',
+			'allow-unavailable-endpoints',
+			'selected-dates-summary',
+		) as $field_name
+	) {
+		unset( $posted_data[ $field_name ] );
+	}
+
+	return $posted_data;
+}
+add_filter(
+	'wpcf7_posted_data',
+	'gutenberg_lab_blocks_filter_hidden_villa_availability_posted_data',
+	15
+);
+
+/**
+ * Removes empty availability date lines from villa enquiry emails.
+ *
+ * @param array<string, mixed> $components   Mail components.
+ * @param WPCF7_ContactForm    $contact_form Current form.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_blocks_filter_hidden_villa_availability_mail_components( $components, $contact_form ) {
+	if (
+		! gutenberg_lab_blocks_should_hide_villa_availability_date_fields() ||
+		empty( $components['body'] ) ||
+		! is_string( $components['body'] )
+	) {
+		return $components;
+	}
+
+	$body = preg_replace(
+		'/^Preferred (arrival|departure) date:[^\r\n]*(?:\r?\n)?/mi',
+		'',
+		$components['body']
+	);
+
+	$components['body'] = null === $body ? $components['body'] : trim( $body );
+
+	return $components;
+}
+add_filter(
+	'wpcf7_mail_components',
+	'gutenberg_lab_blocks_filter_hidden_villa_availability_mail_components',
+	15,
+	2
+);

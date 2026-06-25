@@ -16,6 +16,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 		monthsToShow,
 		heading,
 		formSelector,
+		hideCalendarAndDateFields,
 	} = attributes;
 
 	return (
@@ -65,6 +66,14 @@ const Edit = ( { attributes, setAttributes } ) => {
 							setAttributes( { allowUnavailableEndpoints: value } )
 						}
 					/>
+					<ToggleControl
+						label={ __( 'Hide calendar and date fields', 'gutenberg-lab-blocks' ) }
+						help={ __( 'Removes this calendar from the frontend and strips the arrival/departure fields from the villa contact form on this page.', 'gutenberg-lab-blocks' ) }
+						checked={ !! hideCalendarAndDateFields }
+						onChange={ ( value ) =>
+							setAttributes( { hideCalendarAndDateFields: value } )
+						}
+					/>
 				</PanelBody>
 			</InspectorControls>
 			<div { ...blockProps }>
@@ -78,6 +87,14 @@ const Edit = ( { attributes, setAttributes } ) => {
 							? `${ __( 'Villa ID override:', 'gutenberg-lab-blocks' ) } ${ villaId }`
 							: __( 'Uses the current villa page by default.', 'gutenberg-lab-blocks' ) }
 					</p>
+					{ hideCalendarAndDateFields ? (
+						<p>
+							{ __(
+								'Frontend calendar and contact-form date fields are hidden.',
+								'gutenberg-lab-blocks'
+							) }
+						</p>
+					) : null }
 				</Placeholder>
 			</div>
 		</>

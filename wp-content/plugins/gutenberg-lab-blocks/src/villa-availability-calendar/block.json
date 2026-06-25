@@ -27,6 +27,10 @@
 		"allowUnavailableEndpoints": {
 			"type": "boolean",
 			"default": false
+		},
+		"hideCalendarAndDateFields": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"usesContext": [ "postId", "postType" ],
