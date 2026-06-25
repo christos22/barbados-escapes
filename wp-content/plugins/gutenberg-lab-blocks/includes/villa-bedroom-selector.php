@@ -179,25 +179,13 @@ function gutenberg_lab_blocks_get_villa_bedroom_selector_attributes( $attributes
 }
 
 /**
- * Returns the neutral bedroom selector placeholder label.
- *
- * @return string
- */
-function gutenberg_lab_blocks_get_villa_bedroom_choice_placeholder() {
-	return __( 'Select room number', 'gutenberg-lab-blocks' );
-}
-
-/**
  * Returns option markup for a villa bedroom select.
  *
  * @param array<int, string> $choices Bedroom choice labels.
  * @return string
  */
 function gutenberg_lab_blocks_render_villa_bedroom_choice_options( $choices ) {
-	$markup = sprintf(
-		'<option value="">%s</option>',
-		esc_html( gutenberg_lab_blocks_get_villa_bedroom_choice_placeholder() )
-	);
+	$markup = '';
 
 	foreach ( $choices as $label ) {
 		$markup .= sprintf(
@@ -632,10 +620,10 @@ function gutenberg_lab_blocks_filter_cf7_villa_bedroom_tag( $tag, $_replace ) {
 		);
 	}
 
-	$placeholder       = gutenberg_lab_blocks_get_villa_bedroom_choice_placeholder();
-	$tag['raw_values'] = array_merge( array( '' ), $choices );
-	$tag['values']     = array_merge( array( '' ), $choices );
-	$tag['labels']     = array_merge( array( $placeholder ), $choices );
+	// The first real bedroom choice is the default; there is no neutral placeholder.
+	$tag['raw_values'] = $choices;
+	$tag['values']     = $choices;
+	$tag['labels']     = $choices;
 	$tag['pipes']      = null;
 
 	return $tag;

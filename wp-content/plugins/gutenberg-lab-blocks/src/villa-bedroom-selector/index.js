@@ -25,7 +25,6 @@ const BEDROOM_SELECTOR_LOCK_KEY =
 	'gutenberg-lab-villa-bedroom-selector-choices';
 const MAX_CHOICES = 30;
 const MAX_LABEL_LENGTH = 120;
-const PLACEHOLDER_LABEL = __( 'Select room number', 'gutenberg-lab-blocks' );
 
 const toInteger = ( value, maximum ) => {
 	const number = Number.parseInt( value, 10 );
@@ -523,7 +522,6 @@ const Edit = ( { attributes } ) => {
 						) }
 						disabled
 					>
-						<option value="">{ PLACEHOLDER_LABEL }</option>
 						{ validPreviewChoices.length > 0 ? (
 							validPreviewChoices.map( ( choice, index ) => (
 								<option
