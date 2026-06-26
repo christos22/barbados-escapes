@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.49
+Version: 0.1.50
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -2156,18 +2156,25 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 }
 
 @media (min-width: 782px) {
+	/*
+	 * Let the copy column define this row's height; the image columns then crop
+	 * into that height instead of their intrinsic aspect ratios stretching it.
+	 */
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns {
-		align-items: stretch;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) {
-		display: flex;
+		min-block-size: 0;
+		overflow: hidden;
+		position: relative;
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) > .wp-block-image {
-		flex: 1;
+		inset: 0;
 		margin: 0;
-		width: 100%;
+		position: absolute;
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) > .wp-block-image img {
