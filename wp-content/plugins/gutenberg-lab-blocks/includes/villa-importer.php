@@ -152,6 +152,15 @@ function gutenberg_lab_blocks_villa_importer_block_classes( $base_classes, $attr
 		$classes[] = 'has-background';
 	}
 
+	if ( ! empty( $attributes['borderColor'] ) ) {
+		$classes[] = 'has-border-color';
+		$classes[] = 'has-' . sanitize_html_class( $attributes['borderColor'] ) . '-border-color';
+	}
+
+	if ( ! empty( $attributes['fontSize'] ) ) {
+		$classes[] = 'has-' . sanitize_html_class( $attributes['fontSize'] ) . '-font-size';
+	}
+
 	if ( ! empty( $attributes['fontFamily'] ) ) {
 		$classes[] = 'has-' . sanitize_html_class( $attributes['fontFamily'] ) . '-font-family';
 	}
@@ -2345,7 +2354,17 @@ function gutenberg_lab_blocks_villa_importer_build_pricing_contact_location( $da
 
 	foreach ( range( 1, 3 ) as $index ) {
 		$booking_terms .= gutenberg_lab_blocks_villa_importer_paragraph(
-			$extras[ 'booking_terms_' . $index ] ?? ''
+			$extras[ 'booking_terms_' . $index ] ?? '',
+			array(
+				'fontSize'   => 'xs',
+				'fontFamily' => 'refined-sans',
+				'style'      => array(
+					'typography' => array(
+						'fontStyle'  => 'normal',
+						'fontWeight' => '300',
+					),
+				),
+			)
 		);
 	}
 
@@ -2381,13 +2400,48 @@ function gutenberg_lab_blocks_villa_importer_build_pricing_contact_location( $da
 		gutenberg_lab_blocks_villa_importer_paragraph( $extras['security_deposit_note'] );
 
 	if ( '' !== $booking_terms ) {
-		$pricing .= gutenberg_lab_blocks_villa_importer_block(
+		$booking_terms_block = gutenberg_lab_blocks_villa_importer_block(
 			'gutenberg-lab-blocks/read-more',
 			array(
 				'readMoreLabel' => 'Read Booking Terms',
 				'readLessLabel' => 'Close Booking Terms',
+				'style'         => array(
+					'spacing' => array(
+						'padding' => array(
+							'top' => 'var:preset|spacing|md',
+						),
+					),
+				),
 			),
 			$booking_terms
+		);
+
+		$pricing .= gutenberg_lab_blocks_villa_importer_group(
+			$booking_terms_block,
+			array(
+				'className'       => 'vvm-villa-pricing__terms',
+				'backgroundColor' => 'ivory',
+				'borderColor'     => 'gold',
+				'style'           => array(
+					'spacing' => array(
+						'margin'   => array(
+							'top'    => '0px',
+							'bottom' => '0px',
+						),
+						'padding'  => array(
+							'top'    => 'var:preset|spacing|0',
+							'bottom' => 'var:preset|spacing|md',
+						),
+						'blockGap' => 'var:preset|spacing|sm',
+					),
+					'border'  => array(
+						'width' => '1px',
+					),
+				),
+				'layout'          => array(
+					'type' => 'default',
+				),
+			)
 		);
 	}
 
