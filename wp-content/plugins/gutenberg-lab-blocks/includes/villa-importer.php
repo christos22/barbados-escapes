@@ -1905,6 +1905,72 @@ function gutenberg_lab_blocks_villa_importer_build_bedrooms_tab( $data ) {
 }
 
 /**
+ * Returns presentation copy for known amenity groups.
+ *
+ * The workbook stays simple for clients: they only provide a group and item.
+ * These presets keep imported villas aligned with the approved Monkey Hill
+ * card hierarchy without asking clients to manage design-specific fields.
+ *
+ * @param string $group Amenity group label from the workbook.
+ * @return array{eyebrow: string, title: string, copy: string, chips: array<int, string>}
+ */
+function gutenberg_lab_blocks_villa_importer_amenity_group_meta( $group ) {
+	$group = gutenberg_lab_blocks_villa_importer_text( $group );
+	$key   = strtolower( preg_replace( '/[^a-z0-9]+/', ' ', $group ) );
+	$key   = trim( preg_replace( '/\s+/', ' ', $key ) );
+
+	$presets = array(
+		'inside the villa' => array(
+			'eyebrow' => 'Refined Interior Living',
+			'title'   => 'Inside the Villa',
+			'copy'    => 'Spacious, elegant, and quietly equipped for long, comfortable stays with family or guests.',
+			'chips'   => array( 'Media Room', 'Gourmet Kitchen', 'High-Speed WiFi', 'Ensuite Bedrooms' ),
+		),
+		'outdoor living' => array(
+			'eyebrow' => 'Outdoor Living & Amenities',
+			'title'   => 'Outdoor Living',
+			'copy'    => 'Landscaped grounds, beach access, and open-air spaces designed for long Caribbean days.',
+			'chips'   => array( 'Private Pool', 'Outdoor Dining', 'Beach Access', 'Garden Living' ),
+		),
+		'resort community' => array(
+			'eyebrow' => 'Resort & Community',
+			'title'   => 'Resort & Community',
+			'copy'    => 'Shared resort privileges and community amenities that extend the villa experience.',
+			'chips'   => array( 'Club Access', 'Beach Access', 'Fitness', 'Security' ),
+		),
+		'services staff' => array(
+			'eyebrow' => 'Services & Staff',
+			'title'   => 'Services & Staff',
+			'copy'    => 'Thoughtful service touches that keep each stay comfortable, polished, and easy.',
+			'chips'   => array( 'Housekeeping', 'Concierge', 'Chef Available', 'Laundry' ),
+		),
+		'technology entertainment' => array(
+			'eyebrow' => 'Technology & Entertainment',
+			'title'   => 'Technology & Entertainment',
+			'copy'    => 'Connected comforts and entertainment essentials for relaxed days and quiet evenings.',
+			'chips'   => array( 'WiFi', 'TV', 'Sound System', 'Media Room' ),
+		),
+		'family features' => array(
+			'eyebrow' => 'Family Features',
+			'title'   => 'Family Features',
+			'copy'    => 'Practical details that help families settle in and enjoy the villa with ease.',
+			'chips'   => array( 'Flexible Rooms', 'Pool', 'Kitchen', 'Laundry' ),
+		),
+	);
+
+	if ( isset( $presets[ $key ] ) ) {
+		return $presets[ $key ];
+	}
+
+	return array(
+		'eyebrow' => $group,
+		'title'   => $group,
+		'copy'    => 'A curated set of villa amenities designed for a comfortable Barbados stay.',
+		'chips'   => array(),
+	);
+}
+
+/**
  * Builds the Amenities Stack Tab content.
  *
  * @param array<string, mixed> $data Normalized workbook data.
@@ -1920,7 +1986,9 @@ function gutenberg_lab_blocks_villa_importer_build_amenities_tab( $data ) {
 
 	$content = '';
 
-	foreach ( $groups as $group => $amenities ) {
+	foreach ( array_keys( $groups ) as $group_index => $group ) {
+		$amenities = $groups[ $group ];
+		$meta      = gutenberg_lab_blocks_villa_importer_amenity_group_meta( $group );
 		$rows  = '';
 		$index = 1;
 
@@ -1941,17 +2009,50 @@ function gutenberg_lab_blocks_villa_importer_build_amenities_tab( $data ) {
 			$index++;
 		}
 
+		$chips = '';
+
+		foreach ( $meta['chips'] as $chip ) {
+			$chips .= gutenberg_lab_blocks_villa_importer_paragraph(
+				$chip,
+				array( 'className' => 'vvm-villa-amenities__chip' )
+			);
+		}
+
+		$card_class = 'vvm-villa-amenities__card';
+
+		if ( 1 === ( $group_index % 2 ) ) {
+			$card_class .= ' vvm-villa-amenities__card--dark';
+		}
+
 		$content .= gutenberg_lab_blocks_villa_importer_group(
-			gutenberg_lab_blocks_villa_importer_heading(
-				$group,
-				3,
-				array( 'className' => 'vvm-villa-amenities__title' )
+			gutenberg_lab_blocks_villa_importer_group(
+				gutenberg_lab_blocks_villa_importer_group(
+					gutenberg_lab_blocks_villa_importer_paragraph(
+						$meta['eyebrow'],
+						array( 'className' => 'vvm-villa-amenities__eyebrow' )
+					) .
+					gutenberg_lab_blocks_villa_importer_heading(
+						$meta['title'],
+						3,
+						array( 'className' => 'vvm-villa-amenities__title' )
+					) .
+					gutenberg_lab_blocks_villa_importer_paragraph(
+						$meta['copy'],
+						array( 'className' => 'vvm-villa-amenities__copy' )
+					),
+					array( 'className' => 'vvm-villa-amenities__intro' )
+				) .
+				gutenberg_lab_blocks_villa_importer_group(
+					$chips,
+					array( 'className' => 'vvm-villa-amenities__chips' )
+				),
+				array( 'className' => 'vvm-villa-amenities__header' )
 			) .
 			gutenberg_lab_blocks_villa_importer_group(
 				$rows,
 				array( 'className' => 'vvm-villa-amenities__list' )
 			),
-			array( 'className' => 'vvm-villa-amenities__card' )
+			array( 'className' => $card_class )
 		);
 	}
 
@@ -1960,7 +2061,7 @@ function gutenberg_lab_blocks_villa_importer_build_amenities_tab( $data ) {
 		array( 'label' => 'Amenities' ),
 		gutenberg_lab_blocks_villa_importer_group(
 			$content,
-			array( 'className' => 'vvm-villa-amenities' )
+			array( 'className' => 'vvm-villa-amenities vvm-villa-amenities--show-numbers' )
 		)
 	);
 }
