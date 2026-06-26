@@ -1916,7 +1916,7 @@ function gutenberg_lab_blocks_villa_importer_build_bedrooms_tab( $data ) {
  */
 function gutenberg_lab_blocks_villa_importer_amenity_group_meta( $group ) {
 	$group = gutenberg_lab_blocks_villa_importer_text( $group );
-	$key   = strtolower( preg_replace( '/[^a-z0-9]+/', ' ', $group ) );
+	$key   = preg_replace( '/[^a-z0-9]+/', ' ', strtolower( $group ) );
 	$key   = trim( preg_replace( '/\s+/', ' ', $key ) );
 
 	$presets = array(
