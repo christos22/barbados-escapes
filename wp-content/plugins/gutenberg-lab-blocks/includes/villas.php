@@ -769,7 +769,7 @@ function gutenberg_lab_blocks_register_villa_meta() {
 add_action( 'init', 'gutenberg_lab_blocks_register_villa_meta' );
 
 /**
- * Adds the focused villa CTA meta box instead of generic custom fields.
+ * Adds focused villa meta boxes instead of relying on generic custom fields.
  */
 function gutenberg_lab_blocks_add_villa_meta_boxes() {
 	add_meta_box(
@@ -778,15 +778,6 @@ function gutenberg_lab_blocks_add_villa_meta_boxes() {
 		'gutenberg_lab_blocks_render_villa_card_content_meta_box',
 		'villa',
 		'normal',
-		'default'
-	);
-
-	add_meta_box(
-		'gutenberg-lab-villa-card-cta',
-		__( 'Card CTA', 'gutenberg-lab-blocks' ),
-		'gutenberg_lab_blocks_render_villa_card_cta_meta_box',
-		'villa',
-		'side',
 		'default'
 	);
 
@@ -814,6 +805,8 @@ function gutenberg_lab_blocks_render_villa_card_content_meta_box( $post ) {
 	$descriptor = get_post_meta( $post->ID, 'villa_card_descriptor', true );
 	$facts      = get_post_meta( $post->ID, 'villa_card_facts', true );
 	$price      = get_post_meta( $post->ID, 'villa_card_price', true );
+	$cta_label  = get_post_meta( $post->ID, 'villa_card_cta_label', true );
+	$cta_url    = get_post_meta( $post->ID, 'villa_card_cta_url', true );
 
 	wp_nonce_field( 'gutenberg_lab_blocks_save_villa_fields', 'gutenberg_lab_blocks_villa_fields_nonce' );
 	?>
@@ -884,20 +877,7 @@ function gutenberg_lab_blocks_render_villa_card_content_meta_box( $post ) {
 	<p class="description">
 		<?php esc_html_e( 'Price line shown beneath card facts on collection-style villa cards.', 'gutenberg-lab-blocks' ); ?>
 	</p>
-	<?php
-}
 
-/**
- * Renders the villa CTA meta fields.
- *
- * @param WP_Post $post Current villa post object.
- */
-function gutenberg_lab_blocks_render_villa_card_cta_meta_box( $post ) {
-	$cta_label = get_post_meta( $post->ID, 'villa_card_cta_label', true );
-	$cta_url   = get_post_meta( $post->ID, 'villa_card_cta_url', true );
-
-	wp_nonce_field( 'gutenberg_lab_blocks_save_villa_fields', 'gutenberg_lab_blocks_villa_fields_nonce' );
-	?>
 	<p>
 		<label for="gutenberg-lab-villa-card-cta-label">
 			<?php esc_html_e( 'CTA Label', 'gutenberg-lab-blocks' ); ?>
