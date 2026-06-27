@@ -329,10 +329,14 @@
 
 	.vvm-card-grid__card-meta {
 		display: grid;
-		gap: 0.25rem;
+		gap: 0;
 		color: var(--wp--preset--color--dark-green, #1e3d2f);
 		font-size: var(--wp--preset--font-size--md);
 		line-height: 1.35;
+	}
+
+	.vvm-card-grid__card-meta > * {
+		margin: 0;
 	}
 
 	.vvm-card-grid__card-facts,
@@ -342,8 +346,7 @@
 		line-height: inherit;
 	}
 
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-link-primary .wp-block-button__link {
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link {
 		display: inline-flex;
 		min-block-size: auto;
 		padding: 0;
@@ -363,16 +366,12 @@
 	}
 
 	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link::before,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link::after,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-link-primary .wp-block-button__link::before,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-link-primary .wp-block-button__link::after {
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link::after {
 		content: none;
 	}
 
 	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link:hover,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link:focus-visible,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-link-primary .wp-block-button__link:hover,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-link-primary .wp-block-button__link:focus-visible {
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link:focus-visible {
 		color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
 	}
 }
