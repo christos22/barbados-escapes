@@ -3485,10 +3485,11 @@ function gutenberg_lab_blocks_villa_importer_resolve_source_villa( $source ) {
  * @return array{latitude:string,longitude:string}|array{}
  */
 function gutenberg_lab_blocks_villa_importer_extract_coordinates( $coordinate_source ) {
-	$coordinate_source = html_entity_decode( (string) $coordinate_source, ENT_QUOTES, 'UTF-8' );
+	$coordinate_source = rawurldecode( html_entity_decode( (string) $coordinate_source, ENT_QUOTES, 'UTF-8' ) );
 	$patterns          = array(
+		'/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/i',
 		'/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/',
-		'/[?&](?:query|q)=(-?\d+(?:\.\d+)?)(?:%2C|,)(-?\d+(?:\.\d+)?)/i',
+		'/[?&](?:query|q|ll|center|destination)=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i',
 		'/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/',
 	);
 
@@ -3497,7 +3498,12 @@ function gutenberg_lab_blocks_villa_importer_extract_coordinates( $coordinate_so
 			$latitude  = gutenberg_lab_blocks_sanitize_villa_schema_coordinate( $matches[1] );
 			$longitude = gutenberg_lab_blocks_sanitize_villa_schema_coordinate( $matches[2] );
 
-			if ( '' !== $latitude && '' !== $longitude ) {
+			if (
+				'' !== $latitude &&
+				'' !== $longitude &&
+				abs( (float) $latitude ) <= 90 &&
+				abs( (float) $longitude ) <= 180
+			) {
 				return array(
 					'latitude'  => $latitude,
 					'longitude' => $longitude,
