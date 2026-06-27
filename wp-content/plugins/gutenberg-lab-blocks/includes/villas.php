@@ -677,6 +677,11 @@ function gutenberg_lab_blocks_get_villa_meta_schema() {
 			'default'           => '',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
+		'villa_card_price'      => array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
 		'villa_card_cta_label' => array(
 			'type'              => 'string',
 			'default'           => '',
@@ -808,6 +813,7 @@ function gutenberg_lab_blocks_render_villa_card_content_meta_box( $post ) {
 	$eyebrow    = get_post_meta( $post->ID, 'villa_card_eyebrow', true );
 	$descriptor = get_post_meta( $post->ID, 'villa_card_descriptor', true );
 	$facts      = get_post_meta( $post->ID, 'villa_card_facts', true );
+	$price      = get_post_meta( $post->ID, 'villa_card_price', true );
 
 	wp_nonce_field( 'gutenberg_lab_blocks_save_villa_fields', 'gutenberg_lab_blocks_villa_fields_nonce' );
 	?>
@@ -856,10 +862,27 @@ function gutenberg_lab_blocks_render_villa_card_content_meta_box( $post ) {
 		name="gutenberg_lab_villa_card_facts"
 		class="widefat"
 		value="<?php echo esc_attr( $facts ); ?>"
-		placeholder="<?php echo esc_attr__( '7 Bedrooms - Sleeps 12 - From $1,300/night', 'gutenberg-lab-blocks' ); ?>"
+		placeholder="<?php echo esc_attr__( '7 Bedrooms - Sleeps 12', 'gutenberg-lab-blocks' ); ?>"
 	/>
 	<p class="description">
-		<?php esc_html_e( 'Compact facts line used by collection-style villa cards.', 'gutenberg-lab-blocks' ); ?>
+		<?php esc_html_e( 'Compact facts line used by collection-style villa cards. Keep pricing in the separate price field below.', 'gutenberg-lab-blocks' ); ?>
+	</p>
+
+	<p>
+		<label for="gutenberg-lab-villa-card-price">
+			<?php esc_html_e( 'Card price', 'gutenberg-lab-blocks' ); ?>
+		</label>
+	</p>
+	<input
+		type="text"
+		id="gutenberg-lab-villa-card-price"
+		name="gutenberg_lab_villa_card_price"
+		class="widefat"
+		value="<?php echo esc_attr( $price ); ?>"
+		placeholder="<?php echo esc_attr__( 'From $1,300/night', 'gutenberg-lab-blocks' ); ?>"
+	/>
+	<p class="description">
+		<?php esc_html_e( 'Price line shown beneath card facts on collection-style villa cards.', 'gutenberg-lab-blocks' ); ?>
 	</p>
 	<?php
 }
@@ -1021,6 +1044,7 @@ function gutenberg_lab_blocks_save_villa_meta( $post_id ) {
 		'villa_card_eyebrow'    => 'gutenberg_lab_villa_card_eyebrow',
 		'villa_card_descriptor' => 'gutenberg_lab_villa_card_descriptor',
 		'villa_card_facts'      => 'gutenberg_lab_villa_card_facts',
+		'villa_card_price'      => 'gutenberg_lab_villa_card_price',
 		'villa_card_cta_label'  => 'gutenberg_lab_villa_card_cta_label',
 		'villa_card_cta_url'    => 'gutenberg_lab_villa_card_cta_url',
 		'villa_schema_latitude' => 'gutenberg_lab_villa_schema_latitude',
@@ -1277,6 +1301,47 @@ function gutenberg_lab_blocks_get_villa_card_default_cta_label() {
 }
 
 /**
+ * Splits legacy one-line card facts into facts and price.
+ *
+ * Older villa cards stored strings like `5 Bedrooms - Sleeps 10 - From
+ * $2,000/night` in one field. New collection cards render facts and price as
+ * separate lines, so this keeps existing content looking right while new
+ * imports write the fields separately.
+ *
+ * @param string $facts Existing card facts text.
+ * @param string $price Existing card price text.
+ * @return array{facts:string,price:string}
+ */
+function gutenberg_lab_blocks_normalize_villa_card_facts_price( $facts, $price ) {
+	$facts = sanitize_text_field( (string) $facts );
+	$price = sanitize_text_field( (string) $price );
+
+	if ( '' !== $price || '' === $facts ) {
+		return array(
+			'facts' => $facts,
+			'price' => $price,
+		);
+	}
+
+	if ( preg_match( '/^(.*?)(?:\s+[–—-]\s+)(from\s+.+)$/i', $facts, $matches ) ) {
+		$maybe_facts = trim( $matches[1] );
+		$maybe_price = trim( $matches[2] );
+
+		if ( '' !== $maybe_facts && '' !== $maybe_price ) {
+			return array(
+				'facts' => $maybe_facts,
+				'price' => ucfirst( $maybe_price ),
+			);
+		}
+	}
+
+	return array(
+		'facts' => $facts,
+		'price' => '',
+	);
+}
+
+/**
  * Returns the normalized CTA payload for one villa card.
  *
  * @param int $villa_id Villa post ID.
@@ -1524,6 +1589,8 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 	$eyebrow   = get_post_meta( $villa_id, 'villa_card_eyebrow', true );
 	$descriptor = get_post_meta( $villa_id, 'villa_card_descriptor', true );
 	$facts      = get_post_meta( $villa_id, 'villa_card_facts', true );
+	$price      = get_post_meta( $villa_id, 'villa_card_price', true );
+	$card_meta  = gutenberg_lab_blocks_normalize_villa_card_facts_price( $facts, $price );
 
 	if ( '' === $excerpt ) {
 		$excerpt = wp_trim_words( wp_strip_all_tags( $villa->post_content ), 24 );
@@ -1548,7 +1615,8 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 		'excerpt'   => $excerpt,
 		'eyebrow'   => $eyebrow,
 		'descriptor' => $descriptor,
-		'facts'     => $facts,
+		'facts'     => $card_meta['facts'],
+		'price'     => $card_meta['price'],
 		'amenities' => gutenberg_lab_blocks_get_villa_amenities( $villa_id ),
 		'image_id'  => $image_id,
 		'image_url' => $image_url,
@@ -1589,7 +1657,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 	}
 
 	if ( 'collection' === $args['presentation'] ) {
-		$villa_data['cta']['label'] = __( 'Explore Villa', 'gutenberg-lab-blocks' );
+		$villa_data['cta']['label'] = __( 'Explore villa', 'gutenberg-lab-blocks' );
 	}
 
 	$card_image_size  = 'collection' === $args['presentation']
@@ -1652,13 +1720,21 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 				<p><?php echo esc_html( $villa_data['excerpt'] ); ?></p>
 			<?php endif; ?>
 
-			<?php if ( 'collection' === $args['presentation'] && '' !== $villa_data['facts'] ) : ?>
-				<p class="vvm-card-grid__card-facts"><?php echo esc_html( $villa_data['facts'] ); ?></p>
+			<?php if ( 'collection' === $args['presentation'] && ( '' !== $villa_data['facts'] || '' !== $villa_data['price'] ) ) : ?>
+				<div class="vvm-card-grid__card-meta">
+					<?php if ( '' !== $villa_data['facts'] ) : ?>
+						<p class="vvm-card-grid__card-facts"><strong><?php echo esc_html( $villa_data['facts'] ); ?></strong></p>
+					<?php endif; ?>
+
+					<?php if ( '' !== $villa_data['price'] ) : ?>
+						<p class="vvm-card-grid__card-price"><strong><?php echo esc_html( $villa_data['price'] ); ?></strong></p>
+					<?php endif; ?>
+				</div>
 			<?php endif; ?>
 
 			<?php if ( ! empty( $villa_data['cta']['url'] ) && ! empty( $villa_data['cta']['label'] ) ) : ?>
 				<div class="wp-block-buttons">
-					<div class="wp-block-button is-style-vvm-ghost">
+					<div class="wp-block-button <?php echo 'collection' === $args['presentation'] ? 'is-style-vvm-link-primary' : 'is-style-vvm-ghost'; ?>">
 						<a
 							class="wp-block-button__link wp-element-button"
 							href="<?php echo esc_url( $villa_data['cta']['url'] ); ?>"

@@ -3817,11 +3817,16 @@ function gutenberg_lab_blocks_villa_importer_meta( $data ) {
 		trim( ( $overview['coordinates'] ?? '' ) . ' ' . ( $overview['google_maps_link'] ?? '' ) )
 	);
 	$facts = sprintf(
-		'%1$s Bedrooms - %2$s Bathrooms - Sleeps %3$s - From %4$s/night',
+		'%1$s Bedrooms - %2$s Bathrooms - Sleeps %3$s',
 		$overview['bedrooms'],
 		$overview['bathrooms'],
-		$overview['sleeps'],
-		gutenberg_lab_blocks_villa_importer_format_usd( $overview['starting_rate_usd'] )
+		$overview['sleeps']
+	);
+	$price = 'From ' . gutenberg_lab_blocks_villa_importer_format_usd( $overview['starting_rate_usd'] ) . '/night';
+	$card_location = $overview['card_short_description'] ?? sprintf(
+		'%s, %s',
+		$overview['property_area'],
+		$overview['parish']
 	);
 	$bedroom_selector_choices = gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows(
 		$overview['bedroom_selector_choices'] ?? array()
@@ -3831,13 +3836,10 @@ function gutenberg_lab_blocks_villa_importer_meta( $data ) {
 	);
 
 	$meta = array(
-		'villa_card_eyebrow'           => '',
-		'villa_card_descriptor'        => $overview['card_short_description'] ?? sprintf(
-			'%s, %s',
-			$overview['property_area'],
-			$overview['parish']
-		),
+		'villa_card_eyebrow'           => $card_location,
+		'villa_card_descriptor'        => gutenberg_lab_blocks_villa_importer_excerpt( $data ),
 		'villa_card_facts'             => $facts,
+		'villa_card_price'             => $price,
 		'villa_card_cta_label'         => 'Explore villa',
 		'villa_schema_latitude'        => $coordinates['latitude'] ?? '',
 		'villa_schema_longitude'       => $coordinates['longitude'] ?? '',

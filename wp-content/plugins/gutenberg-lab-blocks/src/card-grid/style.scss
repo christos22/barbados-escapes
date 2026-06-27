@@ -57,6 +57,7 @@
 
 	.vvm-card-grid__card-media {
 		display: block;
+		box-sizing: border-box;
 		position: relative;
 		width: 100%;
 		overflow: hidden;
@@ -302,7 +303,9 @@
 
 	.vvm-card-grid__card-eyebrow,
 	.vvm-card-grid__card-descriptor,
-	.vvm-card-grid__card-facts {
+	.vvm-card-grid__card-meta,
+	.vvm-card-grid__card-facts,
+	.vvm-card-grid__card-price {
 		font-family: var(--wp--preset--font-family--refined-sans);
 	}
 
@@ -318,43 +321,59 @@
 		color: var(--wp--preset--color--dark-green, #1e3d2f);
 	}
 
-	.vvm-card-grid__card-descriptor,
-	.vvm-card-grid__card-facts {
+	.vvm-card-grid__card-descriptor {
 		color: rgb(30 61 47 / 0.72);
 		font-size: var(--wp--preset--font-size--lg);
 		line-height: 1.45;
 	}
 
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link {
+	.vvm-card-grid__card-meta {
+		display: grid;
+		gap: 0.25rem;
+		color: var(--wp--preset--color--dark-green, #1e3d2f);
+		font-size: var(--wp--preset--font-size--md);
+		line-height: 1.35;
+	}
+
+	.vvm-card-grid__card-facts,
+	.vvm-card-grid__card-price {
+		color: inherit;
+		font-size: inherit;
+		line-height: inherit;
+	}
+
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link,
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-link-primary .wp-block-button__link {
 		display: inline-flex;
 		min-block-size: auto;
-		padding: 0 0 0.3125rem;
+		padding: 0;
 		border: 0;
-		border-bottom: 1px solid currentcolor;
 		background: transparent !important;
 		box-shadow: none;
-		color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
+		color: var(--wp--preset--color--gold, #c4922a) !important;
 		font-family: var(--wp--preset--font-family--refined-sans);
-		font-size: var(--wp--preset--font-size--xs);
+		font-size: var(--wp--preset--font-size--lg);
 		font-weight: 400;
-		letter-spacing: 0.34em;
+		letter-spacing: 0;
 		line-height: 1.4;
 		text-decoration: none !important;
-		text-transform: uppercase;
+		text-transform: none;
 		transform: none;
-		transition:
-			color 200ms ease,
-			border-color 200ms ease;
+		transition: color 200ms ease;
 	}
 
 	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link::before,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link::after {
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link::after,
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-link-primary .wp-block-button__link::before,
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-link-primary .wp-block-button__link::after {
 		content: none;
 	}
 
 	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link:hover,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link:focus-visible {
-		color: var(--wp--preset--color--gold, #c4922a) !important;
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link:focus-visible,
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-link-primary .wp-block-button__link:hover,
+	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-link-primary .wp-block-button__link:focus-visible {
+		color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
 	}
 }
 
