@@ -99,18 +99,69 @@ const cellText = ( cell ) => {
 	return String( value ).trim();
 };
 
+const styleWarnings = [];
+const styleWarningKeys = new Set();
+
+const isRedArgb = ( value ) => {
+	const hex = String( value || '' ).replace( /^#/, '' ).toUpperCase();
+	const rgb = hex.length === 8 ? hex.slice( 2 ) : hex;
+
+	if ( rgb.length !== 6 || ! /^[0-9A-F]{6}$/.test( rgb ) ) {
+		return false;
+	}
+
+	if ( [ 'FF0000', 'C00000', '9C0006', 'FFC7CE' ].includes( rgb ) ) {
+		return true;
+	}
+
+	const red = Number.parseInt( rgb.slice( 0, 2 ), 16 );
+	const green = Number.parseInt( rgb.slice( 2, 4 ), 16 );
+	const blue = Number.parseInt( rgb.slice( 4, 6 ), 16 );
+
+	return red >= 160 && red - green >= 60 && red - blue >= 60;
+};
+
+const isRedMarkedCell = ( cell ) => {
+	const fill = cell?.fill;
+	const font = cell?.font;
+
+	return [
+		fill?.fgColor?.argb,
+		fill?.bgColor?.argb,
+		font?.color?.argb,
+	].some( isRedArgb );
+};
+
+const addStyleWarning = ( message ) => {
+	if ( styleWarningKeys.has( message ) ) {
+		return;
+	}
+
+	styleWarningKeys.add( message );
+	styleWarnings.push( message );
+};
+
 const readKeyValuesFromSheet = ( sheet, startRow = 5 ) => {
 	const values = {};
 
 	for ( let rowNumber = startRow; rowNumber <= sheet.rowCount; rowNumber++ ) {
 		const row = sheet.getRow( rowNumber );
-		const key = cellText( row.getCell( 1 ) );
+		const keyCell = row.getCell( 1 );
+		const valueCell = row.getCell( 3 );
+		const key = cellText( keyCell );
 
 		if ( ! key || key.startsWith( '#' ) ) {
 			continue;
 		}
 
-		values[ key ] = cellText( row.getCell( 3 ) );
+		if ( isRedMarkedCell( keyCell ) || isRedMarkedCell( valueCell ) ) {
+			addStyleWarning(
+				`${ sheet.name } row ${ rowNumber }: red-marked import cell was skipped.`
+			);
+			continue;
+		}
+
+		values[ key ] = cellText( valueCell );
 	}
 
 	return values;
@@ -130,9 +181,17 @@ const readTableFromSheet = ( sheet, keysRow = 4, dataStartRow = 6 ) => {
 	const labelRow = sheet.getRow( keysRow + 1 );
 
 	for ( let column = 1; column <= sheet.columnCount; column++ ) {
-		const key = cellText( header.getCell( column ) );
+		const headerCell = header.getCell( column );
+		const key = cellText( headerCell );
 
 		if ( key ) {
+			if ( isRedMarkedCell( headerCell ) ) {
+				addStyleWarning(
+					`${ sheet.name } column ${ headerCell.address.replace( /\d+$/, '' ) }: red-marked import column was skipped.`
+				);
+				continue;
+			}
+
 			keys.push( { column, key } );
 		}
 
@@ -149,11 +208,25 @@ const readTableFromSheet = ( sheet, keysRow = 4, dataStartRow = 6 ) => {
 		const row = sheet.getRow( rowNumber );
 		const item = {};
 		let hasValue = false;
+		const redCells = [];
 
 		for ( const { column, key } of keys ) {
-			const value = cellText( row.getCell( column ) );
+			const cell = row.getCell( column );
+			const value = cellText( cell );
+
+			if ( isRedMarkedCell( cell ) ) {
+				redCells.push( cell.address );
+			}
+
 			item[ key ] = value;
 			hasValue ||= value !== '';
+		}
+
+		if ( hasValue && redCells.length > 0 ) {
+			addStyleWarning(
+				`${ sheet.name } row ${ rowNumber }: skipped because ${ redCells.join( ', ' ) } is marked red.`
+			);
+			continue;
 		}
 
 		const comments = commentsColumns
@@ -406,6 +479,7 @@ const highlights = storyHighlights.length > 0
 const relatedVillas = removeNotApplicableRows( readTable( 'Related Villas' ) );
 const errors = [];
 const warnings = [];
+warnings.push( ...styleWarnings );
 
 const truncateForWarning = ( value ) => {
 	const text = String( value || '' ).replace( /\s+/g, ' ' ).trim();

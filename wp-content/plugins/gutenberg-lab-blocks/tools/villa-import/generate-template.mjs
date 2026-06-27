@@ -33,6 +33,7 @@ const colors = {
 	optional: 'FFDDEBF7',
 	comments: 'FFEAF4E6',
 	fixed: 'FFE2E3E5',
+	exclude: 'FFFF0000',
 	white: 'FFFFFFFF',
 	text: 'FF24332B',
 	muted: 'FF67736D',
@@ -251,7 +252,7 @@ const addTitle = ( sheet, title, intro, endColumn ) => {
 	sheet.getRow( 2 ).height = 36;
 
 	sheet.mergeCells( 3, 1, 3, endColumn );
-	sheet.getCell( 3, 1 ).value = 'Yellow = required   |   Blue = optional   |   Grey = fixed field   |   Do not rename tabs';
+	sheet.getCell( 3, 1 ).value = 'Yellow = required   |   Blue = optional   |   Grey = fixed field   |   Red = skipped by import   |   Do not rename tabs';
 	sheet.getCell( 3, 1 ).font = { name: 'Aptos', size: 10, italic: true, color: { argb: colors.muted } };
 	sheet.getCell( 3, 1 ).alignment = { vertical: 'middle' };
 	sheet.getRow( 3 ).height = 24;
@@ -722,6 +723,7 @@ const instructionSections = [
 	[ 15, 'Use “Not applicable” carefully', 'For a completely optional table such as Reviews or Staff, enter Not applicable in the first cell and leave the rest of that row blank.' ],
 	[ 16, 'Images are separate', 'The featured image, gallery, videos, and availability calendars are added in WordPress after import.' ],
 	[ 17, 'Rates are USD currency', 'Include the $ symbol, for example $1,500. Dates should use DD MMM YYYY, for example 10 Jan 2026, or follow the Monkey Hill examples.' ],
+	[ 18, 'Red means do not import', 'Anything marked red in an answer/table cell is skipped by the importer and reported in the dry-run warnings.' ],
 	[ 19, 'Colour guide', colors.gold ],
 ];
 
@@ -765,13 +767,19 @@ const legend = [
 	[ 'E20:F20', colors.comments, 'Comments - ignored by import' ],
 	[ 'G20:H20', colors.ivory, 'Monkey Hill example only' ],
 	[ 'A21:B21', colors.fixed, 'Fixed field - complete the answer beside it' ],
+	[ 'C21:D21', colors.exclude, 'Red - skipped by import' ],
 ];
 for ( const [ range, color, label ] of legend ) {
 	instructions.mergeCells( range );
 	const cell = instructions.getCell( range.split( ':' )[ 0 ] );
 	cell.value = label;
 	cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
-	cell.font = { name: 'Aptos', size: 10, bold: true, color: { argb: colors.text } };
+	cell.font = {
+		name: 'Aptos',
+		size: 10,
+		bold: true,
+		color: { argb: color === colors.exclude ? colors.white : colors.text },
+	};
 	cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
 	cell.border = thinBorder;
 }

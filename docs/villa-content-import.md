@@ -20,13 +20,15 @@ For each new villa:
    sections.
 4. Use **Comments** for questions, caveats, or review notes. These
    comments are not imported into WordPress content.
-5. Use **Additional Requests** for general requests that do not belong in a
+5. Mark content red only when it should be excluded from the import. Red
+   answer/table cells are skipped and reported during dry-run.
+6. Use **Additional Requests** for general requests that do not belong in a
    specific row or field. This sheet is untracked and not imported.
-6. Complete every yellow required field. Use `Not applicable` when a section
+7. Complete every yellow required field. Use `Not applicable` when a section
    genuinely does not apply; do not leave required questions blank.
-7. Keep the client's wording as the source copy. Copy editing happens during
+8. Keep the client's wording as the source copy. Copy editing happens during
    review, not during import.
-8. Share the completed Sheet with the developer.
+9. Share the completed Sheet with the developer.
 
 Images are configured after the content draft is imported. When the developer
 uses a source villa scaffold, gallery images from that source may be copied as
@@ -65,7 +67,8 @@ and reports the remaining media/calendar work.
 
 Content gaps are reported as warnings instead of blocking the import. For
 example, blank bedroom descriptions, incomplete staff rows, reversed rate date
-ranges, and row comments are flagged for review after the draft is created.
+ranges, red-marked skipped rows, and row comments are flagged for review after
+the draft is created.
 If an older completed sheet put clear pricing labels such as `3 bedroom rate`
 in the Rates comments column, the importer promotes those labels into the
 pricing table and flags that they should be moved into **Rate label** next time.
@@ -96,6 +99,8 @@ is written under `.ddev/villa-import-backups/` before an update.
 - Comments are review notes only. The importer ignores the comments column on
   question tabs and row-based tabs, except for the backwards-compatible Rates
   rescue noted above.
+- Red answer/table cells mean "do not import this content." A table row with a
+  red import cell is skipped and reported as a warning.
 - The **Additional Requests** sheet is untracked and ignored by the importer.
 - Blank means "not provided." `Not applicable` means the section should be
   intentionally omitted.
