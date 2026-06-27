@@ -942,7 +942,7 @@ function gutenberg_lab_blocks_villa_importer_light_gold_heading_attrs() {
  * @return void
  */
 function gutenberg_lab_blocks_villa_importer_add_staff_group_detail( &$groups, $group_key, $title, $label, $detail ) {
-	if ( '' === $detail ) {
+	if ( '' === $label && '' === $detail ) {
 		return;
 	}
 
@@ -975,10 +975,10 @@ function gutenberg_lab_blocks_villa_importer_build_staff_section( $staff ) {
 		$role        = gutenberg_lab_blocks_villa_importer_text( $staff_member['role'] ?? '' );
 		$arrangement = gutenberg_lab_blocks_villa_importer_text( $staff_member['arrangement'] ?? '' );
 		$description = gutenberg_lab_blocks_villa_importer_text( $staff_member['description'] ?? '' );
-		$details     = trim( implode( ' ', array_filter( array( $arrangement, $description ) ) ) );
+		$details     = $description;
 		$role_key    = strtolower( $role );
 
-		if ( '' === $role || '' === $details ) {
+		if ( '' === $role || ( '' === $arrangement && '' === $details ) ) {
 			continue;
 		}
 
@@ -1098,7 +1098,10 @@ function gutenberg_lab_blocks_villa_importer_build_staff_section( $staff ) {
 			);
 		}
 
-		$card      .= gutenberg_lab_blocks_villa_importer_paragraph( $copy, $paragraph_attrs );
+		if ( '' !== $copy ) {
+			$card .= gutenberg_lab_blocks_villa_importer_paragraph( $copy, $paragraph_attrs );
+		}
+
 		$columns[] = $card;
 
 		$column_attributes[] = $dark
@@ -1198,14 +1201,34 @@ function gutenberg_lab_blocks_villa_importer_build_hero_content( $data ) {
 /**
  * Builds the villa facts strip.
  *
+ * In clone mode, the imported villa should inherit the scaffold's visual style.
+ * Some older villas use one label-only line per spec, while newer block defaults
+ * split values and labels. We replace the facts but follow the source item shape.
+ *
  * @param array<string, mixed> $data Normalized workbook data.
- * @param array<string, mixed> $attributes Optional Villa Specs block attributes.
+ * @param array<string, mixed> $source_block Optional source Villa Specs block or attributes.
  * @return string
  */
-function gutenberg_lab_blocks_villa_importer_build_villa_specs( $data, $attributes = array() ) {
-	$overview = $data['overview'];
+function gutenberg_lab_blocks_villa_importer_build_villa_specs( $data, $source_block = array() ) {
+	$overview     = $data['overview'];
+	$attributes   = $source_block['attrs'] ?? $source_block;
+	$source_items = array();
+	$pool_summary = gutenberg_lab_blocks_villa_importer_text( $overview['pool_summary'] ?? '' );
+	$pool_value   = $pool_summary;
+	$pool_label   = 'Pool';
 
-	$specs = array(
+	foreach ( $source_block['innerBlocks'] ?? array() as $inner_block ) {
+		if ( 'gutenberg-lab-blocks/villa-spec-item' === ( $inner_block['blockName'] ?? '' ) ) {
+			$source_items[] = $inner_block['attrs'] ?? array();
+		}
+	}
+
+	if ( preg_match( '/^([0-9]+(?:\.[0-9]+)?)\s+(.+)$/', $pool_summary, $matches ) ) {
+		$pool_value = $matches[1];
+		$pool_label = $matches[2];
+	}
+
+	$label_specs = array(
 		array(
 			'label'    => sprintf(
 				'%s %s',
@@ -1223,15 +1246,60 @@ function gutenberg_lab_blocks_villa_importer_build_villa_specs( $data, $attribut
 			'iconSlug' => 'bathtub-thick',
 		),
 		array( 'label' => 'Sleeps ' . (string) $overview['sleeps'], 'iconSlug' => 'people' ),
-		array( 'label' => (string) $overview['pool_summary'], 'iconSlug' => 'pool-alternative' ),
+		array( 'label' => $pool_summary, 'iconSlug' => 'pool-alternative' ),
 		array(
 			'label'    => 'From ' . gutenberg_lab_blocks_villa_importer_format_usd( $overview['starting_rate_usd'] ) . '/Night',
 			'iconSlug' => 'dollar',
 		),
 	);
+
+	$split_specs = array(
+		array(
+			'value'    => (string) $overview['bedrooms'],
+			'label'    => 1 === (int) $overview['bedrooms'] ? 'Bedroom' : 'Bedrooms',
+			'iconSlug' => 'bedrooms',
+		),
+		array(
+			'value'    => (string) $overview['bathrooms'],
+			'label'    => 1.0 === (float) $overview['bathrooms'] ? 'Bathroom' : 'Bathrooms',
+			'iconSlug' => 'bathtub-thick',
+		),
+		array(
+			'value'    => (string) $overview['sleeps'],
+			'label'    => 'Sleeps',
+			'iconSlug' => 'people',
+		),
+		array(
+			'value'    => $pool_value,
+			'label'    => $pool_label,
+			'iconSlug' => 'pool-alternative',
+		),
+		array(
+			'value'    => 'From ' . gutenberg_lab_blocks_villa_importer_format_usd( $overview['starting_rate_usd'] ),
+			'label'    => 'Per Night',
+			'iconSlug' => 'dollar',
+		),
+	);
 	$spec_markup = '';
 
-	foreach ( $specs as $spec ) {
+	foreach ( $label_specs as $index => $label_spec ) {
+		$source_item     = $source_items[ $index ] ?? array();
+		$source_value    = gutenberg_lab_blocks_villa_importer_text( $source_item['value'] ?? '' );
+		$source_icon     = sanitize_key( $source_item['iconSlug'] ?? '' );
+		$source_icon_size = isset( $source_item['iconSize'] ) ? (float) $source_item['iconSize'] : 0;
+
+		$spec = empty( $source_items )
+			? $label_spec
+			: ( '' !== $source_value ? $split_specs[ $index ] : array( 'label' => $label_spec['label'] ) );
+
+		if ( ! empty( $source_items ) && '' !== $source_icon ) {
+			$spec['iconSlug'] = $source_icon;
+		}
+
+		if ( $source_icon_size > 0 ) {
+			$spec['iconSize'] = $source_icon_size;
+		}
+
 		$spec_markup .= gutenberg_lab_blocks_villa_importer_spec_item( $spec );
 	}
 
@@ -3064,7 +3132,7 @@ function gutenberg_lab_blocks_villa_importer_build_content_from_source( $data, $
 
 		if ( 'gutenberg-lab-blocks/villa-specs' === $block_name ) {
 			$replacement = gutenberg_lab_blocks_villa_importer_first_import_block(
-				gutenberg_lab_blocks_villa_importer_build_villa_specs( $data, $block['attrs'] ?? array() )
+				gutenberg_lab_blocks_villa_importer_build_villa_specs( $data, $block )
 			);
 
 			if ( $replacement ) {
