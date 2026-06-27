@@ -2162,7 +2162,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	 */
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) {

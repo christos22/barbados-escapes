@@ -604,9 +604,12 @@ function gutenberg_lab_blocks_villa_importer_columns( $columns, $attributes = ar
  */
 function gutenberg_lab_blocks_villa_importer_list( $items, $class_name = '' ) {
 	$item_markup = '';
+	$item_class  = str_contains( ' ' . $class_name . ' ', ' list-yellow-dots ' )
+		? ' class="has-refined-sans-font-family"'
+		: '';
 
 	foreach ( array_filter( array_map( 'gutenberg_lab_blocks_villa_importer_text', $items ) ) as $item ) {
-		$item_markup .= '<li>' . esc_html( $item ) . '</li>';
+		$item_markup .= '<li' . $item_class . '>' . esc_html( $item ) . '</li>';
 	}
 
 	if ( '' === $item_markup ) {
@@ -1203,14 +1206,27 @@ function gutenberg_lab_blocks_villa_importer_build_villa_specs( $data, $attribut
 	$overview = $data['overview'];
 
 	$specs = array(
-		array( 'value' => (string) $overview['bedrooms'], 'label' => 'Bedrooms', 'iconSlug' => 'bed' ),
-		array( 'value' => (string) $overview['bathrooms'], 'label' => 'Bathrooms', 'iconSlug' => 'bathtub' ),
-		array( 'value' => (string) $overview['sleeps'], 'label' => 'Sleeps', 'iconSlug' => 'people' ),
-		array( 'value' => (string) $overview['pool_summary'], 'label' => 'Pool', 'iconSlug' => 'pool' ),
 		array(
-			'value'    => 'From ' . gutenberg_lab_blocks_villa_importer_format_usd( $overview['starting_rate_usd'] ),
-			'label'    => 'Per Night',
-			'iconSlug' => 'finance-and',
+			'label'    => sprintf(
+				'%s %s',
+				(string) $overview['bedrooms'],
+				1 === (int) $overview['bedrooms'] ? 'Bedroom' : 'Bedrooms'
+			),
+			'iconSlug' => 'bedrooms',
+		),
+		array(
+			'label'    => sprintf(
+				'%s %s',
+				(string) $overview['bathrooms'],
+				1.0 === (float) $overview['bathrooms'] ? 'Bathroom' : 'Bathrooms'
+			),
+			'iconSlug' => 'bathtub-thick',
+		),
+		array( 'label' => 'Sleeps ' . (string) $overview['sleeps'], 'iconSlug' => 'people' ),
+		array( 'label' => (string) $overview['pool_summary'], 'iconSlug' => 'pool-alternative' ),
+		array(
+			'label'    => 'From ' . gutenberg_lab_blocks_villa_importer_format_usd( $overview['starting_rate_usd'] ) . '/Night',
+			'iconSlug' => 'dollar',
 		),
 	);
 	$spec_markup = '';
@@ -1909,7 +1925,17 @@ function gutenberg_lab_blocks_villa_importer_build_bedrooms_tab( $data ) {
 	return gutenberg_lab_blocks_villa_importer_block(
 		'gutenberg-lab-blocks/stack-tab',
 		array( 'label' => 'Bedrooms' ),
-		$content
+		gutenberg_lab_blocks_villa_importer_group(
+			$content,
+			array(
+				'style'  => array(
+					'spacing' => array(
+						'blockGap' => 'var:preset|spacing|sm',
+					),
+				),
+				'layout' => array( 'type' => 'default' ),
+			)
+		)
 	);
 }
 
@@ -2396,8 +2422,56 @@ function gutenberg_lab_blocks_villa_importer_build_pricing_contact_location( $da
 			'vvm-villa-pricing__table',
 			true
 		) .
-		gutenberg_lab_blocks_villa_importer_paragraph( $extras['tax_note'] ) .
-		gutenberg_lab_blocks_villa_importer_paragraph( $extras['security_deposit_note'] );
+		gutenberg_lab_blocks_villa_importer_paragraph(
+			$extras['tax_note'],
+			array(
+				'style'      => array(
+					'elements' => array(
+						'link' => array(
+							'color' => array(
+								'text' => 'var:preset|color|dark-green',
+							),
+						),
+					),
+					'spacing'  => array(
+						'padding' => array(
+							'left'  => '14px',
+							'right' => '33px',
+						),
+					),
+				),
+				'textColor'  => 'dark-green',
+				'fontSize'   => 'lg',
+				'fontFamily' => 'refined-sans',
+			)
+		) .
+		gutenberg_lab_blocks_villa_importer_paragraph(
+			$extras['security_deposit_note'],
+			array(
+				'style'      => array(
+					'elements'   => array(
+						'link' => array(
+							'color' => array(
+								'text' => 'var:preset|color|gold',
+							),
+						),
+					),
+					'spacing'    => array(
+						'padding' => array(
+							'left'  => '14px',
+							'right' => '33px',
+						),
+					),
+					'typography' => array(
+						'fontStyle'  => 'normal',
+						'fontWeight' => '300',
+					),
+				),
+				'textColor'  => 'gold',
+				'fontSize'   => 'xs',
+				'fontFamily' => 'refined-sans',
+			)
+		);
 
 	if ( '' !== $booking_terms ) {
 		$booking_terms_block = gutenberg_lab_blocks_villa_importer_block(
@@ -2425,7 +2499,7 @@ function gutenberg_lab_blocks_villa_importer_build_pricing_contact_location( $da
 				'style'           => array(
 					'spacing' => array(
 						'margin'   => array(
-							'top'    => '0px',
+							'top'    => 'var:preset|spacing|md',
 							'bottom' => '0px',
 						),
 						'padding'  => array(
@@ -2495,7 +2569,18 @@ function gutenberg_lab_blocks_villa_importer_build_pricing_contact_location( $da
 			array( 'className' => 'vvm-villa-amenities vvm-villa-pricing' )
 		) .
 		$contact,
-		array( 'className' => 'vvm-villa-pricing-contact' )
+		array(
+			'className' => 'vvm-villa-pricing-contact',
+			'style'     => array(
+				'spacing' => array(
+					'margin' => array(
+						'top'    => 'var:preset|spacing|xl',
+						'bottom' => 'var:preset|spacing|xl',
+					),
+				),
+			),
+			'layout'    => array( 'type' => 'default' ),
+		)
 	);
 
 	$map_markup = '';
