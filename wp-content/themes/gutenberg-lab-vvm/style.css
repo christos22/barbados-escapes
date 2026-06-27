@@ -736,6 +736,19 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	color: rgb(196 146 42 / 0.88);
 }
 
+@media (max-width: 1024px) {
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-story-columns.wp-block-columns {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: var(--wp--preset--spacing--lg);
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-story-columns.wp-block-columns > .wp-block-column {
+		width: auto;
+		flex-basis: auto !important;
+	}
+}
+
 /*
  * Villa bedroom level cards. This stays in the theme because the section is
  * authored with native Gutenberg blocks while the visual system is site-wide.
@@ -1284,6 +1297,10 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	min-width: 0;
 }
 
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules > .wp-block-group > .vvm-villa-amenities__card:only-child {
+	grid-column: 1 / -1;
+}
+
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules > .wp-block-group > .vvm-villa-amenities__card > .wp-block-image {
 	height: 100%;
 	margin: 0;
@@ -1331,6 +1348,19 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules__row .vvm-villa-amenities__item strong {
 	color: var(--wp--preset--color--dark-green);
 	font-weight: 700;
+}
+
+@media (max-width: 900px) {
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules > .wp-block-group {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@media (max-width: 520px) {
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules__row .vvm-villa-amenities__item {
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: 0.2rem;
+	}
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-reviews {
@@ -2155,14 +2185,50 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	display: none;
 }
 
-@media (min-width: 782px) {
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns {
+	--vvm-perspective-image-min: 265px;
+	--vvm-perspective-image-max: 288px;
+
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--vvm-perspective-image-min)), 1fr));
+	justify-content: center;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:first-child {
+	grid-column: 1 / -1;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) {
+	inline-size: 100%;
+	justify-self: center;
+	max-inline-size: var(--vvm-perspective-image-max);
+	min-inline-size: min(100%, var(--vvm-perspective-image-min));
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) > .wp-block-image {
+	inline-size: 100%;
+	margin: 0;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) > .wp-block-image img {
+	display: block;
+	inline-size: 100%;
+	max-inline-size: 100%;
+	object-fit: cover;
+}
+
+@media (min-width: 960px) {
 	/*
 	 * Let the copy column define this row's height; the image columns then crop
 	 * into that height instead of their intrinsic aspect ratios stretching it.
 	 */
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns {
-		display: grid;
-		grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+		grid-template-columns: minmax(0, 1fr) repeat(2, minmax(var(--vvm-perspective-image-min), var(--vvm-perspective-image-max)));
+		justify-content: stretch;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:first-child {
+		grid-column: auto;
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) {
@@ -2173,15 +2239,11 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) > .wp-block-image {
 		inset: 0;
-		margin: 0;
 		position: absolute;
 	}
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective.wp-block-columns > .wp-block-column:has(> .wp-block-image) > .wp-block-image img {
-		display: block;
-		height: 100%;
-		object-fit: cover;
-		width: 100%;
+		block-size: 100%;
 	}
 }
 
@@ -2219,7 +2281,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	}
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1024px) {
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-staff.wp-block-columns {
 		flex-direction: column !important;
 	}

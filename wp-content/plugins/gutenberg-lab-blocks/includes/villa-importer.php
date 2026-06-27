@@ -1384,7 +1384,8 @@ function gutenberg_lab_blocks_villa_importer_build_story_columns( $data ) {
 	return gutenberg_lab_blocks_villa_importer_columns(
 		array( $left, $right ),
 		array(
-			'style' => array(
+			'className' => 'vvm-villa-story-columns',
+			'style'     => array(
 				'spacing' => array(
 					'padding'  => array(
 						'top'    => 'var:preset|spacing|xl',

@@ -272,12 +272,16 @@
 .wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-collection.vvm-card-grid--source-villas {
 	--vvm-card-grid-card-gap: 1.25rem;
 	--vvm-card-grid-card-padding: 2.5rem;
+	--vvm-card-grid-card-max-width: 400px;
 
 	.vvm-card-grid__items {
 		gap: var(--vvm-card-grid-gap);
+		justify-items: center;
 	}
 
 	.vvm-card-grid__card--villa {
+		width: 100%;
+		max-inline-size: var(--vvm-card-grid-card-max-width);
 		background: var(--wp--preset--color--white, #ffffff);
 		box-shadow: 0 18px 50px rgb(30 61 47 / 0.06);
 	}

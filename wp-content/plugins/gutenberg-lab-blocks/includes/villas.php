@@ -1592,6 +1592,13 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		$villa_data['cta']['label'] = __( 'Explore Villa', 'gutenberg-lab-blocks' );
 	}
 
+	$card_image_size  = 'collection' === $args['presentation']
+		? 'medium_large'
+		: 'gutenberg-lab-card-landscape';
+	$card_image_sizes = 'collection' === $args['presentation']
+		? '(max-width: 480px) calc(100vw - 3rem), (max-width: 781px) 400px, (max-width: 900px) calc((100vw - 5rem) / 2), 400px'
+		: '(max-width: 782px) 100vw, 33vw';
+
 	$media_classes = array(
 		'vvm-card-grid__card-media',
 		'' !== $villa_data['image_url']
@@ -1614,8 +1621,8 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 						'attachment_id' => $villa_data['image_id'],
 						'class'         => 'vvm-card-grid__card-image',
 						'fallback_url'  => $villa_data['image_url'],
-						'size'          => 'gutenberg-lab-card-landscape',
-						'sizes'         => '(max-width: 782px) 100vw, 33vw',
+						'size'          => $card_image_size,
+						'sizes'         => $card_image_sizes,
 					)
 				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				?>
