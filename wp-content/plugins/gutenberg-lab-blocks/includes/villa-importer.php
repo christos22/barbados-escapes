@@ -2401,6 +2401,33 @@ function gutenberg_lab_blocks_villa_importer_contact_form_block( $attributes ) {
 }
 
 /**
+ * Builds the visitor-facing season label for a pricing table row.
+ *
+ * Bedroom labels are used by the selector/filter only. Showing them again in
+ * the date cell creates noisy rows such as "3 Bedrooms (16 Apr...)". Keep
+ * non-bedroom labels visible because they are real season descriptors.
+ *
+ * @param string $rate_label Imported rate label.
+ * @param string $date_range Formatted date range.
+ * @return string
+ */
+function gutenberg_lab_blocks_villa_importer_pricing_season_label( $rate_label, $date_range ) {
+	if ( '' === $rate_label ) {
+		return $date_range;
+	}
+
+	if ( function_exists( 'gutenberg_lab_blocks_get_villa_bedroom_count_from_label' ) ) {
+		$bedroom_count = gutenberg_lab_blocks_get_villa_bedroom_count_from_label( $rate_label );
+
+		if ( $bedroom_count > 0 ) {
+			return $date_range;
+		}
+	}
+
+	return sprintf( '%s (%s)', $rate_label, $date_range );
+}
+
+/**
  * Builds rates, enquiry, and location content.
  *
  * @param array<string, mixed> $data Normalized workbook data.
@@ -2436,9 +2463,7 @@ function gutenberg_lab_blocks_villa_importer_build_pricing_contact_location( $da
 			gutenberg_lab_blocks_villa_importer_format_date( $rate['end_date'] )
 		);
 		$rate_label = gutenberg_lab_blocks_villa_importer_text( $rate['rate_label'] ?? ( $rate['season'] ?? '' ) );
-		$season = '' !== $rate_label
-			? sprintf( '%s (%s)', $rate_label, $date_range )
-			: $date_range;
+		$season     = gutenberg_lab_blocks_villa_importer_pricing_season_label( $rate_label, $date_range );
 
 		$rate_rows[] = array(
 			'cells' => array(
