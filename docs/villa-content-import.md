@@ -33,8 +33,9 @@ For each new villa:
 Images are configured after the content draft is imported. When the developer
 uses a source villa scaffold, gallery images from that source may be copied as
 placeholders so the layout can be reviewed before villa-specific media is
-assigned. If an iCal link is supplied, the importer stores it as an availability
-feed; the developer should still sync and review the calendar before publishing.
+assigned. If one or more iCal links are supplied, the importer stores them as
+availability feeds; the developer should still sync and review the calendar
+before publishing.
 
 ## Developer Workflow
 
@@ -70,8 +71,9 @@ example, blank bedroom descriptions, incomplete staff rows, reversed rate date
 ranges, red-marked skipped rows, and row comments are flagged for review after
 the draft is created.
 If an older completed sheet put clear pricing labels such as `3 bedroom rate`
-in the Rates comments column, the importer promotes those labels into the
-pricing table and flags that they should be moved into **Rate label** next time.
+or `3 bedrooms` in the Rates comments column, the importer promotes those
+labels into the pricing table and flags that they should be moved into
+**Rate label** next time.
 The command still fails for breaking issues such as missing required workbook
 tabs, invalid core villa facts, unknown location terms, duplicate villa names,
 or generated content that cannot be built.
@@ -118,7 +120,8 @@ is written under `.ddev/villa-import-backups/` before an update.
 - A full Google Maps URL containing coordinates can also populate schema
   latitude and longitude. Short share URLs remain a review task unless
   Coordinates are supplied.
-- The Overview **iCal link** field stores a calendar feed on the imported villa.
+- The Overview **iCal link** field can contain one or more full calendar feed
+  URLs. The importer stores each URL as a separate feed on the imported villa.
   Sync and review the availability calendar before publishing.
 
 ## Content Mapping

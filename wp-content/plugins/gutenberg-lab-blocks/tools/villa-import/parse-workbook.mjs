@@ -335,11 +335,22 @@ const coordinatePairValue = ( value ) => {
 const rateLabelFromComments = ( comments ) => {
 	const text = String( comments || '' ).replace( /\s+/g, ' ' ).trim();
 
-	if ( ! text || text.length > 120 || ! /\brate\b/i.test( text ) ) {
+	if ( ! text || text.length > 120 ) {
 		return '';
 	}
 
-	return text;
+	if ( /\brate\b/i.test( text ) ) {
+		return text;
+	}
+
+	const bedroomLabel = text.match( /^(\d{1,2})\s*(?:bed(?:room)?s?|brs?)\.?$/i );
+
+	if ( bedroomLabel ) {
+		const bedroomCount = Number( bedroomLabel[ 1 ] );
+		return `${ bedroomCount } ${ bedroomCount === 1 ? 'Bedroom' : 'Bedrooms' }`;
+	}
+
+	return '';
 };
 
 const yesNoValue = ( value, fallback = true ) => {

@@ -69,7 +69,7 @@ const keyValueSheets = [
 				[ 'map_address', 'Exact map address or plus code', false, 'Optional. Use when Google Maps needs a more precise address than the guest-facing display address.' ],
 				[ 'google_maps_link', 'Full Google Maps link', false, 'Use a full URL containing coordinates when possible.' ],
 				[ 'coordinates', 'Coordinates', false, 'Optional but useful. Paste latitude, longitude, for example 13.16879926789435, -59.63036875681415. Use this when the Google Maps link is shortened.' ],
-				[ 'ical_link', 'iCal link', false, 'Paste the full .ics/iCal calendar feed URL from Airbnb, Vrbo, or the owner calendar. The developer uses this after import to configure availability.' ],
+				[ 'ical_link', 'iCal link', false, 'Paste one or more full .ics/iCal calendar feed URLs from Airbnb, Vrbo, or the owner calendar. Separate multiple URLs with a new line or note.' ],
 				[ 'postal_code', 'Postal code', false, 'Leave blank if the property does not use one.' ],
 				[ 'card_short_description', 'Villa map card location line', false, 'Example: Sugar Hill Resort, St. James.' ],
 		],
@@ -176,7 +176,7 @@ const tableSheets = [
 			intro: 'Add one row per rate period. Use DD MMM YYYY dates, for example 10 Jan 2026, and USD rates with the $ symbol.',
 			rows: 15,
 			columns: [
-				[ 'rate_label', 'Rate label', false, 'Optional. Example: 3 bedroom rate, 4 bedroom rate, Festive, or Winter.' ],
+				[ 'rate_label', 'Rate label', false, 'Optional. Example: 3 Bedrooms, 4 Bedrooms, Festive, or Winter.' ],
 				[ 'start_date', 'Start date', true, 'Use DD MMM YYYY, for example 10 Jan 2026.', 'date' ],
 				[ 'end_date', 'End date', true, 'Use DD MMM YYYY, for example 14 Dec 2026.', 'date' ],
 				[ 'nightly_rate_usd', 'Nightly rate (USD)', true, 'Include the $ symbol, for example $2,000. USD only.', 'currency' ],

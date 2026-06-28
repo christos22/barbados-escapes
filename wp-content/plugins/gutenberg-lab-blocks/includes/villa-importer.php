@@ -34,6 +34,38 @@ function gutenberg_lab_blocks_villa_importer_text( $value ) {
 }
 
 /**
+ * Extracts one or more iCal/feed URLs from a client-facing workbook cell.
+ *
+ * @param mixed $value Raw workbook value.
+ * @return array<int, string>
+ */
+function gutenberg_lab_blocks_villa_importer_extract_feed_urls( $value ) {
+	$text = gutenberg_lab_blocks_villa_importer_text( $value );
+
+	if ( '' === $text ) {
+		return array();
+	}
+
+	preg_match_all( '/\b(?:https?|webcal):\/\/[^\s<>"\']+/i', $text, $matches );
+
+	if ( empty( $matches[0] ) ) {
+		return array();
+	}
+
+	$urls = array();
+
+	foreach ( $matches[0] as $raw_url ) {
+		$url = rtrim( $raw_url, ".,;)" );
+
+		if ( '' !== $url ) {
+			$urls[] = $url;
+		}
+	}
+
+	return array_values( array_unique( $urls ) );
+}
+
+/**
  * Normalizes a client Yes/No value to a boolean.
  *
  * @param mixed $value Raw workbook value.
@@ -4004,6 +4036,7 @@ class Gutenberg_Lab_Blocks_Villa_Import_Command {
 			$data['related_villas'] ?? array(),
 			$update_id
 		);
+		$ical_feed_urls = gutenberg_lab_blocks_villa_importer_extract_feed_urls( $overview['ical_link'] ?? '' );
 		$warnings = array_merge(
 			(array) ( $data['warnings'] ?? array() ),
 			$related['warnings']
@@ -4047,9 +4080,16 @@ class Gutenberg_Lab_Blocks_Villa_Import_Command {
 		$warnings[] = $source_post instanceof WP_Post
 			? 'Featured image and source placeholder gallery media still need to be reviewed or replaced.'
 			: 'Featured image and gallery media still need to be assigned.';
-		$warnings[] = ! empty( $overview['ical_link'] )
-			? 'iCal link supplied; importer will store it as an availability feed. Sync and review the calendar after import.'
-			: 'Availability calendar feeds still need to be configured.';
+		if ( empty( $ical_feed_urls ) ) {
+			$warnings[] = 'Availability calendar feeds still need to be configured.';
+		} elseif ( 1 === count( $ical_feed_urls ) ) {
+			$warnings[] = 'iCal link supplied; importer will store it as an availability feed. Sync and review the calendar after import.';
+		} else {
+			$warnings[] = sprintf(
+				'iCal links supplied; importer will store %d availability feeds. Sync and review the calendar after import.',
+				count( $ical_feed_urls )
+			);
+		}
 		if ( $source_post instanceof WP_Post ) {
 			$warnings[] = 'After villa-specific media work starts, continue in WordPress instead of re-running the importer over the same draft.';
 		}
@@ -4136,18 +4176,20 @@ class Gutenberg_Lab_Blocks_Villa_Import_Command {
 			delete_post_meta( $post_id, '_gutenberg_lab_villa_import_source_villa' );
 		}
 
-		if (
-			! empty( $overview['ical_link'] ) &&
-			function_exists( 'gutenberg_lab_blocks_update_villa_availability_meta' )
-		) {
+		if ( ! empty( $ical_feed_urls ) && function_exists( 'gutenberg_lab_blocks_update_villa_availability_meta' ) ) {
+			$ical_feed_count = count( $ical_feed_urls );
+			$ical_feeds      = array();
+
+			foreach ( $ical_feed_urls as $index => $ical_feed_url ) {
+				$ical_feeds[] = array(
+					'label' => $ical_feed_count > 1 ? sprintf( '%s feed %d', $title, $index + 1 ) : $title,
+					'url'   => $ical_feed_url,
+				);
+			}
+
 			gutenberg_lab_blocks_update_villa_availability_meta(
 				$post_id,
-				array(
-					array(
-						'label' => $title,
-						'url'   => $overview['ical_link'],
-					),
-				),
+				$ical_feeds,
 				array(),
 				0
 			);

@@ -2249,14 +2249,23 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-staff.wp-block-columns {
 	align-items: stretch;
+	flex-wrap: wrap !important;
 	gap: var(--wp--preset--spacing--sm, 1rem);
+	justify-content: flex-start;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-staff.wp-block-columns > .wp-block-column {
 	box-sizing: border-box;
-	flex-basis: 0 !important;
+	flex-basis: min(100%, 13rem) !important;
 	flex-grow: 1;
-	min-width: 0;
+	max-inline-size: 18rem;
+	min-inline-size: min(100%, 13rem);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-staff.wp-block-columns > .wp-block-column:first-child {
+	flex-basis: min(100%, 10rem) !important;
+	max-inline-size: 12rem;
+	min-inline-size: min(100%, 10rem);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-staff h5.wp-block-heading {
@@ -2288,6 +2297,8 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-staff.wp-block-columns > .wp-block-column {
 		flex-basis: auto !important;
+		max-inline-size: none;
+		min-inline-size: 0;
 		width: 100%;
 	}
 
