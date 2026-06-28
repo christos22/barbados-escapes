@@ -125,7 +125,7 @@ const tableSheets = [
 		rows: 6,
 		columns: [
 			[ 'place', 'Place', true, 'Example: Holetown.' ],
-			[ 'travel_time', 'Travel time', true, 'Example: 10 minutes by car.' ],
+			[ 'travel_time', 'Travel time', true, 'Example: 10 mins. The importer sorts these from shortest to longest.' ],
 		],
 		widths: [ 38, 32 ],
 	},
@@ -162,10 +162,10 @@ const tableSheets = [
 	{
 		name: 'Amenities',
 		title: 'Amenities',
-		intro: 'Add one amenity per row and group similar items together. Keep in the order you would like to appear on the site.',
+		intro: 'Add one amenity per row. Use Inside the Villa or Outdoor Living; the importer always renders these as two sections.',
 		rows: 35,
 		columns: [
-			[ 'group', 'Amenity group', true, 'Choose a common group or type a clear alternative.', 'amenityGroup' ],
+			[ 'group', 'Amenity group', true, 'Choose Inside the Villa or Outdoor Living. Older custom groups are folded into the nearest section.', 'amenityGroup' ],
 			[ 'item', 'Amenity', true, 'Example: Private swimming pool.' ],
 		],
 		widths: [ 28, 58 ],
@@ -826,10 +826,6 @@ lists.getColumn( 4 ).values = [
 	'Amenity groups',
 	'Inside the Villa',
 	'Outdoor Living',
-	'Resort & Community',
-	'Services & Staff',
-	'Technology & Entertainment',
-	'Family Features',
 ];
 
 const importSheet = workbook.addWorksheet( '_Import' );

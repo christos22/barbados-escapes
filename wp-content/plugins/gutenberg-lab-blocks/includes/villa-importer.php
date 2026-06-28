@@ -1375,6 +1375,56 @@ function gutenberg_lab_blocks_villa_importer_build_hero( $data ) {
 }
 
 /**
+ * Formats a numeric label without noisy trailing zeroes.
+ *
+ * @param float $value Numeric value.
+ * @return string
+ */
+function gutenberg_lab_blocks_villa_importer_number_label( $value ) {
+	return rtrim( rtrim( number_format( (float) $value, 2, '.', '' ), '0' ), '.' );
+}
+
+/**
+ * Converts a nearby travel-time label into minutes for display and sorting.
+ *
+ * @param mixed $value Raw workbook travel time.
+ * @return array{label: string, minutes: float|null}
+ */
+function gutenberg_lab_blocks_villa_importer_nearby_travel_time( $value ) {
+	$text = gutenberg_lab_blocks_villa_importer_text( $value );
+
+	if ( '' === $text ) {
+		return array(
+			'label'   => '',
+			'minutes' => null,
+		);
+	}
+
+	if ( preg_match( '/(\d+(?:\.\d+)?)\s*(hours?|hrs?|hr)\b/i', $text, $matches ) ) {
+		$minutes = (float) $matches[1] * 60;
+
+		return array(
+			'label'   => sprintf( '%s mins', gutenberg_lab_blocks_villa_importer_number_label( $minutes ) ),
+			'minutes' => $minutes,
+		);
+	}
+
+	if ( preg_match( '/(\d+(?:\.\d+)?)/', $text, $matches ) ) {
+		$minutes = (float) $matches[1];
+
+		return array(
+			'label'   => sprintf( '%s mins', gutenberg_lab_blocks_villa_importer_number_label( $minutes ) ),
+			'minutes' => $minutes,
+		);
+	}
+
+	return array(
+		'label'   => preg_replace( '/\bminutes?\b/i', 'mins', $text ),
+		'minutes' => null,
+	);
+}
+
+/**
  * Builds the main story, highlights, nearby, and staff columns.
  *
  * @param array<string, mixed> $data Normalized workbook data.
@@ -1399,9 +1449,47 @@ function gutenberg_lab_blocks_villa_importer_build_story_columns( $data ) {
 		$highlights[] = $highlight['highlight'] ?? '';
 	}
 
-	foreach ( $data['nearby'] as $place ) {
-		$nearby[] = array( $place['place'] ?? '', $place['travel_time'] ?? '' );
+	foreach ( $data['nearby'] as $index => $place ) {
+		$travel_time = gutenberg_lab_blocks_villa_importer_nearby_travel_time( $place['travel_time'] ?? '' );
+
+		$nearby[] = array(
+			'place'   => $place['place'] ?? '',
+			'time'    => $travel_time['label'],
+			'minutes' => $travel_time['minutes'],
+			'index'   => $index,
+		);
 	}
+
+	usort(
+		$nearby,
+		static function ( $a, $b ) {
+			$a_minutes = $a['minutes'];
+			$b_minutes = $b['minutes'];
+
+			if ( null === $a_minutes && null === $b_minutes ) {
+				return $a['index'] <=> $b['index'];
+			}
+
+			if ( null === $a_minutes ) {
+				return 1;
+			}
+
+			if ( null === $b_minutes ) {
+				return -1;
+			}
+
+			return $a_minutes === $b_minutes
+				? $a['index'] <=> $b['index']
+				: $a_minutes <=> $b_minutes;
+		}
+	);
+
+	$nearby = array_map(
+		static function ( $place ) {
+			return array( $place['place'], $place['time'] );
+		},
+		$nearby
+	);
 
 	$left =
 		gutenberg_lab_blocks_villa_importer_heading(
@@ -2107,24 +2195,55 @@ function gutenberg_lab_blocks_villa_importer_amenity_group_meta( $group ) {
 }
 
 /**
+ * Collapses client amenity group labels into the two approved villa sections.
+ *
+ * @param mixed $group Raw workbook group.
+ * @return string Either "indoors" or "outdoors".
+ */
+function gutenberg_lab_blocks_villa_importer_amenity_section_key( $group ) {
+	$group = strtolower( gutenberg_lab_blocks_villa_importer_text( $group ) );
+
+	if ( preg_match( '/\b(indoor|indoors|inside|interior|kitchen|bedroom|bathroom|technology|entertainment|family)\b/', $group ) ) {
+		return 'indoors';
+	}
+
+	return 'outdoors';
+}
+
+/**
  * Builds the Amenities Stack Tab content.
  *
  * @param array<string, mixed> $data Normalized workbook data.
  * @return string
  */
 function gutenberg_lab_blocks_villa_importer_build_amenities_tab( $data ) {
-	$groups = array();
+	$groups = array(
+		'indoors'  => array(
+			'label' => 'Inside the Villa',
+			'items' => array(),
+		),
+		'outdoors' => array(
+			'label' => 'Outdoor Living',
+			'items' => array(),
+		),
+	);
 
 	foreach ( $data['amenities'] as $amenity ) {
-		$group = gutenberg_lab_blocks_villa_importer_text( $amenity['group'] ?? 'Villa Amenities' );
-		$groups[ $group ][] = $amenity;
+		$section_key = gutenberg_lab_blocks_villa_importer_amenity_section_key( $amenity['group'] ?? '' );
+		$groups[ $section_key ]['items'][] = $amenity;
 	}
 
 	$content = '';
+	$card_index = 0;
 
-	foreach ( array_keys( $groups ) as $group_index => $group ) {
-		$amenities = $groups[ $group ];
-		$meta      = gutenberg_lab_blocks_villa_importer_amenity_group_meta( $group );
+	foreach ( $groups as $group ) {
+		$amenities = $group['items'];
+
+		if ( empty( $amenities ) ) {
+			continue;
+		}
+
+		$meta = gutenberg_lab_blocks_villa_importer_amenity_group_meta( $group['label'] );
 		$rows  = '';
 		$index = 1;
 
@@ -2156,9 +2275,10 @@ function gutenberg_lab_blocks_villa_importer_build_amenities_tab( $data ) {
 
 		$card_class = 'vvm-villa-amenities__card';
 
-		if ( 1 === ( $group_index % 2 ) ) {
+		if ( 1 === ( $card_index % 2 ) ) {
 			$card_class .= ' vvm-villa-amenities__card--dark';
 		}
+		$card_index++;
 
 		$content .= gutenberg_lab_blocks_villa_importer_group(
 			gutenberg_lab_blocks_villa_importer_group(
@@ -4066,6 +4186,25 @@ class Gutenberg_Lab_Blocks_Villa_Import_Command {
 			(array) ( $data['warnings'] ?? array() ),
 			$related['warnings']
 		);
+
+		$amenity_sections = array();
+
+		foreach ( $data['amenities'] as $amenity ) {
+			if ( '' === gutenberg_lab_blocks_villa_importer_text( $amenity['item'] ?? '' ) ) {
+				continue;
+			}
+
+			$amenity_sections[ gutenberg_lab_blocks_villa_importer_amenity_section_key( $amenity['group'] ?? '' ) ] = true;
+		}
+
+		if ( empty( $amenity_sections['indoors'] ) ) {
+			$warnings[] = 'Amenities: no Inside the Villa items were supplied; add interior amenities so the tab keeps its approved two-section structure.';
+		}
+
+		if ( empty( $amenity_sections['outdoors'] ) ) {
+			$warnings[] = 'Amenities: no Outdoor Living items were supplied; add outdoor amenities so the tab keeps its approved two-section structure.';
+		}
+
 		$content_warnings = array();
 		$content = gutenberg_lab_blocks_villa_importer_build_content(
 			$data,
