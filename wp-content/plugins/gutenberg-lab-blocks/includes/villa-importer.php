@@ -3161,6 +3161,29 @@ function gutenberg_lab_blocks_villa_importer_source_tabs_block( $data, $source_b
 }
 
 /**
+ * Normalizes cloned perspective columns so theme CSS controls the layout.
+ *
+ * @param array<string, mixed> $attributes Source column attributes.
+ * @param string               $class_name Project column role class.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_blocks_villa_importer_perspective_column_attrs( $attributes, $class_name ) {
+	$attributes = is_array( $attributes ) ? $attributes : array();
+
+	unset( $attributes['width'] );
+
+	$class_name = gutenberg_lab_blocks_villa_importer_classes(
+		( $attributes['className'] ?? '' ) . ' ' . $class_name
+	);
+
+	if ( '' !== $class_name ) {
+		$attributes['className'] = $class_name;
+	}
+
+	return $attributes;
+}
+
+/**
  * Replaces the text column in a cloned perspective section and preserves images.
  *
  * @param array<string, mixed> $source_block Parsed source perspective block.
@@ -3189,13 +3212,36 @@ function gutenberg_lab_blocks_villa_importer_source_perspective_block( $source_b
 
 	$replacement = gutenberg_lab_blocks_villa_importer_core_wrapper_block(
 		'column',
-		$first_col['attrs'] ?? array(),
+		gutenberg_lab_blocks_villa_importer_perspective_column_attrs(
+			$first_col['attrs'] ?? array(),
+			'vvm-villa-perspective__copy'
+		),
 		'wp-block-column',
 		gutenberg_lab_blocks_villa_importer_build_perspective_text( $data )
 	);
 
 	if ( $replacement ) {
 		$columns[0] = $replacement;
+	}
+
+	foreach ( $columns as $index => $column ) {
+		if ( 0 === $index || 'core/column' !== ( $column['blockName'] ?? '' ) ) {
+			continue;
+		}
+
+		$rebuilt_column = gutenberg_lab_blocks_villa_importer_core_wrapper_block(
+			'column',
+			gutenberg_lab_blocks_villa_importer_perspective_column_attrs(
+				$column['attrs'] ?? array(),
+				'vvm-villa-perspective__image'
+			),
+			'wp-block-column',
+			serialize_blocks( $column['innerBlocks'] ?? array() )
+		);
+
+		if ( $rebuilt_column ) {
+			$columns[ $index ] = $rebuilt_column;
+		}
 	}
 
 	return gutenberg_lab_blocks_villa_importer_core_wrapper_block(
