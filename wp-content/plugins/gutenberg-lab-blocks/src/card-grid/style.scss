@@ -4,11 +4,15 @@
 	--vvm-card-grid-gap: var(--wp--preset--spacing--lg);
 	--vvm-card-grid-visible-columns: 1;
 	--vvm-card-grid-card-width: 100%;
+	--vvm-card-grid-card-max-width: 555px;
+	--vvm-card-grid-card-min-width: 500px;
 	--vvm-card-grid-media-ratio-width: 3;
 	--vvm-card-grid-media-ratio-height: 2;
 	--vvm-card-grid-carousel-control-outset: clamp(4.5rem, 10vw, 8rem);
 	--vvm-card-grid-carousel-control-screen-inset: clamp(0.5rem, 1vw, 0.75rem);
 	--vvm-card-grid-carousel-side-reserve: clamp(4rem, 5.5vw, 5rem);
+	--vvm-card-grid-carousel-controls-top: 50%;
+	--vvm-card-grid-carousel-viewport-width: 100%;
 	--vvm-card-grid-carousel-controls-width: min(
 		calc(100vw - (var(--vvm-card-grid-carousel-control-screen-inset) * 2)),
 		calc(100% + (var(--vvm-card-grid-carousel-control-outset) * 2))
@@ -22,7 +26,7 @@
 	}
 
 	.vvm-card-grid__carousel {
-		max-inline-size: min(100%, 1280px);
+		max-inline-size: 100%;
 		margin-inline: auto;
 		position: relative;
 	}
@@ -44,6 +48,8 @@
 	}
 
 	.vvm-card-grid__viewport {
+		width: min(100%, var(--vvm-card-grid-carousel-viewport-width));
+		margin-inline: auto;
 		overflow: hidden;
 	}
 
@@ -224,11 +230,11 @@
 
 		.vvm-card-grid__items > * {
 			/*
-			 * Avoid CSS calc() multiplication here. If the browser rejects the
-			 * value, flex-basis falls back to auto and cards shrink unevenly.
+			 * Keep the CSS fallback capped before JS writes an exact pixel width.
+			 * JS still owns the final value because it can subtract the live gap.
 			 */
-			flex: 0 0 var(--vvm-card-grid-card-width);
-			max-width: var(--vvm-card-grid-card-width);
+			flex: 0 0 min(var(--vvm-card-grid-card-width), var(--vvm-card-grid-card-max-width));
+			max-width: min(var(--vvm-card-grid-card-width), var(--vvm-card-grid-card-max-width));
 		}
 	}
 }
@@ -238,8 +244,7 @@
 		.vvm-card-grid__carousel {
 			max-inline-size: min(
 				100%,
-				calc(100vw - (var(--vvm-card-grid-carousel-side-reserve) * 2)),
-				1280px
+				calc(100vw - (var(--vvm-card-grid-carousel-side-reserve) * 2))
 			);
 		}
 	}
@@ -273,7 +278,6 @@
 .wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-collection.vvm-card-grid--source-villas {
 	--vvm-card-grid-card-gap: 1.25rem;
 	--vvm-card-grid-card-padding: 2.5rem;
-	--vvm-card-grid-card-max-width: 400px;
 
 	.vvm-card-grid__items {
 		gap: var(--vvm-card-grid-gap);
@@ -285,6 +289,11 @@
 		max-inline-size: var(--vvm-card-grid-card-max-width);
 		background: var(--wp--preset--color--white, #ffffff);
 		box-shadow: 0 18px 50px rgb(30 61 47 / 0.06);
+	}
+
+	&.vvm-card-grid--display-carousel .vvm-card-grid__card--villa {
+		// Carousel JS writes the exact flex-basis, so the shared 555px cap is enough here.
+		max-inline-size: none;
 	}
 
 	.vvm-card-grid__card-media {
@@ -379,6 +388,11 @@
 @media (max-width: 781px) {
 	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-collection.vvm-card-grid--source-villas {
 		--vvm-card-grid-card-padding: 1.5rem;
+
+		.vvm-card-grid__carousel-controls.vvm-slider-controls--preset-center {
+			// On narrow screens, keep arrows on the media/content boundary so they do not cover villa copy.
+			top: var(--vvm-card-grid-carousel-controls-top);
+		}
 	}
 }
 
