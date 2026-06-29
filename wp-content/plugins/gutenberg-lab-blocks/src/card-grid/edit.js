@@ -114,6 +114,9 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 		contentSource,
 		selectedVillaIds = [],
 		villaPresentation,
+		showVillaDescription = true,
+		showVillaDetails = true,
+		showVillaPrice = true,
 		columns,
 		enableCarousel,
 		mediaRatio,
@@ -423,6 +426,54 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 									} )
 								}
 								help={ presentationHelp[ villaPresentation ] }
+							/>
+							<ToggleControl
+								label={ __(
+									'Show villa description',
+									'gutenberg-lab-blocks'
+								) }
+								checked={ showVillaDescription }
+								onChange={ ( value ) =>
+									setAttributes( {
+										showVillaDescription: value,
+									} )
+								}
+								help={ __(
+									'Hides the card summary text when switched off.',
+									'gutenberg-lab-blocks'
+								) }
+							/>
+							<ToggleControl
+								label={ __(
+									'Show villa details',
+									'gutenberg-lab-blocks'
+								) }
+								checked={ showVillaDetails }
+								onChange={ ( value ) =>
+									setAttributes( {
+										showVillaDetails: value,
+									} )
+								}
+								help={ __(
+									'Hides the bedrooms and bathrooms line when switched off.',
+									'gutenberg-lab-blocks'
+								) }
+							/>
+							<ToggleControl
+								label={ __(
+									'Show villa price',
+									'gutenberg-lab-blocks'
+								) }
+								checked={ showVillaPrice }
+								onChange={ ( value ) =>
+									setAttributes( {
+										showVillaPrice: value,
+									} )
+								}
+								help={ __(
+									'Hides the nightly price line when switched off.',
+									'gutenberg-lab-blocks'
+								) }
 							/>
 						</>
 					) : null }

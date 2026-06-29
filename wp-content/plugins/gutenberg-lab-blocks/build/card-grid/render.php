@@ -39,16 +39,22 @@ if ( ! function_exists( 'gutenberg_lab_card_grid_resolve_block_gap_value' ) ) {
 	}
 }
 
-$content_source     = 'villas' === ( $attributes['contentSource'] ?? 'manual' ) ? 'villas' : 'manual';
-$selected_villa_ids = isset( $attributes['selectedVillaIds'] ) && is_array( $attributes['selectedVillaIds'] )
+$content_source          = 'villas' === ( $attributes['contentSource'] ?? 'manual' ) ? 'villas' : 'manual';
+$selected_villa_ids      = isset( $attributes['selectedVillaIds'] ) && is_array( $attributes['selectedVillaIds'] )
 	? array_values( array_unique( array_filter( array_map( 'absint', $attributes['selectedVillaIds'] ) ) ) )
 	: array();
-$villa_presentation = $attributes['villaPresentation'] ?? 'cinematic';
-$columns            = $attributes['columns'] ?? '2';
-$is_villa_cinematic = 'villas' === $content_source && 'cinematic' === $villa_presentation;
-$enable_carousel    = ! empty( $attributes['enableCarousel'] );
-$media_ratio        = $attributes['mediaRatio'] ?? 'landscape';
-$block_gap          = $attributes['style']['spacing']['blockGap'] ?? '';
+$villa_presentation      = $attributes['villaPresentation'] ?? 'cinematic';
+$columns                 = $attributes['columns'] ?? '2';
+$is_villa_cinematic      = 'villas' === $content_source && 'cinematic' === $villa_presentation;
+$show_villa_description  = ! array_key_exists( 'showVillaDescription', $attributes ) ||
+	! empty( $attributes['showVillaDescription'] );
+$show_villa_details      = ! array_key_exists( 'showVillaDetails', $attributes ) ||
+	! empty( $attributes['showVillaDetails'] );
+$show_villa_price        = ! array_key_exists( 'showVillaPrice', $attributes ) ||
+	! empty( $attributes['showVillaPrice'] );
+$enable_carousel         = ! empty( $attributes['enableCarousel'] );
+$media_ratio             = $attributes['mediaRatio'] ?? 'landscape';
+$block_gap               = $attributes['style']['spacing']['blockGap'] ?? '';
 
 $allowed_columns = array( '2', '3' );
 $allowed_villa_presentations = array(
@@ -118,6 +124,9 @@ if ( 'villas' === $content_source ) {
 							? __( 'Enquire', 'gutenberg-lab-blocks' )
 							: '',
 						'presentation'       => $villa_presentation,
+						'show_description'   => $show_villa_description,
+						'show_details'       => $show_villa_details,
+						'show_price'         => $show_villa_price,
 					)
 				);
 			}

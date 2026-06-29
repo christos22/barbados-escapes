@@ -29,6 +29,18 @@
       "type": "string",
       "default": "cinematic"
     },
+    "showVillaDescription": {
+      "type": "boolean",
+      "default": true
+    },
+    "showVillaDetails": {
+      "type": "boolean",
+      "default": true
+    },
+    "showVillaPrice": {
+      "type": "boolean",
+      "default": true
+    },
     "columns": {
       "type": "string",
       "default": "2"

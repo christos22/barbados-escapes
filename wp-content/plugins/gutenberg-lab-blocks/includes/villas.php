@@ -1627,6 +1627,9 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		array(
 			'cta_label_override' => '',
 			'presentation'       => 'standard',
+			'show_description'   => true,
+			'show_details'       => true,
+			'show_price'         => true,
 		)
 	);
 
@@ -1639,6 +1642,15 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 	if ( 'collection' === $args['presentation'] ) {
 		$villa_data['cta']['label'] = __( 'Explore villa', 'gutenberg-lab-blocks' );
 	}
+
+	$show_description = ! empty( $args['show_description'] );
+	$show_details     = ! empty( $args['show_details'] );
+	$show_price       = ! empty( $args['show_price'] );
+	$has_card_meta    = 'collection' === $args['presentation'] &&
+		(
+			( $show_details && '' !== $villa_data['facts'] ) ||
+			( $show_price && '' !== $villa_data['price'] )
+		);
 
 	$card_image_size  = 'collection' === $args['presentation']
 		? 'medium_large'
@@ -1694,19 +1706,19 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 				</a>
 			</h3>
 
-			<?php if ( 'collection' === $args['presentation'] && '' !== $villa_data['descriptor'] ) : ?>
+			<?php if ( $show_description && 'collection' === $args['presentation'] && '' !== $villa_data['descriptor'] ) : ?>
 				<p class="vvm-card-grid__card-descriptor"><?php echo esc_html( $villa_data['descriptor'] ); ?></p>
-			<?php elseif ( '' !== $villa_data['excerpt'] ) : ?>
+			<?php elseif ( $show_description && '' !== $villa_data['excerpt'] ) : ?>
 				<p><?php echo esc_html( $villa_data['excerpt'] ); ?></p>
 			<?php endif; ?>
 
-			<?php if ( 'collection' === $args['presentation'] && ( '' !== $villa_data['facts'] || '' !== $villa_data['price'] ) ) : ?>
+			<?php if ( $has_card_meta ) : ?>
 				<div class="vvm-card-grid__card-meta">
-					<?php if ( '' !== $villa_data['facts'] ) : ?>
+					<?php if ( $show_details && '' !== $villa_data['facts'] ) : ?>
 						<p class="vvm-card-grid__card-facts"><strong><?php echo esc_html( $villa_data['facts'] ); ?></strong></p>
 					<?php endif; ?>
 
-					<?php if ( '' !== $villa_data['price'] ) : ?>
+					<?php if ( $show_price && '' !== $villa_data['price'] ) : ?>
 						<p class="vvm-card-grid__card-price"><strong><?php echo esc_html( $villa_data['price'] ); ?></strong></p>
 					<?php endif; ?>
 				</div>
