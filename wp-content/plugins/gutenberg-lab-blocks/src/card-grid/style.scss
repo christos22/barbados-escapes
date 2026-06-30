@@ -262,13 +262,19 @@
 	}
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 1024px) {
 	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid {
-		&.vvm-card-grid--columns-3 {
-			--vvm-card-grid-visible-columns: 3;
-			--vvm-card-grid-card-width: 33.333333%;
+		--vvm-card-grid-card-max-width: 9999px;
+		--vvm-card-grid-card-min-width: 0px;
+		--vvm-card-grid-carousel-side-reserve: 0px;
+		--vvm-card-grid-visible-columns: 3;
+		--vvm-card-grid-card-width: 33.333333%;
+
+		&.vvm-card-grid--display-carousel .vvm-card-grid__carousel {
+			max-inline-size: 100%;
 		}
 
+		&.vvm-card-grid--columns-2 .vvm-card-grid__items,
 		&.vvm-card-grid--columns-3 .vvm-card-grid__items {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
