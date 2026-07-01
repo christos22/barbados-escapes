@@ -307,20 +307,20 @@
 		filter: saturate(1.04) contrast(1.03);
 	}
 
-	.vvm-card-grid__card-content {
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content {
 		gap: var(--vvm-card-grid-card-gap);
 		padding: var(--vvm-card-grid-card-padding);
 	}
 
-	.vvm-card-grid__card-eyebrow,
-	.vvm-card-grid__card-descriptor,
-	.vvm-card-grid__card-meta,
-	.vvm-card-grid__card-facts,
-	.vvm-card-grid__card-price {
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content > .vvm-card-grid__card-eyebrow,
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content > .vvm-card-grid__card-descriptor,
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content > .vvm-card-grid__card-meta,
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content .vvm-card-grid__card-facts,
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content .vvm-card-grid__card-price {
 		font-family: var(--wp--preset--font-family--refined-sans);
 	}
 
-	.vvm-card-grid__card-eyebrow {
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content > .vvm-card-grid__card-eyebrow {
 		color: var(--wp--preset--color--gold, #c4922a);
 		font-size: var(--wp--preset--font-size--xs);
 		letter-spacing: 0.34em;
@@ -328,17 +328,17 @@
 		text-transform: uppercase;
 	}
 
-	.vvm-card-grid__card-content .wp-block-heading {
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content > .wp-block-heading {
 		color: var(--wp--preset--color--dark-green, #1e3d2f);
 	}
 
-	.vvm-card-grid__card-descriptor {
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content > .vvm-card-grid__card-descriptor {
 		color: inherit;
 		font-size: var(--wp--preset--font-size--md);
 		line-height: 1.6;
 	}
 
-	.vvm-card-grid__card-meta {
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content > .vvm-card-grid__card-meta {
 		display: grid;
 		gap: 0;
 		color: var(--wp--preset--color--dark-green, #1e3d2f);
@@ -346,18 +346,21 @@
 		line-height: 1.6;
 	}
 
-	.vvm-card-grid__card-meta > * {
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content > .vvm-card-grid__card-meta > * {
 		margin: 0;
 	}
 
-	.vvm-card-grid__card-facts,
-	.vvm-card-grid__card-price {
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content .vvm-card-grid__card-facts,
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content .vvm-card-grid__card-price {
 		color: inherit;
 		font-size: inherit;
 		line-height: inherit;
 	}
 
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link {
+	.vvm-card-grid__card--villa
+		> .vvm-card-grid__card-content
+		.wp-block-button.is-style-vvm-ghost
+		.wp-block-button__link {
 		display: inline-flex;
 		min-block-size: auto;
 		padding: 0;
@@ -376,13 +379,25 @@
 		transition: color 200ms ease;
 	}
 
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link::before,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link::after {
+	.vvm-card-grid__card--villa
+		> .vvm-card-grid__card-content
+		.wp-block-button.is-style-vvm-ghost
+		.wp-block-button__link::before,
+	.vvm-card-grid__card--villa
+		> .vvm-card-grid__card-content
+		.wp-block-button.is-style-vvm-ghost
+		.wp-block-button__link::after {
 		content: none;
 	}
 
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link:hover,
-	.vvm-card-grid__card-content .wp-block-button.is-style-vvm-ghost .wp-block-button__link:focus-visible {
+	.vvm-card-grid__card--villa
+		> .vvm-card-grid__card-content
+		.wp-block-button.is-style-vvm-ghost
+		.wp-block-button__link:hover,
+	.vvm-card-grid__card--villa
+		> .vvm-card-grid__card-content
+		.wp-block-button.is-style-vvm-ghost
+		.wp-block-button__link:focus-visible {
 		color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
 	}
 }
