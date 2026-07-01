@@ -585,6 +585,96 @@ function gutenberg_lab_blocks_villa_importer_find_supporting_image_id( $villa_na
 }
 
 /**
+ * Finds a safe fallback image when a new villa has no matched media yet.
+ *
+ * Imports should keep the intended layout intact even before the final villa
+ * photography has been selected. We prefer reasonably large landscape images
+ * because the House Rules media card crops them vertically.
+ *
+ * @return int Attachment ID or 0.
+ */
+function gutenberg_lab_blocks_villa_importer_find_placeholder_image_id() {
+	$attachments = get_posts(
+		array(
+			'post_type'      => 'attachment',
+			'post_mime_type' => 'image',
+			'post_status'    => 'inherit',
+			'posts_per_page' => 50,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			'fields'         => 'ids',
+		)
+	);
+
+	if ( empty( $attachments ) ) {
+		return 0;
+	}
+
+	$fallback_id = absint( $attachments[0] );
+
+	foreach ( $attachments as $attachment_id ) {
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$width    = absint( $metadata['width'] ?? 0 );
+		$height   = absint( $metadata['height'] ?? 0 );
+
+		if ( $width >= 700 && $height >= 500 ) {
+			return absint( $attachment_id );
+		}
+	}
+
+	return $fallback_id;
+}
+
+/**
+ * Returns the first core/image attachment ID found inside a parsed block tree.
+ *
+ * @param array<string, mixed> $block Parsed block.
+ * @return int Attachment ID or 0.
+ */
+function gutenberg_lab_blocks_villa_importer_first_image_id_in_block( $block ) {
+	if ( 'core/image' === ( $block['blockName'] ?? '' ) && ! empty( $block['attrs']['id'] ) ) {
+		return absint( $block['attrs']['id'] );
+	}
+
+	foreach ( $block['innerBlocks'] ?? array() as $inner_block ) {
+		$image_id = gutenberg_lab_blocks_villa_importer_first_image_id_in_block( $inner_block );
+
+		if ( $image_id ) {
+			return $image_id;
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Extracts an existing House Rules image from the cloned source tab.
+ *
+ * This keeps the layout complete during import even if the workbook has no
+ * media decision yet. Editors can then swap the placeholder in the normal way.
+ *
+ * @param array<string, mixed> $block Parsed source block.
+ * @return int Attachment ID or 0.
+ */
+function gutenberg_lab_blocks_villa_importer_collect_rules_image_id( $block ) {
+	$label = strtolower( gutenberg_lab_blocks_villa_importer_text( $block['attrs']['label'] ?? '' ) );
+
+	if ( 'gutenberg-lab-blocks/stack-tab' === ( $block['blockName'] ?? '' ) && 'house rules' === $label ) {
+		return gutenberg_lab_blocks_villa_importer_first_image_id_in_block( $block );
+	}
+
+	foreach ( $block['innerBlocks'] ?? array() as $inner_block ) {
+		$image_id = gutenberg_lab_blocks_villa_importer_collect_rules_image_id( $inner_block );
+
+		if ( $image_id ) {
+			return $image_id;
+		}
+	}
+
+	return 0;
+}
+
+/**
  * Builds a native columns wrapper.
  *
  * @param array<int, string>                $columns Serialized column contents.
@@ -2326,16 +2416,26 @@ function gutenberg_lab_blocks_villa_importer_build_amenities_tab( $data ) {
  * Builds the House Rules Stack Tab content.
  *
  * @param array<string, mixed> $data Normalized workbook data.
+ * @param int                  $fallback_image_id Optional source/scaffold image.
  * @return string
  */
-function gutenberg_lab_blocks_villa_importer_build_rules_tab( $data ) {
-	$rows      = '';
-	$overview  = $data['overview'] ?? array();
-	$image_id  = gutenberg_lab_blocks_villa_importer_find_supporting_image_id(
+function gutenberg_lab_blocks_villa_importer_build_rules_tab( $data, $fallback_image_id = 0 ) {
+	$rows     = '';
+	$overview = $data['overview'] ?? array();
+	$image_id = gutenberg_lab_blocks_villa_importer_find_supporting_image_id(
 		$overview['villa_name'] ?? '',
 		array( 'gazebo', 'garden', 'terrace', 'pool', 'outside' )
 	);
-	$image     = gutenberg_lab_blocks_villa_importer_image( $image_id );
+
+	if ( ! $image_id ) {
+		$image_id = absint( $fallback_image_id );
+	}
+
+	if ( ! $image_id ) {
+		$image_id = gutenberg_lab_blocks_villa_importer_find_placeholder_image_id();
+	}
+
+	$image = gutenberg_lab_blocks_villa_importer_image( $image_id );
 
 	foreach ( $data['rules'] as $rule ) {
 		$label   = gutenberg_lab_blocks_villa_importer_text( $rule['rule'] ?? '' );
@@ -2379,7 +2479,7 @@ function gutenberg_lab_blocks_villa_importer_build_rules_tab( $data ) {
 	if ( '' !== $image ) {
 		$content_card .= gutenberg_lab_blocks_villa_importer_group(
 			$image,
-			array( 'className' => 'vvm-villa-amenities__card' )
+			array( 'className' => 'vvm-villa-amenities__card vvm-villa-rules__media-card' )
 		);
 	}
 
@@ -2450,13 +2550,14 @@ function gutenberg_lab_blocks_villa_importer_build_reviews_tab( $data ) {
  * Builds the complete Stack Tabs section.
  *
  * @param array<string, mixed> $data Normalized workbook data.
+ * @param int                  $rules_image_id Optional House Rules image.
  * @return string
  */
-function gutenberg_lab_blocks_villa_importer_build_tabs( $data ) {
+function gutenberg_lab_blocks_villa_importer_build_tabs( $data, $rules_image_id = 0 ) {
 	$tabs =
 		gutenberg_lab_blocks_villa_importer_build_bedrooms_tab( $data ) .
 		gutenberg_lab_blocks_villa_importer_build_amenities_tab( $data ) .
-		gutenberg_lab_blocks_villa_importer_build_rules_tab( $data ) .
+		gutenberg_lab_blocks_villa_importer_build_rules_tab( $data, $rules_image_id ) .
 		gutenberg_lab_blocks_villa_importer_build_reviews_tab( $data );
 
 	return gutenberg_lab_blocks_villa_importer_block(
@@ -3131,7 +3232,7 @@ function gutenberg_lab_blocks_villa_importer_apply_carousel_media( $block, $medi
 }
 
 /**
- * Builds Stack Tabs and borrows source bedroom carousel images as placeholders.
+ * Builds Stack Tabs and borrows source media as placeholders.
  *
  * @param array<string, mixed> $data Normalized workbook data.
  * @param array<string, mixed> $source_block Parsed source Stack Tabs block.
@@ -3139,10 +3240,11 @@ function gutenberg_lab_blocks_villa_importer_apply_carousel_media( $block, $medi
  * @return array<string, mixed>|null
  */
 function gutenberg_lab_blocks_villa_importer_source_tabs_block( $data, $source_block, &$warnings ) {
-	$tabs  = gutenberg_lab_blocks_villa_importer_first_import_block(
-		gutenberg_lab_blocks_villa_importer_build_tabs( $data )
+	$rules_image_id = gutenberg_lab_blocks_villa_importer_collect_rules_image_id( $source_block );
+	$tabs           = gutenberg_lab_blocks_villa_importer_first_import_block(
+		gutenberg_lab_blocks_villa_importer_build_tabs( $data, $rules_image_id )
 	);
-	$media = gutenberg_lab_blocks_villa_importer_collect_carousel_media( $source_block );
+	$media          = gutenberg_lab_blocks_villa_importer_collect_carousel_media( $source_block );
 
 	if ( ! $tabs ) {
 		return null;
