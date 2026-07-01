@@ -6,6 +6,7 @@
 	--vvm-card-grid-card-width: 100%;
 	--vvm-card-grid-card-max-width: 555px;
 	--vvm-card-grid-card-min-width: 500px;
+	--vvm-card-grid-wide-width: 1280px;
 	--vvm-card-grid-media-ratio-width: 3;
 	--vvm-card-grid-media-ratio-height: 2;
 	--vvm-card-grid-carousel-control-outset: clamp(4.5rem, 10vw, 8rem);
@@ -242,10 +243,9 @@
 @media (min-width: 900px) {
 	.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--display-carousel {
 		.vvm-card-grid__carousel {
-			max-inline-size: min(
-				100%,
-				calc(100vw - (var(--vvm-card-grid-carousel-side-reserve) * 2))
-			);
+			// Match the normal alignwide card grid width. The controls can
+			// protrude outside this box, but carousel mode should not resize cards.
+			max-inline-size: min(100%, var(--vvm-card-grid-wide-width));
 		}
 	}
 }
@@ -271,7 +271,7 @@
 		--vvm-card-grid-card-width: 33.333333%;
 
 		&.vvm-card-grid--display-carousel .vvm-card-grid__carousel {
-			max-inline-size: 100%;
+			max-inline-size: min(100%, var(--vvm-card-grid-wide-width));
 		}
 
 		&.vvm-card-grid--columns-2 .vvm-card-grid__items,
@@ -282,9 +282,6 @@
 }
 
 .wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-collection.vvm-card-grid--source-villas {
-	--vvm-card-grid-card-gap: 1.25rem;
-	--vvm-card-grid-card-padding: 2.5rem;
-
 	.vvm-card-grid__items {
 		gap: var(--vvm-card-grid-gap);
 		justify-items: center;
@@ -294,7 +291,6 @@
 		width: 100%;
 		max-inline-size: var(--vvm-card-grid-card-max-width);
 		background: var(--wp--preset--color--white, #ffffff);
-		box-shadow: 0 18px 50px rgb(30 61 47 / 0.06);
 	}
 
 	&.vvm-card-grid--display-carousel .vvm-card-grid__card--villa {
@@ -312,7 +308,7 @@
 	}
 
 	.vvm-card-grid__card-content {
-		gap: 1.25rem;
+		gap: var(--vvm-card-grid-card-gap);
 		padding: var(--vvm-card-grid-card-padding);
 	}
 
@@ -328,7 +324,7 @@
 		color: var(--wp--preset--color--gold, #c4922a);
 		font-size: var(--wp--preset--font-size--xs);
 		letter-spacing: 0.34em;
-		line-height: 1.4;
+		line-height: 1.3334;
 		text-transform: uppercase;
 	}
 
@@ -337,9 +333,9 @@
 	}
 
 	.vvm-card-grid__card-descriptor {
-		color: rgb(30 61 47 / 0.72);
-		font-size: var(--wp--preset--font-size--lg);
-		line-height: 1.45;
+		color: inherit;
+		font-size: var(--wp--preset--font-size--md);
+		line-height: 1.6;
 	}
 
 	.vvm-card-grid__card-meta {
@@ -347,7 +343,7 @@
 		gap: 0;
 		color: var(--wp--preset--color--dark-green, #1e3d2f);
 		font-size: var(--wp--preset--font-size--md);
-		line-height: 1.35;
+		line-height: 1.6;
 	}
 
 	.vvm-card-grid__card-meta > * {
