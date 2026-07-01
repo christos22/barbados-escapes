@@ -53,6 +53,7 @@ $show_villa_details      = ! array_key_exists( 'showVillaDetails', $attributes )
 $show_villa_price        = ! array_key_exists( 'showVillaPrice', $attributes ) ||
 	! empty( $attributes['showVillaPrice'] );
 $enable_carousel         = ! empty( $attributes['enableCarousel'] );
+$stretch_to_edges        = ! $is_villa_cinematic && ! empty( $attributes['stretchToEdges'] );
 $media_ratio             = $attributes['mediaRatio'] ?? 'landscape';
 $block_gap               = $attributes['style']['spacing']['blockGap'] ?? '';
 
@@ -173,6 +174,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 				'vvm-card-grid',
 				$is_villa_cinematic ? 'alignfull' : '',
 				$enable_carousel ? 'vvm-card-grid--carousel-enabled' : '',
+				$stretch_to_edges ? 'vvm-card-grid--stretch-to-edges' : '',
 				$use_carousel ? 'vvm-card-grid--display-carousel' : 'vvm-card-grid--display-grid',
 				'vvm-card-grid--source-' . sanitize_html_class( $content_source ),
 				'villas' === $content_source ? 'vvm-card-grid--villa-presentation-' . sanitize_html_class( $villa_presentation ) : '',

@@ -175,6 +175,17 @@
 		padding-inline: var(--wp--custom--layout--gutter-current, 20px);
 	}
 
+	&.vvm-card-grid--stretch-to-edges {
+		/*
+		 * This opt-in layout keeps Monkey Hill as the default, while allowing
+		 * homepage-style grids to use the full page measure.
+		 */
+		box-sizing: border-box;
+		max-inline-size: none;
+		margin-inline: calc(0px - var(--wp--custom--layout--gutter-current, 20px)) !important;
+		padding-inline: var(--wp--custom--layout--gutter-current, 20px);
+	}
+
 	&.vvm-card-grid--ratio-landscape .vvm-card-grid__card-media {
 		aspect-ratio: 3 / 2;
 	}
@@ -236,6 +247,12 @@
 			 */
 			flex: 0 0 min(var(--vvm-card-grid-card-width), var(--vvm-card-grid-card-max-width));
 			max-width: min(var(--vvm-card-grid-card-width), var(--vvm-card-grid-card-max-width));
+		}
+	}
+
+	&.vvm-card-grid--stretch-to-edges.vvm-card-grid--display-carousel {
+		.vvm-card-grid__carousel {
+			max-inline-size: 100%;
 		}
 	}
 }

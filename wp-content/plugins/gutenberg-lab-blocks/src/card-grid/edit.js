@@ -119,6 +119,7 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 		showVillaPrice = true,
 		columns,
 		enableCarousel,
+		stretchToEdges = false,
 		mediaRatio,
 		style,
 	} = attributes;
@@ -196,6 +197,7 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 			'vvm-card-grid',
 			isVillaCinematicStyle ? 'alignfull' : '',
 			enableCarousel ? 'vvm-card-grid--carousel-enabled' : '',
+			stretchToEdges ? 'vvm-card-grid--stretch-to-edges' : '',
 			`vvm-card-grid--source-${ contentSource }`,
 			'villas' === contentSource
 				? `vvm-card-grid--villa-presentation-${ villaPresentation }`
@@ -514,6 +516,33 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 								  )
 								: __(
 										'When enabled, the front end stays a grid until the number of cards exceeds the selected columns.',
+										'gutenberg-lab-blocks'
+								  )
+							}
+						/>
+					<ToggleControl
+						label={ __(
+							'Stretch cards to page edges',
+							'gutenberg-lab-blocks'
+						) }
+						checked={ stretchToEdges }
+						onChange={ ( value ) =>
+							setAttributes( { stretchToEdges: value } )
+						}
+						disabled={ isVillaCinematicStyle }
+						help={
+							isVillaCinematicStyle
+								? __(
+										'The Villa Cinematic variation uses its own full-width editorial layout.',
+										'gutenberg-lab-blocks'
+								  )
+								: stretchToEdges
+								? __(
+										'Cards fill the available page width. Use this for homepage-style wide carousels.',
+										'gutenberg-lab-blocks'
+								  )
+								: __(
+										'Cards use the standard centered width, matching the Monkey Hill card grid.',
 										'gutenberg-lab-blocks'
 								  )
 						}
