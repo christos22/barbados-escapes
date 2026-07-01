@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.52
+Version: 0.1.53
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -1303,6 +1303,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	display: grid;
 	width: 100%;
 	max-width: none;
+	min-height: 0;
 	min-width: 0;
 	margin-block-start: 0;
 	padding: 0 !important;
@@ -1325,6 +1326,25 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	height: 100%;
 	max-width: none;
 	object-fit: cover;
+}
+
+@media (min-width: 901px) {
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules > .wp-block-group > :where(.vvm-villa-amenities__card, .wp-block-group):has(> .wp-block-image) {
+		overflow: hidden;
+		position: relative;
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules > .wp-block-group > :where(.vvm-villa-amenities__card, .wp-block-group):has(> .wp-block-image) > .wp-block-image {
+		inset: 0;
+		position: absolute;
+	}
+}
+
+@media (max-width: 900px) {
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules > .wp-block-group > :where(.vvm-villa-amenities__card, .wp-block-group):has(> .wp-block-image) > .wp-block-image,
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules > .wp-block-group > :where(.vvm-villa-amenities__card, .wp-block-group):has(> .wp-block-image) > .wp-block-image img {
+		height: auto;
+	}
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-rules__list {
