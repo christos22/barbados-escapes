@@ -45,6 +45,27 @@
     "booking_terms_2": "Christmas and New Year Pricing Information: Bookings over the Christmas and New Year period tend to have stricter payment terms and higher room rates than at other times of year. Typically bookings are subject to a 14 night minimum stay.",
     "booking_terms_3": "All prices quoted above have been calculated based on information provided by the owners but are subject to confirmation during December and January."
   },
+  "bedroom_copy": {
+    "layout_heading": "Eight beautifully appointed rooms across the main house and private cottage.",
+    "layout_description": "Six en-suite rooms sit within the main residence, while two additional bedrooms in the private guest cottage create a more flexible and beautifully balanced layout for families, friends, and extended stays.",
+    "areas": [
+      {
+        "area": "Ground Floor",
+        "display_title": "Ground Floor",
+        "description": "Three rooms placed for easy access to terraces, gardens, and the villa’s main living spaces."
+      },
+      {
+        "area": "First Floor",
+        "display_title": "First Floor",
+        "description": "Three elevated rooms arranged for privacy, views, and easy access across the main house."
+      },
+      {
+        "area": "Private Guest Cottage",
+        "display_title": "Private Guest Cottage",
+        "description": "Two additional bedrooms create a flexible cottage layout for extended family or guests seeking extra privacy."
+      }
+    ]
+  },
   "bedrooms": [
     {
       "area": "Ground Floor",

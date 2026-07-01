@@ -1969,13 +1969,55 @@ function gutenberg_lab_blocks_villa_importer_bedroom_level_intro_copy( $area, $c
 }
 
 /**
+ * Creates a stable lookup key for a bedroom floor/area label.
+ *
+ * @param string $area Bedroom area.
+ * @return string
+ */
+function gutenberg_lab_blocks_villa_importer_bedroom_area_key( $area ) {
+	return sanitize_title( gutenberg_lab_blocks_villa_importer_text( $area ) );
+}
+
+/**
+ * Indexes optional client-written bedroom area copy by floor/area.
+ *
+ * @param array<string, mixed> $bedroom_copy Optional bedroom copy payload.
+ * @return array<string, array<string, mixed>>
+ */
+function gutenberg_lab_blocks_villa_importer_bedroom_area_copy_map( $bedroom_copy ) {
+	$area_copy = array();
+
+	if ( empty( $bedroom_copy['areas'] ) || ! is_array( $bedroom_copy['areas'] ) ) {
+		return $area_copy;
+	}
+
+	foreach ( $bedroom_copy['areas'] as $area_row ) {
+		if ( ! is_array( $area_row ) ) {
+			continue;
+		}
+
+		$key = gutenberg_lab_blocks_villa_importer_bedroom_area_key( $area_row['area'] ?? '' );
+
+		if ( '' === $key ) {
+			continue;
+		}
+
+		$area_copy[ $key ] = $area_row;
+	}
+
+	return $area_copy;
+}
+
+/**
  * Builds the bedroom-level grid used inside the Bedrooms tab.
  *
  * @param array<int, array<string, mixed>> $bedrooms Normalized bedroom rows.
+ * @param array<string, mixed>             $bedroom_copy Optional bedroom intro copy.
  * @return string
  */
-function gutenberg_lab_blocks_villa_importer_build_bedroom_levels( $bedrooms ) {
+function gutenberg_lab_blocks_villa_importer_build_bedroom_levels( $bedrooms, $bedroom_copy = array() ) {
 	$groups = array();
+	$area_copy = gutenberg_lab_blocks_villa_importer_bedroom_area_copy_map( $bedroom_copy );
 
 	foreach ( $bedrooms as $bedroom ) {
 		$area = gutenberg_lab_blocks_villa_importer_text(
@@ -2004,10 +2046,24 @@ function gutenberg_lab_blocks_villa_importer_build_bedroom_levels( $bedrooms ) {
 		$panel_class   = 'vvm-bedroom-levels__panel vvm-bedroom-levels__grid' . ( $is_active ? ' is-active' : '' );
 		$room_count    = count( $rooms );
 		$room_cards    = '';
+		$area_settings = $area_copy[ gutenberg_lab_blocks_villa_importer_bedroom_area_key( $area ) ] ?? array();
+		$display_title = gutenberg_lab_blocks_villa_importer_text( $area_settings['display_title'] ?? '' );
+		$intro_copy    = gutenberg_lab_blocks_villa_importer_text( $area_settings['description'] ?? '' );
 		$room_count_text = sprintf(
 			_n( '%d ROOM', '%d ROOMS', $room_count, 'gutenberg-lab-blocks' ),
 			$room_count
 		);
+
+		if ( '' === $display_title ) {
+			$display_title = $area;
+		}
+
+		if ( '' === $intro_copy ) {
+			$intro_copy = gutenberg_lab_blocks_villa_importer_bedroom_level_intro_copy(
+				$area,
+				$room_count
+			);
+		}
 
 		$nav .= gutenberg_lab_blocks_villa_importer_block(
 			'button',
@@ -2052,15 +2108,12 @@ function gutenberg_lab_blocks_villa_importer_build_bedroom_levels( $bedrooms ) {
 				array( 'className' => 'vvm-bedroom-levels__eyebrow' )
 			) .
 			gutenberg_lab_blocks_villa_importer_heading(
-				$area,
+				$display_title,
 				3,
 				array( 'className' => 'vvm-bedroom-levels__title' )
 			) .
 			gutenberg_lab_blocks_villa_importer_paragraph(
-				gutenberg_lab_blocks_villa_importer_bedroom_level_intro_copy(
-					$area,
-					$room_count
-				),
+				$intro_copy,
 				array(
 					'className'  => 'vvm-bedroom-levels__copy',
 					'fontFamily' => 'refined-sans',
@@ -2126,6 +2179,7 @@ function gutenberg_lab_blocks_villa_importer_build_bedroom_levels( $bedrooms ) {
  */
 function gutenberg_lab_blocks_villa_importer_build_bedrooms_tab( $data ) {
 	$bedrooms      = array_values( array_filter( $data['bedrooms'] ?? array() ) );
+	$bedroom_copy  = is_array( $data['bedroom_copy'] ?? null ) ? $data['bedroom_copy'] : array();
 	$bedroom_count = absint( $data['overview']['bedrooms'] ?? count( $bedrooms ) );
 	$slide_markup  = '';
 
@@ -2133,9 +2187,19 @@ function gutenberg_lab_blocks_villa_importer_build_bedrooms_tab( $data ) {
 		$slide_markup .= gutenberg_lab_blocks_villa_importer_bedroom_gallery_slide( $bedroom ) . "\n\n";
 	}
 
-	$bedroom_heading = 1 === $bedroom_count
-		? 'One thoughtfully arranged bedroom across the villa.'
-		: sprintf( '%d thoughtfully arranged bedrooms across the villa.', $bedroom_count );
+	$bedroom_heading = gutenberg_lab_blocks_villa_importer_text( $bedroom_copy['layout_heading'] ?? '' );
+	$bedroom_description = gutenberg_lab_blocks_villa_importer_text( $bedroom_copy['layout_description'] ?? '' );
+
+	if ( '' === $bedroom_heading ) {
+		$bedroom_heading = 1 === $bedroom_count
+			? 'One thoughtfully arranged bedroom across the villa.'
+			: sprintf( '%d thoughtfully arranged bedrooms across the villa.', $bedroom_count );
+	}
+
+	if ( '' === $bedroom_description ) {
+		$bedroom_description = 'Bedrooms are arranged to give guests a clear, easy-to-scan view of the villa’s principal sleeping spaces.';
+	}
+
 	$content =
 		gutenberg_lab_blocks_villa_importer_heading(
 			'BEDROOM LAYOUT',
@@ -2147,7 +2211,7 @@ function gutenberg_lab_blocks_villa_importer_build_bedrooms_tab( $data ) {
 			2
 		) .
 		gutenberg_lab_blocks_villa_importer_paragraph(
-			'Bedrooms are arranged to give guests a clear, easy-to-scan view of the villa’s principal sleeping spaces.',
+			$bedroom_description,
 			array(
 				'style'      => array(
 					'color'      => array(
@@ -2199,7 +2263,7 @@ function gutenberg_lab_blocks_villa_importer_build_bedrooms_tab( $data ) {
 			),
 			trim( $slide_markup )
 		) .
-		gutenberg_lab_blocks_villa_importer_build_bedroom_levels( $bedrooms );
+		gutenberg_lab_blocks_villa_importer_build_bedroom_levels( $bedrooms, $bedroom_copy );
 
 	return gutenberg_lab_blocks_villa_importer_block(
 		'gutenberg-lab-blocks/stack-tab',

@@ -141,10 +141,10 @@ const addStyleWarning = ( message ) => {
 	styleWarnings.push( message );
 };
 
-const readKeyValuesFromSheet = ( sheet, startRow = 5 ) => {
+const readKeyValuesFromSheet = ( sheet, startRow = 5, endRow = sheet.rowCount ) => {
 	const values = {};
 
-	for ( let rowNumber = startRow; rowNumber <= sheet.rowCount; rowNumber++ ) {
+	for ( let rowNumber = startRow; rowNumber <= Math.min( endRow, sheet.rowCount ); rowNumber++ ) {
 		const row = sheet.getRow( rowNumber );
 		const keyCell = row.getCell( 1 );
 		const valueCell = row.getCell( 3 );
@@ -253,6 +253,45 @@ const readTable = ( sheetName, keysRow = 4, dataStartRow = 6 ) =>
 const readTableOptional = ( sheetName, keysRow = 4, dataStartRow = 6 ) => {
 	const sheet = getOptionalSheet( sheetName );
 	return sheet ? readTableFromSheet( sheet, keysRow, dataStartRow ) : [];
+};
+
+const readBedroomCopyFields = ( sheet ) => {
+	const values = {};
+
+	for ( let rowNumber = 5; rowNumber <= Math.min( 6, sheet.rowCount ); rowNumber++ ) {
+		const row = sheet.getRow( rowNumber );
+		const keyCell = row.getCell( 9 );
+		const valueCell = row.getCell( 2 );
+		const key = cellText( keyCell );
+
+		if ( ! key ) {
+			continue;
+		}
+
+		if ( isRedMarkedCell( keyCell ) || isRedMarkedCell( valueCell ) ) {
+			addStyleWarning(
+				`${ sheet.name } row ${ rowNumber }: red-marked import cell was skipped.`
+			);
+			continue;
+		}
+
+		values[ key ] = cellText( valueCell );
+	}
+
+	return values;
+};
+
+const readBedroomCopy = () => {
+	const sheet = getOptionalSheet( 'Bedroom Copy' );
+
+	if ( ! sheet ) {
+		return { fields: {}, areas: [] };
+	}
+
+	return {
+		fields: readBedroomCopyFields( sheet ),
+		areas: removeNotApplicableRows( readTableFromSheet( sheet, 10, 12 ) ),
+	};
 };
 
 const isNotApplicable = ( value ) =>
@@ -472,6 +511,7 @@ const overview = readKeyValues( 'Overview' );
 const story = readKeyValues( 'Villa Story' );
 const extras = readKeyValuesAny( [ 'Pricing & Enquiry', 'Page Extras' ] );
 const bedrooms = removeNotApplicableRows( readTable( 'Bedrooms' ) );
+const bedroomCopy = readBedroomCopy();
 const amenities = removeNotApplicableRows( readTable( 'Amenities' ) );
 const staff = removeNotApplicableRows( readTable( 'Staff' ) );
 const rates = removeNotApplicableRows( readTable( 'Rates' ) );
@@ -521,6 +561,7 @@ for ( const rate of rates ) {
 
 for ( const [ sheetName, rows ] of [
 	[ 'Bedrooms', bedrooms ],
+	[ 'Bedroom Copy', bedroomCopy.areas ],
 	[ 'Amenities', amenities ],
 	[ 'Staff', staff ],
 	[ 'Rates', rates ],
@@ -686,6 +727,7 @@ if ( bedrooms.length === 0 ) {
 }
 
 const bedroomNames = new Set();
+const validBedroomCopyAreas = [];
 
 for ( const [ index, bedroom ] of bedrooms.entries() ) {
 	const row = rowNumber( bedroom, index + 6 );
@@ -712,6 +754,22 @@ for ( const [ index, bedroom ] of bedrooms.entries() ) {
 	) {
 		errors.push( `Bedrooms row ${ row }: Ensuite must be Yes or No.` );
 	}
+}
+
+for ( const [ index, areaCopy ] of bedroomCopy.areas.entries() ) {
+	const row = rowNumber( areaCopy, index + 12 );
+
+	if ( ! areaCopy.area ) {
+		warnings.push( `Bedroom Copy row ${ row }: floor or area is blank; row was skipped.` );
+		continue;
+	}
+
+	if ( ! areaCopy.display_title && ! areaCopy.description ) {
+		warnings.push( `Bedroom Copy row ${ row }: add a display title or description, otherwise this row has nothing to import.` );
+		continue;
+	}
+
+	validBedroomCopyAreas.push( areaCopy );
 }
 
 const validAmenities = [];
@@ -894,12 +952,19 @@ if ( hasLegacyMinimumBedroomChoice ) {
 	overviewPayload.minimum_bedroom_choice = minimumBedroomChoice;
 }
 
+const bedroomCopyPayload = compactValues( bedroomCopy.fields );
+
+if ( validBedroomCopyAreas.length > 0 ) {
+	bedroomCopyPayload.areas = validBedroomCopyAreas.map( compactValues );
+}
+
 const payload = {
 	schema_version: SCHEMA_VERSION,
 	source_file: path.basename( inputPath ),
 	overview: overviewPayload,
 	story: storyPayload,
 	extras: compactValues( extras ),
+	bedroom_copy: bedroomCopyPayload,
 	bedrooms: bedrooms.map( compactValues ),
 	amenities: validAmenities.map( compactValues ),
 	staff: staff.map( compactValues ),

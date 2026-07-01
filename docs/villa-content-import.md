@@ -134,7 +134,8 @@ The workbook covers the full single-villa content shape used by Monkey Hill:
 - main story, extended description, Villa Story highlights, staff, and nearby
   places
 - Natalie's villa perspective
-- bedrooms grouped by floor or area
+- bedroom layout intro copy, floor/area intro cards, and bedrooms grouped by
+  floor or area
 - grouped indoor, outdoor, and resort amenities
 - house rules and guest reviews
 - seasonal rates, tax/deposit notes, and booking terms
@@ -154,6 +155,23 @@ Gutenberg scaffold, then replaces only sections it can map confidently:
 If a source scaffold does not contain a recognizable section, the importer
 warns instead of inventing a new design. Use a different source villa or add the
 missing section manually/with AI guidance after import.
+
+## Bedroom Copy
+
+The **Bedrooms** sheet is for one row per bedroom: floor/area, room name, bed
+setup, features, and the individual room description.
+
+The **Bedroom Copy** sheet controls the sentences around those bedroom cards:
+
+- **Bedroom layout heading**: the large sentence under `BEDROOM LAYOUT`.
+- **Bedroom layout description**: the short paragraph below that heading.
+- **Floor / area intro cards**: optional copy for cards such as `Ground Floor`
+  or `Private Guest Cottage`. The **Floor or area** value should match the
+  matching value on the Bedrooms sheet. **Display title** can be used when the
+  card title should differ from the tab label, for example `Main House`.
+
+If Bedroom Copy is left blank, the importer keeps using sensible generated
+fallback copy so older completed workbooks still import.
 
 ## Bedroom Selector
 

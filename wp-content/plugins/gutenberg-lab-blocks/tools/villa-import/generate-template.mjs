@@ -221,6 +221,39 @@ const tableSheets = [
 	},
 ];
 
+const bedroomCopyDefinition = {
+	name: 'Bedroom Copy',
+	title: 'Bedroom Copy',
+	intro: 'Add the sentences shown above the bedroom cards. Individual room descriptions still live on the Bedrooms sheet.',
+	fields: [
+		[ 'layout_heading', 'Bedroom layout heading', false, 'The large sentence under BEDROOM LAYOUT, above the bedroom gallery.' ],
+		[ 'layout_description', 'Bedroom layout description', false, 'Short paragraph below the bedroom layout heading. Keep it guest-facing and concise.' ],
+	],
+	areaRows: 8,
+	areaColumns: [
+		[ 'area', 'Floor or area', true, 'Must match a Floor or area used on the Bedrooms sheet, for example Ground Floor.' ],
+		[ 'display_title', 'Display title', false, 'Optional. Use this when the card title should differ from the tab label, for example Main House.' ],
+		[ 'description', 'Description', false, 'The sentence shown on the floor/area intro card.' ],
+	],
+	areaExamples: [
+		{
+			area: 'Ground Floor',
+			display_title: 'Ground Floor',
+			description: 'Three rooms placed for easy access to terraces, gardens, and the villa’s main living spaces.',
+		},
+		{
+			area: 'First Floor',
+			display_title: 'First Floor',
+			description: 'Three elevated rooms arranged for privacy, views, and easy access across the main house.',
+		},
+		{
+			area: 'Private Guest Cottage',
+			display_title: 'Private Guest Cottage',
+			description: 'Two additional bedrooms create a flexible cottage layout for extended family or guests seeking extra privacy.',
+		},
+	],
+};
+
 const workbook = new ExcelJS.Workbook();
 workbook.creator = 'Barbados Escapes';
 workbook.company = 'Verse and Vision';
@@ -477,6 +510,166 @@ const displayValue = ( container, key, validation ) => {
 	return value;
 };
 
+const bedroomCopyContainer = ( source ) => {
+	if ( ! source ) {
+		return null;
+	}
+
+	return source.bedroom_copy || null;
+};
+
+const addBedroomCopySheet = () => {
+	const definition = bedroomCopyDefinition;
+	const sheet = workbook.addWorksheet( definition.name, {
+		views: [ { state: 'frozen', ySplit: 11, showGridLines: false } ],
+		properties: { tabColor: { argb: colors.darkGreen } },
+	});
+	const sampleCopy = bedroomCopyContainer( sample );
+	const exampleCopy = bedroomCopyContainer( example ) || {
+		layout_heading: 'Eight beautifully appointed rooms across the main house and private cottage.',
+		layout_description: 'Six en-suite rooms sit within the main residence, while two additional bedrooms in the private guest cottage create a more flexible and beautifully balanced layout for families, friends, and extended stays.',
+		areas: definition.areaExamples,
+	};
+	const areaExampleStartColumn = 5;
+	const endColumn = areaExampleStartColumn + definition.areaColumns.length - 1;
+
+	addTitle( sheet, definition.title, definition.intro, endColumn );
+
+	const keyValueHeader = [ 'Question', 'Client answer', 'Monkey Hill example', 'Guidance', 'Comments' ];
+	sheet.getRow( 4 ).values = keyValueHeader;
+	sheet.getRow( 4 ).height = 28;
+	sheet.getRow( 4 ).eachCell( ( cell ) => {
+		cell.font = { name: 'Aptos', size: 11, bold: true, color: { argb: colors.white } };
+		cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.gold } };
+		cell.alignment = { vertical: 'middle', horizontal: 'left' };
+		cell.border = thinBorder;
+	} );
+
+	definition.fields.forEach( ( [ key, label, required, guidance ], index ) => {
+		const rowNumber = index + 5;
+		const row = sheet.getRow( rowNumber );
+		row.height = 46;
+		row.getCell( 1 ).value = label;
+		row.getCell( 2 ).value = lookupValue( sampleCopy, key );
+		row.getCell( 3 ).value = lookupValue( exampleCopy, key );
+		row.getCell( 4 ).value = guidance;
+		row.getCell( 5 ).value = '';
+		row.getCell( 9 ).value = key;
+
+		row.getCell( 1 ).font = { name: 'Aptos', size: 11, bold: true, color: { argb: colors.text } };
+		row.getCell( 4 ).font = { name: 'Aptos', size: 10, color: { argb: colors.muted } };
+		row.getCell( 1 ).alignment = { vertical: 'top', wrapText: true };
+		row.getCell( 4 ).alignment = { vertical: 'top', wrapText: true };
+		row.getCell( 1 ).border = thinBorder;
+		row.getCell( 4 ).border = thinBorder;
+		styleInputCell( row.getCell( 2 ), required );
+		styleExampleCell( row.getCell( 3 ) );
+		row.getCell( 3 ).note = 'Example only. Type the new villa answer in the Client answer column.';
+		styleCommentCell( row.getCell( 5 ) );
+		row.getCell( 5 ).note = 'Optional client note. This is ignored by the importer.';
+	} );
+
+	sheet.mergeCells( 'A8:H8' );
+	sheet.getCell( 'A8' ).value = 'Floor / area intro cards';
+	sheet.getCell( 'A8' ).font = { name: 'Aptos Display', size: 14, bold: true, color: { argb: colors.white } };
+	sheet.getCell( 'A8' ).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.gold } };
+	sheet.getCell( 'A8' ).alignment = { vertical: 'middle', horizontal: 'left' };
+	sheet.getRow( 8 ).height = 28;
+
+	sheet.mergeCells( 'A9:H9' );
+	sheet.getCell( 'A9' ).value = 'Use this table for cards such as Ground Floor / Main House. Leave blank to use the importer’s default copy.';
+	sheet.getCell( 'A9' ).font = { name: 'Aptos', size: 10, italic: true, color: { argb: colors.muted } };
+	sheet.getCell( 'A9' ).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.ivory } };
+	sheet.getCell( 'A9' ).alignment = { vertical: 'middle', wrapText: true };
+	sheet.getRow( 9 ).height = 26;
+
+	const keyRow = sheet.getRow( 10 );
+	const headerRow = sheet.getRow( 11 );
+	keyRow.hidden = true;
+	keyRow.height = 2;
+	headerRow.height = 32;
+
+	definition.areaColumns.forEach( ( [ key, label, required, guidance ], index ) => {
+		const column = index + 1;
+		keyRow.getCell( column ).value = key;
+		headerRow.getCell( column ).value = label;
+		headerRow.getCell( column ).note = guidance;
+		headerRow.getCell( column ).font = { name: 'Aptos', size: 11, bold: true, color: { argb: colors.white } };
+		headerRow.getCell( column ).fill = {
+			type: 'pattern',
+			pattern: 'solid',
+			fgColor: { argb: required ? colors.gold : colors.darkGreen },
+		};
+		headerRow.getCell( column ).alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+		headerRow.getCell( column ).border = thinBorder;
+	} );
+
+	const commentsHeader = headerRow.getCell( 4 );
+	commentsHeader.value = 'Comments';
+	commentsHeader.font = { name: 'Aptos', size: 10, bold: true, color: { argb: colors.text } };
+	commentsHeader.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.comments } };
+	commentsHeader.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+	commentsHeader.border = thinBorder;
+	commentsHeader.note = 'Optional client notes for this row. This column is ignored by the importer.';
+
+	definition.areaColumns.forEach( ( [ , label ], index ) => {
+		const column = areaExampleStartColumn + index;
+		const cell = headerRow.getCell( column );
+		cell.value = `Monkey Hill example: ${ label }`;
+		cell.font = { name: 'Aptos', size: 10, bold: true, color: { argb: colors.text } };
+		cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.lightGold } };
+		cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+		cell.border = thinBorder;
+		cell.note = 'Example only. Type the new villa details in the left-hand table.';
+	} );
+
+	const sampleAreas = sampleCopy?.areas || [];
+	const exampleAreas = exampleCopy?.areas || definition.areaExamples;
+
+	for ( let index = 0; index < definition.areaRows; index++ ) {
+		const rowNumber = index + 12;
+		const row = sheet.getRow( rowNumber );
+		const sampleArea = sampleAreas[ index ] || {};
+		const exampleArea = exampleAreas[ index ] || {};
+		row.height = 42;
+
+		definition.areaColumns.forEach( ( [ key, , required, guidance ], columnIndex ) => {
+			const cell = row.getCell( columnIndex + 1 );
+			cell.value = lookupValue( sampleArea, key );
+			styleInputCell( cell, required );
+			cell.note = guidance;
+
+			const exampleCell = row.getCell( areaExampleStartColumn + columnIndex );
+			exampleCell.value = lookupValue( exampleArea, key );
+			styleExampleCell( exampleCell );
+		} );
+
+		styleCommentCell( row.getCell( 4 ) );
+	}
+
+	sheet.getColumn( 1 ).width = 30;
+	sheet.getColumn( 2 ).width = 54;
+	sheet.getColumn( 3 ).width = 66;
+	sheet.getColumn( 4 ).width = 48;
+	sheet.getColumn( 5 ).width = 32;
+	sheet.getColumn( 6 ).width = 30;
+	sheet.getColumn( 7 ).width = 66;
+	sheet.getColumn( 9 ).hidden = true;
+	sheet.autoFilter = {
+		from: { row: 11, column: 1 },
+		to: { row: 11, column: 4 },
+	};
+	sheet.pageSetup = {
+		orientation: 'landscape',
+		fitToPage: true,
+		fitToWidth: 1,
+		fitToHeight: 0,
+		paperSize: 9,
+		margins: { left: 0.3, right: 0.3, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 },
+		printArea: 'A1:G19',
+	};
+};
+
 for ( const definition of keyValueSheets ) {
 	const sheet = workbook.addWorksheet( definition.name, {
 		views: [ { state: 'frozen', xSplit: 2, ySplit: 4, showGridLines: false } ],
@@ -648,6 +841,10 @@ for ( const definition of tableSheets ) {
 		margins: { left: 0.3, right: 0.3, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 },
 		printArea: `A1:${ sheet.getColumn( endColumn ).letter }${ definition.rows + 5 }`,
 	};
+
+	if ( definition.name === 'Bedrooms' ) {
+		addBedroomCopySheet();
+	}
 };
 
 const additionalRequests = workbook.addWorksheet( 'Additional Requests', {
@@ -844,6 +1041,7 @@ const desiredSheetOrder = [
 	'Nearby',
 	'Staff',
 	'Bedrooms',
+	'Bedroom Copy',
 	'Amenities',
 	'Rates',
 	'House Rules',
