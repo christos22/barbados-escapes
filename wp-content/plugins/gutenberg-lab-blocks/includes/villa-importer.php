@@ -2492,11 +2492,11 @@ function gutenberg_lab_blocks_villa_importer_build_rules_tab( $data, $fallback_i
 	);
 
 	if ( ! $image_id ) {
-		$image_id = absint( $fallback_image_id );
+		$image_id = gutenberg_lab_blocks_villa_importer_find_placeholder_image_id();
 	}
 
 	if ( ! $image_id ) {
-		$image_id = gutenberg_lab_blocks_villa_importer_find_placeholder_image_id();
+		$image_id = absint( $fallback_image_id );
 	}
 
 	$image = gutenberg_lab_blocks_villa_importer_image( $image_id );

@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.53
+Version: 0.1.54
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -1734,6 +1734,10 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	line-height: 1.55;
 }
 
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__table tbody td:nth-child(2) {
+	font-weight: 700;
+}
+
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__table tbody tr:nth-child(odd) {
 	background: #fbf8f2;
 }
@@ -2101,10 +2105,10 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__submit,
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact__whatsapp .wp-block-button__link {
 	--vvm-button-height: 44px;
-	--vvm-button-font-size: 18px;
+	--vvm-button-font-size: clamp(0.875rem, 0.82rem + 0.2vw, 1rem);
 	--vvm-button-line-height: 1;
 	--vvm-button-border-width: 1px;
-	--vvm-button-padding-inline: 32px;
+	--vvm-button-padding-inline: clamp(1.15rem, 1.5vw, 1.5rem);
 	--vvm-button-padding-block: 12px;
 
 	display: inline-flex;
@@ -2117,10 +2121,10 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	padding-block: var(--vvm-button-padding-block);
 	padding-inline: var(--vvm-button-padding-inline);
 	border-radius: 0;
-	font-family: "Romely", sans-serif;
+	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: var(--vvm-button-font-size);
 	font-weight: 600;
-	letter-spacing: 0.15em;
+	letter-spacing: 0.11em;
 	line-height: var(--vvm-button-line-height);
 	text-transform: uppercase;
 	text-decoration: none;

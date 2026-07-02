@@ -209,7 +209,7 @@ function gutenberg_lab_blocks_get_villa_pricing_row_key_map( $villa_id ) {
 function gutenberg_lab_blocks_get_villa_bedroom_count_from_label( $label ) {
 	if (
 		preg_match(
-			'/(?:^|[^\d])(\d+)\s*[-–—]?\s*bedrooms?\b/i',
+			'/(?:^|[^\d])(\d+)\s*[-–—]?\s*bed(?:room)?s?\b/i',
 			(string) $label,
 			$matches
 		)
