@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.54
+Version: 0.1.55
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -3080,6 +3080,70 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.vvm-header-nav__child > .wp-block-navigation-item__content {
 	padding-left: 3.15rem;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child {
+	/*
+	 * Core renders submenus as link + toggle + child list. In the custom drawer
+	 * we keep that native structure, but lay it out as one parent row with a
+	 * collapsible child panel underneath.
+	 */
+	display: grid !important;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: stretch;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-item__content {
+	grid-column: 1;
+	padding-right: 1rem;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle {
+	grid-column: 2;
+	align-self: stretch;
+	justify-content: center;
+	width: 3.25rem !important;
+	min-width: 3.25rem;
+	min-height: 3.15rem;
+	padding: 0;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle svg {
+	transition: transform 0.2s ease;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle[aria-expanded="true"] svg {
+	transform: rotate(180deg);
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation__submenu-container {
+	grid-column: 1 / -1;
+	position: static !important;
+	display: none !important;
+	width: 100% !important;
+	min-width: 0 !important;
+	height: auto !important;
+	max-height: none !important;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: rgba(30, 61, 47, 0.035);
+	box-shadow: none;
+	opacity: 1;
+	visibility: visible;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle[aria-expanded="true"] + .wp-block-navigation__submenu-container {
+	display: block !important;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation__submenu-container > .wp-block-navigation-item {
+	border-bottom-color: rgba(30, 61, 47, 0.1);
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation__submenu-container > .wp-block-navigation-item > .wp-block-navigation-item__content {
+	padding: 0.75rem 2.25rem 0.75rem 3.25rem;
+	font-size: 0.82rem;
 }
 
 .vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item__content:hover,
