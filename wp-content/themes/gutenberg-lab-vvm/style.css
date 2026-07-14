@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.55
+Version: 0.1.56
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -3098,7 +3098,7 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	padding-right: 1rem;
 }
 
-.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle {
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle:not(.wp-block-navigation-item__content) {
 	grid-column: 2;
 	align-self: stretch;
 	justify-content: center;
@@ -3108,11 +3108,35 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	padding: 0;
 }
 
-.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle svg {
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child.open-on-click > .wp-block-navigation-item__content.wp-block-navigation-submenu__toggle {
+	grid-column: 1 / -1;
+	grid-row: 1;
+	justify-content: flex-start;
+	padding-right: calc(2.25rem + 3.25rem);
+	text-align: left;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child.open-on-click > .wp-block-navigation__submenu-icon {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	grid-column: 2;
+	grid-row: 1;
+	align-self: center;
+	justify-self: center;
+	z-index: 2;
+	width: 3.25rem;
+	min-height: 3.15rem;
+	pointer-events: none;
+}
+
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle svg,
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation__submenu-icon svg {
 	transition: transform 0.2s ease;
 }
 
-.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle[aria-expanded="true"] svg {
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle[aria-expanded="true"] svg,
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle[aria-expanded="true"] + .wp-block-navigation__submenu-icon svg {
 	transform: rotate(180deg);
 }
 
@@ -3133,7 +3157,7 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	visibility: visible;
 }
 
-.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle[aria-expanded="true"] + .wp-block-navigation__submenu-container {
+.vvm-header .wp-block-navigation__responsive-container .wp-block-navigation-item.has-child > .wp-block-navigation-submenu__toggle[aria-expanded="true"] ~ .wp-block-navigation__submenu-container {
 	display: block !important;
 }
 
