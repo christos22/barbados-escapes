@@ -2365,6 +2365,41 @@ function gutenberg_lab_blocks_villa_importer_amenity_section_key( $group ) {
 }
 
 /**
+ * Keeps amenity header chips honest by matching them to supplied amenities.
+ *
+ * @param array<int, string>               $candidates Preset chip labels.
+ * @param array<int, array<string, mixed>> $amenities Supplied amenity rows.
+ * @return array<int, string>
+ */
+function gutenberg_lab_blocks_villa_importer_amenity_chips( $candidates, $amenities ) {
+	$items = implode(
+		' ',
+		array_map(
+			static fn( $amenity ) => gutenberg_lab_blocks_villa_importer_text( $amenity['item'] ?? '' ),
+			$amenities
+		)
+	);
+
+	$patterns = array(
+		'Media Room'       => '/\b(media room|cinema|home theatre|home theater)\b/i',
+		'Gourmet Kitchen'  => '/\bkitchen\b/i',
+		'High-Speed WiFi'  => '/\b(wi-?fi|internet)\b/i',
+		'Ensuite Bedrooms' => '/\b(en-?suite|ensuite)\b/i',
+		'Private Pool'     => '/\b(private pool|private swimming pool|swimming pool)\b/i',
+		'Outdoor Dining'   => '/\b(outdoor|alfresco|al fresco)\b.{0,30}\bdining\b/i',
+		'Beach Access'     => '/\bbeach\b/i',
+		'Garden Living'    => '/\b(garden|gardens|landscaped grounds)\b/i',
+	);
+
+	return array_values(
+		array_filter(
+			$candidates,
+			static fn( $candidate ) => isset( $patterns[ $candidate ] ) && preg_match( $patterns[ $candidate ], $items )
+		)
+	);
+}
+
+/**
  * Builds the Amenities Stack Tab content.
  *
  * @param array<string, mixed> $data Normalized workbook data.
@@ -2418,9 +2453,10 @@ function gutenberg_lab_blocks_villa_importer_build_amenities_tab( $data ) {
 			$index++;
 		}
 
-		$chips = '';
+		$chips      = '';
+		$meta_chips = gutenberg_lab_blocks_villa_importer_amenity_chips( $meta['chips'], $amenities );
 
-		foreach ( $meta['chips'] as $chip ) {
+		foreach ( $meta_chips as $chip ) {
 			$chips .= gutenberg_lab_blocks_villa_importer_paragraph(
 				$chip,
 				array( 'className' => 'vvm-villa-amenities__chip' )
@@ -2686,6 +2722,43 @@ function gutenberg_lab_blocks_villa_importer_contact_form_block( $attributes ) {
 }
 
 /**
+ * Normalizes imported bedroom choices into ascending bedroom-count order.
+ *
+ * Custom labels without a recognizable bedroom count remain after the numeric
+ * choices and keep their original relative order.
+ *
+ * @param mixed $rows Raw normalized workbook choices.
+ * @return array<int, array{label:string}>
+ */
+function gutenberg_lab_blocks_villa_importer_bedroom_selector_choices( $rows ) {
+	$choices = gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows( $rows );
+
+	$sortable = array_map(
+		static function ( $choice, $index ) {
+			$matches = array();
+			$count   = preg_match( '/\b(\d{1,2})\s*bedrooms?\b/i', $choice['label'], $matches )
+				? (int) $matches[1]
+				: PHP_INT_MAX;
+
+			return array(
+				'choice' => $choice,
+				'count'  => $count,
+				'index'  => $index,
+			);
+		},
+		$choices,
+		array_keys( $choices )
+	);
+
+	usort(
+		$sortable,
+		static fn( $left, $right ) => $left['count'] <=> $right['count'] ?: $left['index'] <=> $right['index']
+	);
+
+	return array_values( array_column( $sortable, 'choice' ) );
+}
+
+/**
  * Builds the visitor-facing season label for a pricing table row.
  *
  * Bedroom labels are used by the selector/filter only. Showing them again in
@@ -2765,7 +2838,7 @@ function gutenberg_lab_blocks_villa_importer_build_pricing_contact_location( $da
 		false
 	);
 	$selector_attrs           = array();
-	$bedroom_selector_choices = gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows(
+	$bedroom_selector_choices = gutenberg_lab_blocks_villa_importer_bedroom_selector_choices(
 		$overview['bedroom_selector_choices'] ?? array()
 	);
 	$minimum_bedroom_choice   = min(
@@ -4223,7 +4296,7 @@ function gutenberg_lab_blocks_villa_importer_meta( $data ) {
 		$overview['property_area'],
 		$overview['parish']
 	);
-	$bedroom_selector_choices = gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows(
+	$bedroom_selector_choices = gutenberg_lab_blocks_villa_importer_bedroom_selector_choices(
 		$overview['bedroom_selector_choices'] ?? array()
 	);
 	$pricing_row_keys = gutenberg_lab_blocks_villa_importer_pricing_row_keys(
