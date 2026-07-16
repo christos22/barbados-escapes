@@ -799,8 +799,9 @@ for ( const definition of tableSheets ) {
 		: definition.name.toLowerCase().replaceAll( ' ', '_' );
 	const sampleRows = sample?.[ sampleKey ] || [];
 	const exampleRows = example?.[ sampleKey ] || [];
+	const populatedRowCount = Math.max( definition.rows, sampleRows.length, exampleRows.length );
 
-	for ( let index = 0; index < definition.rows; index++ ) {
+	for ( let index = 0; index < populatedRowCount; index++ ) {
 		const rowNumber = index + 6;
 		const row = sheet.getRow( rowNumber );
 		const sampleRow = sampleRows[ index ] || {};
