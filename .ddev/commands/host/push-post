@@ -1,0 +1,275 @@
+#!/usr/bin/env bash
+## Description: Push one local WordPress post, its meta, and terms to production
+## Usage: push-post --post=ID [--status=draft|publish|local] [--dry-run] [--yes]
+## Example: "ddev push-post --post=2172 --status=publish --dry-run"
+
+set -euo pipefail
+
+APPROOT="${DDEV_APPROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+ENV_FILE="${APPROOT}/.ddev/.env.sync-remote"
+ENV_EXAMPLE_FILE="${APPROOT}/.ddev/.env.sync-remote.example"
+TRANSFER_HELPER="${APPROOT}/.ddev/commands/host/push-post-transfer.php"
+SSH_KEY_PATH="/home/Quester/Nextcloud/Documents/Development/Server/SSH-Keys/inmotion"
+WP_CLI_MAINTENANCE_ARGS=(--skip-plugins --skip-themes)
+SSH_COMMON_ARGS=(-o BatchMode=yes -o ConnectTimeout=10)
+SCP_COMMON_ARGS=(-o BatchMode=yes -o ConnectTimeout=10)
+SSH_RETRY_COUNT=3
+SSH_RETRY_DELAY=3
+
+post_id=""
+target_status="draft"
+confirmed=0
+dry_run=0
+temp_package=""
+remote_package=""
+remote_helper=""
+
+log() {
+	printf '\n==> %s\n' "$*"
+}
+
+fail() {
+	printf 'Error: %s\n' "$*" >&2
+	exit 1
+}
+
+usage() {
+	cat <<'EOF'
+Push one local WordPress post to the live InMotion site.
+
+Usage:
+  ddev push-post --post=ID --dry-run
+  ddev push-post --post=ID --status=draft --yes
+  ddev push-post --post=ID --status=publish --yes
+
+Flags:
+  --post=ID          Required local post ID.
+  --status=draft     Create or update the remote post as a draft. Default.
+  --status=publish   Publish the remote post after its data is transferred.
+  --status=local     Use the local post status.
+  --dry-run          Validate production and all referenced content without changes.
+  --yes              Required for a real production transfer.
+  -h, --help         Show this help text.
+
+The command transfers one post row, post meta, and taxonomy relationships. It
+rewrites the local site URL to production, backs up an existing remote post,
+and refuses to continue when referenced media or linked posts do not match.
+It does not replace the production database or upload missing media.
+EOF
+}
+
+run_with_retries() {
+	local max_attempts="$1"
+	local delay_seconds="$2"
+	local attempt=1
+	local exit_code=0
+	shift 2
+
+	while true; do
+		if "$@"; then
+			return 0
+		else
+			exit_code=$?
+		fi
+
+		if (( attempt >= max_attempts )); then
+			return "${exit_code}"
+		fi
+
+		printf 'Warning: command failed with exit code %s. Retrying in %ss (%s/%s)...\n' \
+			"${exit_code}" "${delay_seconds}" "${attempt}" "${max_attempts}" >&2
+		sleep "${delay_seconds}"
+		attempt=$(( attempt + 1 ))
+	done
+}
+
+ssh_run() {
+	run_with_retries "${SSH_RETRY_COUNT}" "${SSH_RETRY_DELAY}" \
+		ssh "${SSH_COMMON_ARGS[@]}" "$@"
+}
+
+remote_bash() {
+	local remote_command="$1"
+
+	ssh_run "${REMOTE_SSH_HOST}" "bash -lc $(printf '%q' "${remote_command}")"
+}
+
+scp_to_remote() {
+	local local_file="$1"
+	local remote_file="$2"
+
+	run_with_retries "${SSH_RETRY_COUNT}" "${SSH_RETRY_DELAY}" \
+		scp "${SCP_COMMON_ARGS[@]}" "${local_file}" "${REMOTE_SSH_HOST}:${remote_file}"
+}
+
+require_nonempty_var() {
+	local var_name="$1"
+	[[ -n "${!var_name:-}" ]] || fail "Missing ${var_name} in ${ENV_FILE}"
+}
+
+validate_table_prefix() {
+	local table_prefix="$1"
+	[[ "${table_prefix}" =~ ^[A-Za-z0-9_]+_$ ]] || fail "Detected table prefix '${table_prefix}' was not valid."
+}
+
+cleanup() {
+	if [[ -n "${temp_package}" && -f "${temp_package}" ]]; then
+		rm -f "${temp_package}"
+	fi
+
+	if [[ -n "${REMOTE_SSH_HOST:-}" ]]; then
+		for remote_file in "${remote_package}" "${remote_helper}"; do
+			if [[ -n "${remote_file}" ]]; then
+				ssh "${SSH_COMMON_ARGS[@]}" "${REMOTE_SSH_HOST}" "rm -f $(printf '%q' "${remote_file}")" >/dev/null 2>&1 || true
+			fi
+		done
+	fi
+}
+trap cleanup EXIT
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--post=*)
+			post_id="${1#*=}"
+			;;
+		--post)
+			shift
+			[[ $# -gt 0 ]] || fail "--post requires a numeric ID."
+			post_id="$1"
+			;;
+		--status=*)
+			target_status="${1#*=}"
+			;;
+		--status)
+			shift
+			[[ $# -gt 0 ]] || fail "--status requires draft, publish, or local."
+			target_status="$1"
+			;;
+		--dry-run)
+			dry_run=1
+			;;
+		--yes)
+			confirmed=1
+			;;
+		-h|--help)
+			usage
+			exit 0
+			;;
+		*)
+			fail "Unknown argument: $1"
+			;;
+	esac
+	shift
+done
+
+[[ "${post_id}" =~ ^[1-9][0-9]*$ ]] || fail "--post expects a numeric local post ID."
+[[ "${target_status}" =~ ^(draft|publish|local)$ ]] || fail "--status must be draft, publish, or local."
+(( dry_run == 1 || confirmed == 1 )) || fail "A production transfer requires --yes after reviewing a dry run."
+
+for required_command in ddev ssh scp curl mktemp; do
+	command -v "${required_command}" >/dev/null 2>&1 || fail "Missing required command: ${required_command}"
+done
+
+[[ -f "${TRANSFER_HELPER}" ]] || fail "Missing transfer helper: ${TRANSFER_HELPER}"
+[[ -f "${ENV_FILE}" ]] || fail "Missing ${ENV_FILE}. Copy ${ENV_EXAMPLE_FILE} and configure production first."
+
+# shellcheck disable=SC1090
+set -a
+source "${ENV_FILE}"
+set +a
+
+for required_var in REMOTE_SSH_HOST REMOTE_WP_PATH REMOTE_SITE_URL LOCAL_SITE_URL; do
+	require_nonempty_var "${required_var}"
+done
+
+REMOTE_SITE_URL="${REMOTE_SITE_URL%/}"
+LOCAL_SITE_URL="${LOCAL_SITE_URL%/}"
+REMOTE_POST_BACKUP_DIR="${REMOTE_POST_BACKUP_DIR:-${REMOTE_WP_PATH%/*}/barbados-post-backups}"
+REMOTE_EXPECTED_TABLE_PREFIX="${REMOTE_EXPECTED_TABLE_PREFIX:-}"
+
+if ! ssh_run "${REMOTE_SSH_HOST}" 'echo ok' >/dev/null 2>&1; then
+	fail "SSH authentication failed. Unlock the key first with: ssh-add ${SSH_KEY_PATH}"
+fi
+
+local_post_type="$(ddev wp post get "${post_id}" --field=post_type 2>/dev/null | tr -d '\r' | tail -n 1)"
+local_post_title="$(ddev wp post get "${post_id}" --field=post_title 2>/dev/null | tr -d '\r' | tail -n 1)"
+local_post_slug="$(ddev wp post get "${post_id}" --field=post_name 2>/dev/null | tr -d '\r' | tail -n 1)"
+local_post_status="$(ddev wp post get "${post_id}" --field=post_status 2>/dev/null | tr -d '\r' | tail -n 1)"
+
+[[ -n "${local_post_type}" && -n "${local_post_slug}" ]] || fail "Local post ${post_id} could not be read."
+
+if [[ "${target_status}" == "local" ]]; then
+	[[ "${local_post_status}" =~ ^(draft|publish)$ ]] || fail "Local status '${local_post_status}' cannot be pushed automatically."
+	target_status="${local_post_status}"
+fi
+
+quoted_remote_wp_path="$(printf '%q' "${REMOTE_WP_PATH}")"
+
+log "Validating the production WordPress target"
+remote_bash "test -d ${quoted_remote_wp_path} && cd ${quoted_remote_wp_path} && wp core is-installed ${WP_CLI_MAINTENANCE_ARGS[*]} >/dev/null"
+
+remote_home="$(remote_bash "cd ${quoted_remote_wp_path} && wp option get home ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+[[ "${remote_home%/}" == "${REMOTE_SITE_URL}" ]] || fail "Remote WordPress home '${remote_home}' does not match '${REMOTE_SITE_URL}'."
+
+local_table_prefix="$(ddev wp db prefix "${WP_CLI_MAINTENANCE_ARGS[@]}" 2>/dev/null | tr -d '\r' | tail -n 1)"
+remote_table_prefix="$(remote_bash "cd ${quoted_remote_wp_path} && wp db prefix ${WP_CLI_MAINTENANCE_ARGS[*]}" | tr -d '\r' | tail -n 1)"
+validate_table_prefix "${local_table_prefix}"
+validate_table_prefix "${remote_table_prefix}"
+
+if [[ -n "${REMOTE_EXPECTED_TABLE_PREFIX}" && "${remote_table_prefix}" != "${REMOTE_EXPECTED_TABLE_PREFIX}" ]]; then
+	fail "Remote table prefix is '${remote_table_prefix}', expected '${REMOTE_EXPECTED_TABLE_PREFIX}'."
+fi
+
+[[ "${local_table_prefix}" == "${remote_table_prefix}" ]] || fail "Local and production table prefixes differ. Pull production before pushing a post."
+
+temp_package="$(mktemp "${APPROOT}/.ddev/.push-post.XXXXXX.json")"
+container_package="/var/www/html/.ddev/$(basename "${temp_package}")"
+container_helper="/var/www/html/.ddev/commands/host/push-post-transfer.php"
+
+log "Exporting local ${local_post_type} ${post_id}: ${local_post_title}"
+ddev wp eval-file "${container_helper}" export "${post_id}" "${container_package}" "${LOCAL_SITE_URL}" "${REMOTE_SITE_URL}"
+[[ -s "${temp_package}" ]] || fail "The local post transfer package was empty."
+
+remote_package="$(remote_bash "mktemp /tmp/barbados-push-post.XXXXXX.json" | tr -d '\r' | tail -n 1)"
+remote_helper="$(remote_bash "mktemp /tmp/barbados-push-post.XXXXXX.php" | tr -d '\r' | tail -n 1)"
+[[ -n "${remote_package}" && -n "${remote_helper}" ]] || fail "Could not create production temporary files."
+
+scp_to_remote "${temp_package}" "${remote_package}"
+scp_to_remote "${TRANSFER_HELPER}" "${remote_helper}"
+
+quoted_remote_package="$(printf '%q' "${remote_package}")"
+quoted_remote_helper="$(printf '%q' "${remote_helper}")"
+
+log "Checking production dependencies and destination slug"
+remote_bash "cd ${quoted_remote_wp_path} && wp eval-file ${quoted_remote_helper} check ${quoted_remote_package}"
+
+if (( dry_run == 1 )); then
+	log "Dry run passed. No WordPress content was changed."
+	printf 'Ready: ddev push-post --post=%s --status=%s --yes\n' "${post_id}" "${target_status}"
+	exit 0
+fi
+
+quoted_backup_dir="$(printf '%q' "${REMOTE_POST_BACKUP_DIR}")"
+
+log "Transferring only ${local_post_title} to production as ${target_status}"
+remote_bash "cd ${quoted_remote_wp_path} && wp eval-file ${quoted_remote_helper} import ${quoted_remote_package} ${quoted_backup_dir} $(printf '%q' "${target_status}")"
+
+remote_post_id="$(remote_bash "cd ${quoted_remote_wp_path} && wp post list --post_type=$(printf '%q' "${local_post_type}") --name=$(printf '%q' "${local_post_slug}") --format=ids" | tr -d '\r' | tail -n 1)"
+[[ "${remote_post_id}" =~ ^[1-9][0-9]*$ ]] || fail "The production post could not be found after transfer."
+
+remote_status="$(remote_bash "cd ${quoted_remote_wp_path} && wp post get ${remote_post_id} --field=post_status" | tr -d '\r' | tail -n 1)"
+[[ "${remote_status}" == "${target_status}" ]] || fail "Production status is '${remote_status}', expected '${target_status}'."
+
+log "Purging production caches"
+remote_bash "cd ${quoted_remote_wp_path} && wp cache flush >/dev/null; if wp plugin is-active autoptimize >/dev/null 2>&1; then wp autoptimize clear >/dev/null 2>&1 || true; fi; if wp plugin is-active nginx-helper >/dev/null 2>&1; then wp nginx-helper purge-all >/dev/null 2>&1 || true; fi"
+
+remote_url="$(remote_bash "cd ${quoted_remote_wp_path} && wp post url ${remote_post_id}" | tr -d '\r' | tail -n 1)"
+http_status="not checked (${target_status})"
+
+if [[ "${target_status}" == "publish" ]]; then
+	http_status="$(curl -L -A 'Mozilla/5.0' -sS -o /dev/null -w '%{http_code}' "${remote_url}")"
+	[[ "${http_status}" == "200" ]] || fail "Production URL returned HTTP ${http_status}: ${remote_url}"
+fi
+
+log "Post push complete"
+printf 'Remote ID: %s\nStatus: %s\nURL: %s\nHTTP: %s\n' "${remote_post_id}" "${remote_status}" "${remote_url}" "${http_status}"

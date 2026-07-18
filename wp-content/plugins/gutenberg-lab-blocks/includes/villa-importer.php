@@ -838,6 +838,10 @@ function gutenberg_lab_blocks_villa_importer_table( $rows, $class_name = '', $ha
 function gutenberg_lab_blocks_villa_importer_buttons( $buttons, $attributes = array() ) {
 	$button_markup = '';
 
+	if ( ! isset( $attributes['layout'] ) ) {
+		$attributes['layout'] = array( 'type' => 'flex' );
+	}
+
 	foreach ( $buttons as $button ) {
 		$label = gutenberg_lab_blocks_villa_importer_text( $button['label'] ?? '' );
 		$url   = esc_url( $button['url'] ?? '' );
@@ -867,6 +871,10 @@ function gutenberg_lab_blocks_villa_importer_buttons( $buttons, $attributes = ar
 		? gutenberg_lab_blocks_villa_importer_classes( $attributes['className'] )
 		: '';
 	$wrapper_classes    = 'wp-block-buttons' . ( '' !== $wrapper_class_name ? ' ' . $wrapper_class_name : '' );
+
+	if ( 'flex' === ( $attributes['layout']['type'] ?? '' ) ) {
+		$wrapper_classes .= ' is-layout-flex wp-block-buttons-is-layout-flex';
+	}
 
 	return gutenberg_lab_blocks_villa_importer_block(
 		'buttons',

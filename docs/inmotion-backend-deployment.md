@@ -249,6 +249,32 @@ Safety behavior:
 - preserves remote All-in-One WP Migration Google Drive settings by default
 - rewrites local URLs to `https://barbadosescapes.com`
 
+### Local To Production Single Post Push
+
+Use this for a reviewed villa or page when production should receive only that
+post, not the full local database.
+
+```bash
+ddev push-post --post=2172 --status=publish --dry-run
+ddev push-post --post=2172 --status=publish --yes
+```
+
+The default target status is `draft`. `--status=local` preserves a local draft
+or published status, while an explicit `--status=publish` is clearer for a live
+release.
+
+Safety behavior:
+
+- validates the production URL and shared database prefix
+- rewrites local site URLs inside content and meta
+- checks that referenced attachments, upload files, and linked posts match production
+- creates or updates only the matching post type and slug
+- backs up an existing remote post beside the WordPress docroot before changing it
+- builds the remote record as a draft before applying the requested status
+- copies post meta and taxonomy relationships without replacing the database
+- refreshes villa availability from its copied iCal feed
+- refuses missing media instead of publishing a broken page
+
 ### Rollback
 
 By default, database refresh creates a DDEV snapshot first. Roll back with:
