@@ -23,7 +23,6 @@ require_once __DIR__ . '/includes/package-rendering.php';
 require_once __DIR__ . '/includes/peeking-carousel.php';
 require_once __DIR__ . '/includes/site-messages.php';
 require_once __DIR__ . '/includes/villas.php';
-require_once __DIR__ . '/includes/villa-subpages.php';
 require_once __DIR__ . '/includes/villa-bedroom-selector.php';
 require_once __DIR__ . '/includes/villa-availability.php';
 require_once __DIR__ . '/includes/villa-importer.php';
@@ -42,7 +41,6 @@ function gutenberg_lab_blocks_register_rewrite_content_types() {
 	gutenberg_lab_blocks_register_package_type_taxonomy();
 	gutenberg_lab_blocks_register_villas_post_type();
 	gutenberg_lab_blocks_register_villa_location_taxonomy();
-	gutenberg_lab_blocks_register_villa_subpage_rewrite();
 }
 
 /**
