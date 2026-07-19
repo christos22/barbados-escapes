@@ -12,6 +12,8 @@ function barbados_push_post_excluded_meta_keys() {
 		'_edit_lock',
 		'_edit_last',
 		'_gutenberg_lab_villa_availability_sync_status',
+		// The scaffold ID is local import provenance, not a live post relationship.
+		'_gutenberg_lab_villa_import_source_villa',
 	);
 }
 
@@ -155,10 +157,6 @@ function barbados_push_post_build_package( $post_id, $from_url, $to_url ) {
 
 	if ( ! empty( $meta['_thumbnail_id'][0] ) ) {
 		$attachment_ids[] = (int) $meta['_thumbnail_id'][0];
-	}
-
-	if ( ! empty( $meta['_gutenberg_lab_villa_import_source_villa'][0] ) ) {
-		$post_ids[] = (int) $meta['_gutenberg_lab_villa_import_source_villa'][0];
 	}
 
 	$attachments = array();
