@@ -296,7 +296,9 @@ For this repo, prefer a maximum-Gutenberg approach.
 - The villa template should support editor-managed content sections such as hero/gallery, summary, facts, amenities, CTA, and related villas when those pieces are in scope.
 - Keep code commented, but keep comments concise and useful.
 - Avoid hardcoding content that should be editor-managed.
-- Treat `/home/grapsa5/barbadosescapes.verseandvision.ca/.htaccess` as a required server-side rewrite file until that requirement is intentionally moved into a repo-managed deployment step.
+- Treat the production and staging `.htaccess` files as server-managed rewrite prerequisites until that requirement is intentionally moved into a repo-managed deployment step:
+  - `/home/grapsa5/barbadosescapes.com/.htaccess`
+  - `/home/grapsa5/barbadosescapes.com/staging/.htaccess`
 
 ## Build And Verification
 

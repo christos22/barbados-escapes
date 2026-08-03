@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This note documents the working backend deployment path for the Barbados Escapes WordPress install on InMotion. It covers only the backend connection and deployment flow, not any frontend hosting.
+This note documents the working backend deployment paths for the Barbados Escapes production and staging WordPress installs on InMotion. It covers only the backend connection and deployment flow, not any frontend hosting.
 
-Verified on April 12-13, 2026. Updated for the production launch target on June 3, 2026.
+Verified on April 12-13, 2026. Updated for the production launch target on June 3, 2026, and the `/staging/` deployment target on August 3, 2026.
 
 ## AI Chat Notes
 
@@ -26,6 +26,12 @@ Verified on April 12-13, 2026. Updated for the production launch target on June 
 - Production table prefix: `vvm_`
 - Deployed theme path: `/home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm`
 - Deployed plugin path: `/home/grapsa5/barbadosescapes.com/wp-content/plugins/gutenberg-lab-blocks`
+- Staging URL: `https://barbadosescapes.com/staging/`
+- Staging WordPress docroot: `/home/grapsa5/barbadosescapes.com/staging`
+- Staging table prefix: `vvm_`
+- Staging server repo: `/home/grapsa5/repositories/barbados-escapes-staging`
+- Staging theme path: `/home/grapsa5/barbadosescapes.com/staging/wp-content/themes/gutenberg-lab-vvm`
+- Staging plugin path: `/home/grapsa5/barbadosescapes.com/staging/wp-content/plugins/gutenberg-lab-blocks`
 
 ## Deploy Contract
 
@@ -34,11 +40,18 @@ Verified on April 12-13, 2026. Updated for the production launch target on June 
   - `wp-content/themes/gutenberg-lab-vvm`
   - `wp-content/plugins/gutenberg-lab-blocks`
 - WordPress core, uploads, and third-party plugins remain server-managed.
-- Auto-deploy is triggered by pushes to `main` that touch:
+- Production auto-deploy is triggered by pushes to `main` that touch:
   - `.github/workflows/deploy-backend.yml`
   - `.cpanel.yml`
   - `wp-content/themes/gutenberg-lab-vvm/**`
   - `wp-content/plugins/gutenberg-lab-blocks/**`
+- Staging auto-deploy is triggered by pushes to `staging` that touch:
+  - `.github/workflows/deploy-staging.yml`
+  - `wp-content/themes/gutenberg-lab-vvm/**`
+  - `wp-content/plugins/gutenberg-lab-blocks/**`
+- Staging can also be deployed manually with the `Deploy Backend to Staging` workflow.
+- `.cpanel.yml` remains production-only. This prevents a manual cPanel deploy from updating both environments accidentally.
+- Database, uploads, WordPress core, and third-party plugins are not copied by either code pipeline.
 
 ## Connection Model
 
@@ -98,7 +111,7 @@ The working setup was:
 
 ## GitHub Actions -> Server Setup
 
-The repo workflow is [`.github/workflows/deploy-backend.yml`](../.github/workflows/deploy-backend.yml).
+The production workflow is [`.github/workflows/deploy-backend.yml`](../.github/workflows/deploy-backend.yml). The staging workflow is [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml).
 
 Required GitHub Actions secrets:
 
@@ -125,13 +138,43 @@ For this project, the same private key used by the VVM deployment worked:
 
 That key is for GitHub Actions logging into the InMotion server. It is not the same key as the server-side `barbados-escapes-git` deploy key used to pull from GitHub.
 
+## Staging Deployment
+
+Staging is a separate WordPress install below the production document root. Its code pipeline deliberately has its own server checkout so a staging deploy cannot switch the branch used by production:
+
+- Git branch: `staging`
+- Server checkout: `/home/grapsa5/repositories/barbados-escapes-staging`
+- WordPress target: `/home/grapsa5/barbadosescapes.com/staging`
+- Public URL: `https://barbadosescapes.com/staging/`
+
+Before copying code, the workflow verifies all of the following:
+
+- the exact staging path contains `wp-config.php` and an installed WordPress site
+- both `home` and `siteurl` equal `https://barbadosescapes.com/staging`
+- the table prefix is `vvm_`
+- `gutenberg-lab-vvm` is the active theme
+- `gutenberg-lab-blocks` is active
+- the dedicated server checkout contains the exact GitHub commit being deployed
+
+The workflow then updates the tracked custom theme and plugin with `rsync`, verifies every repository-owned file against the checkout, and requests a cache-busted staging URL with a browser user agent. A mismatch or non-`200` response fails the deployment. It intentionally preserves staging-only files during the initial pipeline cutover; removing obsolete server files is a separate cleanup decision.
+
+To deploy the current committed branch tip to staging without changing local branches:
+
+```bash
+git push origin HEAD:staging
+```
+
+Only committed files are deployed. A non-fast-forward push is intentionally rejected; update the staging branch normally rather than force-pushing it. The same workflow can be run manually from GitHub Actions when a one-off deployment of a selected ref is more appropriate.
+
+Staging code deployment does not copy its database or uploads. The existing DDEV `sync-remote`, `push-remote`, and `push-post` commands remain production-only until a separate staging content-sync contract is explicitly added.
+
 ## Rewrite Requirement
 
 Deployment worked before routing worked.
 
 WordPress was installed and reachable at `/wp-login.php`, and the REST API worked at `/?rest_route=/`, but `/wp-json/` returned `404` until `.htaccess` existed in the live docroot.
 
-The working file on the server is:
+The production file on the server is:
 
 ```apacheconf
 # BEGIN WordPress
@@ -147,11 +190,27 @@ RewriteRule . /index.php [L]
 # END WordPress
 ```
 
+The staging install has the corresponding subdirectory rules:
+
+```apacheconf
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteBase /staging/
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /staging/index.php [L]
+</IfModule>
+# END WordPress
+```
+
 Current note:
 
-- this `.htaccess` file was created directly on the server
-- it is not currently deployed from this repo
-- if the docroot is rebuilt or replaced, `/wp-json/` should be rechecked immediately
+- the production and staging rewrite files are managed directly on the server
+- they are not currently deployed from this repo
+- if either docroot is rebuilt or replaced, its `/wp-json/` route should be rechecked immediately
 
 ## Local Refresh
 
@@ -285,7 +344,9 @@ ddev snapshot restore --latest
 
 ## Verification Checklist
 
-Use these checks after setup changes or deployment troubleshooting:
+### Production
+
+Use these checks after production setup changes or deployment troubleshooting:
 
 1. Confirm the server repo remote:
 
@@ -325,10 +386,27 @@ Use these checks after setup changes or deployment troubleshooting:
 
    - `www-authenticate: Basic realm="Access to A Bun In The Oven"`
 
+### Staging
+
+The staging Action performs these checks automatically. For manual troubleshooting:
+
+```bash
+git -C /home/grapsa5/repositories/barbados-escapes-staging rev-parse HEAD
+wp --path=/home/grapsa5/barbadosescapes.com/staging option get home
+wp --path=/home/grapsa5/barbadosescapes.com/staging option get siteurl
+wp --path=/home/grapsa5/barbadosescapes.com/staging config get table_prefix
+curl -I -A "Mozilla/5.0" "https://barbadosescapes.com/staging/?deploy_verify=<commit>"
+```
+
+Expected values are the staging URL for both WordPress URL options, `vvm_` for the prefix, and HTTP `200`. Staging should also continue to emit `noindex, nofollow` while it is not intended for search indexing.
+
 ## Normal Workflow
 
-1. Commit changes to `main`.
-2. Push to GitHub.
-3. GitHub Actions runs `Deploy Backend to InMotion`.
-4. The workflow SSHes into InMotion, pulls `/home/grapsa5/repositories/barbados-escapes`, copies the custom theme and plugin into the live WordPress install, and verifies the deployed files over SSH.
-5. If needed, cPanel `Git Version Control -> Pull or Deploy -> Deploy HEAD Commit` remains available as a manual fallback.
+1. Commit the code that should be reviewed on staging.
+2. Push that commit to `staging` with `git push origin HEAD:staging`.
+3. GitHub Actions runs `Deploy Backend to Staging`, verifies the staging identity, deploys the custom theme/plugin, verifies every repository-owned file, and checks the public staging URL.
+4. Review `https://barbadosescapes.com/staging/`.
+5. Merge the approved commit into `main` and push it to GitHub.
+6. GitHub Actions runs `Deploy Backend to InMotion` for production.
+7. The production workflow pulls `/home/grapsa5/repositories/barbados-escapes`, copies the custom theme and plugin into the live WordPress install, and verifies the deployed files over SSH.
+8. If needed, cPanel `Git Version Control -> Pull or Deploy -> Deploy HEAD Commit` remains available as a production-only manual fallback.

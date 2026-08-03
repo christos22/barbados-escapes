@@ -121,9 +121,10 @@ jobs:
               "GITHUB_SHA=$GITHUB_SHA bash -se" < "$remote_script"; then
               echo "Deployment verified on server."
               exit 0
+            else
+              status=$?
             fi
 
-            status=$?
             echo "SSH deploy attempt ${attempt}/5 failed with status $status."
 
             if [ "$attempt" -eq 5 ]; then
