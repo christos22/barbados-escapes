@@ -1,120 +1,544 @@
+@import "flatpickr/dist/flatpickr.css";
+
 .wp-block-gutenberg-lab-blocks-villa-hero-search,
 .vvm-villa-hero-search {
-	width: min(100%, 44rem);
-	margin-inline: auto;
+	box-sizing: border-box;
+	justify-self: center;
+	margin-inline: 0;
+	max-width: none;
+	position: relative;
+	width: min(90rem, calc(100vw - 2rem));
+	/* Floating filter panels must stay above the isolated villa-card layers. */
+	z-index: 5;
 }
 
 .vvm-villa-hero-search {
+	--vvm-search-border: rgb(30 61 47 / 0.14);
+	--vvm-search-gold: var(--wp--preset--color--gold, #c4922a);
+	--vvm-search-green: var(--wp--preset--color--dark-green, #1e3d2f);
+	--vvm-search-muted: rgb(30 61 47 / 0.66);
+	--vvm-search-surface: rgb(255 255 255 / 0.97);
+
 	&__form {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-		gap: 0.65rem;
-		align-items: center;
-		padding: 0.5rem;
+		align-items: stretch;
+		background: var(--vvm-search-surface);
+		border: 1px solid var(--vvm-search-border);
 		border-radius: 999px;
-		border: 1px solid rgb(15 45 35 / 0.08);
-		background: rgb(255 255 255 / 0.96);
-		box-shadow: 0 12px 30px rgb(15 45 35 / 0.12);
+		box-shadow: 0 16px 38px rgb(15 45 35 / 0.14);
+		display: grid;
+		grid-template-columns:
+			minmax(13rem, 1.45fr)
+			repeat(var(--vvm-search-filter-count, 5), minmax(8.5rem, 1fr))
+			auto;
+		isolation: isolate;
+		padding: 0.5rem;
 	}
 
 	&__field {
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		min-width: 0;
+		padding: 0.45rem 0.85rem;
 		position: relative;
-
-		&::after {
-			content: "▾";
-			position: absolute;
-			top: 50%;
-			right: 1.15rem;
-			transform: translateY(-50%);
-			font-size: 0.85rem;
-			color: var(--wp--preset--color--forest, #013223);
-			pointer-events: none;
-		}
 	}
 
+	&__field + &__field,
 	&__actions {
-		display: flex;
+		border-left: 1px solid var(--vvm-search-border);
+	}
+
+	&__advanced {
+		display: contents;
+	}
+
+	&__advanced[hidden] {
+		display: none;
+	}
+
+	&__advanced > &__field:first-child {
+		border-left: 1px solid var(--vvm-search-border);
+	}
+
+	&__more-toggle {
+		display: none;
+	}
+
+	&__label {
+		color: var(--vvm-search-green);
+		display: block;
+		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-size: 0.68rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		margin-bottom: 0.25rem;
+		text-align: left;
+		text-transform: uppercase;
+	}
+
+	&__control,
+	&__date-input,
+	&__select-trigger,
+	&__price-summary-value,
+	&__price-panel input {
+		background: transparent;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		box-sizing: border-box;
+		color: var(--vvm-search-green);
+		font: inherit;
+		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-size: 0.9rem;
+		line-height: 1.35;
+		margin: 0;
+		min-height: 1.5rem;
+		padding: 0;
+		width: 100%;
+	}
+
+	&__control::placeholder,
+	&__date-input,
+	&__select:has(option:checked[value=""]),
+	&__select-trigger[data-placeholder="true"],
+	&__field--price:not(:has(input:not(:placeholder-shown))) &__price-summary-value {
+		color: var(--vvm-search-muted);
+		opacity: 1;
+	}
+
+	&__control:focus,
+	&__date-input:focus,
+	&__select-trigger:focus,
+	&__price-panel input:focus {
+		outline: 2px solid var(--vvm-search-gold);
+		outline-offset: 0.25rem;
 	}
 
 	&__select,
-	&__submit {
-		width: 100%;
-		min-height: 3.5rem;
-		border: 0;
-		font: inherit;
-	}
-
-	&__select {
-		padding: 0 2.75rem 0 1.15rem;
-		border-radius: 999px 0 0 999px;
-		font-family: var(--wp--preset--font-family--refined-sans, inherit);
-		font-size: 1rem;
-		color: var(--wp--preset--color--deep-forest, #0f2d23);
-		background: rgb(246 241 232 / 0.9);
+	&__select-trigger {
 		appearance: none;
+		background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+			linear-gradient(135deg, currentColor 50%, transparent 50%);
+		background-position:
+			calc(100% - 0.65rem) calc(50% - 0.1rem),
+			calc(100% - 0.35rem) calc(50% - 0.1rem);
+		background-repeat: no-repeat;
+		background-size: 0.3rem 0.3rem;
+		cursor: pointer;
+		padding-right: 1.25rem;
+	}
+
+	&__select-menu {
+		min-width: 0;
+		position: relative;
+		width: 100%;
+	}
+
+	&__select-trigger {
+		display: block;
+		text-align: left;
+	}
+
+	&__select-options {
+		background: #fff;
+		border: 1px solid var(--vvm-search-border);
+		border-radius: 0.5rem;
+		box-shadow: 0 18px 38px rgb(15 45 35 / 0.16);
+		box-sizing: border-box;
+		left: 0;
+		max-height: 18rem;
+		max-width: calc(100vw - 2rem);
+		overflow-y: auto;
+		padding: 0.35rem;
+		position: absolute;
+		top: calc(100% + 0.55rem);
+		width: max(100%, 15rem);
+		z-index: 20;
+	}
+
+	&__select-option {
+		background: transparent;
+		border: 0;
+		border-radius: 0.3rem;
+		color: var(--vvm-search-green);
+		cursor: pointer;
+		display: block;
+		font: inherit;
+		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-size: 0.86rem;
+		line-height: 1.35;
+		padding: 0.65rem 0.7rem;
+		text-align: left;
+		width: 100%;
+	}
+
+	&__select-option:hover,
+	&__select-option:focus-visible {
+		background: var(--wp--preset--color--light-gold, #f5ecd7);
+		outline: 0;
+	}
+
+	&__select-option[aria-selected="true"] {
+		background: rgb(196 146 42 / 0.15);
+		font-weight: 600;
+	}
+
+	&__date-fallback {
+		align-items: center;
+		display: grid;
+		gap: 0.35rem;
+		grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	}
+
+	&__date-input {
+		font-size: 0.78rem;
+	}
+
+	&__date-trigger {
+		cursor: pointer;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__form.is-date-enhanced &__date-fallback {
+		display: none;
+	}
+
+	&__field--price {
+		margin: 0;
+	}
+
+	&__price-summary {
+		box-sizing: border-box;
+		cursor: pointer;
+		display: block;
+		list-style: none;
+		min-width: 0;
+		padding-right: 1.2rem;
+		position: relative;
+		text-align: left;
+		width: 100%;
+	}
+
+	&__price-summary::-webkit-details-marker {
+		display: none;
+	}
+
+	&__price-summary::after {
+		border-bottom: 1px solid currentColor;
+		border-right: 1px solid currentColor;
+		color: var(--vvm-search-green);
+		content: "";
+		height: 0.35rem;
+		position: absolute;
+		right: 0.1rem;
+		top: 50%;
+		transform: translateY(-70%) rotate(45deg);
+		transition: transform 160ms ease;
+		width: 0.35rem;
+	}
+
+	&__field--price[open] &__price-summary::after {
+		transform: translateY(-25%) rotate(225deg);
+	}
+
+	&__price-summary-value {
+		display: block;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__price-panel {
+		background: #fff;
+		border: 1px solid var(--vvm-search-border);
+		border-radius: 0.5rem;
+		box-shadow: 0 18px 38px rgb(15 45 35 / 0.16);
+		display: grid;
+		gap: 0.45rem;
+		left: 0;
+		min-width: 15rem;
+		padding: 1rem;
+		position: absolute;
+		top: calc(100% + 0.55rem);
+		z-index: 10;
+	}
+
+	&__price-panel label {
+		color: var(--vvm-search-muted);
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.03em;
+		text-align: left;
+	}
+
+	&__price-panel input {
+		background: var(--wp--preset--color--ivory, #fbf8f2);
+		border: 1px solid var(--vvm-search-border);
+		border-radius: 0.25rem;
+		min-height: 2.75rem;
+		padding-inline: 0.75rem;
+	}
+
+	&__actions {
+		align-items: center;
+		display: flex;
+		padding-left: 0.5rem;
 	}
 
 	&__submit {
-		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		gap: 0.55rem;
-		padding-inline: 1.5rem;
-		border-radius: 999px;
-		color: var(--wp--preset--color--white, #ffffff);
-		background: var(--wp--preset--color--forest, #013223);
-		font-family: var(--wp--preset--font-family--refined-sans, inherit);
-		font-size: 0.8rem;
-		font-weight: 700;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
+		background: var(--vvm-search-gold);
+		border: 0;
+		border-radius: 50%;
+		color: var(--wp--preset--color--white, #fff);
 		cursor: pointer;
+		display: inline-flex;
+		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-size: 0.76rem;
+		font-weight: 700;
+		gap: 0;
+		justify-content: center;
+		letter-spacing: 0.06em;
+		min-height: 3.0625rem;
+		min-width: 3.0625rem;
+		padding: 0;
+		text-transform: uppercase;
+		transition:
+			background-color 160ms ease,
+			transform 160ms ease;
+		width: 3.0625rem;
+	}
+
+	&__submit:hover,
+	&__submit:focus-visible {
+		background: var(--vvm-search-green);
+		transform: translateY(-1px);
+	}
+
+	&__submit:focus-visible {
+		outline: 2px solid var(--wp--preset--color--white, #fff);
+		outline-offset: -4px;
 	}
 
 	&__submit-label {
+		display: none;
 		white-space: nowrap;
 	}
 
 	&__submit-icon {
-		width: 1rem;
 		height: 1rem;
+		width: 1rem;
 	}
 
 	&__submit-icon svg {
 		display: block;
-		width: 100%;
-		height: 100%;
 		fill: none;
+		height: 100%;
 		stroke: currentColor;
 		stroke-linecap: round;
 		stroke-linejoin: round;
 		stroke-width: 2;
+		width: 100%;
 	}
+}
 
-	&__submit:disabled,
-	&__select:disabled {
-		cursor: not-allowed;
-		opacity: 0.68;
+.flatpickr-calendar.vvm-villa-search-calendar {
+	--vvm-picker-border: rgb(30 61 47 / 0.14);
+	--vvm-picker-range: rgb(196 146 42 / 0.18);
+
+	background: var(--wp--preset--color--white, #fff);
+	border: 1px solid var(--vvm-picker-border);
+	border-radius: 0.5rem;
+	box-sizing: content-box;
+	box-shadow: 0 20px 48px rgb(15 45 35 / 0.18);
+	color: var(--wp--preset--color--dark-green, #1e3d2f);
+	font-family: var(--wp--preset--font-family--refined-sans, inherit);
+	padding: 0.85rem;
+}
+
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-months,
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-month,
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-weekdays,
+.flatpickr-calendar.vvm-villa-search-calendar span.flatpickr-weekday {
+	background: transparent;
+	color: var(--wp--preset--color--dark-green, #1e3d2f);
+}
+
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-current-month,
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-current-month input.cur-year {
+	font-size: 1rem;
+}
+
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-prev-month,
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-next-month {
+	color: var(--wp--preset--color--dark-green, #1e3d2f);
+	fill: currentColor;
+}
+
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day {
+	border-radius: 0;
+}
+
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day:hover,
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day:focus {
+	background: var(--wp--preset--color--light-gold, #f5ecd7);
+	border-color: var(--wp--preset--color--gold, #c4922a);
+}
+
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day.inRange {
+	background: var(--vvm-picker-range);
+	border-color: transparent;
+	box-shadow:
+		-5px 0 0 var(--vvm-picker-range),
+		5px 0 0 var(--vvm-picker-range);
+}
+
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day.startRange,
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day.endRange,
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day.selected {
+	background: var(--wp--preset--color--gold, #c4922a);
+	border-color: var(--wp--preset--color--gold, #c4922a);
+	color: #fff;
+}
+
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day.flatpickr-disabled,
+.flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day.flatpickr-disabled:hover {
+	background: transparent;
+	border-color: transparent;
+	color: rgb(30 61 47 / 0.24);
+}
+
+@media (max-width: 1100px) {
+	.vvm-villa-hero-search {
+		&__form {
+			border-radius: 0.75rem;
+			gap: 0;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		&__field,
+		&__actions {
+			border: 0;
+		}
+
+		&__field {
+			box-shadow: inset -1px -1px 0 var(--vvm-search-border);
+		}
+
+		&__actions {
+			border-top: 1px solid var(--vvm-search-border);
+			grid-column: 1 / -1;
+			padding: 0.5rem;
+		}
+
+		&__submit {
+			border-radius: 0.45rem;
+			gap: 0.55rem;
+			min-height: 3.75rem;
+			padding-inline: 1.2rem;
+			width: 100%;
+		}
+
+		&__submit-label {
+			display: inline;
+		}
 	}
 }
 
 @media (max-width: 781px) {
+	.wp-block-gutenberg-lab-blocks-villa-hero-search,
+	.vvm-villa-hero-search {
+		width: min(100%, calc(100vw - 1.5rem));
+	}
+
 	.vvm-villa-hero-search {
 		&__form {
+			border-radius: 0.65rem;
 			grid-template-columns: 1fr;
-			border-radius: 1.5rem;
+		}
+
+		&__field,
+		&__actions {
+			border: 0;
+			box-shadow: none;
+		}
+
+		&__field + &__field,
+		&__advanced > &__field:first-child,
+		&__actions {
+			border-top: 1px solid var(--vvm-search-border);
+		}
+
+		&__advanced {
+			display: block;
+		}
+
+		&__field {
+			min-height: 3.7rem;
+			padding-inline: 0.75rem;
+		}
+
+		&__more-toggle {
+			align-items: center;
+			background: transparent;
+			border: 0;
+			border-top: 1px solid var(--vvm-search-border);
+			color: var(--vvm-search-green);
+			cursor: pointer;
+			display: flex;
+			font: inherit;
+			font-size: 0.72rem;
+			font-weight: 700;
+			justify-content: space-between;
+			letter-spacing: 0.07em;
+			min-height: 3rem;
+			padding-inline: 0.75rem;
+			text-transform: uppercase;
+		}
+
+		&__more-toggle:focus-visible {
+			outline: 2px solid var(--vvm-search-gold);
+			outline-offset: -3px;
+		}
+
+		&__more-toggle-icon {
+			border-bottom: 1px solid currentColor;
+			border-right: 1px solid currentColor;
+			height: 0.4rem;
+			transform: translateY(-0.15rem) rotate(45deg);
+			transition: transform 160ms ease;
+			width: 0.4rem;
+		}
+
+		&__more-toggle[aria-expanded="true"] &__more-toggle-icon {
+			transform: translateY(0.15rem) rotate(225deg);
+		}
+
+		&__price-panel {
+			left: 0.5rem;
+			min-width: 0;
+			right: 0.5rem;
 		}
 
 		&__actions {
-			width: 100%;
+			grid-column: auto;
+			padding: 0.5rem 0;
 		}
+	}
 
-		&__select {
-			border-radius: 999px;
-		}
+	.flatpickr-calendar.vvm-villa-search-calendar {
+		max-width: calc(100vw - 1rem);
+	}
+}
 
-		&__submit {
-			width: 100%;
-		}
+@media (prefers-reduced-motion: reduce) {
+	.vvm-villa-hero-search__submit,
+	.vvm-villa-hero-search__price-summary::after,
+	.vvm-villa-hero-search__more-toggle-icon {
+		transition: none;
 	}
 }

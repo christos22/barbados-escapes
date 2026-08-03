@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/villa-search-results",
+	"version": "0.1.0",
+	"title": "Villa Search Results",
+	"category": "widgets",
+	"icon": "screenoptions",
+	"description": "Renders filtered villa cards with progressive infinite scrolling and resilient pagination.",
+	"supports": {
+		"align": ["wide"],
+		"html": false,
+		"reusable": false
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": [
+		"gutenberg-lab-blocks-card-grid-style",
+		"file:./style-index.css"
+	],
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php"
+}

@@ -14,14 +14,21 @@ export default function Edit( { attributes, setAttributes } ) {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Search Settings', 'gutenberg-lab-blocks' ) }>
+				<PanelBody
+					title={ __( 'Search Settings', 'gutenberg-lab-blocks' ) }
+				>
 					<TextControl
 						label={ __( 'Button Label', 'gutenberg-lab-blocks' ) }
 						value={ buttonLabel }
-						onChange={ ( value ) => setAttributes( { buttonLabel: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { buttonLabel: value } )
+						}
 					/>
 					<TextControl
-						label={ __( 'Location Placeholder', 'gutenberg-lab-blocks' ) }
+						label={ __(
+							'Location Placeholder',
+							'gutenberg-lab-blocks'
+						) }
 						value={ locationPlaceholder }
 						onChange={ ( value ) =>
 							setAttributes( { locationPlaceholder: value } )
@@ -37,7 +44,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				/>
 				<p className="vvm-villa-hero-search-editor-preview__hint">
 					{ __(
-						'Preview uses the live Villa Location terms and keeps the selected archive filter visible while you edit.',
+						'Preview uses the live Area and Collection terms. The frontend enhances the two date fields into one range picker.',
 						'gutenberg-lab-blocks'
 					) }
 				</p>

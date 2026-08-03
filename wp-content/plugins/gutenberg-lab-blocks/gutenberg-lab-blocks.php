@@ -25,6 +25,7 @@ require_once __DIR__ . '/includes/site-messages.php';
 require_once __DIR__ . '/includes/villas.php';
 require_once __DIR__ . '/includes/villa-bedroom-selector.php';
 require_once __DIR__ . '/includes/villa-availability.php';
+require_once __DIR__ . '/includes/villa-search-results.php';
 require_once __DIR__ . '/includes/villa-importer.php';
 require_once __DIR__ . '/includes/mcp-abilities.php';
 require_once __DIR__ . '/includes/block-visibility.php';
@@ -40,6 +41,7 @@ function gutenberg_lab_blocks_register_rewrite_content_types() {
 	gutenberg_lab_blocks_register_packages_post_type();
 	gutenberg_lab_blocks_register_package_type_taxonomy();
 	gutenberg_lab_blocks_register_villas_post_type();
+	gutenberg_lab_blocks_register_villa_collection_taxonomy();
 	gutenberg_lab_blocks_register_villa_location_taxonomy();
 }
 
@@ -468,6 +470,7 @@ function gutenberg_lab_blocks_register_blocks() {
 	register_block_type( __DIR__ . '/build/stack-tab-item' );
 	register_block_type( __DIR__ . '/build/site-alerts' );
 	register_block_type( __DIR__ . '/build/villa-hero-search' );
+	register_block_type( __DIR__ . '/build/villa-search-results' );
 	register_block_type( __DIR__ . '/build/villa-availability-calendar' );
 	register_block_type( __DIR__ . '/build/villa-bedroom-selector' );
 	register_block_type( __DIR__ . '/build/villa-gallery-hero' );

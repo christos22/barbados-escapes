@@ -2088,6 +2088,12 @@ function gutenberg_lab_blocks_villa_importer_build_bedroom_levels( $bedrooms, $b
 			$title_parts = gutenberg_lab_blocks_villa_importer_bedroom_card_title_parts(
 				$room['room_name'] ?? ''
 			);
+			$room_label = gutenberg_lab_blocks_villa_importer_text( $room['room_label'] ?? '' );
+
+			if ( '' !== $room_label ) {
+				$title_parts['eyebrow'] = $room_label;
+			}
+
 			$chips       = gutenberg_lab_blocks_villa_importer_bedroom_level_chips( $room );
 			$description = gutenberg_lab_blocks_villa_importer_text( $room['description'] ?? '' );
 
@@ -3816,6 +3822,35 @@ function gutenberg_lab_blocks_villa_importer_validate_payload( $data ) {
 		}
 	}
 
+	$overview = $data['overview'];
+
+	// Current workbooks explicitly manage the public Area filter. Keep legacy
+	// payloads compatible, but never accept an explicitly blank or malformed key.
+	if ( array_key_exists( 'search_area', $overview ) ) {
+		if ( ! is_scalar( $overview['search_area'] ) && null !== $overview['search_area'] ) {
+			return new WP_Error(
+				'invalid_villa_search_area',
+				__( 'The villa search area must be a plain text value.', 'gutenberg-lab-blocks' )
+			);
+		}
+
+		$search_area = gutenberg_lab_blocks_villa_importer_text( $overview['search_area'] );
+
+		if ( '' === $search_area ) {
+			return new WP_Error(
+				'missing_villa_search_area',
+				__( 'The villa search area is required in the current workbook format.', 'gutenberg-lab-blocks' )
+			);
+		}
+
+		if ( strlen( $search_area ) > 120 ) {
+			return new WP_Error(
+				'villa_search_area_too_long',
+				__( 'The villa search area must be 120 characters or fewer.', 'gutenberg-lab-blocks' )
+			);
+		}
+	}
+
 	return true;
 }
 
@@ -3873,6 +3908,130 @@ function gutenberg_lab_blocks_villa_importer_resolve_location( $location_name ) 
 			$location_name
 		)
 	);
+}
+
+/**
+ * Finds one enabled taxonomy term used by the public villa search.
+ *
+ * Search terms are curated in WordPress. Refusing unknown or hidden terms keeps
+ * workbook typos from creating villas that cannot be found through the filters.
+ *
+ * @param string $taxonomy Taxonomy name.
+ * @param string $term_name Client term name.
+ * @return WP_Term|WP_Error
+ */
+function gutenberg_lab_blocks_villa_importer_resolve_search_term( $taxonomy, $term_name ) {
+	if ( ! in_array( $taxonomy, array( 'villa_location', 'villa_collection' ), true ) ) {
+		return new WP_Error(
+			'invalid_villa_search_taxonomy',
+			__( 'The workbook contains an unsupported villa search taxonomy.', 'gutenberg-lab-blocks' )
+		);
+	}
+
+	$term_name = gutenberg_lab_blocks_villa_importer_text( $term_name );
+
+	if ( '' === $term_name ) {
+		return new WP_Error(
+			'empty_villa_search_term',
+			__( 'A villa search term cannot be empty.', 'gutenberg-lab-blocks' )
+		);
+	}
+
+	if ( 'villa_location' === $taxonomy ) {
+		$term = gutenberg_lab_blocks_villa_importer_resolve_location( $term_name );
+	} else {
+		$term = get_term_by( 'name', $term_name, $taxonomy );
+
+		if ( ! $term ) {
+			$term = get_term_by( 'slug', sanitize_title( $term_name ), $taxonomy );
+		}
+
+		if ( ! $term || is_wp_error( $term ) ) {
+			return new WP_Error(
+				'unknown_villa_collection',
+				sprintf(
+					/* translators: %s: Client collection. */
+					__( 'The villa collection "%s" does not match an existing collection term.', 'gutenberg-lab-blocks' ),
+					$term_name
+				)
+			);
+		}
+	}
+
+	if ( is_wp_error( $term ) ) {
+		return $term;
+	}
+
+	if ( ! (bool) get_term_meta( $term->term_id, 'villa_search_enabled', true ) ) {
+		return new WP_Error(
+			'disabled_villa_search_term',
+			sprintf(
+				/* translators: %s: Search term name. */
+				__( 'The search term "%s" exists but is not enabled for the public villa search.', 'gutenberg-lab-blocks' ),
+				$term->name
+			)
+		);
+	}
+
+	return $term;
+}
+
+/**
+ * Resolves a comma-separated string or array of enabled search terms.
+ *
+ * @param string              $taxonomy Taxonomy name.
+ * @param string|array<mixed> $values Term names.
+ * @return array<int, WP_Term>|WP_Error
+ */
+function gutenberg_lab_blocks_villa_importer_resolve_search_terms( $taxonomy, $values ) {
+	if ( ! is_array( $values ) ) {
+		$values = preg_split( '/[,;\r\n]+/', (string) $values );
+	}
+
+	$names = array();
+
+	foreach ( $values as $value ) {
+		if ( ! is_scalar( $value ) && null !== $value ) {
+			return new WP_Error(
+				'invalid_villa_search_term',
+				__( 'Villa search terms must be plain text values.', 'gutenberg-lab-blocks' )
+			);
+		}
+
+		$name = gutenberg_lab_blocks_villa_importer_text( $value );
+
+		if ( '' !== $name ) {
+			$names[] = $name;
+		}
+	}
+
+	if ( count( $names ) > 20 ) {
+		return new WP_Error(
+			'too_many_villa_search_terms',
+			__( 'The workbook cannot assign more than 20 terms to one villa search filter.', 'gutenberg-lab-blocks' )
+		);
+	}
+
+	$terms = array();
+
+	foreach ( $names as $name ) {
+		if ( strlen( $name ) > 120 ) {
+			return new WP_Error(
+				'villa_search_term_too_long',
+				__( 'Villa search term names must be 120 characters or fewer.', 'gutenberg-lab-blocks' )
+			);
+		}
+
+		$term = gutenberg_lab_blocks_villa_importer_resolve_search_term( $taxonomy, $name );
+
+		if ( is_wp_error( $term ) ) {
+			return $term;
+		}
+
+		$terms[ (int) $term->term_id ] = $term;
+	}
+
+	return array_values( $terms );
 }
 
 /**
@@ -4236,6 +4395,7 @@ function gutenberg_lab_blocks_villa_importer_backup_draft( $post_id, $backup_dir
 		'meta'       => get_post_meta( $post_id ),
 		'taxonomies' => array(
 			'villa_location' => wp_get_object_terms( $post_id, 'villa_location', array( 'fields' => 'ids' ) ),
+			'villa_collection' => wp_get_object_terms( $post_id, 'villa_collection', array( 'fields' => 'ids' ) ),
 			'villa_amenity'  => wp_get_object_terms( $post_id, 'villa_amenity', array( 'fields' => 'ids' ) ),
 		),
 	);
@@ -4259,20 +4419,39 @@ function gutenberg_lab_blocks_villa_importer_backup_draft( $post_id, $backup_dir
 /**
  * Builds the pricing-row key map used by the frontend selector.
  *
- * @param array<int, array<string, mixed>> $rates Normalized workbook rates.
+ * Seasonal labels such as "Summer rate" are generic and must remain visible
+ * for every bedroom choice. Only labels that identify a bedroom count or
+ * exactly match a custom selector choice receive a filtering key.
+ *
+ * @param array<int, array<string, mixed>> $rates   Normalized workbook rates.
+ * @param array<int, array{label:string}>  $choices Normalized custom choices.
  * @return array<int, string>
  */
-function gutenberg_lab_blocks_villa_importer_pricing_row_keys( $rates ) {
-	$keys = array();
+function gutenberg_lab_blocks_villa_importer_pricing_row_keys( $rates, $choices = array() ) {
+	$keys        = array();
+	$choice_keys = array();
+
+	foreach ( $choices as $choice ) {
+		$choice_label = gutenberg_lab_blocks_villa_importer_text( $choice['label'] ?? '' );
+		$choice_key   = gutenberg_lab_blocks_get_villa_bedroom_pricing_key_from_label( $choice_label );
+
+		if ( '' !== $choice_key ) {
+			$choice_keys[ $choice_key ] = true;
+		}
+	}
 
 	foreach ( $rates as $rate ) {
 		$rate_label = gutenberg_lab_blocks_villa_importer_text(
 			$rate['rate_label'] ?? ( $rate['season'] ?? '' )
 		);
-
-		$keys[] = gutenberg_lab_blocks_get_villa_bedroom_pricing_key_from_label(
+		$pricing_key = gutenberg_lab_blocks_get_villa_bedroom_pricing_key_from_label(
 			$rate_label
 		);
+
+		$keys[] = gutenberg_lab_blocks_get_villa_bedroom_count_from_label( $rate_label ) > 0 ||
+			isset( $choice_keys[ $pricing_key ] )
+			? $pricing_key
+			: '';
 	}
 
 	return array_filter( $keys ) ? $keys : array();
@@ -4308,10 +4487,14 @@ function gutenberg_lab_blocks_villa_importer_meta( $data ) {
 		$overview['bedroom_selector_choices'] ?? array()
 	);
 	$pricing_row_keys = gutenberg_lab_blocks_villa_importer_pricing_row_keys(
-		$data['rates'] ?? array()
+		$data['rates'] ?? array(),
+		$bedroom_selector_choices
 	);
 
 	$meta = array(
+		'villa_search_bedrooms'        => absint( $overview['bedrooms'] ),
+		'villa_search_sleeps'          => absint( $overview['sleeps'] ),
+		'villa_search_starting_price_usd' => absint( $overview['starting_rate_usd'] ),
 		'villa_card_eyebrow'           => $card_location,
 		'villa_card_descriptor'        => gutenberg_lab_blocks_villa_importer_excerpt( $data ),
 		'villa_card_facts'             => $facts,
@@ -4398,6 +4581,30 @@ class Gutenberg_Lab_Blocks_Villa_Import_Command {
 			WP_CLI::error( $location->get_error_message() );
 		}
 
+		$location_terms = array( (int) $location->term_id => $location );
+		$search_area = gutenberg_lab_blocks_villa_importer_text( $overview['search_area'] ?? '' );
+
+		if ( '' !== $search_area ) {
+			$search_area_term = gutenberg_lab_blocks_villa_importer_resolve_search_term( 'villa_location', $search_area );
+
+			if ( is_wp_error( $search_area_term ) ) {
+				WP_CLI::error( $search_area_term->get_error_message() );
+			}
+
+			$location_terms[ (int) $search_area_term->term_id ] = $search_area_term;
+		}
+
+		$collection_terms = array_key_exists( 'villa_collections', $overview )
+			? gutenberg_lab_blocks_villa_importer_resolve_search_terms(
+				'villa_collection',
+				$overview['villa_collections']
+			)
+			: null;
+
+		if ( is_wp_error( $collection_terms ) ) {
+			WP_CLI::error( $collection_terms->get_error_message() );
+		}
+
 		if ( '' !== $source_ref ) {
 			$source_post = gutenberg_lab_blocks_villa_importer_resolve_source_villa( $source_ref );
 
@@ -4434,6 +4641,27 @@ class Gutenberg_Lab_Blocks_Villa_Import_Command {
 
 			if ( ! $dry_run && ! $confirmed ) {
 				WP_CLI::error( 'Updating an existing draft requires --yes.' );
+			}
+
+			// A workbook created before search-area support has no explicit area
+			// key. Preserve any enabled area already assigned to that draft rather
+			// than silently stripping it during a legacy workbook update.
+			if ( ! array_key_exists( 'search_area', $overview ) ) {
+				$existing_location_terms = wp_get_object_terms(
+					$update_id,
+					'villa_location',
+					array( 'fields' => 'all' )
+				);
+
+				if ( is_wp_error( $existing_location_terms ) ) {
+					WP_CLI::error( $existing_location_terms->get_error_message() );
+				}
+
+				foreach ( $existing_location_terms as $existing_location_term ) {
+					if ( (bool) get_term_meta( $existing_location_term->term_id, 'villa_search_enabled', true ) ) {
+						$location_terms[ (int) $existing_location_term->term_id ] = $existing_location_term;
+					}
+				}
 			}
 
 			$slug_duplicate = get_page_by_path( $slug, OBJECT, 'villa' );
@@ -4553,7 +4781,20 @@ class Gutenberg_Lab_Blocks_Villa_Import_Command {
 
 		WP_CLI::line( sprintf( 'Villa: %s', $title ) );
 		WP_CLI::line( sprintf( 'Slug: %s', $slug ) );
-		WP_CLI::line( sprintf( 'Location: %s', $location->name ) );
+		WP_CLI::line(
+			sprintf(
+				'Locations: %s',
+				implode( ', ', wp_list_pluck( array_values( $location_terms ), 'name' ) )
+			)
+		);
+		if ( null !== $collection_terms ) {
+			WP_CLI::line(
+				sprintf(
+					'Collections: %s',
+					empty( $collection_terms ) ? 'none' : implode( ', ', wp_list_pluck( $collection_terms, 'name' ) )
+				)
+			);
+		}
 		WP_CLI::line(
 			$source_post instanceof WP_Post
 				? sprintf( 'Source scaffold: %s (#%d)', get_the_title( $source_post ), $source_post->ID )
@@ -4614,7 +4855,29 @@ class Gutenberg_Lab_Blocks_Villa_Import_Command {
 			WP_CLI::error( $summary_terms->get_error_message() );
 		}
 
-		wp_set_object_terms( $post_id, array( (int) $location->term_id ), 'villa_location', false );
+		$location_result = wp_set_object_terms(
+			$post_id,
+			array_keys( $location_terms ),
+			'villa_location',
+			false
+		);
+
+		if ( is_wp_error( $location_result ) ) {
+			WP_CLI::error( $location_result->get_error_message() );
+		}
+
+		if ( null !== $collection_terms ) {
+			$collection_result = wp_set_object_terms(
+				$post_id,
+				array_map( static fn( $term ) => (int) $term->term_id, $collection_terms ),
+				'villa_collection',
+				false
+			);
+
+			if ( is_wp_error( $collection_result ) ) {
+				WP_CLI::error( $collection_result->get_error_message() );
+			}
+		}
 		wp_set_object_terms( $post_id, $summary_terms, 'villa_amenity', false );
 
 		foreach ( gutenberg_lab_blocks_villa_importer_meta( $data ) as $meta_key => $meta_value ) {

@@ -6,7 +6,7 @@
   "title": "Villa Hero Search",
   "category": "widgets",
   "icon": "search",
-  "description": "Renders the villa location search form used in the homepage hero and archive intro.",
+  "description": "Renders the reusable Phase 1 villa search form used in the homepage hero and results page.",
   "attributes": {
     "buttonLabel": {
       "type": "string",
@@ -25,5 +25,6 @@
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "style": "file:./style-index.css",
+  "viewScript": "file:./view.js",
   "render": "file:./render.php"
 }

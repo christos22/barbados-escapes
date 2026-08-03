@@ -343,7 +343,7 @@ const integerValue = ( value ) => {
 
 const commaListValue = ( value ) =>
 	String( value || '' )
-		.split( ',' )
+		.split( /[,;\n]+/ )
 		.map( ( item ) => item.trim().replace( /\s+/g, ' ' ) )
 		.filter( Boolean );
 
@@ -611,6 +611,7 @@ addRequired(
 		'villa_name',
 		'property_area',
 		'parish',
+		...( hasOwn( overview, 'search_area' ) ? [ 'search_area' ] : [] ),
 		'hero_location_line',
 		'hero_statement',
 		'bedrooms',
@@ -660,6 +661,7 @@ const minimumBedroomChoice = hasLegacyMinimumBedroomChoice
 	? ( integerValue( overview.minimum_bedroom_choice ) || 1 )
 	: 1;
 const bedroomSelectorChoices = commaListValue( overview.bedroom_selector_choices );
+const villaCollections = commaListValue( overview.villa_collections );
 const coordinates = coordinatePairValue( overview.coordinates );
 
 if ( ! bedroomCount || bedroomCount < 1 ) {
@@ -676,6 +678,30 @@ if ( ! sleepsCount || sleepsCount < 1 ) {
 
 if ( startingRate === null || startingRate <= 0 ) {
 	errors.push( 'Overview: Starting nightly rate must be a number greater than zero.' );
+}
+
+if ( overview.search_area && String( overview.search_area ).length > 120 ) {
+	errors.push( 'Overview: Search area must be 120 characters or fewer.' );
+}
+
+if ( villaCollections.length > 20 ) {
+	errors.push( 'Overview: Search collections cannot contain more than 20 values.' );
+}
+
+const villaCollectionNames = new Set();
+
+for ( const collection of villaCollections ) {
+	const normalizedCollection = collection.toLowerCase();
+
+	if ( collection.length > 120 ) {
+		errors.push( `Overview: Search collection "${ collection }" must be 120 characters or fewer.` );
+	}
+
+	if ( villaCollectionNames.has( normalizedCollection ) ) {
+		errors.push( `Overview: Search collection "${ collection }" is duplicated.` );
+	}
+
+	villaCollectionNames.add( normalizedCollection );
 }
 
 if ( bedroomSelectorEnabled === null ) {
@@ -844,6 +870,18 @@ for ( const [ index, rate ] of rates.entries() ) {
 	}
 }
 
+const validRateAmounts = rates
+	.map( ( rate ) => currencyValue( rate.nightly_rate_usd ) )
+	.filter( ( amount ) => amount !== null && amount > 0 );
+
+if (
+	startingRate !== null &&
+	validRateAmounts.length > 0 &&
+	startingRate !== Math.min( ...validRateAmounts )
+) {
+	warnings.push( 'Overview: Starting nightly rate differs from the lowest valid Rates amount; confirm the search and card “from” price.' );
+}
+
 for ( const requiredRule of [ 'check-in', 'check-out', 'minimum stay', 'children', 'pets', 'smoking' ] ) {
 	if ( ! rules.some( ( rule ) => String( rule.rule || '' ).toLowerCase() === requiredRule ) ) {
 		errors.push( `House Rules: Add the "${ requiredRule }" rule.` );
@@ -943,6 +981,10 @@ const overviewPayload = {
 	bedroom_selector_enabled: bedroomSelectorEnabled,
 	bedroom_selector_choices: bedroomSelectorChoices,
 };
+
+if ( hasOwn( overview, 'villa_collections' ) ) {
+	overviewPayload.villa_collections = villaCollections;
+}
 
 if ( coordinates ) {
 	overviewPayload.coordinates = coordinates;

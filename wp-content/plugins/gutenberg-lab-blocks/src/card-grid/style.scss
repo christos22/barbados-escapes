@@ -378,6 +378,15 @@
 		margin: 0;
 	}
 
+	.vvm-card-grid__card--villa > .vvm-card-grid__card-content > .vvm-card-grid__card-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem 1.25rem;
+		margin-top: auto;
+		padding-top: 0.35rem;
+	}
+
 	.vvm-card-grid__card--villa > .vvm-card-grid__card-content .vvm-card-grid__card-facts,
 	.vvm-card-grid__card--villa > .vvm-card-grid__card-content .vvm-card-grid__card-price {
 		color: inherit;

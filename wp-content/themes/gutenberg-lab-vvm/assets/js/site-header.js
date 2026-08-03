@@ -145,7 +145,16 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	const initializeVillaContactDateRanges = () => {
 		villaContactForms.forEach( ( form ) => {
 			const arrival = form.querySelector( '[name="preferred-arrival"]' );
-			const departure = form.querySelector( '[name="preferred-departure"]' );
+			const departure = form.querySelector(
+				'[name="preferred-departure"]'
+			);
+			const formCard = form.closest( '.vvm-villa-contact__form-card' );
+
+			// Give result-card enquiry links a stable destination without coupling
+			// the saved Contact Form 7 markup to this navigation feature.
+			if ( formCard && ! document.getElementById( 'enquire' ) ) {
+				formCard.id = 'enquire';
+			}
 
 			if (
 				! arrival ||
@@ -174,6 +183,14 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			arrival.addEventListener( 'input', syncDepartureMinimum );
 			syncDepartureMinimum();
 		} );
+
+		if ( window.location.hash === '#enquire' ) {
+			window.requestAnimationFrame( () => {
+				document.getElementById( 'enquire' )?.scrollIntoView( {
+					block: 'start',
+				} );
+			} );
+		}
 	};
 
 	const initializeVillaContactTextareas = () => {

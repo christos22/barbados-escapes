@@ -12,10 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registers the Villas content type used by the homepage hero search.
  *
- * We keep the first version intentionally small: a real CPT plus a structured
- * location taxonomy. Single villa URLs remain public under `/villas/{slug}/`,
- * but the `/villas/` archive is disabled until the collection/search page is
- * ready for launch.
+ * Single villa URLs live under `/villas/{slug}/`, while `/villas/` is the
+ * server-rendered collection and search-results page.
  */
 function gutenberg_lab_blocks_register_villas_post_type() {
 	register_post_type(
@@ -49,9 +47,10 @@ function gutenberg_lab_blocks_register_villas_post_type() {
 			),
 			'public'       => true,
 			'show_in_rest' => true,
-			'has_archive'  => false,
+			'has_archive'  => 'villas',
 			'rewrite'      => array(
-				'slug' => 'villas',
+				'slug'       => 'villas',
+				'with_front' => false,
 			),
 			'menu_icon'    => 'dashicons-admin-home',
 			'supports'     => array(
@@ -64,6 +63,7 @@ function gutenberg_lab_blocks_register_villas_post_type() {
 			),
 			'taxonomies'   => array(
 				'villa_amenity',
+				'villa_collection',
 				'villa_location',
 			),
 		)
@@ -478,6 +478,43 @@ function gutenberg_lab_blocks_sanitize_villa_schema_coordinate( $coordinate ) {
 }
 
 /**
+ * Sanitizes the positive whole numbers used by villa search.
+ *
+ * Zero represents "not supplied", which lets the query ignore incomplete
+ * records instead of deriving business data from presentation copy.
+ *
+ * @param mixed $value Raw numeric value.
+ * @return int
+ */
+function gutenberg_lab_blocks_sanitize_villa_search_integer( $value ) {
+	if ( ! is_scalar( $value ) || is_bool( $value ) ) {
+		return 0;
+	}
+
+	$value = trim( (string) $value );
+
+	// Reject signs, decimals, scientific notation and mixed strings instead of
+	// silently turning malformed input such as `-5` or `12abc` into a filter.
+	if ( '' === $value || ! preg_match( '/^\d+$/D', $value ) ) {
+		return 0;
+	}
+
+	$normalized = ltrim( $value, '0' );
+
+	if ( '' === $normalized ) {
+		return 0;
+	}
+
+	$integer = filter_var(
+		$normalized,
+		FILTER_VALIDATE_INT,
+		array( 'options' => array( 'min_range' => 1 ) )
+	);
+
+	return false === $integer ? 0 : (int) $integer;
+}
+
+/**
  * Registers the reusable Amenity taxonomy for villa posts.
  */
 function gutenberg_lab_blocks_register_villa_amenity_taxonomy() {
@@ -662,6 +699,21 @@ add_action( 'enqueue_block_editor_assets', 'gutenberg_lab_blocks_enqueue_villa_a
  */
 function gutenberg_lab_blocks_get_villa_meta_schema() {
 	return array(
+		'villa_search_bedrooms' => array(
+			'type'              => 'integer',
+			'default'           => 0,
+			'sanitize_callback' => 'gutenberg_lab_blocks_sanitize_villa_search_integer',
+		),
+		'villa_search_sleeps' => array(
+			'type'              => 'integer',
+			'default'           => 0,
+			'sanitize_callback' => 'gutenberg_lab_blocks_sanitize_villa_search_integer',
+		),
+		'villa_search_starting_price_usd' => array(
+			'type'              => 'integer',
+			'default'           => 0,
+			'sanitize_callback' => 'gutenberg_lab_blocks_sanitize_villa_search_integer',
+		),
 		'villa_card_eyebrow'    => array(
 			'type'              => 'string',
 			'default'           => '',
@@ -801,15 +853,71 @@ add_action( 'add_meta_boxes_villa', 'gutenberg_lab_blocks_add_villa_meta_boxes' 
  * @param WP_Post $post Current villa post object.
  */
 function gutenberg_lab_blocks_render_villa_card_content_meta_box( $post ) {
-	$eyebrow    = get_post_meta( $post->ID, 'villa_card_eyebrow', true );
-	$descriptor = get_post_meta( $post->ID, 'villa_card_descriptor', true );
-	$facts      = get_post_meta( $post->ID, 'villa_card_facts', true );
-	$price      = get_post_meta( $post->ID, 'villa_card_price', true );
-	$cta_label  = get_post_meta( $post->ID, 'villa_card_cta_label', true );
-	$cta_url    = get_post_meta( $post->ID, 'villa_card_cta_url', true );
+	$search_bedrooms = get_post_meta( $post->ID, 'villa_search_bedrooms', true );
+	$search_sleeps   = get_post_meta( $post->ID, 'villa_search_sleeps', true );
+	$search_price    = get_post_meta( $post->ID, 'villa_search_starting_price_usd', true );
+	$eyebrow         = get_post_meta( $post->ID, 'villa_card_eyebrow', true );
+	$descriptor      = get_post_meta( $post->ID, 'villa_card_descriptor', true );
+	$facts           = get_post_meta( $post->ID, 'villa_card_facts', true );
+	$price           = get_post_meta( $post->ID, 'villa_card_price', true );
+	$cta_label       = get_post_meta( $post->ID, 'villa_card_cta_label', true );
+	$cta_url         = get_post_meta( $post->ID, 'villa_card_cta_url', true );
 
 	wp_nonce_field( 'gutenberg_lab_blocks_save_villa_fields', 'gutenberg_lab_blocks_villa_fields_nonce' );
 	?>
+	<h3><?php esc_html_e( 'Search details', 'gutenberg-lab-blocks' ); ?></h3>
+	<p class="description">
+		<?php esc_html_e( 'Structured numbers used for fast search filtering. Keep display wording in the card fields below.', 'gutenberg-lab-blocks' ); ?>
+	</p>
+	<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;">
+		<p>
+			<label for="gutenberg-lab-villa-search-bedrooms">
+				<?php esc_html_e( 'Bedrooms', 'gutenberg-lab-blocks' ); ?>
+			</label>
+			<input
+				type="number"
+				id="gutenberg-lab-villa-search-bedrooms"
+				name="gutenberg_lab_villa_search_bedrooms"
+				class="widefat"
+				min="1"
+				step="1"
+				inputmode="numeric"
+				value="<?php echo esc_attr( $search_bedrooms ); ?>"
+			/>
+		</p>
+		<p>
+			<label for="gutenberg-lab-villa-search-sleeps">
+				<?php esc_html_e( 'Guest capacity', 'gutenberg-lab-blocks' ); ?>
+			</label>
+			<input
+				type="number"
+				id="gutenberg-lab-villa-search-sleeps"
+				name="gutenberg_lab_villa_search_sleeps"
+				class="widefat"
+				min="1"
+				step="1"
+				inputmode="numeric"
+				value="<?php echo esc_attr( $search_sleeps ); ?>"
+			/>
+		</p>
+		<p>
+			<label for="gutenberg-lab-villa-search-price">
+				<?php esc_html_e( 'Starting nightly price (USD)', 'gutenberg-lab-blocks' ); ?>
+			</label>
+			<input
+				type="number"
+				id="gutenberg-lab-villa-search-price"
+				name="gutenberg_lab_villa_search_starting_price_usd"
+				class="widefat"
+				min="1"
+				step="1"
+				inputmode="numeric"
+				value="<?php echo esc_attr( $search_price ); ?>"
+			/>
+		</p>
+	</div>
+	<hr />
+	<h3><?php esc_html_e( 'Card presentation', 'gutenberg-lab-blocks' ); ?></h3>
 	<p>
 		<label for="gutenberg-lab-villa-card-eyebrow">
 			<?php esc_html_e( 'Card eyebrow', 'gutenberg-lab-blocks' ); ?>
@@ -1021,6 +1129,9 @@ function gutenberg_lab_blocks_save_villa_meta( $post_id ) {
 	}
 
 	$field_map = array(
+		'villa_search_bedrooms' => 'gutenberg_lab_villa_search_bedrooms',
+		'villa_search_sleeps' => 'gutenberg_lab_villa_search_sleeps',
+		'villa_search_starting_price_usd' => 'gutenberg_lab_villa_search_starting_price_usd',
 		'villa_card_eyebrow'    => 'gutenberg_lab_villa_card_eyebrow',
 		'villa_card_descriptor' => 'gutenberg_lab_villa_card_descriptor',
 		'villa_card_facts'      => 'gutenberg_lab_villa_card_facts',
@@ -1048,7 +1159,7 @@ function gutenberg_lab_blocks_save_villa_meta( $post_id ) {
 			$value = call_user_func( $meta_schema[ $meta_key ]['sanitize_callback'], $value );
 		}
 
-		if ( '' === $value ) {
+		if ( '' === $value || ( str_starts_with( $meta_key, 'villa_search_' ) && 0 === $value ) ) {
 			delete_post_meta( $post_id, $meta_key );
 			continue;
 		}
@@ -1096,6 +1207,141 @@ function gutenberg_lab_blocks_register_villa_location_taxonomy() {
 	);
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_villa_location_taxonomy' );
+
+/**
+ * Registers editorial villa collections used by search.
+ *
+ * Collections are managed in WordPress and can be reused across homepage and
+ * results-page searches without exposing thin public taxonomy archives.
+ */
+function gutenberg_lab_blocks_register_villa_collection_taxonomy() {
+	register_taxonomy(
+		'villa_collection',
+		array( 'villa' ),
+		array(
+			'labels'            => array(
+				'name'          => __( 'Villa Collections', 'gutenberg-lab-blocks' ),
+				'singular_name' => __( 'Villa Collection', 'gutenberg-lab-blocks' ),
+				'search_items'  => __( 'Search Villa Collections', 'gutenberg-lab-blocks' ),
+				'all_items'     => __( 'All Villa Collections', 'gutenberg-lab-blocks' ),
+				'edit_item'     => __( 'Edit Villa Collection', 'gutenberg-lab-blocks' ),
+				'update_item'   => __( 'Update Villa Collection', 'gutenberg-lab-blocks' ),
+				'add_new_item'  => __( 'Add New Villa Collection', 'gutenberg-lab-blocks' ),
+				'new_item_name' => __( 'New Villa Collection Name', 'gutenberg-lab-blocks' ),
+				'menu_name'     => __( 'Collections', 'gutenberg-lab-blocks' ),
+			),
+			'public'            => false,
+			'hierarchical'      => false,
+			'show_ui'           => true,
+			'show_in_rest'      => true,
+			'show_admin_column' => true,
+			'query_var'         => false,
+			'rewrite'           => false,
+		)
+	);
+}
+add_action( 'init', 'gutenberg_lab_blocks_register_villa_collection_taxonomy' );
+
+/**
+ * Registers the opt-in flag used by the predefined Area and Collection lists.
+ *
+ * Existing broad editorial terms can remain attached to villas without
+ * automatically appearing as public search choices.
+ */
+function gutenberg_lab_blocks_register_villa_search_term_meta() {
+	foreach ( array( 'villa_location', 'villa_collection' ) as $taxonomy ) {
+		register_term_meta(
+			$taxonomy,
+			'villa_search_enabled',
+			array(
+				'type'              => 'boolean',
+				'single'            => true,
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
+				'show_in_rest'      => true,
+			)
+		);
+	}
+}
+add_action( 'init', 'gutenberg_lab_blocks_register_villa_search_term_meta' );
+
+/**
+ * Adds the search-list checkbox when creating an Area or Collection term.
+ */
+function gutenberg_lab_blocks_render_villa_search_term_add_field() {
+	?>
+	<div class="form-field term-villa-search-enabled-wrap">
+		<input type="hidden" name="gutenberg_lab_villa_search_visibility_present" value="1">
+		<label>
+			<input type="checkbox" name="gutenberg_lab_villa_search_enabled" value="1">
+			<?php esc_html_e( 'Show in the public villa search', 'gutenberg-lab-blocks' ); ?>
+		</label>
+		<p>
+			<?php esc_html_e( 'Use this only for the concise, client-approved search list.', 'gutenberg-lab-blocks' ); ?>
+		</p>
+	</div>
+	<?php
+}
+add_action( 'villa_location_add_form_fields', 'gutenberg_lab_blocks_render_villa_search_term_add_field' );
+add_action( 'villa_collection_add_form_fields', 'gutenberg_lab_blocks_render_villa_search_term_add_field' );
+
+/**
+ * Adds the search-list checkbox when editing an Area or Collection term.
+ *
+ * @param WP_Term $term Current taxonomy term.
+ */
+function gutenberg_lab_blocks_render_villa_search_term_edit_field( $term ) {
+	$is_enabled = (bool) get_term_meta( $term->term_id, 'villa_search_enabled', true );
+	?>
+	<tr class="form-field term-villa-search-enabled-wrap">
+		<th scope="row">
+			<?php esc_html_e( 'Villa search', 'gutenberg-lab-blocks' ); ?>
+		</th>
+		<td>
+			<input type="hidden" name="gutenberg_lab_villa_search_visibility_present" value="1">
+			<label>
+				<input
+					type="checkbox"
+					name="gutenberg_lab_villa_search_enabled"
+					value="1"
+					<?php checked( $is_enabled ); ?>
+				>
+				<?php esc_html_e( 'Show in the public villa search', 'gutenberg-lab-blocks' ); ?>
+			</label>
+			<p class="description">
+				<?php esc_html_e( 'Only enabled terms appear in the Area or Collection field.', 'gutenberg-lab-blocks' ); ?>
+			</p>
+		</td>
+	</tr>
+	<?php
+}
+add_action( 'villa_location_edit_form_fields', 'gutenberg_lab_blocks_render_villa_search_term_edit_field' );
+add_action( 'villa_collection_edit_form_fields', 'gutenberg_lab_blocks_render_villa_search_term_edit_field' );
+
+/**
+ * Saves the public-search visibility flag from the taxonomy form.
+ *
+ * @param int $term_id Current taxonomy term ID.
+ */
+function gutenberg_lab_blocks_save_villa_search_term_field( $term_id ) {
+	if ( ! isset( $_POST['gutenberg_lab_villa_search_visibility_present'] ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'manage_categories' ) ) {
+		return;
+	}
+
+	update_term_meta(
+		$term_id,
+		'villa_search_enabled',
+		isset( $_POST['gutenberg_lab_villa_search_enabled'] ) ? 1 : 0
+	);
+}
+add_action( 'created_villa_location', 'gutenberg_lab_blocks_save_villa_search_term_field' );
+add_action( 'edited_villa_location', 'gutenberg_lab_blocks_save_villa_search_term_field' );
+add_action( 'created_villa_collection', 'gutenberg_lab_blocks_save_villa_search_term_field' );
+add_action( 'edited_villa_collection', 'gutenberg_lab_blocks_save_villa_search_term_field' );
 
 /**
  * Returns the normalized public request path.
@@ -1213,53 +1459,179 @@ function gutenberg_lab_blocks_serve_retired_public_url_gone() {
 add_action( 'template_redirect', 'gutenberg_lab_blocks_serve_retired_public_url_gone', 0 );
 
 /**
- * Returns the selected villa location slug from the current request.
+ * Sanitizes a villa-search date without accepting partial or impossible dates.
  *
- * The hero search uses a plain GET form, so the frontend and the editor preview
- * both need a single source of truth for the active location value.
- *
+ * @param mixed $value Raw request value.
  * @return string
  */
-function gutenberg_lab_blocks_get_selected_villa_location_slug() {
-	$selected_location = get_query_var( 'villa_location' );
+function gutenberg_lab_blocks_sanitize_villa_search_date( $value ) {
+	$value = sanitize_text_field( (string) $value );
+	$date  = DateTimeImmutable::createFromFormat( '!Y-m-d', $value, wp_timezone() );
 
-	if ( is_string( $selected_location ) && '' !== $selected_location ) {
-		return sanitize_title( $selected_location );
-	}
-
-	if ( isset( $_GET['villa_location'] ) ) {
-		return sanitize_title( wp_unslash( $_GET['villa_location'] ) );
-	}
-
-	return '';
+	return $date && $date->format( 'Y-m-d' ) === $value ? $value : '';
 }
 
 /**
- * Returns the published villa location terms used by the hero search.
+ * Returns the normalized villa-search request.
  *
+ * This is the shared contract for the form, archive query and enquiry links.
+ * Unknown query parameters never reach the villa query.
+ *
+ * @return array<string, int|string>
+ */
+function gutenberg_lab_blocks_get_villa_search_request() {
+	$request = array(
+		'arrival'           => '',
+		'departure'         => '',
+		'villa_location'    => '',
+		'villa_collection'  => '',
+		'min_bedrooms'      => 0,
+		'guests'            => 0,
+		'min_price'         => 0,
+		'max_price'         => 0,
+	);
+
+	foreach ( array( 'arrival', 'departure' ) as $date_key ) {
+		if ( isset( $_GET[ $date_key ] ) && is_scalar( $_GET[ $date_key ] ) ) {
+			$request[ $date_key ] = gutenberg_lab_blocks_sanitize_villa_search_date(
+				wp_unslash( $_GET[ $date_key ] )
+			);
+		}
+	}
+
+	foreach ( array( 'villa_location', 'villa_collection' ) as $taxonomy_key ) {
+		if ( isset( $_GET[ $taxonomy_key ] ) && is_scalar( $_GET[ $taxonomy_key ] ) ) {
+			$request[ $taxonomy_key ] = sanitize_title( wp_unslash( $_GET[ $taxonomy_key ] ) );
+		}
+	}
+
+	foreach ( array( 'min_bedrooms', 'guests', 'min_price', 'max_price' ) as $number_key ) {
+		if ( isset( $_GET[ $number_key ] ) && is_scalar( $_GET[ $number_key ] ) ) {
+			$request[ $number_key ] = gutenberg_lab_blocks_sanitize_villa_search_integer(
+				wp_unslash( $_GET[ $number_key ] )
+			);
+		}
+	}
+
+	$bedroom_options = range( 3, 8 );
+	if ( ! in_array( $request['min_bedrooms'], $bedroom_options, true ) ) {
+		$request['min_bedrooms'] = 0;
+	}
+
+	// Availability is meaningful only for a complete, chronological stay.
+	// Clear malformed or partial pairs so the visible summary cannot imply that
+	// an availability filter was applied when it was not.
+	$date_range_is_invalid = '' === $request['arrival'] ||
+		'' === $request['departure'] ||
+		$request['arrival'] < wp_date( 'Y-m-d' ) ||
+		$request['departure'] <= $request['arrival'];
+
+	if ( ! $date_range_is_invalid ) {
+		$arrival_date   = new DateTimeImmutable( $request['arrival'], wp_timezone() );
+		$departure_date = new DateTimeImmutable( $request['departure'], wp_timezone() );
+		$date_range_is_invalid = (int) $arrival_date->diff( $departure_date )->format( '%a' ) > 1095;
+	}
+
+	if ( $date_range_is_invalid ) {
+		$request['arrival']   = '';
+		$request['departure'] = '';
+	}
+
+	// A hand-edited URL may reverse the price inputs. Normalize it to the same
+	// usable range the enhanced form requires rather than showing an impossible
+	// summary and returning an accidental empty set.
+	if (
+		$request['min_price'] &&
+		$request['max_price'] &&
+		$request['min_price'] > $request['max_price']
+	) {
+		$minimum              = $request['max_price'];
+		$request['max_price'] = $request['min_price'];
+		$request['min_price'] = $minimum;
+	}
+
+	return $request;
+}
+
+/**
+ * Returns filter terms without repeating taxonomy queries in one request.
+ *
+ * @param string $taxonomy Supported villa filter taxonomy.
  * @return WP_Term[]
  */
-function gutenberg_lab_blocks_get_villa_location_terms() {
-	static $terms = null;
+function gutenberg_lab_blocks_get_villa_filter_terms( $taxonomy ) {
+	static $terms_by_taxonomy = array();
 
-	if ( null !== $terms ) {
-		return $terms;
+	if ( ! in_array( $taxonomy, array( 'villa_location', 'villa_collection' ), true ) ) {
+		return array();
+	}
+
+	if ( isset( $terms_by_taxonomy[ $taxonomy ] ) ) {
+		return $terms_by_taxonomy[ $taxonomy ];
 	}
 
 	$terms = get_terms(
 		array(
-			'taxonomy'   => 'villa_location',
-			'hide_empty' => false,
+			'taxonomy'   => $taxonomy,
+			// Enabled but unused terms would lead visitors to a guaranteed empty
+			// result set, so keep those options out of the public form.
+			'hide_empty' => true,
+			'meta_key'   => 'villa_search_enabled',
+			'meta_value' => '1',
 			'orderby'    => 'name',
 			'order'      => 'ASC',
 		)
 	);
 
-	if ( is_wp_error( $terms ) ) {
-		$terms = array();
+	$terms_by_taxonomy[ $taxonomy ] = is_wp_error( $terms ) ? array() : $terms;
+
+	return $terms_by_taxonomy[ $taxonomy ];
+}
+
+/**
+ * Returns the Villa Location terms used by search.
+ *
+ * @return WP_Term[]
+ */
+function gutenberg_lab_blocks_get_villa_location_terms() {
+	return gutenberg_lab_blocks_get_villa_filter_terms( 'villa_location' );
+}
+
+/**
+ * Returns the Villa Collection terms used by search.
+ *
+ * @return WP_Term[]
+ */
+function gutenberg_lab_blocks_get_villa_collection_terms() {
+	return gutenberg_lab_blocks_get_villa_filter_terms( 'villa_collection' );
+}
+
+/**
+ * Formats an active search range for the visible date field.
+ *
+ * @param string $arrival   Normalized arrival date.
+ * @param string $departure Normalized departure date.
+ * @return string
+ */
+function gutenberg_lab_blocks_format_villa_search_date_range( $arrival, $departure ) {
+	if ( '' === $arrival && '' === $departure ) {
+		return '';
 	}
 
-	return $terms;
+	$formatted_dates = array();
+
+	foreach ( array( $arrival, $departure ) as $date_value ) {
+		if ( '' === $date_value ) {
+			continue;
+		}
+
+		$date = DateTimeImmutable::createFromFormat( '!Y-m-d', $date_value, wp_timezone() );
+		if ( $date ) {
+			$formatted_dates[] = wp_date( 'j M Y', $date->getTimestamp() );
+		}
+	}
+
+	return implode( ' – ', $formatted_dates );
 }
 
 /**
@@ -1626,6 +1998,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		$args,
 		array(
 			'cta_label_override' => '',
+			'enquiry_url'        => '',
 			'presentation'       => 'standard',
 			'show_description'   => true,
 			'show_details'       => true,
@@ -1725,7 +2098,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 			<?php endif; ?>
 
 			<?php if ( ! empty( $villa_data['cta']['url'] ) && ! empty( $villa_data['cta']['label'] ) ) : ?>
-				<div class="wp-block-buttons">
+				<div class="wp-block-buttons<?php echo '' !== $args['enquiry_url'] ? ' vvm-card-grid__card-actions' : ''; ?>">
 					<div class="wp-block-button <?php echo 'collection' === $args['presentation'] ? 'is-style-vvm-link-primary' : 'is-style-vvm-ghost'; ?>">
 						<a
 							class="wp-block-button__link wp-element-button"
@@ -1734,6 +2107,18 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 							<?php echo esc_html( $villa_data['cta']['label'] ); ?>
 						</a>
 					</div>
+
+					<?php if ( '' !== $args['enquiry_url'] ) : ?>
+						<div class="wp-block-button is-style-vvm-primary">
+							<a
+								class="wp-block-button__link wp-element-button"
+								href="<?php echo esc_url( $args['enquiry_url'] ); ?>"
+								aria-label="<?php echo esc_attr( sprintf( __( 'Enquire about %s', 'gutenberg-lab-blocks' ), $villa_data['title'] ) ); ?>"
+							>
+								<?php esc_html_e( 'Enquire', 'gutenberg-lab-blocks' ); ?>
+							</a>
+						</div>
+					<?php endif; ?>
 				</div>
 			<?php endif; ?>
 		</div>
@@ -1822,18 +2207,60 @@ function gutenberg_lab_blocks_render_villa_carousel_slide( $villa_id ) {
  * @return string
  */
 function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = array(), $wrapper_attributes = '' ) {
-	$button_label        = isset( $attributes['buttonLabel'] ) && is_string( $attributes['buttonLabel'] )
+	$button_label = isset( $attributes['buttonLabel'] ) && is_string( $attributes['buttonLabel'] )
 		? sanitize_text_field( $attributes['buttonLabel'] )
 		: __( 'Search', 'gutenberg-lab-blocks' );
 	$location_placeholder = isset( $attributes['locationPlaceholder'] ) && is_string( $attributes['locationPlaceholder'] )
 		? sanitize_text_field( $attributes['locationPlaceholder'] )
 		: __( 'Search by Area', 'gutenberg-lab-blocks' );
-	$locations            = gutenberg_lab_blocks_get_villa_location_terms();
-	$selected_location    = gutenberg_lab_blocks_get_selected_villa_location_slug();
-	$archive_url          = get_post_type_archive_link( 'villa' );
-	$field_id             = wp_unique_id( 'villa-hero-search-field-' );
-	$has_locations        = ! empty( $locations );
-	$empty_state_label    = __( 'Add villa locations to enable search.', 'gutenberg-lab-blocks' );
+	$request                = gutenberg_lab_blocks_get_villa_search_request();
+	$locations              = gutenberg_lab_blocks_get_villa_location_terms();
+	$collections            = gutenberg_lab_blocks_get_villa_collection_terms();
+	// Keep the desktop grid aligned with only the filters that can be used.
+	$visible_filter_count   = 3 + ( empty( $locations ) ? 0 : 1 ) + ( empty( $collections ) ? 0 : 1 );
+	$archive_url            = get_post_type_archive_link( 'villa' );
+	$date_field_id          = wp_unique_id( 'villa-search-dates-' );
+	$arrival_field_id       = wp_unique_id( 'villa-search-arrival-' );
+	$departure_field_id     = wp_unique_id( 'villa-search-departure-' );
+	$location_field_id      = wp_unique_id( 'villa-search-location-' );
+	$collection_field_id    = wp_unique_id( 'villa-search-collection-' );
+	$bedrooms_field_id      = wp_unique_id( 'villa-search-bedrooms-' );
+	$guests_field_id        = wp_unique_id( 'villa-search-guests-' );
+	$min_price_field_id     = wp_unique_id( 'villa-search-min-price-' );
+	$max_price_field_id     = wp_unique_id( 'villa-search-max-price-' );
+	$advanced_filters_id    = wp_unique_id( 'villa-search-advanced-' );
+	$date_display           = gutenberg_lab_blocks_format_villa_search_date_range(
+		$request['arrival'],
+		$request['departure']
+	);
+	$today                  = wp_date( 'Y-m-d' );
+	$price_summary          = __( 'Any price', 'gutenberg-lab-blocks' );
+	$has_advanced_filters   = ! empty( $request['villa_collection'] )
+		|| ! empty( $request['min_bedrooms'] )
+		|| ! empty( $request['guests'] )
+		|| ! empty( $request['min_price'] )
+		|| ! empty( $request['max_price'] );
+
+	if ( $request['min_price'] && $request['max_price'] ) {
+		$price_summary = sprintf(
+			/* translators: 1: minimum nightly price, 2: maximum nightly price. */
+			__( '$%1$s–$%2$s', 'gutenberg-lab-blocks' ),
+			number_format_i18n( $request['min_price'] ),
+			number_format_i18n( $request['max_price'] )
+		);
+	} elseif ( $request['min_price'] ) {
+		$price_summary = sprintf(
+			/* translators: %s: minimum nightly price. */
+			__( 'From $%s', 'gutenberg-lab-blocks' ),
+			number_format_i18n( $request['min_price'] )
+		);
+	} elseif ( $request['max_price'] ) {
+		$price_summary = sprintf(
+			/* translators: %s: maximum nightly price. */
+			__( 'Up to $%s', 'gutenberg-lab-blocks' ),
+			number_format_i18n( $request['max_price'] )
+		);
+	}
 
 	if ( ! $archive_url ) {
 		return '';
@@ -1842,29 +2269,228 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 	ob_start();
 	?>
 	<section <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-		<form class="vvm-villa-hero-search__form" action="<?php echo esc_url( $archive_url ); ?>" method="get">
-			<div class="vvm-villa-hero-search__field">
-				<label class="screen-reader-text" for="<?php echo esc_attr( $field_id ); ?>">
-					<?php esc_html_e( 'Villa location', 'gutenberg-lab-blocks' ); ?>
+		<form
+			class="vvm-villa-hero-search__form"
+			style="--vvm-search-filter-count: <?php echo esc_attr( $visible_filter_count ); ?>;"
+			action="<?php echo esc_url( $archive_url ); ?>"
+			method="get"
+			role="search"
+			aria-label="<?php esc_attr_e( 'Search villas', 'gutenberg-lab-blocks' ); ?>"
+			data-vvm-villa-search
+			data-vvm-villa-search-date-error="<?php esc_attr_e( 'Choose both an arrival and departure date.', 'gutenberg-lab-blocks' ); ?>"
+			data-vvm-villa-search-price-error="<?php esc_attr_e( 'The maximum price must not be lower than the minimum price.', 'gutenberg-lab-blocks' ); ?>"
+		>
+			<div class="vvm-villa-hero-search__field vvm-villa-hero-search__field--dates">
+				<label class="vvm-villa-hero-search__label" for="<?php echo esc_attr( $date_field_id ); ?>">
+					<?php esc_html_e( 'Dates', 'gutenberg-lab-blocks' ); ?>
 				</label>
-				<select
-					id="<?php echo esc_attr( $field_id ); ?>"
-					name="villa_location"
-					class="vvm-villa-hero-search__select"
-					<?php disabled( ! $has_locations ); ?>
-				>
-					<option value="">
-						<?php echo esc_html( $has_locations ? $location_placeholder : $empty_state_label ); ?>
-					</option>
-					<?php foreach ( $locations as $location ) : ?>
-						<option
-							value="<?php echo esc_attr( $location->slug ); ?>"
-							<?php selected( $selected_location, $location->slug ); ?>
-						>
-							<?php echo esc_html( $location->name ); ?>
+				<div class="vvm-villa-hero-search__date-fallback" data-vvm-villa-search-date-fallback>
+					<label class="screen-reader-text" for="<?php echo esc_attr( $arrival_field_id ); ?>">
+						<?php esc_html_e( 'Arrival date', 'gutenberg-lab-blocks' ); ?>
+					</label>
+					<input
+						id="<?php echo esc_attr( $arrival_field_id ); ?>"
+						class="vvm-villa-hero-search__date-input"
+						type="date"
+						name="arrival"
+						min="<?php echo esc_attr( $today ); ?>"
+						value="<?php echo esc_attr( $request['arrival'] ); ?>"
+						data-vvm-villa-search-arrival-fallback
+					/>
+					<span aria-hidden="true">–</span>
+					<label class="screen-reader-text" for="<?php echo esc_attr( $departure_field_id ); ?>">
+						<?php esc_html_e( 'Departure date', 'gutenberg-lab-blocks' ); ?>
+					</label>
+					<input
+						id="<?php echo esc_attr( $departure_field_id ); ?>"
+						class="vvm-villa-hero-search__date-input"
+						type="date"
+						name="departure"
+						min="<?php echo esc_attr( $today ); ?>"
+						value="<?php echo esc_attr( $request['departure'] ); ?>"
+						data-vvm-villa-search-departure-fallback
+					/>
+				</div>
+				<input
+					id="<?php echo esc_attr( $date_field_id ); ?>"
+					class="vvm-villa-hero-search__control vvm-villa-hero-search__date-trigger"
+					type="text"
+					placeholder="<?php esc_attr_e( 'Select dates', 'gutenberg-lab-blocks' ); ?>"
+					value="<?php echo esc_attr( $date_display ); ?>"
+					readonly
+					hidden
+					data-vvm-villa-search-date-trigger
+				/>
+				<input
+					type="hidden"
+					value="<?php echo esc_attr( $request['arrival'] ); ?>"
+					data-vvm-villa-search-arrival
+				/>
+				<input
+					type="hidden"
+					value="<?php echo esc_attr( $request['departure'] ); ?>"
+					data-vvm-villa-search-departure
+				/>
+			</div>
+
+			<?php if ( ! empty( $locations ) ) : ?>
+				<div class="vvm-villa-hero-search__field">
+					<label class="vvm-villa-hero-search__label" for="<?php echo esc_attr( $location_field_id ); ?>">
+						<?php esc_html_e( 'Area', 'gutenberg-lab-blocks' ); ?>
+					</label>
+					<select
+						id="<?php echo esc_attr( $location_field_id ); ?>"
+						name="villa_location"
+						class="vvm-villa-hero-search__control vvm-villa-hero-search__select"
+					>
+						<option value="">
+							<?php echo esc_html( $location_placeholder ); ?>
 						</option>
-					<?php endforeach; ?>
-				</select>
+						<?php foreach ( $locations as $location ) : ?>
+							<option
+								value="<?php echo esc_attr( $location->slug ); ?>"
+								<?php selected( $request['villa_location'], $location->slug ); ?>
+							>
+								<?php echo esc_html( $location->name ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</div>
+			<?php endif; ?>
+
+			<button
+				class="vvm-villa-hero-search__more-toggle"
+				type="button"
+				aria-controls="<?php echo esc_attr( $advanced_filters_id ); ?>"
+				aria-expanded="<?php echo $has_advanced_filters ? 'true' : 'false'; ?>"
+				hidden
+				data-vvm-villa-search-more-toggle
+			>
+				<span data-vvm-villa-search-more-label>
+					<?php esc_html_e( 'More filters', 'gutenberg-lab-blocks' ); ?>
+				</span>
+				<span hidden data-vvm-villa-search-fewer-label>
+					<?php esc_html_e( 'Fewer filters', 'gutenberg-lab-blocks' ); ?>
+				</span>
+				<span class="vvm-villa-hero-search__more-toggle-icon" aria-hidden="true"></span>
+			</button>
+
+			<div
+				id="<?php echo esc_attr( $advanced_filters_id ); ?>"
+				class="vvm-villa-hero-search__advanced"
+				data-vvm-villa-search-advanced
+				data-vvm-villa-search-has-active="<?php echo $has_advanced_filters ? 'true' : 'false'; ?>"
+			>
+				<?php if ( ! empty( $collections ) ) : ?>
+					<div class="vvm-villa-hero-search__field">
+						<label class="vvm-villa-hero-search__label" for="<?php echo esc_attr( $collection_field_id ); ?>">
+							<?php esc_html_e( 'Collection', 'gutenberg-lab-blocks' ); ?>
+						</label>
+						<select
+							id="<?php echo esc_attr( $collection_field_id ); ?>"
+							name="villa_collection"
+							class="vvm-villa-hero-search__control vvm-villa-hero-search__select"
+						>
+							<option value=""><?php esc_html_e( 'Any collection', 'gutenberg-lab-blocks' ); ?></option>
+							<?php foreach ( $collections as $collection ) : ?>
+								<option
+									value="<?php echo esc_attr( $collection->slug ); ?>"
+									<?php selected( $request['villa_collection'], $collection->slug ); ?>
+								>
+									<?php echo esc_html( $collection->name ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+				<?php endif; ?>
+
+				<div class="vvm-villa-hero-search__field">
+					<label class="vvm-villa-hero-search__label" for="<?php echo esc_attr( $bedrooms_field_id ); ?>">
+						<?php esc_html_e( 'Bedrooms', 'gutenberg-lab-blocks' ); ?>
+					</label>
+					<select
+						id="<?php echo esc_attr( $bedrooms_field_id ); ?>"
+						name="min_bedrooms"
+						class="vvm-villa-hero-search__control vvm-villa-hero-search__select"
+					>
+						<option value=""><?php esc_html_e( 'Any number', 'gutenberg-lab-blocks' ); ?></option>
+						<?php foreach ( range( 3, 8 ) as $bedroom_count ) : ?>
+							<option
+								value="<?php echo esc_attr( $bedroom_count ); ?>"
+								<?php selected( $request['min_bedrooms'], $bedroom_count ); ?>
+							>
+								<?php
+								printf(
+									/* translators: %d: minimum number of bedrooms. */
+									esc_html__( '%d+ bedrooms', 'gutenberg-lab-blocks' ),
+									$bedroom_count
+								);
+								?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</div>
+
+				<div class="vvm-villa-hero-search__field">
+					<label class="vvm-villa-hero-search__label" for="<?php echo esc_attr( $guests_field_id ); ?>">
+						<?php esc_html_e( 'Guests', 'gutenberg-lab-blocks' ); ?>
+					</label>
+					<input
+						id="<?php echo esc_attr( $guests_field_id ); ?>"
+						name="guests"
+						class="vvm-villa-hero-search__control"
+						type="number"
+						min="1"
+						step="1"
+						inputmode="numeric"
+						placeholder="<?php esc_attr_e( 'Any number', 'gutenberg-lab-blocks' ); ?>"
+						value="<?php echo $request['guests'] ? esc_attr( $request['guests'] ) : ''; ?>"
+					/>
+				</div>
+
+				<details class="vvm-villa-hero-search__field vvm-villa-hero-search__field--price">
+					<summary class="vvm-villa-hero-search__price-summary">
+						<span class="vvm-villa-hero-search__label">
+							<?php esc_html_e( 'Nightly price', 'gutenberg-lab-blocks' ); ?>
+						</span>
+						<span class="vvm-villa-hero-search__price-summary-value" data-vvm-villa-search-price-summary>
+							<?php echo esc_html( $price_summary ); ?>
+						</span>
+					</summary>
+					<div class="vvm-villa-hero-search__price-panel">
+						<label for="<?php echo esc_attr( $min_price_field_id ); ?>">
+							<?php esc_html_e( 'Minimum USD', 'gutenberg-lab-blocks' ); ?>
+						</label>
+						<input
+							id="<?php echo esc_attr( $min_price_field_id ); ?>"
+							name="min_price"
+							type="number"
+							min="500"
+							<?php if ( $request['max_price'] ) : ?>
+								max="<?php echo esc_attr( $request['max_price'] ); ?>"
+							<?php endif; ?>
+							step="500"
+							inputmode="numeric"
+							placeholder="<?php esc_attr_e( 'No minimum', 'gutenberg-lab-blocks' ); ?>"
+							value="<?php echo $request['min_price'] ? esc_attr( $request['min_price'] ) : ''; ?>"
+							data-vvm-villa-search-min-price
+						/>
+						<label for="<?php echo esc_attr( $max_price_field_id ); ?>">
+							<?php esc_html_e( 'Maximum USD', 'gutenberg-lab-blocks' ); ?>
+						</label>
+						<input
+							id="<?php echo esc_attr( $max_price_field_id ); ?>"
+							name="max_price"
+							type="number"
+							min="<?php echo esc_attr( $request['min_price'] ?: 500 ); ?>"
+							step="500"
+							inputmode="numeric"
+							placeholder="<?php esc_attr_e( 'No maximum', 'gutenberg-lab-blocks' ); ?>"
+							value="<?php echo $request['max_price'] ? esc_attr( $request['max_price'] ) : ''; ?>"
+							data-vvm-villa-search-max-price
+						/>
+					</div>
+				</details>
 			</div>
 
 			<div class="vvm-villa-hero-search__actions">
@@ -1872,7 +2498,6 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 					class="vvm-villa-hero-search__submit"
 					type="submit"
 					aria-label="<?php echo esc_attr( $button_label ); ?>"
-					<?php disabled( ! $has_locations ); ?>
 				>
 					<span class="vvm-villa-hero-search__submit-label">
 						<?php echo esc_html( $button_label ); ?>

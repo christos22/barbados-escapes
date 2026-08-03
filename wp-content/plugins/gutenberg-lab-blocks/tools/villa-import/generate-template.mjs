@@ -51,11 +51,11 @@ const keyValueSheets = [
 	{
 		name: 'Overview',
 		title: 'Villa Overview',
-		intro: 'Start with the core facts guests will see in the hero, villa card, specifications, and location section.',
+		intro: 'Start with the core facts used by the villa page, result cards, and search filters.',
 		fields: [
 			[ 'villa_name', 'Villa name', true, 'Use the public-facing villa name.' ],
-			[ 'property_area', 'Area or neighbourhood', true, 'Example: Sugar Hill, Royal Westmoreland, or Gibbs.' ],
-			[ 'parish', 'Villa location', true, 'Choose an existing website location from the dropdown.', 'parish' ],
+			[ 'property_area', 'Display area or neighbourhood', true, 'Guest-facing copy. Example: Sugar Hill Resort, Royal Westmoreland, or Gibbs.' ],
+			[ 'parish', 'Parish / broad location', true, 'Choose the broad website location used for the address and taxonomy.', 'parish' ],
 			[ 'hero_location_line', 'Hero location line', true, 'Example: Sugar Hill, St. James, Barbados.' ],
 			[ 'hero_statement', 'Hero statement', true, 'A concise, distinctive statement shown over the villa hero.' ],
 			[ 'bedrooms', 'Number of bedrooms', true, 'Whole number only.', 'whole' ],
@@ -72,6 +72,8 @@ const keyValueSheets = [
 				[ 'ical_link', 'iCal link', false, 'Paste one or more full .ics/iCal calendar feed URLs from Airbnb, Vrbo, or the owner calendar. Separate multiple URLs with a new line or note.' ],
 				[ 'postal_code', 'Postal code', false, 'Leave blank if the property does not use one.' ],
 				[ 'card_short_description', 'Villa map card location line', false, 'Example: Sugar Hill Resort, St. James.' ],
+				[ 'search_area', 'Search area', true, 'Choose the exact enabled Area filter. This can differ from the guest-facing display area.', 'searchArea' ],
+				[ 'villa_collections', 'Search collections', false, 'Optional. Separate chosen names with commas; leave blank for none. Options: Beachfront Villas; Family Villas; Fully Staffed Villas; Golf Resort Villas; Ridgefront Villas; Villas with Community Gym; Villas with Pools; Villas with Private Gym / Gym Equipment; Wedding Villas.' ],
 		],
 	},
 	{
@@ -301,6 +303,7 @@ const applyValidation = ( cell, validation ) => {
 		view: '=Lists!$B$2:$B$6',
 		yesNo: '=Lists!$C$2:$C$3',
 		amenityGroup: '=Lists!$D$2:$D$7',
+		searchArea: '=Lists!$E$2:$E$6',
 	};
 
 	if ( listValidations[ validation ] ) {
@@ -693,6 +696,7 @@ for ( const definition of keyValueSheets ) {
 	definition.fields.forEach( ( [ key, label, required, guidance, validation, defaultValue = '' ], index ) => {
 		const rowNumber = index + 5;
 		const row = sheet.getRow( rowNumber );
+		const exampleValue = displayValue( exampleContainer, key, validation );
 		let value = sampleContainer
 			? displayValue( sampleContainer, key, validation )
 			: defaultValue;
@@ -700,8 +704,16 @@ for ( const definition of keyValueSheets ) {
 		if ( validation === 'yesNo' && typeof value === 'boolean' ) {
 			value = value ? 'Yes' : 'No';
 		}
-		row.values = [ key, label, value, displayValue( exampleContainer, key, validation ), guidance, '' ];
-		row.height = Math.max( 30, Math.min( 66, 18 + Math.ceil( Math.max( label.length, guidance.length ) / 48 ) * 14 ) );
+		row.values = [ key, label, value, exampleValue, guidance, '' ];
+		row.height = Math.max(
+			30,
+			Math.min(
+				100,
+				18 + Math.ceil(
+					Math.max( label.length, guidance.length, String( exampleValue || '' ).length ) / 48
+				) * 14
+			)
+		);
 
 		row.getCell( 1 ).font = { name: 'Aptos', size: 9, color: { argb: colors.muted } };
 		row.getCell( 2 ).font = { name: 'Aptos', size: 11, bold: true, color: { argb: colors.text } };
@@ -901,7 +913,7 @@ instructions.getCell( 'A1' ).alignment = { vertical: 'middle', horizontal: 'left
 instructions.getRow( 1 ).height = 38;
 
 instructions.mergeCells( 'A2:H2' );
-instructions.getCell( 'A2' ).value = 'A simple content document for creating a new villa page accurately, with Monkey Hill shown as an example.';
+instructions.getCell( 'A2' ).value = 'A simple content document for creating a new villa page and its search data accurately, with Monkey Hill shown as an example.';
 instructions.getCell( 'A2' ).font = { name: 'Aptos', size: 12, italic: true, color: { argb: colors.text } };
 instructions.getCell( 'A2' ).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.lightGold } };
 instructions.getCell( 'A2' ).alignment = { vertical: 'middle' };
@@ -983,6 +995,7 @@ for ( const [ range, color, label ] of legend ) {
 }
 instructions.getRow( 20 ).height = 38;
 instructions.getRow( 21 ).height = 38;
+instructions.getRow( 15 ).height = 48;
 
 instructions.mergeCells( 'A23:H23' );
 instructions.getCell( 'A23' ).value = 'Developer handoff';
@@ -996,7 +1009,7 @@ instructions.getCell( 'A24' ).fill = { type: 'pattern', pattern: 'solid', fgColo
 instructions.getCell( 'A24' ).border = thinBorder;
 
 instructions.columns = [
-	{ width: 9 },
+	{ width: 28 },
 	{ width: 24 },
 	{ width: 18 },
 	{ width: 18 },
@@ -1025,6 +1038,32 @@ lists.getColumn( 4 ).values = [
 	'Inside the Villa',
 	'Outdoor Living',
 ];
+lists.getColumn( 5 ).values = [
+	'Enabled search areas',
+	'Prospect',
+	'Royal Westmoreland Villas',
+	'Sandy Lane Villas',
+	'Speightstown',
+	'Sugar Hill Villas',
+];
+lists.getColumn( 6 ).values = [
+	'Enabled villa collections',
+	'Beachfront Villas',
+	'Family Villas',
+	'Fully Staffed Villas',
+	'Golf Resort Villas',
+	'Ridgefront Villas',
+	'Villas with Community Gym',
+	'Villas with Pools',
+	'Villas with Private Gym / Gym Equipment',
+	'Wedding Villas',
+];
+lists.getColumn( 1 ).width = 24;
+lists.getColumn( 2 ).width = 24;
+lists.getColumn( 3 ).width = 18;
+lists.getColumn( 4 ).width = 24;
+lists.getColumn( 5 ).width = 34;
+lists.getColumn( 6 ).width = 44;
 
 const importSheet = workbook.addWorksheet( '_Import' );
 importSheet.state = 'veryHidden';
@@ -1034,6 +1073,8 @@ importSheet.getCell( 'A2' ).value = 'template_name';
 importSheet.getCell( 'B2' ).value = 'Barbados Escapes Villa Content';
 importSheet.getCell( 'A3' ).value = 'generated_utc';
 importSheet.getCell( 'B3' ).value = new Date().toISOString();
+importSheet.getColumn( 1 ).width = 24;
+importSheet.getColumn( 2 ).width = 50;
 
 const desiredSheetOrder = [
 	'Instructions',

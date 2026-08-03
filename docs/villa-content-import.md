@@ -62,9 +62,9 @@ Choose the source villa that is closest to the new villa's needs:
   review section, or special content section.
 
 The command refuses duplicate names and slugs. It creates a draft, assigns the
-existing location taxonomy, clones the chosen source villa scaffold when
-provided, replaces recognized content sections, derives card/schema metadata,
-and reports the remaining media/calendar work.
+validated search-area and collection taxonomy terms, clones the chosen source
+villa scaffold when provided, replaces recognized content sections, derives
+card/schema/search metadata, and reports the remaining media/calendar work.
 
 Content gaps are reported as warnings instead of blocking the import. For
 example, blank bedroom descriptions, incomplete staff rows, reversed rate date
@@ -108,9 +108,26 @@ is written under `.ddev/villa-import-backups/` before an update.
   intentionally omitted.
 - Dates use `DD MMM YYYY`, for example `10 Jan 2026`.
 - Rates are USD values with the `$` symbol, for example `$2,000`.
-- Existing location terms are required. Common `Saint`/`St.` variants are
-  accepted, but a misspelled or unknown parish stops the import rather than
-  creating a new taxonomy term.
+- **Search area** (`search_area`) is required in the current Overview template.
+  Its value must exactly match an enabled `villa_location` term offered by the
+  workbook dropdown. The importer assigns the resolved term to the villa's
+  `villa_location` taxonomy.
+- **Villa collections** (`villa_collections`) is optional. Enter enabled
+  `villa_collection` names separated by commas, semicolons, or new lines. The
+  importer assigns every resolved term to the villa's `villa_collection`
+  taxonomy. In the current template, blank means no collection terms are
+  assigned and clears them when updating an importer-managed draft.
+- Dry-run rejects unknown or disabled search-area and collection terms. It does
+  not create taxonomy terms from workbook text, which prevents spelling errors
+  from silently becoming new filter options.
+- Older workbooks without the `search_area` and `villa_collections` keys remain
+  supported. Their Overview parish supplies the broad `villa_location`; when
+  updating a draft, existing enabled Area and Collection assignments are
+  preserved because the legacy workbook did not explicitly manage them.
+- Overview **Bedrooms**, **Sleeps**, and **Starting nightly rate (USD)** are the
+  source of truth for search. They populate `villa_search_bedrooms`,
+  `villa_search_sleeps`, and `villa_search_starting_price_usd` respectively;
+  do not duplicate these values in a separate search section.
 - Use **Display address** for the guest-facing location wording.
 - Use **Exact map address or plus code** when the Google Map needs a more
   precise address than the public wording.
@@ -159,7 +176,9 @@ missing section manually/with AI guidance after import.
 ## Bedroom Copy
 
 The **Bedrooms** sheet is for one row per bedroom: floor/area, room name, bed
-setup, features, and the individual room description.
+setup, features, and the individual room description. The optional **Short
+label** appears above the room name, for example `Bedroom One` above `Garden
+Suite`.
 
 The **Bedroom Copy** sheet controls the sentences around those bedroom cards:
 
@@ -190,6 +209,10 @@ When enabled, the importer creates the selector automatically from Overview:
 the custom comma-separated labels when provided, otherwise the automatic
 bedroom range. If `Sleeps` divides evenly by the bedroom count, automatic
 labels include guest capacity, such as `4 Bedrooms (sleeps 8)`.
+
+Rate rows whose labels identify a bedroom choice are filtered by that choice.
+Generic seasonal labels such as `Summer rate` remain visible for every bedroom
+choice.
 
 ## Maintaining the Template
 

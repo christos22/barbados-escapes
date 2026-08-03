@@ -5,6 +5,14 @@
     "villa_name": "Monkey Hill",
     "property_area": "Sugar Hill Resort",
     "parish": "St. James",
+    "search_area": "Sugar Hill Villas",
+    "villa_collections": [
+      "Family Villas",
+      "Fully Staffed Villas",
+      "Ridgefront Villas",
+      "Villas with Community Gym",
+      "Villas with Pools"
+    ],
     "hero_location_line": "Sugar Hill Resort, St James, Barbados",
     "hero_statement": "A grand private estate with sweeping sea views, rare seclusion, and the kind of effortless West Coast elegance that stays with you.",
     "bedrooms": 8,

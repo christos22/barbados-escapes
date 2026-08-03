@@ -5,6 +5,11 @@
     "villa_name": "Importer Sample Villa",
     "property_area": "Sugar Hill",
     "parish": "St. James",
+    "search_area": "Sugar Hill Villas",
+    "villa_collections": [
+      "Family Villas",
+      "Villas with Pools"
+    ],
     "hero_location_line": "Sugar Hill, St. James, Barbados",
     "hero_statement": "A calm private villa with generous living spaces and long Caribbean views.",
     "bedrooms": 2,
