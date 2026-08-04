@@ -24,6 +24,10 @@
       "type": "string",
       "default": ""
     },
+    "deferImage": {
+      "type": "boolean",
+      "default": false
+    },
     "videoId": {
       "type": "number"
     },

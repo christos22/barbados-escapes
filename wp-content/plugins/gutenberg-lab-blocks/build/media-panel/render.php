@@ -9,6 +9,7 @@ $media_type       = $attributes['mediaType'] ?? 'image';
 $image_id         = gutenberg_lab_blocks_get_image_id_from_attributes( $attributes );
 $image_url        = $attributes['imageUrl'] ?? '';
 $image_alt        = $attributes['imageAlt'] ?? '';
+$defer_image      = ! empty( $attributes['deferImage'] );
 $fallback_image_id = gutenberg_lab_blocks_get_image_id_from_attributes( $attributes, 'fallbackImageId', 'fallbackImageUrl' );
 $fallback_image_url = $attributes['fallbackImageUrl'] ?? '';
 $fallback_image_alt = $attributes['fallbackImageAlt'] ?? '';
@@ -70,7 +71,8 @@ if ( $current_post_id && ( ! $image_url || ! $fallback_image_url ) && has_post_t
 $has_priority_candidate = ( 'video' === $media_type && ! empty( $video_data['has_vimeo_video'] ) && ! empty( $video_data['poster_url'] ) ) ||
 	( 'video' === $media_type && empty( $video_data['has_uploaded_video'] ) && ! empty( $fallback_image_url ) ) ||
 	( 'image' === $media_type && ! empty( $image_url ) );
-$should_prioritize_image = $has_priority_candidate && function_exists( 'gutenberg_lab_blocks_claim_frontend_priority_image' )
+// Below-fold panels can opt out so they do not compete with the page hero.
+$should_prioritize_image = ! $defer_image && $has_priority_candidate && function_exists( 'gutenberg_lab_blocks_claim_frontend_priority_image' )
 	? gutenberg_lab_blocks_claim_frontend_priority_image()
 	: false;
 $image_loading_attrs     = $should_prioritize_image
