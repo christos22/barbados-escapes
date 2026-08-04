@@ -2413,7 +2413,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 						name="min_bedrooms"
 						class="vvm-villa-hero-search__control vvm-villa-hero-search__select"
 					>
-						<option value=""><?php esc_html_e( 'Any number', 'gutenberg-lab-blocks' ); ?></option>
+						<option value=""><?php esc_html_e( 'Any bedrooms', 'gutenberg-lab-blocks' ); ?></option>
 						<?php foreach ( range( 3, 8 ) as $bedroom_count ) : ?>
 							<option
 								value="<?php echo esc_attr( $bedroom_count ); ?>"
@@ -2443,7 +2443,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 						min="1"
 						step="1"
 						inputmode="numeric"
-						placeholder="<?php esc_attr_e( 'Any number', 'gutenberg-lab-blocks' ); ?>"
+						placeholder="<?php esc_attr_e( 'Any guests', 'gutenberg-lab-blocks' ); ?>"
 						value="<?php echo $request['guests'] ? esc_attr( $request['guests'] ) : ''; ?>"
 					/>
 				</div>
