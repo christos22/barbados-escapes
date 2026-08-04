@@ -553,9 +553,6 @@ function gutenberg_lab_blocks_render_villa_search_results_markup( $wrapper_attri
 				</ul>
 			<?php endif; ?>
 
-			<a class="vvm-villa-search-results__adjust" href="#villa-search">
-				<?php esc_html_e( 'Adjust your search', 'gutenberg-lab-blocks' ); ?>
-			</a>
 		</header>
 
 		<?php if ( '' !== $card_markup ) : ?>

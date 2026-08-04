@@ -27,6 +27,7 @@
 	--vvm-button-border-width: 1px;
 	--vvm-button-padding-inline: 32px;
 	--vvm-button-padding-block: 12px;
+	--vvm-button-optical-offset-y: 2px;
 
 	display: inline-flex;
 	align-items: center;
@@ -36,7 +37,11 @@
 	z-index: 0;
 	box-sizing: border-box;
 	min-block-size: var(--vvm-button-height);
-	padding-block: var(--vvm-button-padding-block);
+
+	/* Romely's visible capitals sit high inside their line box, so offset the
+	 * padding without changing the button's total height. */
+	padding-block-start: calc(var(--vvm-button-padding-block) + var(--vvm-button-optical-offset-y));
+	padding-block-end: calc(var(--vvm-button-padding-block) - var(--vvm-button-optical-offset-y));
 	padding-inline: var(--vvm-button-padding-inline);
 	border: var(--vvm-button-border-width) solid transparent;
 	border-radius: 0;

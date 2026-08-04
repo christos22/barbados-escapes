@@ -10,9 +10,7 @@
 
 	&__header {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-		align-items: end;
-		gap: 0.85rem var(--wp--preset--spacing--md);
+		gap: 0.85rem;
 		padding-bottom: var(--wp--preset--spacing--md);
 		border-bottom: 1px solid var(--vvm-results-border);
 	}
@@ -27,7 +25,6 @@
 	&__filters {
 		display: flex;
 		flex-wrap: wrap;
-		grid-column: 1;
 		gap: 0.5rem;
 		margin: 0;
 		padding: 0;
@@ -44,16 +41,10 @@
 		line-height: 1.2;
 	}
 
-	&__adjust,
 	&__clear {
 		color: var(--vvm-results-gold);
 		font-family: var(--wp--preset--font-family--refined-sans, inherit);
 		text-underline-offset: 0.2em;
-	}
-
-	&__adjust {
-		grid-column: 2;
-		grid-row: 1 / span 2;
 	}
 
 	&__empty {
@@ -115,22 +106,5 @@
 
 	&__sentinel {
 		height: 1px;
-	}
-}
-
-@media (max-width: 781px) {
-
-	.vvm-villa-search-results {
-
-		&__header {
-			grid-template-columns: minmax(0, 1fr);
-			align-items: start;
-		}
-
-		&__filters,
-		&__adjust {
-			grid-column: 1;
-			grid-row: auto;
-		}
 	}
 }
