@@ -248,6 +248,21 @@
 			> .wp-block-gutenberg-lab-blocks-villa-hero-search {
 				// Give the hero copy room to breathe without changing the results-page search.
 				margin-top: clamp(1rem, 1.5vw, 1.5rem);
+
+				.vvm-villa-hero-search__label {
+					// Keep field names available to assistive technology while the
+					// homepage uses the simpler, single-line search treatment.
+					border: 0;
+					clip: rect(0 0 0 0);
+					clip-path: inset(50%);
+					height: 1px;
+					margin: -1px;
+					overflow: hidden;
+					padding: 0;
+					position: absolute;
+					white-space: nowrap;
+					width: 1px;
+				}
 			}
 
 			> .vvm-villa-hero-cta {
