@@ -536,9 +536,6 @@ function gutenberg_lab_blocks_render_villa_search_results_markup( $wrapper_attri
 	<section
 		<?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		data-vvm-villa-search-results
-		data-vvm-villa-results-loading="<?php esc_attr_e( 'Loading more villas…', 'gutenberg-lab-blocks' ); ?>"
-		data-vvm-villa-results-complete="<?php esc_attr_e( 'All villas loaded.', 'gutenberg-lab-blocks' ); ?>"
-		data-vvm-villa-results-error="<?php esc_attr_e( 'More villas could not load automatically. Use the next page link.', 'gutenberg-lab-blocks' ); ?>"
 	>
 		<header class="vvm-villa-search-results__header">
 			<p class="vvm-villa-search-results__summary" aria-live="polite">
@@ -586,11 +583,6 @@ function gutenberg_lab_blocks_render_villa_search_results_markup( $wrapper_attri
 			>
 				<?php echo $pagination; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</nav>
-			<p
-				class="vvm-villa-search-results__status"
-				aria-live="polite"
-				data-vvm-villa-results-status
-			></p>
 			<div
 				class="vvm-villa-search-results__sentinel"
 				aria-hidden="true"

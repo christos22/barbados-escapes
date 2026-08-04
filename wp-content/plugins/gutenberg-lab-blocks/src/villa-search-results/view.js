@@ -6,7 +6,6 @@ const setupVillaInfiniteScroll = ( results ) => {
 		'[data-vvm-villa-results-pagination]'
 	);
 	const nextLink = pagination?.querySelector( 'a.next' );
-	const status = results.querySelector( '[data-vvm-villa-results-status]' );
 	const sentinel = results.querySelector(
 		'[data-vvm-villa-results-sentinel]'
 	);
@@ -16,7 +15,6 @@ const setupVillaInfiniteScroll = ( results ) => {
 		! items ||
 		! pagination ||
 		! nextLink ||
-		! status ||
 		! sentinel ||
 		typeof window.IntersectionObserver !== 'function'
 	) {
@@ -25,17 +23,9 @@ const setupVillaInfiniteScroll = ( results ) => {
 
 	let nextUrl = nextLink.href;
 	let isLoading = false;
-	const loadingMessage =
-		results.dataset.vvmVillaResultsLoading || 'Loading more villas…';
-	const completeMessage =
-		results.dataset.vvmVillaResultsComplete || 'All villas loaded.';
-	const errorMessage =
-		results.dataset.vvmVillaResultsError ||
-		'More villas could not load automatically. Use the next page link.';
 
 	const finish = () => {
 		observer?.disconnect();
-		status.textContent = completeMessage;
 		results.classList.remove( 'is-loading' );
 		results.removeAttribute( 'aria-busy' );
 	};
@@ -44,7 +34,6 @@ const setupVillaInfiniteScroll = ( results ) => {
 		observer?.disconnect();
 		results.classList.remove( 'is-infinite-scroll-ready', 'is-loading' );
 		results.removeAttribute( 'aria-busy' );
-		status.textContent = errorMessage;
 	};
 
 	const loadNextPage = async () => {
@@ -55,7 +44,6 @@ const setupVillaInfiniteScroll = ( results ) => {
 		isLoading = true;
 		results.classList.add( 'is-loading' );
 		results.setAttribute( 'aria-busy', 'true' );
-		status.textContent = loadingMessage;
 
 		try {
 			const fragmentUrl = new URL( nextUrl, window.location.href );
@@ -114,8 +102,7 @@ const setupVillaInfiniteScroll = ( results ) => {
 			}
 
 			nextLink.href = nextUrl;
-			status.textContent = '';
-		} catch ( error ) {
+		} catch {
 			isLoading = false;
 			restorePagination();
 		}

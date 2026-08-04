@@ -96,14 +96,6 @@
 		display: none;
 	}
 
-	&__status {
-		min-height: 1.5em;
-		margin: 0;
-		color: var(--vvm-results-green);
-		font-family: var(--wp--preset--font-family--refined-sans, inherit);
-		text-align: center;
-	}
-
 	&__sentinel {
 		height: 1px;
 	}
