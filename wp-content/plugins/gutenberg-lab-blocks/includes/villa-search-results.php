@@ -529,7 +529,6 @@ function gutenberg_lab_blocks_render_villa_search_results_markup( $wrapper_attri
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
-
 		</header>
 
 		<?php if ( '' !== $card_markup ) : ?>
