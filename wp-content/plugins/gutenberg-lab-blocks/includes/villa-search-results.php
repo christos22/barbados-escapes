@@ -377,6 +377,15 @@ function gutenberg_lab_blocks_get_villa_search_filter_labels( $request ) {
 		);
 	}
 
+	if ( ! empty( $request['guests'] ) ) {
+		$guests   = absint( $request['guests'] );
+		$labels[] = sprintf(
+			/* translators: %s: number of guests. */
+			_n( '%s guest', '%s guests', $guests, 'gutenberg-lab-blocks' ),
+			number_format_i18n( $guests )
+		);
+	}
+
 	if ( ! empty( $request['min_price'] ) && ! empty( $request['max_price'] ) ) {
 		$labels[] = sprintf(
 			/* translators: 1: minimum nightly price, 2: maximum nightly price. */
@@ -562,6 +571,15 @@ function gutenberg_lab_blocks_render_villa_search_results_markup( $wrapper_attri
 			>
 				<?php echo $pagination; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</nav>
+			<div class="vvm-villa-search-results__loader" aria-hidden="true">
+				<span class="vvm-villa-search-results__spinner"></span>
+				<span><?php esc_html_e( 'Loading more villas…', 'gutenberg-lab-blocks' ); ?></span>
+			</div>
+			<p
+				class="vvm-villa-search-results__announcement"
+				aria-live="polite"
+				data-vvm-villa-results-status
+			></p>
 			<div
 				class="vvm-villa-search-results__sentinel"
 				aria-hidden="true"
