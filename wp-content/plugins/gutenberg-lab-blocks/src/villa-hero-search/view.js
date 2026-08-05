@@ -331,6 +331,42 @@ const setupSelectMenus = ( form ) => {
 	} );
 };
 
+const setupNumberFieldLabels = ( form ) => {
+	const fields = Array.from(
+		form.querySelectorAll( '[data-vvm-villa-search-number-field]' )
+	);
+
+	fields.forEach( ( field ) => {
+		const input = field.querySelector(
+			'[data-vvm-villa-search-number-input]'
+		);
+		const display = field.querySelector(
+			'[data-vvm-villa-search-number-display]'
+		);
+
+		if ( ! input || ! display ) {
+			return;
+		}
+
+		const sync = () => {
+			const value = Number.parseInt( input.value, 10 );
+			const hasValue = Number.isInteger( value ) && value > 0;
+
+			field.classList.toggle( 'has-value', hasValue );
+			display.textContent = hasValue
+				? `${ value } ${
+						value === 1
+							? field.dataset.vvmVillaSearchSingular
+							: field.dataset.vvmVillaSearchPlural
+				  }`
+				: '';
+		};
+
+		input.addEventListener( 'input', sync );
+		sync();
+	} );
+};
+
 const setupPriceRange = ( form ) => {
 	const minimum = form.querySelector( '[data-vvm-villa-search-min-price]' );
 	const maximum = form.querySelector( '[data-vvm-villa-search-max-price]' );
@@ -381,7 +417,7 @@ const setupPriceRange = ( form ) => {
 		} else if ( maxValue ) {
 			summary.textContent = `Up to ${ formatUsd( maxValue ) }`;
 		} else {
-			summary.textContent = 'Any price';
+			summary.textContent = 'Search by Price';
 		}
 	};
 
@@ -466,6 +502,7 @@ const setupVillaSearch = ( form ) => {
 	form.dataset.vvmVillaSearchReady = 'true';
 	setupDateRange( form );
 	setupSelectMenus( form );
+	setupNumberFieldLabels( form );
 	setupPriceRange( form );
 	setupAdvancedFilters( form );
 	setupCleanSubmission( form );
