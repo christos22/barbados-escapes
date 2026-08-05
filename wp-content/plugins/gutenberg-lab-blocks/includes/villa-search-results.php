@@ -326,6 +326,7 @@ function gutenberg_lab_blocks_render_villa_search_cards( $villa_ids, $request ) 
 				'presentation'     => 'collection',
 				'show_description' => true,
 				'show_details'     => true,
+				'show_fact_icons'  => true,
 				'show_price'       => true,
 			)
 		);
@@ -335,38 +336,17 @@ function gutenberg_lab_blocks_render_villa_search_cards( $villa_ids, $request ) 
 }
 
 /**
- * Formats the primary result count/date/party summary.
+ * Formats the primary result-count summary.
  *
- * @param int                           $total   Number of matching villas.
- * @param array<string, int|string> $request Normalized search request.
+ * @param int $total Number of matching villas.
  * @return string
  */
-function gutenberg_lab_blocks_get_villa_search_summary( $total, $request ) {
-	$parts = array(
-		sprintf(
-			/* translators: %s: number of matching villas. */
-			_n( '%s private residence available', '%s private residences available', $total, 'gutenberg-lab-blocks' ),
-			number_format_i18n( $total )
-		),
+function gutenberg_lab_blocks_get_villa_search_summary( $total ) {
+	return sprintf(
+		/* translators: %s: number of matching villas. */
+		_n( '%s private residence available', '%s private residences available', $total, 'gutenberg-lab-blocks' ),
+		number_format_i18n( $total )
 	);
-	$date_range = gutenberg_lab_blocks_format_villa_search_date_range(
-		(string) $request['arrival'],
-		(string) $request['departure']
-	);
-
-	if ( '' !== $date_range ) {
-		$parts[] = $date_range;
-	}
-
-	if ( ! empty( $request['guests'] ) ) {
-		$parts[] = sprintf(
-			/* translators: %s: number of guests. */
-			_n( '%s guest', '%s guests', absint( $request['guests'] ), 'gutenberg-lab-blocks' ),
-			number_format_i18n( absint( $request['guests'] ) )
-		);
-	}
-
-	return implode( ' · ', $parts );
 }
 
 /**
@@ -542,7 +522,7 @@ function gutenberg_lab_blocks_render_villa_search_results_markup( $wrapper_attri
 	>
 		<header class="vvm-villa-search-results__header">
 			<p class="vvm-villa-search-results__summary" aria-live="polite">
-				<?php echo esc_html( gutenberg_lab_blocks_get_villa_search_summary( $results['total'], $request ) ); ?>
+				<?php echo esc_html( gutenberg_lab_blocks_get_villa_search_summary( $results['total'] ) ); ?>
 			</p>
 
 			<?php if ( $filter_labels ) : ?>

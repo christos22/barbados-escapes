@@ -116,6 +116,35 @@
 		outline-offset: 0.25rem;
 	}
 
+	&__number-field {
+		min-width: 0;
+		position: relative;
+	}
+
+	&__number-display {
+		color: var(--vvm-search-green);
+		display: none;
+		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-size: 0.9rem;
+		inset: 0;
+		line-height: 1.35;
+		min-height: 1.5rem;
+		overflow: hidden;
+		pointer-events: none;
+		position: absolute;
+		text-align: left;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__number-field.has-value:not(:focus-within) &__control {
+		color: transparent;
+	}
+
+	&__number-field.has-value:not(:focus-within) &__number-display {
+		display: block;
+	}
+
 	&__select,
 	&__select-trigger {
 		appearance: none;

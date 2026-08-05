@@ -248,6 +248,9 @@
 			> .wp-block-gutenberg-lab-blocks-villa-hero-search {
 				// Give the hero copy room to breathe without changing the results-page search.
 				margin-top: clamp(1rem, 1.5vw, 1.5rem);
+				// Match the Young Estates desktop width, then retain comfortable
+				// viewport gutters as the screen narrows.
+				width: min(72.1875rem, calc(100vw - clamp(2rem, 4vw, 3rem)));
 			}
 
 			> .vvm-villa-hero-cta {

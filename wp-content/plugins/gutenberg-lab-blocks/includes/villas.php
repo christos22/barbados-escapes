@@ -1607,6 +1607,30 @@ function gutenberg_lab_blocks_get_villa_collection_terms() {
 }
 
 /**
+ * Returns a concise public label for Area and Collection search options.
+ *
+ * Taxonomy names and slugs remain untouched; only the dropdown copy omits the
+ * repetitive word "Villas". A leading "with" is also removed when it would be
+ * left behind, for example "Villas with Community Gym" becomes "Community Gym".
+ *
+ * @param string $term_name Stored taxonomy term name.
+ * @return string
+ */
+function gutenberg_lab_blocks_format_villa_search_term_label( $term_name ) {
+	$term_name = trim( (string) $term_name );
+	$label     = preg_replace( '/\bVillas\b/ui', '', $term_name );
+
+	if ( null === $label ) {
+		return $term_name;
+	}
+
+	$label = preg_replace( '/^\s*with\s+/ui', '', $label );
+	$label = preg_replace( '/\s+/u', ' ', trim( (string) $label ) );
+
+	return is_string( $label ) && '' !== $label ? $label : $term_name;
+}
+
+/**
  * Formats an active search range for the visible date field.
  *
  * @param string $arrival   Normalized arrival date.
@@ -1691,6 +1715,90 @@ function gutenberg_lab_blocks_normalize_villa_card_facts_price( $facts, $price )
 		'facts' => $facts,
 		'price' => '',
 	);
+}
+
+/**
+ * Maps the standard villa facts line to compact icon-and-label items.
+ *
+ * Card facts remain one editor-managed string, so the renderer only enhances
+ * the three known fact types. If the string contains anything unexpected, an
+ * empty result tells the card to preserve the original text instead of hiding
+ * content it does not understand.
+ *
+ * @param string $facts    Normalized villa card facts.
+ * @param int    $bedrooms Structured bedroom count used when legacy facts omit it.
+ * @param int    $sleeps   Structured occupancy used when legacy facts omit it.
+ * @return array<int, array{icon:string,label:string}>
+ */
+function gutenberg_lab_blocks_get_villa_card_fact_icon_items( $facts, $bedrooms = 0, $sleeps = 0 ) {
+	$facts    = sanitize_text_field( (string) $facts );
+	$bedrooms = absint( $bedrooms );
+	$sleeps   = absint( $sleeps );
+
+	if ( '' === $facts && 0 === $bedrooms && 0 === $sleeps ) {
+		return array();
+	}
+
+	$matched = preg_match_all(
+		'/\b(?:\d+(?:\.\d+)?\s+Bedrooms?|\d+(?:\.\d+)?\s+Bathrooms?|(?:Sleeps?|Guests?|Occupancy)\s*(?:up\s+to\s+)?\d+)\b/ui',
+		$facts,
+		$fact_matches
+	);
+
+	if ( false === $matched ) {
+		return array();
+	}
+
+	$remaining_facts = preg_replace(
+		'/\b(?:\d+(?:\.\d+)?\s+Bedrooms?|\d+(?:\.\d+)?\s+Bathrooms?|(?:Sleeps?|Guests?|Occupancy)\s*(?:up\s+to\s+)?\d+)\b/ui',
+		'',
+		$facts
+	);
+
+	if ( ! is_string( $remaining_facts ) || preg_match( '/[^\s,|\/–—-]/u', $remaining_facts ) ) {
+		return array();
+	}
+
+	$items = array();
+
+	foreach ( $fact_matches[0] as $fact_label ) {
+		if ( preg_match( '/\bBedrooms?\b/ui', $fact_label ) ) {
+			$items['bed'] = $fact_label;
+		} elseif ( preg_match( '/\bBathrooms?\b/ui', $fact_label ) ) {
+			$items['bathtub-thick'] = $fact_label;
+		} elseif ( preg_match( '/\b(?:Sleeps?|Guests?|Occupancy)\b/ui', $fact_label ) ) {
+			$items['people'] = $fact_label;
+		}
+	}
+
+	if ( ! isset( $items['bed'] ) && $bedrooms > 0 ) {
+		$items['bed'] = sprintf(
+			/* translators: %s: number of bedrooms. */
+			_n( '%s Bedroom', '%s Bedrooms', $bedrooms, 'gutenberg-lab-blocks' ),
+			number_format_i18n( $bedrooms )
+		);
+	}
+
+	if ( ! isset( $items['people'] ) && $sleeps > 0 ) {
+		$items['people'] = sprintf(
+			/* translators: %s: maximum villa occupancy. */
+			__( 'Sleeps %s', 'gutenberg-lab-blocks' ),
+			number_format_i18n( $sleeps )
+		);
+	}
+
+	$icon_items = array();
+
+	foreach ( array( 'bed', 'bathtub-thick', 'people' ) as $icon_key ) {
+		if ( isset( $items[ $icon_key ] ) ) {
+			$icon_items[] = array(
+				'icon'  => $icon_key,
+				'label' => $items[ $icon_key ],
+			);
+		}
+	}
+
+	return $icon_items;
 }
 
 /**
@@ -1942,6 +2050,8 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 	$descriptor = get_post_meta( $villa_id, 'villa_card_descriptor', true );
 	$facts      = get_post_meta( $villa_id, 'villa_card_facts', true );
 	$price      = get_post_meta( $villa_id, 'villa_card_price', true );
+	$bedrooms   = absint( get_post_meta( $villa_id, 'villa_search_bedrooms', true ) );
+	$sleeps     = absint( get_post_meta( $villa_id, 'villa_search_sleeps', true ) );
 	$card_meta  = gutenberg_lab_blocks_normalize_villa_card_facts_price( $facts, $price );
 
 	if ( '' === $excerpt ) {
@@ -1969,6 +2079,8 @@ function gutenberg_lab_blocks_get_villa_data( $villa_id ) {
 		'descriptor' => $descriptor,
 		'facts'     => $card_meta['facts'],
 		'price'     => $card_meta['price'],
+		'bedrooms'  => $bedrooms,
+		'sleeps'    => $sleeps,
 		'amenities' => gutenberg_lab_blocks_get_villa_amenities( $villa_id ),
 		'image_id'  => $image_id,
 		'image_url' => $image_url,
@@ -2002,6 +2114,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 			'presentation'       => 'standard',
 			'show_description'   => true,
 			'show_details'       => true,
+			'show_fact_icons'    => false,
 			'show_price'         => true,
 		)
 	);
@@ -2018,7 +2131,15 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 
 	$show_description = ! empty( $args['show_description'] );
 	$show_details     = ! empty( $args['show_details'] );
+	$show_fact_icons  = ! empty( $args['show_fact_icons'] );
 	$show_price       = ! empty( $args['show_price'] );
+	$fact_icon_items  = $show_fact_icons
+		? gutenberg_lab_blocks_get_villa_card_fact_icon_items(
+			$villa_data['facts'],
+			$villa_data['bedrooms'],
+			$villa_data['sleeps']
+		)
+		: array();
 	$has_card_meta    = 'collection' === $args['presentation'] &&
 		(
 			( $show_details && '' !== $villa_data['facts'] ) ||
@@ -2088,7 +2209,20 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 			<?php if ( $has_card_meta ) : ?>
 				<div class="vvm-card-grid__card-meta">
 					<?php if ( $show_details && '' !== $villa_data['facts'] ) : ?>
-						<p class="vvm-card-grid__card-facts"><strong><?php echo esc_html( $villa_data['facts'] ); ?></strong></p>
+						<?php if ( $fact_icon_items ) : ?>
+							<ul class="vvm-card-grid__card-facts vvm-card-grid__card-facts--icons" aria-label="<?php esc_attr_e( 'Villa details', 'gutenberg-lab-blocks' ); ?>">
+								<?php foreach ( $fact_icon_items as $fact_icon_item ) : ?>
+									<li class="vvm-card-grid__card-fact">
+										<span class="vvm-card-grid__card-fact-icon">
+											<?php echo gutenberg_lab_blocks_get_villa_amenity_icon_svg( $fact_icon_item['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										</span>
+										<strong><?php echo esc_html( $fact_icon_item['label'] ); ?></strong>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						<?php else : ?>
+							<p class="vvm-card-grid__card-facts"><strong><?php echo esc_html( $villa_data['facts'] ); ?></strong></p>
+						<?php endif; ?>
 					<?php endif; ?>
 
 					<?php if ( $show_price && '' !== $villa_data['price'] ) : ?>
@@ -2234,7 +2368,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 		$request['departure']
 	);
 	$today                  = wp_date( 'Y-m-d' );
-	$price_summary          = __( 'Any price', 'gutenberg-lab-blocks' );
+	$price_summary          = __( 'Search by Price', 'gutenberg-lab-blocks' );
 	$has_advanced_filters   = ! empty( $request['villa_collection'] )
 		|| ! empty( $request['min_bedrooms'] )
 		|| ! empty( $request['guests'] )
@@ -2351,7 +2485,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 								value="<?php echo esc_attr( $location->slug ); ?>"
 								<?php selected( $request['villa_location'], $location->slug ); ?>
 							>
-								<?php echo esc_html( $location->name ); ?>
+								<?php echo esc_html( gutenberg_lab_blocks_format_villa_search_term_label( $location->name ) ); ?>
 							</option>
 						<?php endforeach; ?>
 					</select>
@@ -2391,13 +2525,13 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 							name="villa_collection"
 							class="vvm-villa-hero-search__control vvm-villa-hero-search__select"
 						>
-							<option value=""><?php esc_html_e( 'Any collection', 'gutenberg-lab-blocks' ); ?></option>
+							<option value=""><?php esc_html_e( 'Search by Collection', 'gutenberg-lab-blocks' ); ?></option>
 							<?php foreach ( $collections as $collection ) : ?>
 								<option
 									value="<?php echo esc_attr( $collection->slug ); ?>"
 									<?php selected( $request['villa_collection'], $collection->slug ); ?>
 								>
-									<?php echo esc_html( $collection->name ); ?>
+									<?php echo esc_html( gutenberg_lab_blocks_format_villa_search_term_label( $collection->name ) ); ?>
 								</option>
 							<?php endforeach; ?>
 						</select>
@@ -2413,7 +2547,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 						name="min_bedrooms"
 						class="vvm-villa-hero-search__control vvm-villa-hero-search__select"
 					>
-						<option value=""><?php esc_html_e( 'Any number', 'gutenberg-lab-blocks' ); ?></option>
+						<option value=""><?php esc_html_e( 'Search by Bedrooms', 'gutenberg-lab-blocks' ); ?></option>
 						<?php foreach ( range( 3, 8 ) as $bedroom_count ) : ?>
 							<option
 								value="<?php echo esc_attr( $bedroom_count ); ?>"
@@ -2435,17 +2569,30 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 					<label class="vvm-villa-hero-search__label" for="<?php echo esc_attr( $guests_field_id ); ?>">
 						<?php esc_html_e( 'Guests', 'gutenberg-lab-blocks' ); ?>
 					</label>
-					<input
-						id="<?php echo esc_attr( $guests_field_id ); ?>"
-						name="guests"
-						class="vvm-villa-hero-search__control"
-						type="number"
-						min="1"
-						step="1"
-						inputmode="numeric"
-						placeholder="<?php esc_attr_e( 'Any number', 'gutenberg-lab-blocks' ); ?>"
-						value="<?php echo $request['guests'] ? esc_attr( $request['guests'] ) : ''; ?>"
-					/>
+					<div
+						class="vvm-villa-hero-search__number-field"
+						data-vvm-villa-search-number-field
+						data-vvm-villa-search-singular="<?php esc_attr_e( 'Guest', 'gutenberg-lab-blocks' ); ?>"
+						data-vvm-villa-search-plural="<?php esc_attr_e( 'Guests', 'gutenberg-lab-blocks' ); ?>"
+					>
+						<input
+							id="<?php echo esc_attr( $guests_field_id ); ?>"
+							name="guests"
+							class="vvm-villa-hero-search__control"
+							type="number"
+							min="1"
+							step="1"
+							inputmode="numeric"
+							placeholder="<?php esc_attr_e( 'Search by Guests', 'gutenberg-lab-blocks' ); ?>"
+							value="<?php echo $request['guests'] ? esc_attr( $request['guests'] ) : ''; ?>"
+							data-vvm-villa-search-number-input
+						/>
+						<span
+							class="vvm-villa-hero-search__number-display"
+							aria-hidden="true"
+							data-vvm-villa-search-number-display
+						></span>
+					</div>
 				</div>
 
 				<details class="vvm-villa-hero-search__field vvm-villa-hero-search__field--price">

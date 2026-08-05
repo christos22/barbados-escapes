@@ -116,6 +116,48 @@
 	&__sentinel {
 		height: 1px;
 	}
+
+	// Search-result cards use the existing villa icon set for their three
+	// scannable facts. Shared card grids keep their original text-only facts.
+	.vvm-card-grid__card-facts--icons {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.45rem 1rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.vvm-card-grid__card-fact {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+	}
+
+	.vvm-card-grid__card-fact-icon {
+		display: inline-grid;
+		flex: 0 0 1rem;
+		width: 1rem;
+		height: 1rem;
+		place-items: center;
+		color: var(--vvm-results-gold);
+	}
+
+	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--bed,
+	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--people {
+		fill: none;
+		stroke: currentcolor;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		stroke-width: 1.5;
+	}
 }
 
 @media (max-width: 781px) {
