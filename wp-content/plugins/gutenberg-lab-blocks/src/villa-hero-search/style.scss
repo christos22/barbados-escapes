@@ -122,6 +122,12 @@
 		position: relative;
 	}
 
+	&__number-field > &__control,
+	&__number-display {
+		// Match the optical baseline of the adjacent custom-select values.
+		padding-top: 1px;
+	}
+
 	&__number-display {
 		color: var(--vvm-search-green);
 		display: none;
@@ -276,7 +282,8 @@
 	}
 
 	&__price-summary-value {
-		display: block;
+		align-items: center;
+		display: flex;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;

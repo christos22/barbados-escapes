@@ -110,8 +110,9 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_registry() {
 			'asset' => $asset_dir . 'beach-club-access.svg',
 		),
 		'bed'                => array(
-			'label' => __( 'Bed', 'gutenberg-lab-blocks' ),
-			'paths' => '<path d="M4 11.5V7.8c0-.9.7-1.6 1.6-1.6h4.1c1 0 1.8.8 1.8 1.8v3.5"></path><path d="M11.5 11.5V9.2h5.3c1.8 0 3.2 1.4 3.2 3.2v4.1"></path><path d="M4 16.5h16"></path><path d="M4 18.5v-7"></path><path d="M20 18.5v-2"></path>',
+			'label'    => __( 'Bed', 'gutenberg-lab-blocks' ),
+			'paths'    => '<path d="M4 11.5V7.8c0-.9.7-1.6 1.6-1.6h4.1c1 0 1.8.8 1.8 1.8v3.5"></path><path d="M11.5 11.5V9.2h5.3c1.8 0 3.2 1.4 3.2 3.2v4.1"></path><path d="M4 16.5h16"></path><path d="M4 18.5v-7"></path><path d="M20 18.5v-2"></path>',
+			'view_box' => '3 5.2 18 14.3',
 		),
 		'bedrooms'           => array(
 			'label' => __( 'Bedrooms', 'gutenberg-lab-blocks' ),
@@ -254,8 +255,9 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_registry() {
 			'asset' => $asset_dir . 'outdoor-shower.svg',
 		),
 		'people'             => array(
-			'label' => __( 'People', 'gutenberg-lab-blocks' ),
-			'paths' => '<circle cx="12" cy="7.5" r="3"></circle><path d="M7.2 18.8c.7-3 2.3-4.5 4.8-4.5s4.1 1.5 4.8 4.5"></path><circle cx="5.8" cy="10" r="2.1"></circle><path d="M2.8 18.2c.3-2 1.3-3.2 3-3.7"></path><circle cx="18.2" cy="10" r="2.1"></circle><path d="M21.2 18.2c-.3-2-1.3-3.2-3-3.7"></path>',
+			'label'    => __( 'People', 'gutenberg-lab-blocks' ),
+			'paths'    => '<circle cx="12" cy="7.5" r="3"></circle><path d="M7.2 18.8c.7-3 2.3-4.5 4.8-4.5s4.1 1.5 4.8 4.5"></path><circle cx="5.8" cy="10" r="2.1"></circle><path d="M2.8 18.2c.3-2 1.3-3.2 3-3.7"></path><circle cx="18.2" cy="10" r="2.1"></circle><path d="M21.2 18.2c-.3-2-1.3-3.2-3-3.7"></path>',
+			'view_box' => '1.8 3.5 20.4 16.3',
 		),
 		'pergola'            => array(
 			'label' => __( 'Pergola', 'gutenberg-lab-blocks' ),
@@ -1979,10 +1981,12 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_svg( $icon_key ) {
 	$icon_registry = gutenberg_lab_blocks_get_villa_amenity_icon_registry();
 	$default_paths = $icon_registry['default']['paths'] ?? '';
 	$icon_paths    = $icon_registry[ $icon_key ]['paths'] ?? $default_paths;
+	$icon_view_box = $icon_registry[ $icon_key ]['view_box'] ?? '0 0 24 24';
 
 	return sprintf(
-		'<svg class="vvm-villa-amenity-icon vvm-villa-amenity-icon--%1$s" viewBox="0 0 24 24" aria-hidden="true" focusable="false">%2$s</svg>',
+		'<svg class="vvm-villa-amenity-icon vvm-villa-amenity-icon--%1$s" viewBox="%2$s" aria-hidden="true" focusable="false">%3$s</svg>',
 		esc_attr( $icon_key ),
+		esc_attr( $icon_view_box ),
 		$icon_paths
 	);
 }
