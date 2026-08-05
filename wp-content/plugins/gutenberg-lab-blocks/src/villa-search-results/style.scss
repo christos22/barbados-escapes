@@ -10,7 +10,7 @@
 
 	&__header {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-columns: minmax(0, 1fr);
 		align-items: end;
 		gap: 0.85rem var(--wp--preset--spacing--md);
 		padding-bottom: var(--wp--preset--spacing--md);
@@ -44,16 +44,10 @@
 		line-height: 1.2;
 	}
 
-	&__adjust,
 	&__clear {
 		color: var(--vvm-results-gold);
 		font-family: var(--wp--preset--font-family--refined-sans, inherit);
 		text-underline-offset: 0.2em;
-	}
-
-	&__adjust {
-		grid-column: 2;
-		grid-row: 1 / span 2;
 	}
 
 	&__empty {
@@ -137,9 +131,10 @@
 
 	.vvm-card-grid__card-fact-icon {
 		display: inline-grid;
-		flex: 0 0 1rem;
-		width: 1rem;
-		height: 1rem;
+		flex: 0 0 2rem;
+		width: 2rem;
+		height: 2rem;
+		line-height: 0;
 		place-items: center;
 		color: var(--vvm-results-gold);
 	}
@@ -169,8 +164,7 @@
 			align-items: start;
 		}
 
-		&__filters,
-		&__adjust {
+		&__filters {
 			grid-column: 1;
 			grid-row: auto;
 		}
