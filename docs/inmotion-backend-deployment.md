@@ -327,8 +327,20 @@ Use these checks after setup changes or deployment troubleshooting:
 
 ## Normal Workflow
 
-1. Commit changes to `main`.
-2. Push to GitHub.
-3. GitHub Actions runs `Deploy Backend to InMotion`.
-4. The workflow SSHes into InMotion, pulls `/home/grapsa5/repositories/barbados-escapes`, copies the custom theme and plugin into the live WordPress install, and verifies the deployed files over SSH.
-5. If needed, cPanel `Git Version Control -> Pull or Deploy -> Deploy HEAD Commit` remains available as a manual fallback.
+Use the short branch-pick workflow in
+[`docs/git-release-workflow.md`](git-release-workflow.md):
+
+1. Create a feature branch from the current `main` branch.
+2. Push the feature branch to GitHub.
+3. In GitHub Actions, run `Deploy Selected Branch to Staging` and choose that
+   feature branch in the standard branch picker.
+4. Review the exact feature commit on staging.
+5. Merge the approved feature into `main`.
+6. GitHub Actions runs `Deploy Backend to InMotion` for matching custom theme
+   or plugin changes on `main`.
+7. The production workflow pulls `main`, copies the custom theme and plugin,
+   and verifies the deployed files over SSH.
+
+The legacy `staging` branch is not part of this routine flow and must not be
+merged or rebased. If needed, cPanel `Git Version Control -> Pull or Deploy ->
+Deploy HEAD Commit` remains available as a manual production fallback.
