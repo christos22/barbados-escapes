@@ -158,17 +158,32 @@ jobs:
           # Cloudflare rejects curl's default user agent. A cache-busted browser-
           # style request confirms the public staging install still renders.
           health_url="$EXPECTED_URL/?deploy_verify=$GITHUB_SHA"
-          http_status=$(curl \
+          health_result=$(curl \
             --silent \
             --show-error \
             --connect-timeout 20 \
             --max-time 60 \
             --output /dev/null \
-            --write-out '%{http_code}' \
+            --write-out '%{http_code}|%{redirect_url}' \
             --user-agent 'Mozilla/5.0 (compatible; BarbadosEscapesDeploy/1.0)' \
             "$health_url")
+          http_status="${health_result%%|*}"
+          redirect_url="${health_result#*|}"
 
-          if [ "$http_status" != '200' ]; then
+          if [ "$http_status" = '200' ]; then
+            :
+          elif [ "$http_status" = '302' ]; then
+            # Staging may be intentionally protected. Accept only its own
+            # Password Protected login redirect; never follow arbitrary redirects.
+            case "$redirect_url" in
+              "$EXPECTED_URL/"*'password-protected=login'*)
+                ;;
+              *)
+                echo "Staging health check returned an unexpected redirect: $redirect_url"
+                exit 1
+                ;;
+            esac
+          else
             echo "Staging health check failed: $health_url returned HTTP $http_status"
             exit 1
           fi
