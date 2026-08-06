@@ -2144,6 +2144,9 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 			$villa_data['sleeps']
 		)
 		: array();
+	$icon_price       = $fact_icon_items && $show_price && '' !== $villa_data['price']
+		? $villa_data['price']
+		: '';
 	$has_card_meta    = 'collection' === $args['presentation'] &&
 		(
 			( $show_details && '' !== $villa_data['facts'] ) ||
@@ -2212,7 +2215,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 
 			<?php if ( $has_card_meta ) : ?>
 				<div class="vvm-card-grid__card-meta">
-					<?php if ( $show_details && '' !== $villa_data['facts'] ) : ?>
+					<?php if ( $show_details && ( '' !== $villa_data['facts'] || $fact_icon_items ) ) : ?>
 						<?php if ( $fact_icon_items ) : ?>
 							<ul class="vvm-card-grid__card-facts vvm-card-grid__card-facts--icons" aria-label="<?php esc_attr_e( 'Villa details', 'gutenberg-lab-blocks' ); ?>">
 								<?php foreach ( $fact_icon_items as $fact_icon_item ) : ?>
@@ -2220,16 +2223,24 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 										<span class="vvm-card-grid__card-fact-icon">
 											<?php echo gutenberg_lab_blocks_get_villa_amenity_icon_svg( $fact_icon_item['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</span>
-										<strong><?php echo esc_html( $fact_icon_item['label'] ); ?></strong>
+										<span class="vvm-card-grid__card-fact-label"><?php echo esc_html( $fact_icon_item['label'] ); ?></span>
 									</li>
 								<?php endforeach; ?>
+								<?php if ( '' !== $icon_price ) : ?>
+									<li class="vvm-card-grid__card-fact vvm-card-grid__card-fact--price" aria-label="<?php echo esc_attr( $villa_data['price'] ); ?>">
+										<span class="vvm-card-grid__card-fact-icon">
+											<?php echo gutenberg_lab_blocks_get_villa_amenity_icon_svg( 'dollar' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										</span>
+										<span class="vvm-card-grid__card-fact-label"><?php echo esc_html( $icon_price ); ?></span>
+									</li>
+								<?php endif; ?>
 							</ul>
 						<?php else : ?>
 							<p class="vvm-card-grid__card-facts"><strong><?php echo esc_html( $villa_data['facts'] ); ?></strong></p>
 						<?php endif; ?>
 					<?php endif; ?>
 
-					<?php if ( $show_price && '' !== $villa_data['price'] ) : ?>
+					<?php if ( $show_price && '' !== $villa_data['price'] && ! $fact_icon_items ) : ?>
 						<p class="vvm-card-grid__card-price"><strong><?php echo esc_html( $villa_data['price'] ); ?></strong></p>
 					<?php endif; ?>
 				</div>

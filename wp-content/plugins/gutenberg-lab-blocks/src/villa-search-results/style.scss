@@ -139,32 +139,46 @@
 		height: 1px;
 	}
 
-	// Search-result cards use the existing villa icon set for their three
-	// scannable facts. Shared card grids keep their original text-only facts.
+	// Search-result cards keep three compact facts and the nightly price in one
+	// scannable row. Shared card grids retain their original text-only metadata.
 	.vvm-card-grid__card-facts--icons {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		align-items: center;
-		gap: 0.45rem 1rem;
+		gap: 0.4rem;
+		width: 100%;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 
 	.vvm-card-grid__card-fact {
-		display: inline-flex;
+		display: flex;
+		flex-direction: column;
 		align-items: center;
-		gap: 0.35rem;
+		justify-content: start;
+		min-width: 0;
+		gap: 0.4rem;
+		font-size: clamp(0.58rem, 0.75vw, 0.72rem);
+		font-weight: 400;
+		line-height: 1.15;
+		overflow-wrap: anywhere;
+		text-align: center;
+		white-space: normal;
 	}
 
 	.vvm-card-grid__card-fact-icon {
 		display: inline-grid;
-		flex: 0 0 2rem;
-		width: 2rem;
-		height: 2rem;
+		flex: 0 0 clamp(1.25rem, 1.8vw, 1.75rem);
+		width: clamp(1.25rem, 1.8vw, 1.75rem);
+		height: clamp(1.25rem, 1.8vw, 1.75rem);
 		line-height: 0;
 		place-items: center;
 		color: var(--vvm-results-gold);
+	}
+
+	.vvm-card-grid__card-fact-label {
+		font-weight: 400;
 	}
 
 	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon {
