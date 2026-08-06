@@ -1,0 +1,219 @@
+name: Deploy Selected Branch to Staging
+run-name: "Staging: ${{ github.ref_name }} @ ${{ github.sha }}"
+
+# Select the feature branch in GitHub's standard "Use workflow from" picker.
+# The selected branch's exact commit is deployed to the isolated staging site.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-backend-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: staging
+      url: https://barbadosescapes.com/staging/
+    steps:
+      - name: Deploy and verify selected commit via OpenSSH
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          SSH_HOST: 209.182.196.26
+          SSH_PORT: 2222
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+
+          # Staging uses the same InMotion account and login key as production.
+          # The stable IP avoids intermittent resets from the old hostname.
+          : "${SSH_USERNAME:?Missing SSH_USERNAME secret}"
+          : "${SSH_PRIVATE_KEY:?Missing SSH_PRIVATE_KEY secret}"
+
+          install -m 700 -d "$HOME/.ssh"
+
+          deploy_key="$HOME/.ssh/inmotion_deploy_key"
+          known_hosts="$HOME/.ssh/known_hosts"
+          remote_script="$RUNNER_TEMP/deploy-staging-remote.sh"
+
+          trap 'rm -f "$deploy_key" "$remote_script"' EXIT
+
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$deploy_key"
+          chmod 600 "$deploy_key"
+
+          touch "$known_hosts"
+          chmod 600 "$known_hosts"
+
+          host_key_ready=false
+
+          for attempt in 1 2 3; do
+            echo "Collecting SSH host key, attempt ${attempt}/3..."
+
+            if ssh-keyscan -t ecdsa -p "$SSH_PORT" -T 10 "$SSH_HOST" >> "$known_hosts"; then
+              host_key_ready=true
+              break
+            fi
+
+            sleep_seconds=$(( attempt * 10 ))
+            echo "Host key scan failed. Retrying in ${sleep_seconds}s..."
+            sleep "$sleep_seconds"
+          done
+
+          if [ "$host_key_ready" != true ]; then
+            echo "Could not collect SSH host key for $SSH_HOST:$SSH_PORT"
+            exit 1
+          fi
+
+          cat > "$remote_script" <<'REMOTE_SCRIPT'
+          set -euo pipefail
+
+          readonly EXPECTED_REMOTE='ssh://git@github.com-barbados-escapes/christos22/barbados-escapes.git'
+          readonly REPOPATH='/home/grapsa5/repositories/barbados-escapes-staging'
+          readonly WORDPRESSPATH='/home/grapsa5/barbadosescapes.com/staging'
+          readonly EXPECTED_URL='https://barbadosescapes.com/staging'
+          readonly EXPECTED_PREFIX='vvm_'
+          readonly THEME_SLUG='gutenberg-lab-vvm'
+          readonly PLUGIN_SLUG='gutenberg-lab-blocks'
+          readonly THEMEPATH="$WORDPRESSPATH/wp-content/themes/$THEME_SLUG"
+          readonly PLUGINPATH="$WORDPRESSPATH/wp-content/plugins/$PLUGIN_SLUG"
+
+          # Fail closed before creating or copying anything. A staging-path
+          # typo must never fall through to the production WordPress install.
+          test "$WORDPRESSPATH" = '/home/grapsa5/barbadosescapes.com/staging'
+          test -f "$WORDPRESSPATH/wp-config.php"
+          test -d "$WORDPRESSPATH/wp-content"
+          wp --path="$WORDPRESSPATH" core is-installed --skip-plugins --skip-themes
+
+          actual_home=$(wp --path="$WORDPRESSPATH" option get home --skip-plugins --skip-themes)
+          actual_siteurl=$(wp --path="$WORDPRESSPATH" option get siteurl --skip-plugins --skip-themes)
+          actual_prefix=$(wp --path="$WORDPRESSPATH" config get table_prefix)
+          actual_theme=$(wp --path="$WORDPRESSPATH" option get stylesheet --skip-plugins --skip-themes)
+
+          test "$actual_home" = "$EXPECTED_URL"
+          test "$actual_siteurl" = "$EXPECTED_URL"
+          test "$actual_prefix" = "$EXPECTED_PREFIX"
+          test "$actual_theme" = "$THEME_SLUG"
+          wp --path="$WORDPRESSPATH" plugin is-active "$PLUGIN_SLUG" --skip-plugins --skip-themes
+
+          # Staging has its own checkout so it can never switch the production
+          # checkout to a feature branch during a deployment.
+          if [ ! -e "$REPOPATH" ]; then
+            git clone "$EXPECTED_REMOTE" "$REPOPATH"
+          fi
+
+          test -d "$REPOPATH/.git"
+
+          actual_remote=$(git -C "$REPOPATH" remote get-url origin)
+          test "$actual_remote" = "$EXPECTED_REMOTE"
+
+          repo_status=$(git -C "$REPOPATH" status --porcelain --untracked-files=all --ignored)
+
+          if [ -n "$repo_status" ]; then
+            echo "Staging checkout has unexpected local changes: $REPOPATH"
+            exit 1
+          fi
+
+          # Fetch every branch, then deploy the exact immutable commit selected
+          # in GitHub Actions. Staging has no branch history to merge or rebase.
+          git -C "$REPOPATH" fetch --prune origin
+          git -C "$REPOPATH" cat-file -e "${GITHUB_SHA}^{commit}"
+          git -C "$REPOPATH" checkout --detach "$GITHUB_SHA"
+
+          deployed_sha=$(git -C "$REPOPATH" rev-parse HEAD)
+
+          if [ "$deployed_sha" != "$GITHUB_SHA" ]; then
+            echo "Staging repo SHA mismatch: expected $GITHUB_SHA, got $deployed_sha"
+            exit 1
+          fi
+
+          test -f "$REPOPATH/wp-content/themes/$THEME_SLUG/style.css"
+          test -f "$REPOPATH/wp-content/themes/$THEME_SLUG/functions.php"
+          test -f "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/gutenberg-lab-blocks.php"
+          test -d "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/build"
+
+          # Deploy only source-controlled custom code. Staging content, uploads,
+          # WordPress core, third-party plugins, and local backups are untouched.
+          rsync -a "$REPOPATH/wp-content/themes/$THEME_SLUG/" "$THEMEPATH/"
+          rsync -a "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/" "$PLUGINPATH/"
+
+          # Verify every repository-owned source file after the copy.
+          theme_drift=$(rsync -acni "$REPOPATH/wp-content/themes/$THEME_SLUG/" "$THEMEPATH/")
+          plugin_drift=$(rsync -acni "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/" "$PLUGINPATH/")
+
+          if [ -n "$theme_drift" ] || [ -n "$plugin_drift" ]; then
+            echo 'Staging code verification found files that did not copy cleanly.'
+            printf '%s\n' "$theme_drift" "$plugin_drift"
+            exit 1
+          fi
+
+          # Cloudflare rejects curl's default user agent. A cache-busted,
+          # browser-style request confirms the public staging install renders.
+          health_url="$EXPECTED_URL/?deploy_verify=$GITHUB_SHA"
+          health_result=$(curl \
+            --silent \
+            --show-error \
+            --connect-timeout 20 \
+            --max-time 60 \
+            --output /dev/null \
+            --write-out '%{http_code}|%{redirect_url}' \
+            --user-agent 'Mozilla/5.0 (compatible; BarbadosEscapesDeploy/1.0)' \
+            "$health_url")
+          http_status="${health_result%%|*}"
+          redirect_url="${health_result#*|}"
+
+          if [ "$http_status" = '200' ]; then
+            :
+          elif [ "$http_status" = '302' ]; then
+            # Accept only the staging install's own password-protection login.
+            case "$redirect_url" in
+              "$EXPECTED_URL/"*'password-protected=login'*)
+                ;;
+              *)
+                echo "Staging health check returned an unexpected redirect: $redirect_url"
+                exit 1
+                ;;
+            esac
+          else
+            echo "Staging health check failed: $health_url returned HTTP $http_status"
+            exit 1
+          fi
+
+          echo "Staging deployment verified at $deployed_sha (HTTP $http_status)."
+          REMOTE_SCRIPT
+
+          for attempt in 1 2 3 4 5; do
+            echo "SSH staging deploy attempt ${attempt}/5..."
+
+            if ssh \
+              -i "$deploy_key" \
+              -p "$SSH_PORT" \
+              -o BatchMode=yes \
+              -o ConnectTimeout=20 \
+              -o IdentitiesOnly=yes \
+              -o ServerAliveInterval=15 \
+              -o ServerAliveCountMax=2 \
+              -o StrictHostKeyChecking=yes \
+              "$SSH_USERNAME@$SSH_HOST" \
+              "GITHUB_SHA=$GITHUB_SHA bash -se" < "$remote_script"; then
+              echo "Staging deployment verified on server and over HTTP."
+              exit 0
+            else
+              status=$?
+            fi
+
+            echo "SSH staging deploy attempt ${attempt}/5 failed with status $status."
+
+            if [ "$attempt" -eq 5 ]; then
+              exit "$status"
+            fi
+
+            sleep_seconds=$(( attempt * 15 ))
+            echo "Retrying in ${sleep_seconds}s..."
+            sleep "$sleep_seconds"
+          done
