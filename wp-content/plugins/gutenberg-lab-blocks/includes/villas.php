@@ -2378,6 +2378,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 	$min_price_field_id     = wp_unique_id( 'villa-search-min-price-' );
 	$max_price_field_id     = wp_unique_id( 'villa-search-max-price-' );
 	$advanced_filters_id    = wp_unique_id( 'villa-search-advanced-' );
+	$form_id                = wp_unique_id( 'villa-search-form-' );
 	$date_display           = gutenberg_lab_blocks_format_villa_search_date_range(
 		$request['arrival'],
 		$request['departure']
@@ -2418,8 +2419,26 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 	ob_start();
 	?>
 	<section <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+		<button
+			class="vvm-villa-hero-search__launcher"
+			type="button"
+			aria-controls="<?php echo esc_attr( $form_id ); ?>"
+			aria-expanded="false"
+			hidden
+			data-vvm-villa-search-launcher
+		>
+			<span class="vvm-villa-hero-search__launcher-icon" aria-hidden="true">
+				<svg viewBox="0 0 24 24" focusable="false">
+					<circle cx="11" cy="11" r="6.5"></circle>
+					<path d="M16 16l4 4"></path>
+				</svg>
+			</span>
+			<span><?php esc_html_e( 'Search Our Villas', 'gutenberg-lab-blocks' ); ?></span>
+		</button>
 		<form
+			id="<?php echo esc_attr( $form_id ); ?>"
 			class="vvm-villa-hero-search__form"
+			tabindex="-1"
 			style="--vvm-search-filter-count: <?php echo esc_attr( $visible_filter_count ); ?>;"
 			action="<?php echo esc_url( $archive_url ); ?>"
 			method="get"

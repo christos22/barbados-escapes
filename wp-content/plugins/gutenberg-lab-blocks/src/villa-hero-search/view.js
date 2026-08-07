@@ -2,6 +2,7 @@ import flatpickr from 'flatpickr';
 
 const DESKTOP_QUERY = '(min-width: 782px)';
 const MOBILE_QUERY = '(max-width: 781px)';
+const COMPACT_HERO_QUERY = '(max-width: 1199px)';
 
 const formatDateKey = ( date ) => {
 	if ( ! ( date instanceof Date ) || Number.isNaN( date.getTime() ) ) {
@@ -494,6 +495,55 @@ const setupCleanSubmission = ( form ) => {
 	} );
 };
 
+const setupResponsiveHeroLauncher = ( form ) => {
+	const wrapper = form.closest( '.vvm-villa-hero-search' );
+	const launcher = wrapper?.querySelector(
+		'[data-vvm-villa-search-launcher]'
+	);
+
+	// The same dynamic block powers the homepage and results page. Only the
+	// copy inside the homepage media hero should collapse into a launcher.
+	if ( ! wrapper || ! launcher || ! wrapper.closest( '.media-panel' ) ) {
+		return;
+	}
+
+	const compactMedia = window.matchMedia( COMPACT_HERO_QUERY );
+	let isExpanded = false;
+
+	const render = () => {
+		const isCompact = compactMedia.matches;
+
+		wrapper.classList.toggle( 'is-hero-collapsible', isCompact );
+
+		if ( ! isCompact ) {
+			isExpanded = false;
+			launcher.hidden = true;
+			form.hidden = false;
+			launcher.setAttribute( 'aria-expanded', 'false' );
+			return;
+		}
+
+		launcher.hidden = isExpanded;
+		form.hidden = ! isExpanded;
+		launcher.setAttribute(
+			'aria-expanded',
+			isExpanded ? 'true' : 'false'
+		);
+	};
+
+	launcher.addEventListener( 'click', () => {
+		isExpanded = true;
+		render();
+
+		// Move keyboard focus to the revealed search landmark without opening
+		// the date picker before the visitor explicitly chooses Dates.
+		form.focus( { preventScroll: true } );
+	} );
+
+	compactMedia.addEventListener?.( 'change', render );
+	render();
+};
+
 const setupVillaSearch = ( form ) => {
 	if ( form.dataset.vvmVillaSearchReady === 'true' ) {
 		return;
@@ -506,6 +556,7 @@ const setupVillaSearch = ( form ) => {
 	setupPriceRange( form );
 	setupAdvancedFilters( form );
 	setupCleanSubmission( form );
+	setupResponsiveHeroLauncher( form );
 };
 
 const initVillaSearch = () => {
