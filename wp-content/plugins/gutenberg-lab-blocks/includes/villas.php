@@ -1775,7 +1775,7 @@ function gutenberg_lab_blocks_get_villa_card_fact_icon_items( $facts, $bedrooms 
 
 	foreach ( $fact_matches[0] as $fact_label ) {
 		if ( preg_match( '/\bBedrooms?\b/ui', $fact_label ) ) {
-			$items['bedrooms-line'] = $fact_label;
+			$items['bedrooms'] = $fact_label;
 		} elseif ( preg_match( '/\bBathrooms?\b/ui', $fact_label ) ) {
 			$items['bathtub-thick'] = $fact_label;
 		} elseif ( preg_match( '/\b(?:Sleeps?|Guests?|Occupancy)\b/ui', $fact_label ) ) {
@@ -1783,8 +1783,8 @@ function gutenberg_lab_blocks_get_villa_card_fact_icon_items( $facts, $bedrooms 
 		}
 	}
 
-	if ( ! isset( $items['bedrooms-line'] ) && $bedrooms > 0 ) {
-		$items['bedrooms-line'] = sprintf(
+	if ( ! isset( $items['bedrooms'] ) && $bedrooms > 0 ) {
+		$items['bedrooms'] = sprintf(
 			/* translators: %s: number of bedrooms. */
 			_n( '%s Bedroom', '%s Bedrooms', $bedrooms, 'gutenberg-lab-blocks' ),
 			number_format_i18n( $bedrooms )
@@ -1801,7 +1801,7 @@ function gutenberg_lab_blocks_get_villa_card_fact_icon_items( $facts, $bedrooms 
 
 	$icon_items = array();
 
-	foreach ( array( 'bedrooms-line', 'bathtub-thick', 'people' ) as $icon_key ) {
+	foreach ( array( 'bedrooms', 'bathtub-thick', 'people' ) as $icon_key ) {
 		if ( isset( $items[ $icon_key ] ) ) {
 			$icon_items[] = array(
 				'icon'  => $icon_key,

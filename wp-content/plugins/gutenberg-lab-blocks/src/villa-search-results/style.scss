@@ -191,7 +191,13 @@
 		height: 100%;
 	}
 
-	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--bedrooms-line,
+	// The shared villa-ribbon bedroom asset has a wider visual footprint than
+	// the line icons, so enlarge it inside the same fixed layout cell.
+	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--bedrooms {
+		transform: scale(1.25);
+		transform-origin: center;
+	}
+
 	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--people,
 	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--dollar-line {
 		fill: none;
