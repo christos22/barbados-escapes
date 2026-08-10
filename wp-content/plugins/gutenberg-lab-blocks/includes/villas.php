@@ -2125,6 +2125,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		array(
 			'cta_label_override' => '',
 			'enquiry_url'        => '',
+			'heading_level'      => 3,
 			'presentation'       => 'standard',
 			'show_description'   => true,
 			'show_details'       => true,
@@ -2147,6 +2148,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 	$show_details     = ! empty( $args['show_details'] );
 	$show_fact_icons  = ! empty( $args['show_fact_icons'] );
 	$show_price       = ! empty( $args['show_price'] );
+	$heading_tag      = 2 === (int) $args['heading_level'] ? 'h2' : 'h3';
 	$fact_icon_items  = $show_fact_icons
 		? gutenberg_lab_blocks_get_villa_card_fact_icon_items(
 			$villa_data['facts'],
@@ -2176,13 +2178,20 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 			? 'vvm-card-grid__card-media--background'
 			: 'vvm-card-grid__card-media--placeholder',
 	);
+	$media_link_label = '' !== $villa_data['image_url']
+		? sprintf( __( 'View %s', 'gutenberg-lab-blocks' ), $villa_data['title'] )
+		: sprintf(
+			/* translators: %s: villa title. */
+			__( 'Villa image coming soon: View %s', 'gutenberg-lab-blocks' ),
+			$villa_data['title']
+		);
 	ob_start();
 	?>
 	<article class="vvm-card-grid__card vvm-card-grid__card--villa">
 		<a
 			class="<?php echo esc_attr( implode( ' ', $media_classes ) ); ?>"
 			href="<?php echo esc_url( $villa_data['permalink'] ); ?>"
-			aria-label="<?php echo esc_attr( sprintf( __( 'View %s', 'gutenberg-lab-blocks' ), $villa_data['title'] ) ); ?>"
+			aria-label="<?php echo esc_attr( $media_link_label ); ?>"
 		>
 			<?php if ( '' !== $villa_data['image_url'] ) : ?>
 				<?php
@@ -2211,11 +2220,11 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 				</p>
 			<?php endif; ?>
 
-			<h3 class="wp-block-heading">
+			<<?php echo esc_html( $heading_tag ); ?> class="wp-block-heading">
 				<a href="<?php echo esc_url( $villa_data['permalink'] ); ?>">
 					<?php echo esc_html( $villa_data['title'] ); ?>
 				</a>
-			</h3>
+			</<?php echo esc_html( $heading_tag ); ?>>
 
 			<?php if ( $show_description && 'collection' === $args['presentation'] && '' !== $villa_data['descriptor'] ) : ?>
 				<p class="vvm-card-grid__card-descriptor"><?php echo esc_html( $villa_data['descriptor'] ); ?></p>
@@ -2262,6 +2271,12 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 						<a
 							class="wp-block-button__link wp-element-button"
 							href="<?php echo esc_url( $villa_data['cta']['url'] ); ?>"
+							aria-label="<?php echo esc_attr( sprintf(
+								/* translators: 1: CTA label, 2: villa title. */
+								__( '%1$s: %2$s', 'gutenberg-lab-blocks' ),
+								$villa_data['cta']['label'],
+								$villa_data['title']
+							) ); ?>"
 						>
 							<?php echo esc_html( $villa_data['cta']['label'] ); ?>
 						</a>
@@ -2391,6 +2406,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 	$guests_field_id        = wp_unique_id( 'villa-search-guests-' );
 	$min_price_field_id     = wp_unique_id( 'villa-search-min-price-' );
 	$max_price_field_id     = wp_unique_id( 'villa-search-max-price-' );
+	$price_error_id         = wp_unique_id( 'villa-search-price-error-' );
 	$advanced_filters_id    = wp_unique_id( 'villa-search-advanced-' );
 	$form_id                = wp_unique_id( 'villa-search-form-' );
 	$date_display           = gutenberg_lab_blocks_format_villa_search_date_range(
@@ -2683,6 +2699,15 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 							value="<?php echo $request['max_price'] ? esc_attr( $request['max_price'] ) : ''; ?>"
 							data-vvm-villa-search-max-price
 						/>
+						<p
+							id="<?php echo esc_attr( $price_error_id ); ?>"
+							class="screen-reader-text"
+							role="alert"
+							hidden
+							data-vvm-villa-search-price-error
+						>
+							<?php esc_html_e( 'The maximum price must not be lower than the minimum price.', 'gutenberg-lab-blocks' ); ?>
+						</p>
 					</div>
 				</details>
 			</div>

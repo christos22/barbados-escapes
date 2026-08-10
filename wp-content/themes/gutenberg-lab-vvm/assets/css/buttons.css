@@ -295,7 +295,7 @@
 
 .wp-block-button.is-style-vvm-link-primary :is(.wp-block-button__link, .wp-element-button) {
 	gap: 0.5rem;
-	color: var(--wp--preset--color--gold, #c4922a) !important;
+	color: var(--wp--custom--brand--accessible-gold, #8a631d) !important;
 	font-family: "Romely", sans-serif;
 	font-weight: 600;
 	letter-spacing: 0.025em;
@@ -344,7 +344,6 @@
 	.wp-block-button.is-style-vvm-link-primary,
 	.wp-block-button.is-style-vvm-link-secondary
 ) :is(.wp-block-button__link, .wp-element-button):focus-visible {
-	color: var(--wp--preset--color--gold, #c4922a) !important;
 	text-decoration: none !important;
 }
 

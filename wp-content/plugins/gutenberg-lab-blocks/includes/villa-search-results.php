@@ -323,6 +323,7 @@ function gutenberg_lab_blocks_render_villa_search_cards( $villa_ids, $request ) 
 			$villa_id,
 			array(
 				'enquiry_url'      => gutenberg_lab_blocks_get_villa_search_enquiry_url( $villa_id, $request ),
+				'heading_level'    => 2,
 				'presentation'     => 'collection',
 				'show_description' => true,
 				'show_details'     => true,
@@ -526,6 +527,8 @@ function gutenberg_lab_blocks_render_villa_search_results_markup( $wrapper_attri
 		<?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		data-vvm-villa-search-results
 		data-vvm-villa-results-loading="<?php esc_attr_e( 'Loading more villas…', 'gutenberg-lab-blocks' ); ?>"
+		data-vvm-villa-results-loaded-singular="<?php esc_attr_e( '1 more villa loaded.', 'gutenberg-lab-blocks' ); ?>"
+		data-vvm-villa-results-loaded-plural="<?php esc_attr_e( '%d more villas loaded.', 'gutenberg-lab-blocks' ); ?>"
 		data-vvm-villa-results-complete="<?php esc_attr_e( 'All villas loaded.', 'gutenberg-lab-blocks' ); ?>"
 		data-vvm-villa-results-error="<?php esc_attr_e( 'More villas could not load automatically. Use the next page link.', 'gutenberg-lab-blocks' ); ?>"
 	>
@@ -581,6 +584,7 @@ function gutenberg_lab_blocks_render_villa_search_results_markup( $wrapper_attri
 			<p
 				class="vvm-villa-search-results__announcement"
 				aria-live="polite"
+				role="status"
 				data-vvm-villa-results-status
 			></p>
 			<div

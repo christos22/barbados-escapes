@@ -86,6 +86,27 @@ function syncContentInteractivity( contentPanel, isActive ) {
 		} );
 }
 
+function syncListSemantics( carouselElement, slideSelector ) {
+	const list = carouselElement.querySelector( '.splide__list' );
+
+	if ( ! list || ! [ 'UL', 'OL' ].includes( list.tagName ) ) {
+		return;
+	}
+
+	// Splide applies role="presentation" to the authored list and role="group"
+	// to each LI. The latter role is not permitted on an LI, so retain the
+	// native list/listitem semantics while keeping Splide's slide labels.
+	list.removeAttribute( 'role' );
+	list.querySelectorAll( slideSelector ).forEach( ( slide ) => {
+		if (
+			'LI' === slide.tagName &&
+			'group' === slide.getAttribute( 'role' )
+		) {
+			slide.removeAttribute( 'role' );
+		}
+	} );
+}
+
 function syncActiveState(
 	rootElement,
 	splide,
@@ -240,6 +261,7 @@ function initializePeekingCarousel( rootElement, config ) {
 	} );
 
 	const syncUi = () => {
+		syncListSemantics( carouselElement, slideSelector );
 		syncButtons( previousButton, nextButton );
 		syncActiveState(
 			rootElement,

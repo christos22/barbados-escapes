@@ -27,15 +27,21 @@ const setupVillaInfiniteScroll = ( results ) => {
 	let isLoading = false;
 	const loadingMessage =
 		results.dataset.vvmVillaResultsLoading || 'Loading more villas…';
+	const loadedSingularMessage =
+		results.dataset.vvmVillaResultsLoadedSingular || '1 more villa loaded.';
+	const loadedPluralMessage =
+		results.dataset.vvmVillaResultsLoadedPlural || '%d more villas loaded.';
 	const completeMessage =
 		results.dataset.vvmVillaResultsComplete || 'All villas loaded.';
 	const errorMessage =
 		results.dataset.vvmVillaResultsError ||
 		'More villas could not load automatically. Use the next page link.';
 
-	const finish = () => {
+	const finish = ( loadedMessage = '' ) => {
 		observer?.disconnect();
-		status.textContent = completeMessage;
+		status.textContent = loadedMessage
+			? `${ loadedMessage } ${ completeMessage }`
+			: completeMessage;
 		results.classList.remove( 'is-loading' );
 		results.removeAttribute( 'aria-busy' );
 	};
@@ -89,7 +95,15 @@ const setupVillaInfiniteScroll = ( results ) => {
 
 			const template = document.createElement( 'template' );
 			template.innerHTML = html.trim();
-			items.append( ...template.content.children );
+			const loadedCards = Array.from( template.content.children );
+			const loadedMessage =
+				loadedCards.length === 1
+					? loadedSingularMessage
+					: loadedPluralMessage.replace(
+							'%d',
+							String( loadedCards.length )
+					  );
+			items.append( ...loadedCards );
 
 			const responseNextUrl = payload.data.nextUrl || '';
 
@@ -109,12 +123,12 @@ const setupVillaInfiniteScroll = ( results ) => {
 			results.removeAttribute( 'aria-busy' );
 
 			if ( ! nextUrl ) {
-				finish();
+				finish( loadedMessage );
 				return;
 			}
 
 			nextLink.href = nextUrl;
-			status.textContent = '';
+			status.textContent = loadedMessage;
 		} catch ( error ) {
 			isLoading = false;
 			restorePagination();

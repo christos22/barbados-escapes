@@ -10,6 +10,7 @@
 		"useRootPaddingAwareAlignments": true,
 		"custom": {
 			"brand": {
+				"accessibleGold": "#8A631D",
 				"darkGreen": "#1E3D2F",
 				"gold": "#C4922A",
 				"lightGold": "#F5ECD7"
@@ -189,7 +190,7 @@
 				},
 				":hover": {
 					"color": {
-						"text": "var(--wp--preset--color--gold)"
+						"text": "var(--wp--custom--brand--accessible-gold)"
 					}
 				}
 			},

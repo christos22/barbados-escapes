@@ -15,9 +15,11 @@
 
 .vvm-villa-hero-search {
 	--vvm-search-border: rgb(30 61 47 / 0.14);
+	--vvm-search-focus: var(--wp--custom--brand--accessible-gold, #8a631d);
 	--vvm-search-gold: var(--wp--preset--color--gold, #c4922a);
 	--vvm-search-green: var(--wp--preset--color--dark-green, #1e3d2f);
-	--vvm-search-muted: rgb(30 61 47 / 0.66);
+	--vvm-search-ink-on-gold: #163429;
+	--vvm-search-muted: #657970;
 	--vvm-search-surface: rgb(255 255 255 / 0.97);
 	--vvm-search-value-font-size: 0.9rem;
 
@@ -145,7 +147,7 @@
 	&__select-trigger:focus,
 	&__counter-trigger:focus,
 	&__price-panel input:focus {
-		outline: 2px solid var(--vvm-search-gold);
+		outline: 2px solid var(--vvm-search-focus);
 		outline-offset: 0.25rem;
 	}
 
@@ -271,7 +273,7 @@
 	&__counter-button:focus-visible {
 		background: var(--vvm-search-green);
 		color: #fff;
-		outline: 2px solid var(--vvm-search-gold);
+		outline: 2px solid var(--vvm-search-focus);
 		outline-offset: 2px;
 	}
 
@@ -384,7 +386,7 @@
 	}
 
 	&__form.is-date-enhanced &__field--dates:focus-within::after {
-		background-color: var(--vvm-search-gold);
+		background-color: var(--vvm-search-focus);
 	}
 
 	&__form.is-date-enhanced
@@ -411,6 +413,11 @@
 		position: relative;
 		text-align: left;
 		width: 100%;
+	}
+
+	&__price-summary:focus-visible {
+		outline: 2px solid var(--vvm-search-focus);
+		outline-offset: 0.25rem;
 	}
 
 	&__field--price[data-placeholder="true"] &__price-summary {
@@ -456,7 +463,7 @@
 		background: var(--vvm-search-gold);
 		border: 0;
 		border-radius: 50%;
-		color: var(--wp--preset--color--white, #fff);
+		color: var(--vvm-search-ink-on-gold);
 		cursor: pointer;
 		display: inline-flex;
 		font-family: var(--wp--preset--font-family--refined-sans, inherit);
@@ -478,6 +485,7 @@
 	&__submit:hover,
 	&__submit:focus-visible {
 		background: var(--vvm-search-green);
+		color: var(--wp--preset--color--white, #fff);
 		transform: translateY(-1px);
 	}
 
@@ -564,7 +572,7 @@
 .flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day.selected {
 	background: var(--wp--preset--color--gold, #c4922a);
 	border-color: var(--wp--preset--color--gold, #c4922a);
-	color: #fff;
+	color: #163429;
 }
 
 .flatpickr-calendar.vvm-villa-search-calendar .flatpickr-day.flatpickr-disabled,
@@ -584,7 +592,7 @@
 			border: 1px solid var(--vvm-search-gold);
 			border-radius: 999px;
 			box-shadow: 0 12px 28px rgb(15 45 35 / 0.18);
-			color: var(--wp--preset--color--white, #fff);
+			color: var(--vvm-search-ink-on-gold);
 			cursor: pointer;
 			display: flex;
 			font-family: var(--wp--preset--font-family--refined-sans, inherit);
@@ -607,6 +615,7 @@
 		.vvm-villa-hero-search__launcher:focus-visible {
 			background: var(--vvm-search-green);
 			border-color: var(--vvm-search-green);
+			color: var(--wp--preset--color--white, #fff);
 			transform: translateY(-1px);
 		}
 
@@ -732,7 +741,7 @@
 		}
 
 		&__more-toggle:focus-visible {
-			outline: 2px solid var(--vvm-search-gold);
+			outline: 2px solid var(--vvm-search-focus);
 			outline-offset: -3px;
 		}
 

@@ -13,6 +13,7 @@
 
 	position: absolute;
 	z-index: 3;
+	box-sizing: border-box;
 	display: flex;
 	align-items: center;
 	gap: var(--vvm-slider-controls-gap);

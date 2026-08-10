@@ -1,6 +1,7 @@
 .vvm-villa-search-results {
 	--vvm-results-border: rgb(30 61 47 / 0.16);
 	--vvm-results-gold: var(--wp--preset--color--gold, #c4922a);
+	--vvm-results-gold-text: var(--wp--custom--brand--accessible-gold, #8a631d);
 	--vvm-results-green: var(--wp--preset--color--dark-green, #1e3d2f);
 
 	box-sizing: border-box;
@@ -47,7 +48,7 @@
 	}
 
 	&__clear {
-		color: var(--vvm-results-gold);
+		color: var(--vvm-results-gold-text);
 		font-family: var(--wp--preset--font-family--refined-sans, inherit);
 		text-underline-offset: 0.2em;
 	}
@@ -94,7 +95,7 @@
 	&__pagination .current {
 		border-color: var(--vvm-results-gold);
 		background: var(--vvm-results-gold);
-		color: var(--wp--preset--color--white, #fff);
+		color: #163429;
 	}
 
 	&.is-infinite-scroll-ready &__pagination {
@@ -198,6 +199,11 @@
 		stroke-linecap: round;
 		stroke-linejoin: round;
 		stroke-width: 1.05;
+	}
+
+	// Brand gold is decorative; small text needs the darker AA-safe companion.
+	.vvm-card-grid__card-eyebrow {
+		color: var(--vvm-results-gold-text) !important;
 	}
 }
 

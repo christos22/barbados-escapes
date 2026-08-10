@@ -75,6 +75,7 @@ const setupDateRange = ( form ) => {
 	const dateError =
 		form.dataset.vvmVillaSearchDateError ||
 		'Choose both an arrival and departure date.';
+	const calendarId = `${ trigger.id }-calendar`;
 	const setTriggerValue = ( value ) => {
 		trigger.value = value;
 		trigger.dataset.placeholder = value ? 'false' : 'true';
@@ -95,6 +96,8 @@ const setupDateRange = ( form ) => {
 		monthSelectorType: 'static',
 		positionElement: trigger,
 		showMonths: desktopMedia.matches ? 2 : 1,
+		onOpen: () => trigger.setAttribute( 'aria-expanded', 'true' ),
+		onClose: () => trigger.setAttribute( 'aria-expanded', 'false' ),
 		onChange: ( dates, _dateString, instance ) => {
 			trigger.setCustomValidity( '' );
 
@@ -119,6 +122,16 @@ const setupDateRange = ( form ) => {
 			instance.calendarContainer.classList.add(
 				'vvm-villa-search-calendar'
 			);
+			instance.calendarContainer.id = calendarId;
+			instance.calendarContainer.setAttribute( 'role', 'dialog' );
+			instance.calendarContainer.setAttribute(
+				'aria-label',
+				'Choose arrival and departure dates'
+			);
+			trigger.setAttribute( 'aria-controls', calendarId );
+			trigger.setAttribute( 'aria-expanded', 'false' );
+			trigger.setAttribute( 'aria-haspopup', 'dialog' );
+			trigger.setAttribute( 'role', 'combobox' );
 			setTriggerValue( dates.length ? formatDisplayRange( dates ) : '' );
 		},
 	} );
@@ -142,6 +155,16 @@ const setupDateRange = ( form ) => {
 	};
 
 	desktopMedia.addEventListener?.( 'change', syncMonthCount );
+
+	trigger.addEventListener( 'keydown', ( event ) => {
+		if ( [ 'Enter', ' ' ].includes( event.key ) ) {
+			event.preventDefault();
+			picker.open();
+		} else if ( event.key === 'Escape' && picker.isOpen ) {
+			event.preventDefault();
+			picker.close();
+		}
+	} );
 
 	form.addEventListener( 'submit', ( event ) => {
 		if ( picker.selectedDates.length === 1 ) {
@@ -279,15 +302,27 @@ const setupSelectMenus = ( form ) => {
 			optionButtons[ boundedIndex ]?.focus();
 		};
 
-		trigger.addEventListener( 'click', () => {
+		trigger.addEventListener( 'click', ( event ) => {
 			if ( panel.hidden ) {
 				openMenu();
+
+				// Enter and Space dispatch a zero-detail click. Move keyboard
+				// users into the listbox while preserving the mouse workflow.
+				if ( event.detail === 0 ) {
+					focusOption( select.selectedIndex );
+				}
 			} else {
 				closeMenu( menu );
 			}
 		} );
 
 		trigger.addEventListener( 'keydown', ( event ) => {
+			if ( event.key === 'Escape' && ! panel.hidden ) {
+				event.preventDefault();
+				closeMenu( menu, true );
+				return;
+			}
+
 			if ( ! [ 'ArrowDown', 'ArrowUp' ].includes( event.key ) ) {
 				return;
 			}
@@ -327,6 +362,15 @@ const setupSelectMenus = ( form ) => {
 		} );
 
 		select.addEventListener( 'change', sync );
+		wrapper.addEventListener( 'focusout', () => {
+			window.setTimeout( () => {
+				if (
+					! wrapper.contains( wrapper.ownerDocument.activeElement )
+				) {
+					closeMenu( menu );
+				}
+			}, 0 );
+		} );
 		wrapper.append( trigger, panel );
 		field.insertBefore( wrapper, select );
 		select.hidden = true;
@@ -531,6 +575,12 @@ const setupCounterFields = ( form ) => {
 				closeCounter( counter );
 			}
 		} );
+		trigger.addEventListener( 'keydown', ( event ) => {
+			if ( event.key === 'Escape' && ! panel.hidden ) {
+				event.preventDefault();
+				closeCounter( counter, true );
+			}
+		} );
 
 		panel.addEventListener( 'keydown', ( event ) => {
 			if ( event.key === 'Escape' ) {
@@ -542,6 +592,13 @@ const setupCounterFields = ( form ) => {
 		increase.addEventListener( 'click', () => adjust( 1 ) );
 		input.addEventListener( 'input', sync );
 		input.addEventListener( 'change', sync );
+		field.addEventListener( 'focusout', () => {
+			window.setTimeout( () => {
+				if ( ! field.contains( field.ownerDocument.activeElement ) ) {
+					closeCounter( counter );
+				}
+			}, 0 );
+		} );
 		sync();
 	} );
 
@@ -560,9 +617,10 @@ const setupPriceRange = ( form ) => {
 	const summary = form.querySelector(
 		'[data-vvm-villa-search-price-summary]'
 	);
+	const error = form.querySelector( '[data-vvm-villa-search-price-error]' );
 	const details = summary?.closest( 'details' );
 
-	if ( ! minimum || ! maximum || ! summary || ! details ) {
+	if ( ! minimum || ! maximum || ! summary || ! error || ! details ) {
 		return;
 	}
 
@@ -584,7 +642,7 @@ const setupPriceRange = ( form ) => {
 			? `At least ${ formatUsd( minValue ) }`
 			: maximumPlaceholder;
 
-		if ( maxValue ) {
+		if ( maxValue && ! isInvalid ) {
 			minimum.max = String( maxValue );
 		} else {
 			minimum.removeAttribute( 'max' );
@@ -592,6 +650,13 @@ const setupPriceRange = ( form ) => {
 
 		maximum.setCustomValidity( isInvalid ? priceError : '' );
 		maximum.setAttribute( 'aria-invalid', isInvalid ? 'true' : 'false' );
+		error.hidden = ! isInvalid;
+
+		if ( isInvalid ) {
+			maximum.setAttribute( 'aria-describedby', error.id );
+		} else {
+			maximum.removeAttribute( 'aria-describedby' );
+		}
 		details.dataset.placeholder = minValue || maxValue ? 'false' : 'true';
 
 		if ( isInvalid ) {
@@ -611,6 +676,25 @@ const setupPriceRange = ( form ) => {
 
 	minimum.addEventListener( 'input', refresh );
 	maximum.addEventListener( 'input', refresh );
+	maximum.addEventListener( 'invalid', () => {
+		details.open = true;
+
+		// Only expose the custom range message while the range is genuinely
+		// inverted. Native validation can emit a later `invalid` event after the
+		// visitor has corrected the values; it must not revive a stale alert.
+		const minValue = Number( minimum.value ) || 0;
+		const maxValue = Number( maximum.value ) || 0;
+		const hasInvertedRange =
+			minValue > 0 && maxValue > 0 && maxValue < minValue;
+
+		error.hidden = ! hasInvertedRange;
+
+		if ( hasInvertedRange ) {
+			maximum.setAttribute( 'aria-describedby', error.id );
+		} else {
+			maximum.removeAttribute( 'aria-describedby' );
+		}
+	} );
 	refresh();
 
 	document.addEventListener( 'click', ( event ) => {
