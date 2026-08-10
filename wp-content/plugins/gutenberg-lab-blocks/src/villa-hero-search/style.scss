@@ -80,7 +80,6 @@
 	&__control,
 	&__date-input,
 	&__select-trigger,
-	&__counter-trigger,
 	&__price-summary-value,
 	&__price-panel input {
 		background: transparent;
@@ -109,8 +108,7 @@
 		padding-right: 1.25rem;
 	}
 
-	&__select-trigger,
-	&__counter-trigger {
+	&__select-trigger {
 		align-items: center;
 		appearance: none;
 		cursor: pointer;
@@ -122,6 +120,47 @@
 
 	&__date-input {
 		font-size: 0.78rem;
+	}
+
+	&__number-field {
+		color: var(--vvm-search-muted);
+		flex: 1 1 auto;
+		min-width: 0;
+		position: relative;
+	}
+
+	&__number-field.has-value {
+		color: var(--vvm-search-green);
+	}
+
+	&__number-field > &__control {
+		// Extend through the field's vertical padding so the native stepper has
+		// one stable hover/click target instead of two tiny arrow hotspots.
+		height: calc(100% + 0.9rem);
+		margin-block: -0.45rem;
+		min-height: 2.4rem;
+
+		// Match the optical baseline of the adjacent custom-select values.
+		padding-top: 1px;
+	}
+
+	&__number-display {
+		align-items: center;
+		box-sizing: border-box;
+		color: var(--vvm-search-green);
+		display: none;
+		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-size: var(--vvm-search-value-font-size);
+		inset: 0;
+		line-height: 1.35;
+		min-height: 1.5rem;
+		overflow: hidden;
+		pointer-events: none;
+		position: absolute;
+		padding-right: 1.25rem;
+		text-align: left;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	&__price-panel input {
@@ -136,8 +175,7 @@
 	&__date-input:placeholder-shown,
 	&__date-trigger[data-placeholder="true"],
 	&__select:has(option:checked[value=""]),
-	&__select-trigger[data-placeholder="true"],
-	&__counter-trigger[data-placeholder="true"] {
+	&__select-trigger[data-placeholder="true"] {
 		color: var(--vvm-search-muted);
 		opacity: 1;
 	}
@@ -145,14 +183,21 @@
 	&__control:focus,
 	&__date-input:focus,
 	&__select-trigger:focus,
-	&__counter-trigger:focus,
 	&__price-panel input:focus {
 		outline: 2px solid var(--vvm-search-focus);
 		outline-offset: 0.25rem;
 	}
 
+	&__number-field.has-value:not(:focus-within) &__control {
+		color: transparent;
+	}
+
+	&__number-field.has-value:not(:focus-within) &__number-display {
+		display: flex;
+	}
+
 	&__select-trigger::after,
-	&__counter-trigger::after,
+	&__number-field::after,
 	&__price-summary::after {
 		border-bottom: 1px solid currentcolor;
 		border-right: 1px solid currentcolor;
@@ -167,47 +212,29 @@
 		width: 0.35rem;
 	}
 
+	// Align the custom cue with Chromium's native number-stepper gutter.
+	&__number-field::after {
+		right: 0.4rem;
+	}
+
+	// Give the idle field the same cue as the other filters. The browser's
+	// native number steppers take over as soon as the visitor interacts.
+	&__number-field:hover::after,
+	&__number-field:focus-within::after {
+		opacity: 0;
+	}
+
 	&__select-menu--open &__select-trigger::after,
-	&__field--counter-open &__counter-trigger::after,
 	&__field--price[open] &__price-summary::after {
 		transform: translateY(-25%) rotate(225deg);
 	}
 
-	&__select-value,
-	&__counter-trigger-value {
+	&__select-value {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
-	&__field--counter-open {
-		z-index: 30;
-	}
-
-	&__counter-panel {
-		align-items: center;
-		background: #fff;
-		border: 1px solid var(--vvm-search-border);
-		border-radius: 0.5rem;
-		box-shadow: 0 18px 38px rgb(15 45 35 / 0.16);
-		box-sizing: border-box;
-		display: flex;
-		gap: 1rem;
-		justify-content: space-between;
-		left: 0;
-		min-width: 15rem;
-		padding: 1rem;
-		position: absolute;
-		top: calc(100% + 0.55rem);
-		width: max(100%, 15rem);
-		z-index: 20;
-	}
-
-	&__counter-panel[hidden] {
-		display: none;
-	}
-
-	&__counter-panel-label,
 	&__price-panel label {
 		color: var(--vvm-search-green);
 		font-family: var(--wp--preset--font-family--refined-sans, inherit);
@@ -218,84 +245,6 @@
 		text-align: left;
 	}
 
-	&__counter-controls {
-		align-items: center;
-		display: flex;
-		flex: 0 0 auto;
-		gap: 0.75rem;
-	}
-
-	&__counter-button {
-		align-items: center;
-		background: transparent;
-		border: 1px solid var(--vvm-search-green);
-		border-radius: 50%;
-		box-sizing: border-box;
-		color: var(--vvm-search-green);
-		cursor: pointer;
-		display: inline-flex;
-		font: inherit;
-		font-size: 0;
-		height: 2.25rem;
-		justify-content: center;
-		line-height: 1;
-		padding: 0;
-		position: relative;
-		transition:
-			background-color 160ms ease,
-			color 160ms ease,
-			opacity 160ms ease;
-		width: 2.25rem;
-	}
-
-	// Draw both symbols from the exact centre so font metrics cannot shift them.
-	&__counter-button::before,
-	&__counter-button--increase::after {
-		background: currentcolor;
-		border-radius: 999px;
-		content: "";
-		left: 50%;
-		position: absolute;
-		top: 50%;
-		transform: translate(-50%, -50%);
-	}
-
-	&__counter-button::before {
-		height: 1.5px;
-		width: 0.8rem;
-	}
-
-	&__counter-button--increase::after {
-		height: 0.8rem;
-		width: 1.5px;
-	}
-
-	&__counter-button:focus-visible {
-		background: var(--vvm-search-green);
-		color: #fff;
-		outline: 2px solid var(--vvm-search-focus);
-		outline-offset: 2px;
-	}
-
-	&__counter-button:disabled {
-		cursor: not-allowed;
-		opacity: 0.3;
-	}
-
-	&__counter-button:hover:not(:disabled) {
-		background: var(--vvm-search-green);
-		color: #fff;
-	}
-
-	&__counter-count {
-		color: var(--vvm-search-green);
-		font-family: var(--wp--preset--font-family--refined-sans, inherit);
-		font-size: 1rem;
-		font-variant-numeric: tabular-nums;
-		line-height: 1;
-		min-width: 1.25rem;
-		text-align: center;
-	}
 
 	&__select-menu {
 		min-width: 0;
@@ -764,13 +713,6 @@
 			right: 0.5rem;
 		}
 
-		&__counter-panel {
-			left: 0.5rem;
-			min-width: 0;
-			right: 0.5rem;
-			width: auto;
-		}
-
 		&__actions {
 			grid-column: auto;
 			padding: 0.5rem 0;
@@ -791,7 +733,6 @@
 
 	.vvm-villa-hero-search__launcher,
 	.vvm-villa-hero-search__submit,
-	.vvm-villa-hero-search__counter-button,
 	.vvm-villa-hero-search__price-summary::after,
 	.vvm-villa-hero-search__more-toggle-icon {
 		transition: none;

@@ -180,9 +180,7 @@ const formatUsd = ( value ) => `$${ Number( value ).toLocaleString() }`;
 
 const setupSelectMenus = ( form ) => {
 	const selects = Array.from(
-		form.querySelectorAll(
-			'.vvm-villa-hero-search__select:not([data-vvm-villa-search-counter-input])'
-		)
+		form.querySelectorAll( '.vvm-villa-hero-search__select' )
 	);
 	const menus = [];
 
@@ -386,228 +384,39 @@ const setupSelectMenus = ( form ) => {
 	} );
 };
 
-const setupCounterFields = ( form ) => {
+const setupNumberFieldLabels = ( form ) => {
 	const fields = Array.from(
-		form.querySelectorAll( '[data-vvm-villa-search-counter-field]' )
+		form.querySelectorAll( '[data-vvm-villa-search-number-field]' )
 	);
-	const counters = [];
-
-	const closeCounter = ( counter, restoreFocus = false ) => {
-		counter.panel.hidden = true;
-		counter.trigger.setAttribute( 'aria-expanded', 'false' );
-		counter.field.classList.remove(
-			'vvm-villa-hero-search__field--counter-open'
-		);
-
-		if ( restoreFocus ) {
-			counter.trigger.focus();
-		}
-	};
-
-	const closeOtherCounters = ( activeCounter ) => {
-		counters.forEach( ( counter ) => {
-			if ( counter !== activeCounter ) {
-				closeCounter( counter );
-			}
-		} );
-	};
 
 	fields.forEach( ( field ) => {
 		const input = field.querySelector(
-			'[data-vvm-villa-search-counter-input]'
+			'[data-vvm-villa-search-number-input]'
 		);
-		const label = field.querySelector( 'label' );
+		const display = field.querySelector(
+			'[data-vvm-villa-search-number-display]'
+		);
 
-		if ( ! input || ! label || ! input.id ) {
+		if ( ! input || ! display ) {
 			return;
 		}
 
-		const isSelect = input.tagName === 'SELECT';
-		const optionValues = isSelect
-			? Array.from( input.options )
-					.map( ( option ) => Number.parseInt( option.value, 10 ) )
-					.filter( Number.isInteger )
-			: [];
-		const nativeMinimum = Number.parseInt( input.min, 10 );
-		const nativeMaximum = Number.parseInt( input.max, 10 );
-		const nativeStep = Number.parseInt( input.step, 10 );
-		const minimum = optionValues[ 0 ] || nativeMinimum || 1;
-		const maximum =
-			optionValues[ optionValues.length - 1 ] ||
-			nativeMaximum ||
-			Infinity;
-		const step = nativeStep || 1;
-		const labelText = label.textContent.trim();
-		const placeholder = isSelect
-			? input.options[ 0 ]?.textContent.trim() || labelText
-			: input.getAttribute( 'placeholder' ) || labelText;
-		const trigger = document.createElement( 'button' );
-		const triggerValue = document.createElement( 'span' );
-		const panel = document.createElement( 'div' );
-		const panelLabel = document.createElement( 'span' );
-		const controls = document.createElement( 'div' );
-		const decrease = document.createElement( 'button' );
-		const count = document.createElement( 'output' );
-		const increase = document.createElement( 'button' );
-		const labelId = `${ input.id }-label`;
-		const triggerId = `${ input.id }-trigger`;
-		const valueId = `${ input.id }-value`;
-		const panelId = `${ input.id }-panel`;
-		const panelLabelId = `${ input.id }-panel-label`;
-
-		trigger.className = 'vvm-villa-hero-search__counter-trigger';
-		trigger.type = 'button';
-		trigger.id = triggerId;
-		trigger.setAttribute( 'aria-controls', panelId );
-		trigger.setAttribute( 'aria-expanded', 'false' );
-		triggerValue.className = 'vvm-villa-hero-search__counter-trigger-value';
-		triggerValue.id = valueId;
-		trigger.append( triggerValue );
-
-		panel.className = 'vvm-villa-hero-search__counter-panel';
-		panel.id = panelId;
-		panel.hidden = true;
-		panel.setAttribute( 'role', 'group' );
-		panel.setAttribute( 'aria-labelledby', panelLabelId );
-		panelLabel.className = 'vvm-villa-hero-search__counter-panel-label';
-		panelLabel.id = panelLabelId;
-		panelLabel.textContent = labelText;
-		controls.className = 'vvm-villa-hero-search__counter-controls';
-
-		decrease.className =
-			'vvm-villa-hero-search__counter-button vvm-villa-hero-search__counter-button--decrease';
-		decrease.type = 'button';
-		decrease.textContent = '−';
-		decrease.setAttribute(
-			'aria-label',
-			`Decrease ${ labelText.toLowerCase() }`
-		);
-		count.className = 'vvm-villa-hero-search__counter-count';
-		count.setAttribute( 'for', input.id );
-		count.setAttribute( 'aria-live', 'polite' );
-		increase.className =
-			'vvm-villa-hero-search__counter-button vvm-villa-hero-search__counter-button--increase';
-		increase.type = 'button';
-		increase.textContent = '+';
-		increase.setAttribute(
-			'aria-label',
-			`Increase ${ labelText.toLowerCase() }`
-		);
-
-		controls.append( decrease, count, increase );
-		panel.append( panelLabel, controls );
-
-		label.id = label.id || labelId;
-		label.htmlFor = triggerId;
-		trigger.setAttribute( 'aria-labelledby', `${ label.id } ${ valueId }` );
-		field.insertBefore( trigger, input );
-		field.insertBefore( panel, input );
-		input.hidden = true;
-		field.classList.add( 'vvm-villa-hero-search__field--counter' );
-
-		const readValue = () => {
-			const value = Number.parseInt( input.value, 10 );
-
-			return Number.isInteger( value ) && value > 0 ? value : 0;
-		};
-
-		const formatValue = ( value ) => {
-			if ( ! value ) {
-				return placeholder;
-			}
-
-			if ( isSelect ) {
-				return (
-					input.options[ input.selectedIndex ]?.textContent.trim() ||
-					placeholder
-				);
-			}
-
-			const noun =
-				value === 1
-					? field.dataset.vvmVillaSearchSingular
-					: field.dataset.vvmVillaSearchPlural;
-
-			return `${ value } ${ noun }`;
-		};
-
 		const sync = () => {
-			const value = readValue();
+			const value = Number.parseInt( input.value, 10 );
+			const hasValue = Number.isInteger( value ) && value > 0;
 
-			triggerValue.textContent = formatValue( value );
-			trigger.dataset.placeholder = value ? 'false' : 'true';
-			count.value = String( value );
-			count.textContent = String( value );
-			decrease.disabled = value === 0;
-			increase.disabled = Number.isFinite( maximum ) && value >= maximum;
+			field.classList.toggle( 'has-value', hasValue );
+			display.textContent = hasValue
+				? `${ value } ${
+						value === 1
+							? field.dataset.vvmVillaSearchSingular
+							: field.dataset.vvmVillaSearchPlural
+				  }`
+				: '';
 		};
 
-		const adjust = ( direction ) => {
-			const current = readValue();
-			let next = current;
-
-			if ( direction > 0 ) {
-				next = current ? current + step : minimum;
-				next = Math.min( next, maximum );
-			} else if ( current <= minimum ) {
-				next = 0;
-			} else {
-				next = Math.max( minimum, current - step );
-			}
-
-			input.value = next ? String( next ) : '';
-			input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
-			input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
-		};
-
-		const counter = { field, panel, trigger };
-		counters.push( counter );
-
-		trigger.addEventListener( 'click', () => {
-			if ( panel.hidden ) {
-				closeOtherCounters( counter );
-				panel.hidden = false;
-				trigger.setAttribute( 'aria-expanded', 'true' );
-				field.classList.add(
-					'vvm-villa-hero-search__field--counter-open'
-				);
-			} else {
-				closeCounter( counter );
-			}
-		} );
-		trigger.addEventListener( 'keydown', ( event ) => {
-			if ( event.key === 'Escape' && ! panel.hidden ) {
-				event.preventDefault();
-				closeCounter( counter, true );
-			}
-		} );
-
-		panel.addEventListener( 'keydown', ( event ) => {
-			if ( event.key === 'Escape' ) {
-				event.preventDefault();
-				closeCounter( counter, true );
-			}
-		} );
-		decrease.addEventListener( 'click', () => adjust( -1 ) );
-		increase.addEventListener( 'click', () => adjust( 1 ) );
 		input.addEventListener( 'input', sync );
-		input.addEventListener( 'change', sync );
-		field.addEventListener( 'focusout', () => {
-			window.setTimeout( () => {
-				if ( ! field.contains( field.ownerDocument.activeElement ) ) {
-					closeCounter( counter );
-				}
-			}, 0 );
-		} );
 		sync();
-	} );
-
-	document.addEventListener( 'click', ( event ) => {
-		counters.forEach( ( counter ) => {
-			if ( ! counter.field.contains( event.target ) ) {
-				closeCounter( counter );
-			}
-		} );
 	} );
 };
 
@@ -820,7 +629,7 @@ const setupVillaSearch = ( form ) => {
 	form.dataset.vvmVillaSearchReady = 'true';
 	setupDateRange( form );
 	setupSelectMenus( form );
-	setupCounterFields( form );
+	setupNumberFieldLabels( form );
 	setupPriceRange( form );
 	setupAdvancedFilters( form );
 	setupCleanSubmission( form );

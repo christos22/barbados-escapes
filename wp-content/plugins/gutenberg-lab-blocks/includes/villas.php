@@ -2602,12 +2602,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 					</div>
 				<?php endif; ?>
 
-				<div
-					class="vvm-villa-hero-search__field"
-					data-vvm-villa-search-counter-field
-					data-vvm-villa-search-singular="<?php esc_attr_e( 'bedroom', 'gutenberg-lab-blocks' ); ?>"
-					data-vvm-villa-search-plural="<?php esc_attr_e( 'bedrooms', 'gutenberg-lab-blocks' ); ?>"
-				>
+				<div class="vvm-villa-hero-search__field">
 					<label class="screen-reader-text" for="<?php echo esc_attr( $bedrooms_field_id ); ?>">
 						<?php esc_html_e( 'Bedrooms', 'gutenberg-lab-blocks' ); ?>
 					</label>
@@ -2615,7 +2610,6 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 						id="<?php echo esc_attr( $bedrooms_field_id ); ?>"
 						name="min_bedrooms"
 						class="vvm-villa-hero-search__control vvm-villa-hero-search__select"
-						data-vvm-villa-search-counter-input
 					>
 						<option value=""><?php esc_html_e( 'Bedrooms', 'gutenberg-lab-blocks' ); ?></option>
 						<?php foreach ( range( 3, 8 ) as $bedroom_count ) : ?>
@@ -2635,27 +2629,34 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 					</select>
 				</div>
 
-				<div
-					class="vvm-villa-hero-search__field"
-					data-vvm-villa-search-counter-field
-					data-vvm-villa-search-singular="<?php esc_attr_e( 'Guest', 'gutenberg-lab-blocks' ); ?>"
-					data-vvm-villa-search-plural="<?php esc_attr_e( 'Guests', 'gutenberg-lab-blocks' ); ?>"
-				>
+				<div class="vvm-villa-hero-search__field">
 					<label class="screen-reader-text" for="<?php echo esc_attr( $guests_field_id ); ?>">
 						<?php esc_html_e( 'Guests', 'gutenberg-lab-blocks' ); ?>
 					</label>
-					<input
-						id="<?php echo esc_attr( $guests_field_id ); ?>"
-						name="guests"
-						class="vvm-villa-hero-search__control"
-						type="number"
-						min="1"
-						step="1"
-						inputmode="numeric"
-						placeholder="<?php esc_attr_e( 'Guests', 'gutenberg-lab-blocks' ); ?>"
-						value="<?php echo $request['guests'] ? esc_attr( $request['guests'] ) : ''; ?>"
-						data-vvm-villa-search-counter-input
-					/>
+					<div
+						class="vvm-villa-hero-search__number-field"
+						data-vvm-villa-search-number-field
+						data-vvm-villa-search-singular="<?php esc_attr_e( 'Guest', 'gutenberg-lab-blocks' ); ?>"
+						data-vvm-villa-search-plural="<?php esc_attr_e( 'Guests', 'gutenberg-lab-blocks' ); ?>"
+					>
+						<input
+							id="<?php echo esc_attr( $guests_field_id ); ?>"
+							name="guests"
+							class="vvm-villa-hero-search__control"
+							type="number"
+							min="1"
+							step="1"
+							inputmode="numeric"
+							placeholder="<?php esc_attr_e( 'Guests', 'gutenberg-lab-blocks' ); ?>"
+							value="<?php echo $request['guests'] ? esc_attr( $request['guests'] ) : ''; ?>"
+							data-vvm-villa-search-number-input
+						/>
+						<span
+							class="vvm-villa-hero-search__number-display"
+							aria-hidden="true"
+							data-vvm-villa-search-number-display
+						></span>
+					</div>
 				</div>
 
 				<details class="vvm-villa-hero-search__field vvm-villa-hero-search__field--price">
