@@ -16,7 +16,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 				'vvm-card-grid--display-grid',
 				'vvm-card-grid--source-villas',
 				'vvm-card-grid--villa-presentation-collection',
-				'vvm-card-grid--columns-3',
+				'vvm-card-grid--columns-2',
 				'vvm-card-grid--ratio-landscape',
 				'vvm-villa-search-results',
 			)

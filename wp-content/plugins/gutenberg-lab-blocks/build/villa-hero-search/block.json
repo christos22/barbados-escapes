@@ -14,7 +14,7 @@
     },
     "locationPlaceholder": {
       "type": "string",
-      "default": "Search by Area"
+      "default": "Area"
     }
   },
   "supports": {
