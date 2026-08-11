@@ -295,7 +295,8 @@
 
 .wp-block-button.is-style-vvm-link-primary :is(.wp-block-button__link, .wp-element-button) {
 	gap: 0.5rem;
-	color: var(--wp--custom--brand--accessible-gold, #8a631d) !important;
+	/* Gutenberg text-colour classes or inline selections can override this default. */
+	color: var(--wp--preset--color--gold, #c4922a);
 	font-family: "Romely", sans-serif;
 	font-weight: 600;
 	letter-spacing: 0.025em;

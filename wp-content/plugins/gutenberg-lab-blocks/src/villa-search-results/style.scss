@@ -229,12 +229,6 @@
 		color: var(--vvm-results-gold) !important;
 	}
 
-	// Keep the result-card text CTA on the client's exact brand-gold token.
-	.vvm-card-grid__card-actions
-	.wp-block-button.is-style-vvm-link-primary
-	:is(.wp-block-button__link, .wp-element-button) {
-		color: var(--vvm-results-gold) !important;
-	}
 }
 
 @keyframes vvm-villa-results-spin {
