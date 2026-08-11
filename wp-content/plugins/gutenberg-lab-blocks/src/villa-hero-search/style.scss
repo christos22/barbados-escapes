@@ -134,14 +134,78 @@
 	}
 
 	&__number-field > &__control {
-		// Extend through the field's vertical padding so the native stepper has
-		// one stable hover/click target instead of two tiny arrow hotspots.
+		appearance: textfield;
 		height: calc(100% + 0.9rem);
 		margin-block: -0.45rem;
 		min-height: 2.4rem;
+		padding-right: 2.75rem;
 
 		// Match the optical baseline of the adjacent custom-select values.
 		padding-top: 1px;
+	}
+
+	&__number-field > &__control::-webkit-inner-spin-button,
+	&__number-field > &__control::-webkit-outer-spin-button {
+		appearance: none;
+		margin: 0;
+	}
+
+	&__number-steppers {
+		display: grid;
+		height: calc(100% + 0.9rem);
+		grid-template-rows: repeat(2, minmax(1.5rem, 1fr));
+		opacity: 0;
+		pointer-events: none;
+		position: absolute;
+		right: -0.35rem;
+		top: 50%;
+		transform: translateY(-50%);
+		transition: opacity 120ms ease;
+		width: 2.5rem;
+		z-index: 2;
+	}
+
+	&__number-field:hover &__number-steppers,
+	&__number-field:focus-within &__number-steppers {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	&__number-step {
+		align-items: center;
+		appearance: none;
+		background: transparent;
+		border: 0;
+		color: var(--vvm-search-green);
+		cursor: pointer;
+		display: flex;
+		justify-content: center;
+		margin: 0;
+		min-height: 1.5rem;
+		padding: 0;
+		width: 100%;
+	}
+
+	&__number-step:hover,
+	&__number-step:focus-visible {
+		background: rgb(30 61 47 / 0.08);
+		outline: none;
+	}
+
+	&__number-step::before {
+		border-bottom: 1.5px solid currentcolor;
+		border-right: 1.5px solid currentcolor;
+		content: "";
+		height: 0.5rem;
+		width: 0.5rem;
+	}
+
+	&__number-step--up::before {
+		transform: translateY(20%) rotate(225deg);
+	}
+
+	&__number-step--down::before {
+		transform: translateY(-20%) rotate(45deg);
 	}
 
 	&__number-display {
@@ -157,7 +221,7 @@
 		overflow: hidden;
 		pointer-events: none;
 		position: absolute;
-		padding-right: 1.25rem;
+		padding-right: 2.75rem;
 		text-align: left;
 		text-overflow: ellipsis;
 		white-space: nowrap;

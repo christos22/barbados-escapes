@@ -238,6 +238,8 @@
 			}
 
 			> p {
+				// Centre the constrained subtitle block within the wider hero copy area.
+				margin-inline: auto;
 				max-width: 44rem;
 				font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
 				font-size: clamp(1rem, 1.3vw, 1.15rem);

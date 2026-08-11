@@ -401,6 +401,10 @@ const setupNumberFieldLabels = ( form ) => {
 			return;
 		}
 
+		const stepButtons = Array.from(
+			field.querySelectorAll( '[data-vvm-villa-search-number-step]' )
+		);
+
 		const sync = () => {
 			const value = Number.parseInt( input.value, 10 );
 			const hasValue = Number.isInteger( value ) && value > 0;
@@ -416,6 +420,21 @@ const setupNumberFieldLabels = ( form ) => {
 		};
 
 		input.addEventListener( 'input', sync );
+
+		stepButtons.forEach( ( button ) => {
+			button.addEventListener( 'click', () => {
+				if ( button.dataset.vvmVillaSearchNumberStep === 'up' ) {
+					input.stepUp();
+				} else {
+					input.stepDown();
+				}
+
+				// Native stepUp/stepDown do not emit input events themselves.
+				input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+				input.focus( { preventScroll: true } );
+			} );
+		} );
+
 		sync();
 	} );
 };

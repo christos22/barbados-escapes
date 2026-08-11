@@ -2665,6 +2665,20 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 							aria-hidden="true"
 							data-vvm-villa-search-number-display
 						></span>
+						<span class="vvm-villa-hero-search__number-steppers">
+							<button
+								type="button"
+								class="vvm-villa-hero-search__number-step vvm-villa-hero-search__number-step--up"
+								aria-label="<?php esc_attr_e( 'Increase guests', 'gutenberg-lab-blocks' ); ?>"
+								data-vvm-villa-search-number-step="up"
+							></button>
+							<button
+								type="button"
+								class="vvm-villa-hero-search__number-step vvm-villa-hero-search__number-step--down"
+								aria-label="<?php esc_attr_e( 'Decrease guests', 'gutenberg-lab-blocks' ); ?>"
+								data-vvm-villa-search-number-step="down"
+							></button>
+						</span>
 					</div>
 				</div>
 
