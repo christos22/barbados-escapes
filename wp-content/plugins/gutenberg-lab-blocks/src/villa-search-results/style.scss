@@ -190,11 +190,12 @@
 		line-height: 0;
 		place-items: center;
 		color: var(--vvm-results-icon-green);
+		opacity: 0.72;
 	}
 
 	.vvm-card-grid__card-fact-label {
-		color: #1e3d2f;
-		font-family: var(--wp--preset--font-family--site-primary, "Romely", Georgia, serif);
+		color: var(--vvm-results-icon-green);
+		font-family: var(--wp--preset--font-family--refined-sans, "TT Norms", system-ui, sans-serif);
 		font-weight: 400;
 	}
 
