@@ -146,7 +146,7 @@
 	// Give the two-column results layout a more generous desktop gutter while
 	// leaving the shared card-grid spacing and single-column mobile flow intact.
 	&.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-collection.vvm-card-grid--source-villas
-		.vvm-card-grid__items {
+	.vvm-card-grid__items {
 		column-gap: clamp(48px, 5vw, 64px);
 	}
 
@@ -184,9 +184,9 @@
 		flex: 0 0 clamp(2.9rem, 4vw, 3.2rem);
 		width: clamp(2.9rem, 4vw, 3.2rem);
 		height: clamp(2.9rem, 4vw, 3.2rem);
-		padding: clamp(0.52rem, 0.75vw, 0.62rem);
-		border: 1px solid currentcolor;
-		border-radius: 50%;
+		// The previous circle used one pixel on every edge. Move that space into
+		// padding so removing the border does not change the SVG artwork size.
+		padding: calc(clamp(0.52rem, 0.75vw, 0.62rem) + 1px);
 		line-height: 0;
 		place-items: center;
 		color: var(--vvm-results-icon-green);
