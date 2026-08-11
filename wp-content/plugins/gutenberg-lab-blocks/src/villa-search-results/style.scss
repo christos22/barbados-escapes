@@ -3,6 +3,7 @@
 	--vvm-results-gold: var(--wp--preset--color--gold, #c4922a);
 	--vvm-results-gold-text: var(--wp--custom--brand--accessible-gold, #8a631d);
 	--vvm-results-green: var(--wp--preset--color--dark-green, #1e3d2f);
+	--vvm-results-icon-green: #7fa48f;
 
 	box-sizing: border-box;
 	display: grid;
@@ -188,7 +189,7 @@
 		padding: calc(clamp(0.52rem, 0.75vw, 0.62rem) + 1px);
 		line-height: 0;
 		place-items: center;
-		color: var(--vvm-results-gold);
+		color: var(--vvm-results-icon-green);
 	}
 
 	.vvm-card-grid__card-fact-label {
