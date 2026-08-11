@@ -3,7 +3,6 @@
 	--vvm-results-gold: var(--wp--preset--color--gold, #c4922a);
 	--vvm-results-gold-text: var(--wp--custom--brand--accessible-gold, #8a631d);
 	--vvm-results-green: var(--wp--preset--color--dark-green, #1e3d2f);
-	--vvm-results-icon-green: #7fa48f;
 
 	box-sizing: border-box;
 	display: grid;
@@ -189,7 +188,7 @@
 		padding: calc(clamp(0.52rem, 0.75vw, 0.62rem) + 1px);
 		line-height: 0;
 		place-items: center;
-		color: var(--vvm-results-icon-green);
+		color: var(--vvm-results-gold);
 	}
 
 	.vvm-card-grid__card-fact-label {
@@ -204,6 +203,9 @@
 		height: auto;
 		max-width: none;
 		max-height: none;
+		// Enlarge the artwork without changing the four-column fact layout.
+		transform: scale(2);
+		transform-origin: center;
 	}
 
 	// Keep each canvas at the artwork's natural aspect ratio. This removes the
@@ -222,9 +224,16 @@
 		stroke-width: 1.05;
 	}
 
-	// Brand gold is decorative; small text needs the darker AA-safe companion.
+	// Match the location eyebrow to the client's exact brand gold.
 	.vvm-card-grid__card-eyebrow {
-		color: var(--vvm-results-gold-text) !important;
+		color: var(--vvm-results-gold) !important;
+	}
+
+	// Keep the result-card text CTA on the client's exact brand-gold token.
+	.vvm-card-grid__card-actions
+	.wp-block-button.is-style-vvm-link-primary
+	:is(.wp-block-button__link, .wp-element-button) {
+		color: var(--vvm-results-gold) !important;
 	}
 }
 
