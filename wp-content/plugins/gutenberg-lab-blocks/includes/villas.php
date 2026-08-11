@@ -174,7 +174,7 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_registry() {
 		'dollar-line'        => array(
 			'label'    => __( 'Dollar Line', 'gutenberg-lab-blocks' ),
 			'paths'    => '<path d="M16.5 7.2c-.9-1.1-2.3-1.7-4-1.7-2.2 0-3.7 1.1-3.7 2.9 0 1.7 1.4 2.6 3.9 3.2 2.4.6 3.8 1.5 3.8 3.4 0 2-1.7 3.4-4.2 3.4-1.9 0-3.5-.8-4.6-2.1"></path><path d="M12.5 3.5v17"></path>',
-			'view_box' => '6.5 2.5 11.2 19',
+			'view_box' => '7.175 2.975 9.85 18.05',
 		),
 		'dvd'                => array(
 			'label' => __( 'DVD', 'gutenberg-lab-blocks' ),
@@ -267,7 +267,7 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_registry() {
 		'people'             => array(
 			'label'    => __( 'People', 'gutenberg-lab-blocks' ),
 			'paths'    => '<circle cx="12" cy="7.5" r="3"></circle><path d="M7.2 18.8c.7-3 2.3-4.5 4.8-4.5s4.1 1.5 4.8 4.5"></path><circle cx="5.8" cy="10" r="2.1"></circle><path d="M2.8 18.2c.3-2 1.3-3.2 3-3.7"></path><circle cx="18.2" cy="10" r="2.1"></circle><path d="M21.2 18.2c-.3-2-1.3-3.2-3-3.7"></path>',
-			'view_box' => '1.8 3.5 20.4 16.3',
+			'view_box' => '2.275 3.975 19.45 15.35',
 		),
 		'pergola'            => array(
 			'label' => __( 'Pergola', 'gutenberg-lab-blocks' ),
@@ -2159,6 +2159,15 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 	$icon_price       = $fact_icon_items && $show_price && '' !== $villa_data['price']
 		? $villa_data['price']
 		: '';
+
+	// The dollar icon already establishes that this is the compact price fact.
+	if ( '' !== $icon_price ) {
+		$compact_price = preg_replace( '/\/night\s*$/i', '', $icon_price );
+
+		if ( is_string( $compact_price ) ) {
+			$icon_price = trim( $compact_price );
+		}
+	}
 	$has_card_meta    = 'collection' === $args['presentation'] &&
 		(
 			( $show_details && '' !== $villa_data['facts'] ) ||
@@ -2246,7 +2255,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 									</li>
 								<?php endforeach; ?>
 								<?php if ( '' !== $icon_price ) : ?>
-									<li class="vvm-card-grid__card-fact vvm-card-grid__card-fact--price" aria-label="<?php echo esc_attr( $villa_data['price'] ); ?>">
+									<li class="vvm-card-grid__card-fact vvm-card-grid__card-fact--price" aria-label="<?php echo esc_attr( $icon_price ); ?>">
 										<span class="vvm-card-grid__card-fact-icon">
 											<?php echo gutenberg_lab_blocks_get_villa_amenity_icon_svg( 'dollar-line' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</span>

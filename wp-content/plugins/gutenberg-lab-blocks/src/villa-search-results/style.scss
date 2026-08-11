@@ -3,6 +3,7 @@
 	--vvm-results-gold: var(--wp--preset--color--gold, #c4922a);
 	--vvm-results-gold-text: var(--wp--custom--brand--accessible-gold, #8a631d);
 	--vvm-results-green: var(--wp--preset--color--dark-green, #1e3d2f);
+	--vvm-results-icon-green: #7fa48f;
 
 	box-sizing: border-box;
 	display: grid;
@@ -142,6 +143,13 @@
 		height: 1px;
 	}
 
+	// Give the two-column results layout a more generous desktop gutter while
+	// leaving the shared card-grid spacing and single-column mobile flow intact.
+	&.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-collection.vvm-card-grid--source-villas
+		.vvm-card-grid__items {
+		column-gap: clamp(48px, 5vw, 64px);
+	}
+
 	// Search-result cards keep three compact facts and the nightly price in one
 	// scannable row. Shared card grids retain their original text-only metadata.
 	.vvm-card-grid__card-facts--icons {
@@ -172,30 +180,37 @@
 
 	.vvm-card-grid__card-fact-icon {
 		display: inline-grid;
-		flex: 0 0 clamp(1.25rem, 1.8vw, 1.75rem);
-		width: clamp(1.25rem, 1.8vw, 1.75rem);
-		height: clamp(1.25rem, 1.8vw, 1.75rem);
+		box-sizing: border-box;
+		flex: 0 0 clamp(2.9rem, 4vw, 3.2rem);
+		width: clamp(2.9rem, 4vw, 3.2rem);
+		height: clamp(2.9rem, 4vw, 3.2rem);
+		padding: clamp(0.52rem, 0.75vw, 0.62rem);
+		border: 1px solid currentcolor;
+		border-radius: 50%;
 		line-height: 0;
 		place-items: center;
-		color: var(--vvm-results-gold);
+		color: var(--vvm-results-icon-green);
 	}
 
 	.vvm-card-grid__card-fact-label {
 		color: #1e3d2f;
+		font-family: var(--wp--preset--font-family--site-primary, "Romely", Georgia, serif);
 		font-weight: 400;
 	}
 
 	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon {
 		display: block;
 		width: 100%;
-		height: 100%;
+		height: auto;
+		max-width: none;
+		max-height: none;
 	}
 
-	// The shared villa-ribbon bedroom asset has a wider visual footprint than
-	// the line icons, so enlarge it inside the same fixed layout cell.
-	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--bedrooms {
-		transform: scale(1.25);
-		transform-origin: center;
+	// Keep each canvas at the artwork's natural aspect ratio. This removes the
+	// empty bands created when wide icons are forced into square SVG elements.
+	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--dollar-line {
+		width: auto;
+		height: 100%;
 	}
 
 	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--people,
