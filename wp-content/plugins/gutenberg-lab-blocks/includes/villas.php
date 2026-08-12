@@ -1801,11 +1801,19 @@ function gutenberg_lab_blocks_get_villa_card_fact_icon_items( $facts, $bedrooms 
 
 	$icon_items = array();
 
-	foreach ( array( 'bedrooms', 'bathtub-thick', 'people' ) as $icon_key ) {
-		if ( isset( $items[ $icon_key ] ) ) {
+	// Search cards use the lightweight bedroom outline so it visually matches
+	// the other fact icons. The shared filled bedroom asset remains unchanged.
+	$icon_map = array(
+		'bedrooms'      => 'bedrooms-line',
+		'bathtub-thick' => 'bathtub-thick',
+		'people'        => 'people',
+	);
+
+	foreach ( $icon_map as $fact_key => $icon_key ) {
+		if ( isset( $items[ $fact_key ] ) ) {
 			$icon_items[] = array(
 				'icon'  => $icon_key,
-				'label' => $items[ $icon_key ],
+				'label' => $items[ $fact_key ],
 			);
 		}
 	}

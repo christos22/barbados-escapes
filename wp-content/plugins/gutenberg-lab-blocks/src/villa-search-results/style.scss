@@ -169,7 +169,7 @@
 		align-items: center;
 		justify-content: start;
 		min-width: 0;
-		gap: 9px;
+		gap: 6px;
 		font-size: clamp(0.58rem, 0.75vw, 0.72rem);
 		font-weight: 400;
 		line-height: 1.15;
@@ -196,6 +196,7 @@
 	.vvm-card-grid__card-fact-label {
 		color: var(--vvm-results-icon-green);
 		font-family: var(--wp--preset--font-family--refined-sans, "TT Norms", system-ui, sans-serif);
+		font-size: 14px;
 		font-weight: 400;
 	}
 
@@ -219,6 +220,7 @@
 		height: 100%;
 	}
 
+	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--bedrooms-line,
 	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--people,
 	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--dollar-line {
 		fill: none;
@@ -250,6 +252,10 @@
 }
 
 @media (max-width: 781px) {
+
+	.vvm-villa-search-results .vvm-card-grid__card-fact-label {
+		font-size: 12px;
+	}
 
 	.vvm-villa-search-results {
 
