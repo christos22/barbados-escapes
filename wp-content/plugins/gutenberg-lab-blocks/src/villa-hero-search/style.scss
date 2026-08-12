@@ -77,6 +77,19 @@
 		display: none;
 	}
 
+	&__label {
+		color: var(--vvm-search-green);
+		display: block;
+		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-size: 0.68rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		margin-bottom: 0.25rem;
+		text-align: left;
+		text-transform: uppercase;
+	}
+
 	&__control,
 	&__date-input,
 	&__select-trigger,

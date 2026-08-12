@@ -385,6 +385,8 @@ const setupSelectMenus = ( form ) => {
 };
 
 const setupNumberFieldLabels = ( form ) => {
+	const hasVisibleLabels =
+		form.dataset.vvmVillaSearchHasVisibleLabels === 'true';
 	const fields = Array.from(
 		form.querySelectorAll( '[data-vvm-villa-search-number-field]' )
 	);
@@ -408,15 +410,20 @@ const setupNumberFieldLabels = ( form ) => {
 		const sync = () => {
 			const value = Number.parseInt( input.value, 10 );
 			const hasValue = Number.isInteger( value ) && value > 0;
+			let displayValue = '';
+
+			if ( hasValue ) {
+				displayValue = hasVisibleLabels
+					? String( value )
+					: `${ value } ${
+							value === 1
+								? field.dataset.vvmVillaSearchSingular
+								: field.dataset.vvmVillaSearchPlural
+					  }`;
+			}
 
 			field.classList.toggle( 'has-value', hasValue );
-			display.textContent = hasValue
-				? `${ value } ${
-						value === 1
-							? field.dataset.vvmVillaSearchSingular
-							: field.dataset.vvmVillaSearchPlural
-				  }`
-				: '';
+			display.textContent = displayValue;
 		};
 
 		input.addEventListener( 'input', sync );
@@ -455,6 +462,8 @@ const setupPriceRange = ( form ) => {
 	const priceError =
 		form.dataset.vvmVillaSearchPriceError ||
 		'The maximum price must not be lower than the minimum price.';
+	const pricePlaceholder =
+		form.dataset.vvmVillaSearchPricePlaceholder || 'Price';
 	const maximumPlaceholder =
 		maximum.getAttribute( 'placeholder' ) || 'No maximum';
 
@@ -498,7 +507,7 @@ const setupPriceRange = ( form ) => {
 		} else if ( maxValue ) {
 			summary.textContent = `Up to ${ formatUsd( maxValue ) }`;
 		} else {
-			summary.textContent = 'Price';
+			summary.textContent = pricePlaceholder;
 		}
 	};
 

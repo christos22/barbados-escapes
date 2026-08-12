@@ -3,7 +3,6 @@
 	--vvm-results-gold: var(--wp--preset--color--gold, #c4922a);
 	--vvm-results-gold-text: var(--wp--custom--brand--accessible-gold, #8a631d);
 	--vvm-results-green: var(--wp--preset--color--dark-green, #1e3d2f);
-	--vvm-results-icon-green: #7fa48f;
 
 	box-sizing: border-box;
 	display: grid;
@@ -150,84 +149,136 @@
 		column-gap: clamp(48px, 5vw, 64px);
 	}
 
-	// Search-result cards keep three compact facts and the nightly price in one
-	// scannable row. Shared card grids retain their original text-only metadata.
+	// Keep the three property facts compact and inline, matching the client's
+	// card reference without changing shared card grids or action buttons.
 	.vvm-card-grid__card-facts--icons {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
+		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.4rem;
+		gap: 0.55rem 1.25rem;
 		width: 100%;
 		margin: 0;
-		padding: 20px 0;
+		padding: 0.65rem 0;
+		border-block: 1px solid var(--vvm-results-border);
 		list-style: none;
 	}
 
 	.vvm-card-grid__card-fact {
-		display: flex;
-		flex-direction: column;
+		display: inline-flex;
 		align-items: center;
-		justify-content: start;
+		justify-content: flex-start;
 		min-width: 0;
-		gap: 6px;
-		font-size: clamp(0.58rem, 0.75vw, 0.72rem);
+		gap: 0.35rem;
+		color: var(--vvm-results-green);
+		font-size: 14px;
 		font-weight: 400;
-		line-height: 1.15;
+		line-height: 1.2;
 		overflow-wrap: anywhere;
-		text-align: center;
+		text-align: left;
 		white-space: normal;
 	}
 
 	.vvm-card-grid__card-fact-icon {
-		display: inline-grid;
-		box-sizing: border-box;
-		flex: 0 0 clamp(2.9rem, 4vw, 3.2rem);
-		width: clamp(2.9rem, 4vw, 3.2rem);
-		height: clamp(2.9rem, 4vw, 3.2rem);
-		// The previous circle used one pixel on every edge. Move that space into
-		// padding so removing the border does not change the SVG artwork size.
-		padding: calc(clamp(0.52rem, 0.75vw, 0.62rem) + 1px);
+		display: inline-flex;
+		flex: 0 0 0.95rem;
+		width: 0.95rem;
+		height: 0.95rem;
+		padding: 0;
 		line-height: 0;
-		place-items: end center;
-		color: var(--vvm-results-icon-green);
-		opacity: 0.72;
+		color: var(--vvm-results-green);
 	}
 
 	.vvm-card-grid__card-fact-label {
-		color: var(--vvm-results-icon-green);
+		color: var(--vvm-results-green);
 		font-family: var(--wp--preset--font-family--refined-sans, "TT Norms", system-ui, sans-serif);
-		font-size: 14px;
+		font-size: inherit;
 		font-weight: 400;
 	}
 
 	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon {
 		display: block;
 		width: 100%;
-		height: auto;
+		height: 100%;
 		max-width: none;
 		max-height: none;
-		// Enlarge the artwork without changing the four-column fact layout.
-		transform: scale(2);
-		// Different SVG aspect ratios otherwise leave inconsistent space below
-		// the artwork. Anchor every icon to the same visual baseline.
-		transform-origin: center bottom;
-	}
-
-	// Keep each canvas at the artwork's natural aspect ratio. This removes the
-	// empty bands created when wide icons are forced into square SVG elements.
-	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--dollar-line {
-		width: auto;
-		height: 100%;
+		transform: none;
 	}
 
 	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--bedrooms-line,
-	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--people,
-	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--dollar-line {
+	.vvm-card-grid__card-fact-icon .vvm-villa-amenity-icon--people {
 		fill: none;
 		stroke: currentcolor;
 		stroke-linecap: round;
 		stroke-linejoin: round;
 		stroke-width: 1.05;
+	}
+
+	// Pricing is intentionally separated from amenities, like the reference:
+	// a quiet uppercase lead-in followed by the prominent nightly amount.
+	.vvm-card-grid__card-price-detail {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.25rem 0.35rem;
+		margin: 0;
+		padding-top: 0.65rem;
+		color: var(--vvm-results-green);
+	}
+
+	.vvm-card-grid__card-price-prefix {
+		font-family: var(--wp--preset--font-family--refined-sans, "TT Norms", system-ui, sans-serif);
+		font-size: 0.65rem;
+		font-weight: 400;
+		flex-basis: 100%;
+		margin-bottom: 0.2rem;
+		letter-spacing: 0.24em;
+		line-height: 1.2;
+		text-transform: uppercase;
+	}
+
+	.vvm-card-grid__card-price-value {
+		font-family: var(--wp--preset--font-family--display-serif, "Romely", Georgia, serif);
+		font-size: clamp(1.4rem, 2vw, 1.75rem);
+		font-weight: 400;
+		line-height: 1.05;
+	}
+
+	.vvm-card-grid__card-price-suffix {
+		color: currentcolor;
+		font-family: var(--wp--preset--font-family--refined-sans, "TT Norms", system-ui, sans-serif);
+		font-size: 0.65rem;
+		font-weight: 400;
+		line-height: 1.2;
+	}
+
+	// Option B compresses the same semantic facts into one comparison row.
+	.vvm-card-grid__card--facts-inline .vvm-card-grid__card-facts--icons {
+		flex-wrap: nowrap;
+		gap: clamp(0.45rem, 1.2vw, 1rem);
+	}
+
+	.vvm-card-grid__card--facts-inline .vvm-card-grid__card-fact {
+		flex: 0 1 auto;
+		gap: 0.25rem;
+		font-size: clamp(0.7rem, 1vw, 0.8rem);
+		white-space: nowrap;
+	}
+
+	.vvm-card-grid__card--facts-inline .vvm-card-grid__card-fact--price {
+		display: inline-flex;
+		align-items: baseline;
+		margin-left: auto;
+		font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+		font-weight: 400;
+	}
+
+	.vvm-card-grid__card--facts-inline .vvm-card-grid__card-fact--price .vvm-card-grid__card-fact-label {
+		font-weight: inherit;
+	}
+
+	.vvm-card-grid__card--facts-inline .vvm-card-grid__card-price-suffix {
+		font-size: 0.55rem;
+		font-weight: 400;
 	}
 
 	// Match the location eyebrow to the client's exact brand gold.
@@ -253,8 +304,16 @@
 
 @media (max-width: 781px) {
 
-	.vvm-villa-search-results .vvm-card-grid__card-fact-label {
+	.vvm-villa-search-results .vvm-card-grid__card-fact {
 		font-size: 12px;
+	}
+
+	.vvm-villa-search-results .vvm-card-grid__card--facts-inline .vvm-card-grid__card-fact {
+		font-size: clamp(0.62rem, 2.8vw, 0.72rem);
+	}
+
+	.vvm-villa-search-results .vvm-card-grid__card--facts-inline .vvm-card-grid__card-fact--price {
+		font-size: clamp(0.78rem, 3.5vw, 0.95rem);
 	}
 
 	.vvm-villa-search-results {
