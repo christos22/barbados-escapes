@@ -327,13 +327,13 @@ function gutenberg_lab_blocks_get_villa_enquiry_guest_fields() {
 		'villa-adults'            => array(
 			'request_key' => 'adults',
 			'label'       => __( 'Adults', 'gutenberg-lab-blocks' ),
-			'description' => __( 'Ages 18+', 'gutenberg-lab-blocks' ),
+			'description' => __( '18+', 'gutenberg-lab-blocks' ),
 			'minimum'     => 1,
 		),
 		'villa-children-12-17'    => array(
 			'request_key' => 'children_12_17',
 			'label'       => __( 'Children', 'gutenberg-lab-blocks' ),
-			'description' => __( 'Ages 12–17', 'gutenberg-lab-blocks' ),
+			'description' => __( '12–17', 'gutenberg-lab-blocks' ),
 			'minimum'     => 0,
 		),
 		'villa-children-under-12' => array(

@@ -2800,7 +2800,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 						data-vvm-villa-search-guest-count
 						data-vvm-villa-search-guest-name="adults"
 						data-vvm-villa-search-guest-label="<?php esc_attr_e( 'Adults', 'gutenberg-lab-blocks' ); ?>"
-						data-vvm-villa-search-guest-description="<?php esc_attr_e( 'Ages 18+', 'gutenberg-lab-blocks' ); ?>"
+						data-vvm-villa-search-guest-description="<?php esc_attr_e( '18+', 'gutenberg-lab-blocks' ); ?>"
 						data-vvm-villa-search-guest-adults
 					/>
 					<input
@@ -2811,8 +2811,8 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 						value="<?php echo esc_attr( $request['children_12_17'] ); ?>"
 						data-vvm-villa-search-guest-count
 						data-vvm-villa-search-guest-name="children_12_17"
-						data-vvm-villa-search-guest-label="<?php esc_attr_e( 'Older children', 'gutenberg-lab-blocks' ); ?>"
-						data-vvm-villa-search-guest-description="<?php esc_attr_e( 'Ages 12–17', 'gutenberg-lab-blocks' ); ?>"
+						data-vvm-villa-search-guest-label="<?php esc_attr_e( 'Children', 'gutenberg-lab-blocks' ); ?>"
+						data-vvm-villa-search-guest-description="<?php esc_attr_e( '12–17', 'gutenberg-lab-blocks' ); ?>"
 					/>
 					<input
 						id="<?php echo esc_attr( $children_under_12_id ); ?>"
