@@ -192,8 +192,32 @@ function gutenberg_lab_blocks_query_villa_search_candidate_ids( $request ) {
 	}
 
 	$query = new WP_Query( $query_args );
+	$candidate_ids = array_values( array_map( 'absint', $query->posts ) );
+	$children_under_12 = absint( $request['children_under_12'] ?? 0 );
+	$children_12_17    = absint( $request['children_12_17'] ?? 0 );
 
-	return array_values( array_map( 'absint', $query->posts ) );
+	// A legacy `guests=N` search contains no age breakdown, so it remains a
+	// capacity-only query. Age restrictions apply only to explicit child counts.
+	if ( $children_under_12 > 0 || $children_12_17 > 0 ) {
+		$candidate_ids = array_values(
+			array_filter(
+				$candidate_ids,
+				static function ( $villa_id ) use ( $children_under_12 ) {
+					$policy = gutenberg_lab_blocks_sanitize_villa_guest_age_policy(
+						get_post_meta( $villa_id, 'villa_search_guest_age_policy', true )
+					);
+
+					if ( $children_under_12 > 0 ) {
+						return 'all_ages' === $policy;
+					}
+
+					return 'adults_18_plus' !== $policy;
+				}
+			)
+		);
+	}
+
+	return $candidate_ids;
 }
 
 /**

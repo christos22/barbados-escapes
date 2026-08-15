@@ -3824,6 +3824,25 @@ function gutenberg_lab_blocks_villa_importer_validate_payload( $data ) {
 
 	$overview = $data['overview'];
 
+	if ( array_key_exists( 'guest_age_policy', $overview ) ) {
+		$raw_policy = strtolower( gutenberg_lab_blocks_villa_importer_text( $overview['guest_age_policy'] ) );
+		$allowed_policies = array(
+			'all_ages',
+			'ages_12_plus',
+			'adults_18_plus',
+			'all ages',
+			'ages 12+ only',
+			'adults 18+ only',
+		);
+
+		if ( ! in_array( $raw_policy, $allowed_policies, true ) ) {
+			return new WP_Error(
+				'invalid_villa_guest_age_policy',
+				__( 'The villa guest age policy must be All ages, Ages 12+ only, or Adults 18+ only.', 'gutenberg-lab-blocks' )
+			);
+		}
+	}
+
 	// Current workbooks explicitly manage the public Area filter. Keep legacy
 	// payloads compatible, but never accept an explicitly blank or malformed key.
 	if ( array_key_exists( 'search_area', $overview ) ) {
@@ -4495,6 +4514,9 @@ function gutenberg_lab_blocks_villa_importer_meta( $data ) {
 		'villa_search_bedrooms'        => absint( $overview['bedrooms'] ),
 		'villa_search_sleeps'          => absint( $overview['sleeps'] ),
 		'villa_search_starting_price_usd' => absint( $overview['starting_rate_usd'] ),
+		'villa_search_guest_age_policy' => gutenberg_lab_blocks_sanitize_villa_guest_age_policy(
+			$overview['guest_age_policy'] ?? 'all_ages'
+		),
 		'villa_card_eyebrow'           => $card_location,
 		'villa_card_descriptor'        => gutenberg_lab_blocks_villa_importer_excerpt( $data ),
 		'villa_card_facts'             => $facts,

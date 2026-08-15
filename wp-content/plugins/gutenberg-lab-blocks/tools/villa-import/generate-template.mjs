@@ -61,6 +61,7 @@ const keyValueSheets = [
 			[ 'bedrooms', 'Number of bedrooms', true, 'Whole number only.', 'whole' ],
 			[ 'bathrooms', 'Number of bathrooms', true, 'Decimals such as 4.5 are allowed.', 'decimal' ],
 			[ 'sleeps', 'Maximum guests', true, 'Whole number only.', 'whole' ],
+			[ 'guest_age_policy', 'Guest age policy', true, 'Choose All ages unless this villa excludes younger guests. The search uses this policy only when children are included.', 'guestAgePolicy', 'All ages' ],
 			[ 'bedroom_selector_enabled', 'Show bedroom selector?', true, 'Choose Yes when guests can enquire for a bedroom drop-down configuration. Choose No when the villa is only offered as a fixed whole-villa stay.', 'yesNo', 'No' ],
 			[ 'bedroom_selector_choices', 'Bedroom selector options', false, 'Optional. Enter each visitor-facing option separated by commas. Example from With Bedroom Selection: 2 Bedrooms, 1 Bedroom. Only include real selectable options; the website adds its own placeholder automatically.' ],
 				[ 'pool_summary', 'Pool summary', true, 'Example: 1 Private Pool or 2 Pools.' ],
@@ -304,6 +305,7 @@ const applyValidation = ( cell, validation ) => {
 		yesNo: '=Lists!$C$2:$C$3',
 		amenityGroup: '=Lists!$D$2:$D$7',
 		searchArea: '=Lists!$E$2:$E$6',
+		guestAgePolicy: '=Lists!$G$2:$G$4',
 	};
 
 	if ( listValidations[ validation ] ) {
@@ -1058,12 +1060,19 @@ lists.getColumn( 6 ).values = [
 	'Villas with Private Gym / Gym Equipment',
 	'Wedding Villas',
 ];
+lists.getColumn( 7 ).values = [
+	'Guest age policies',
+	'All ages',
+	'Ages 12+ only',
+	'Adults 18+ only',
+];
 lists.getColumn( 1 ).width = 24;
 lists.getColumn( 2 ).width = 24;
 lists.getColumn( 3 ).width = 18;
 lists.getColumn( 4 ).width = 24;
 lists.getColumn( 5 ).width = 34;
 lists.getColumn( 6 ).width = 44;
+lists.getColumn( 7 ).width = 24;
 
 const importSheet = workbook.addWorksheet( '_Import' );
 importSheet.state = 'veryHidden';

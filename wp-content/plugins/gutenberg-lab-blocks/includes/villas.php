@@ -527,6 +527,50 @@ function gutenberg_lab_blocks_sanitize_villa_search_integer( $value ) {
 }
 
 /**
+ * Returns the supported guest age policies for villa search.
+ *
+ * A single policy avoids contradictory checkbox combinations in the editor.
+ * Existing villas with no saved value remain unrestricted through the
+ * `all_ages` default.
+ *
+ * @return array<string, string>
+ */
+function gutenberg_lab_blocks_get_villa_guest_age_policy_choices() {
+	return array(
+		'all_ages'       => __( 'All ages', 'gutenberg-lab-blocks' ),
+		'ages_12_plus'   => __( 'Ages 12+ only', 'gutenberg-lab-blocks' ),
+		'adults_18_plus' => __( 'Adults 18+ only', 'gutenberg-lab-blocks' ),
+	);
+}
+
+/**
+ * Normalizes a guest age policy from the editor or workbook importer.
+ *
+ * @param mixed $value Raw policy key or client-facing label.
+ * @return string
+ */
+function gutenberg_lab_blocks_sanitize_villa_guest_age_policy( $value ) {
+	if ( ! is_scalar( $value ) || is_bool( $value ) ) {
+		return 'all_ages';
+	}
+
+	$normalized = strtolower( trim( sanitize_text_field( (string) $value ) ) );
+	$normalized = preg_replace( '/[^a-z0-9]+/', '_', $normalized );
+	$normalized = trim( (string) $normalized, '_' );
+
+	$aliases = array(
+		''                 => 'all_ages',
+		'all_ages'         => 'all_ages',
+		'ages_12_only'     => 'ages_12_plus',
+		'ages_12_plus'     => 'ages_12_plus',
+		'adults_18_only'   => 'adults_18_plus',
+		'adults_18_plus'   => 'adults_18_plus',
+	);
+
+	return $aliases[ $normalized ] ?? 'all_ages';
+}
+
+/**
  * Registers the reusable Amenity taxonomy for villa posts.
  */
 function gutenberg_lab_blocks_register_villa_amenity_taxonomy() {
@@ -726,6 +770,11 @@ function gutenberg_lab_blocks_get_villa_meta_schema() {
 			'default'           => 0,
 			'sanitize_callback' => 'gutenberg_lab_blocks_sanitize_villa_search_integer',
 		),
+		'villa_search_guest_age_policy' => array(
+			'type'              => 'string',
+			'default'           => 'all_ages',
+			'sanitize_callback' => 'gutenberg_lab_blocks_sanitize_villa_guest_age_policy',
+		),
 		'villa_card_eyebrow'    => array(
 			'type'              => 'string',
 			'default'           => '',
@@ -868,6 +917,9 @@ function gutenberg_lab_blocks_render_villa_card_content_meta_box( $post ) {
 	$search_bedrooms = get_post_meta( $post->ID, 'villa_search_bedrooms', true );
 	$search_sleeps   = get_post_meta( $post->ID, 'villa_search_sleeps', true );
 	$search_price    = get_post_meta( $post->ID, 'villa_search_starting_price_usd', true );
+	$guest_age_policy = gutenberg_lab_blocks_sanitize_villa_guest_age_policy(
+		get_post_meta( $post->ID, 'villa_search_guest_age_policy', true )
+	);
 	$eyebrow         = get_post_meta( $post->ID, 'villa_card_eyebrow', true );
 	$descriptor      = get_post_meta( $post->ID, 'villa_card_descriptor', true );
 	$facts           = get_post_meta( $post->ID, 'villa_card_facts', true );
@@ -926,6 +978,25 @@ function gutenberg_lab_blocks_render_villa_card_content_meta_box( $post ) {
 				inputmode="numeric"
 				value="<?php echo esc_attr( $search_price ); ?>"
 			/>
+		</p>
+		<p>
+			<label for="gutenberg-lab-villa-search-guest-age-policy">
+				<?php esc_html_e( 'Guest age policy', 'gutenberg-lab-blocks' ); ?>
+			</label>
+			<select
+				id="gutenberg-lab-villa-search-guest-age-policy"
+				name="gutenberg_lab_villa_search_guest_age_policy"
+				class="widefat"
+			>
+				<?php foreach ( gutenberg_lab_blocks_get_villa_guest_age_policy_choices() as $policy_key => $policy_label ) : ?>
+					<option value="<?php echo esc_attr( $policy_key ); ?>" <?php selected( $guest_age_policy, $policy_key ); ?>>
+						<?php echo esc_html( $policy_label ); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+			<span class="description">
+				<?php esc_html_e( 'All ages is the default. Restrictions are applied only when the search includes children.', 'gutenberg-lab-blocks' ); ?>
+			</span>
 		</p>
 	</div>
 	<hr />
@@ -1144,6 +1215,7 @@ function gutenberg_lab_blocks_save_villa_meta( $post_id ) {
 		'villa_search_bedrooms' => 'gutenberg_lab_villa_search_bedrooms',
 		'villa_search_sleeps' => 'gutenberg_lab_villa_search_sleeps',
 		'villa_search_starting_price_usd' => 'gutenberg_lab_villa_search_starting_price_usd',
+		'villa_search_guest_age_policy' => 'gutenberg_lab_villa_search_guest_age_policy',
 		'villa_card_eyebrow'    => 'gutenberg_lab_villa_card_eyebrow',
 		'villa_card_descriptor' => 'gutenberg_lab_villa_card_descriptor',
 		'villa_card_facts'      => 'gutenberg_lab_villa_card_facts',

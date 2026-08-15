@@ -662,6 +662,14 @@ const minimumBedroomChoice = hasLegacyMinimumBedroomChoice
 	: 1;
 const bedroomSelectorChoices = commaListValue( overview.bedroom_selector_choices );
 const villaCollections = commaListValue( overview.villa_collections );
+const guestAgePolicyAliases = new Map( [
+	[ '', 'all_ages' ],
+	[ 'all ages', 'all_ages' ],
+	[ 'ages 12+ only', 'ages_12_plus' ],
+	[ 'adults 18+ only', 'adults_18_plus' ],
+] );
+const guestAgePolicyLabel = String( overview.guest_age_policy || 'All ages' ).trim();
+const guestAgePolicy = guestAgePolicyAliases.get( guestAgePolicyLabel.toLowerCase() );
 const coordinates = coordinatePairValue( overview.coordinates );
 
 if ( ! bedroomCount || bedroomCount < 1 ) {
@@ -678,6 +686,10 @@ if ( ! sleepsCount || sleepsCount < 1 ) {
 
 if ( startingRate === null || startingRate <= 0 ) {
 	errors.push( 'Overview: Starting nightly rate must be a number greater than zero.' );
+}
+
+if ( ! guestAgePolicy ) {
+	errors.push( 'Overview: Guest age policy must be All ages, Ages 12+ only, or Adults 18+ only.' );
 }
 
 if ( overview.search_area && String( overview.search_area ).length > 120 ) {
@@ -978,6 +990,7 @@ const overviewPayload = {
 	bathrooms: bathroomCount,
 	sleeps: sleepsCount,
 	starting_rate_usd: startingRate,
+	guest_age_policy: guestAgePolicy || 'all_ages',
 	bedroom_selector_enabled: bedroomSelectorEnabled,
 	bedroom_selector_choices: bedroomSelectorChoices,
 };

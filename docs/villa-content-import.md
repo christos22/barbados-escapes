@@ -128,6 +128,11 @@ is written under `.ddev/villa-import-backups/` before an update.
   source of truth for search. They populate `villa_search_bedrooms`,
   `villa_search_sleeps`, and `villa_search_starting_price_usd` respectively;
   do not duplicate these values in a separate search section.
+- **Guest age policy** controls child-age eligibility in search. Choose **All
+  ages** (the default), **Ages 12+ only**, or **Adults 18+ only**. Older
+  workbooks and villas with no saved value remain unrestricted. The policy is
+  applied only when the visitor supplies a child-age breakdown; a legacy total
+  guest count remains a capacity-only filter.
 - Use **Display address** for the guest-facing location wording.
 - Use **Exact map address or plus code** when the Google Map needs a more
   precise address than the public wording.
