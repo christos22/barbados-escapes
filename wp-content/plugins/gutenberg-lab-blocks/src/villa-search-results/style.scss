@@ -251,20 +251,21 @@
 		line-height: 1.2;
 	}
 
-	// Option B compresses the same semantic facts into one comparison row.
-	.vvm-card-grid__card--facts-inline .vvm-card-grid__card-facts--icons {
+	// Options B-D share the same compact semantic layout. Options C and D
+	// adjust divider tone and spacing below; D also softens amenity facts.
+	:is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-facts--icons {
 		flex-wrap: nowrap;
 		gap: clamp(0.45rem, 1.2vw, 1rem);
 	}
 
-	.vvm-card-grid__card--facts-inline .vvm-card-grid__card-fact {
+	:is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-fact {
 		flex: 0 1 auto;
 		gap: 0.25rem;
 		font-size: clamp(0.7rem, 1vw, 0.8rem);
 		white-space: nowrap;
 	}
 
-	.vvm-card-grid__card--facts-inline .vvm-card-grid__card-fact--price {
+	:is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-fact--price {
 		display: inline-flex;
 		align-items: baseline;
 		margin-left: auto;
@@ -272,13 +273,27 @@
 		font-weight: 400;
 	}
 
-	.vvm-card-grid__card--facts-inline .vvm-card-grid__card-fact--price .vvm-card-grid__card-fact-label {
+	:is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-fact--price .vvm-card-grid__card-fact-label {
 		font-weight: inherit;
 	}
 
-	.vvm-card-grid__card--facts-inline .vvm-card-grid__card-price-suffix {
+	:is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-price-suffix {
 		font-size: 0.55rem;
 		font-weight: 400;
+	}
+
+	// Option C keeps Option B's compact layout, but softens the horizontal
+	// dividers and uses the client's requested exact vertical spacing.
+	:is(.vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-facts--icons {
+		padding: 9px 0;
+		border-block-color: rgb(30 61 47 / 0.09);
+	}
+
+	// Option D softens only the amenity facts. Pricing deliberately remains at
+	// full contrast so it retains its hierarchy and stays easy to scan. Apply
+	// opacity to the complete fact so icons with their own colour also soften.
+	.vvm-card-grid__card--facts-inline_faint_facts .vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) {
+		opacity: 0.75;
 	}
 
 	// Match the location eyebrow to the client's exact brand gold.
@@ -308,11 +323,11 @@
 		font-size: 12px;
 	}
 
-	.vvm-villa-search-results .vvm-card-grid__card--facts-inline .vvm-card-grid__card-fact {
+	.vvm-villa-search-results :is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-fact {
 		font-size: clamp(0.62rem, 2.8vw, 0.72rem);
 	}
 
-	.vvm-villa-search-results .vvm-card-grid__card--facts-inline .vvm-card-grid__card-fact--price {
+	.vvm-villa-search-results :is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-fact--price {
 		font-size: clamp(0.78rem, 3.5vw, 0.95rem);
 	}
 

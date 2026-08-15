@@ -12,9 +12,9 @@
 
 .vvm-villa-card-style-admin__choices {
 	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 	gap: 2rem;
-	max-width: 1040px;
+	max-width: 1560px;
 }
 
 .vvm-villa-card-style-admin__choice {

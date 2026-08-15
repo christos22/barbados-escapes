@@ -2279,9 +2279,11 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 	$icon_price_aria  = $icon_price;
 	$icon_price_suffix = __( '/night + tax', 'gutenberg-lab-blocks' );
 	$display_fact_icon_items = $fact_icon_items;
+	$is_inline_fact_style = in_array( $fact_style, array( 'inline', 'inline_faint', 'inline_faint_facts' ), true );
+	$uses_abbreviated_inline_labels = in_array( $fact_style, array( 'inline', 'inline_faint' ), true );
 
 	// Keep the compact visual order identical to the DOM reading order.
-	if ( 'inline' === $fact_style ) {
+	if ( $is_inline_fact_style ) {
 		$inline_fact_order = array(
 			'people'        => 1,
 			'bedrooms-line' => 2,
@@ -2413,7 +2415,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 									<?php
 									$fact_label = $fact_icon_item['label'];
 
-									if ( 'inline' === $fact_style ) {
+									if ( $uses_abbreviated_inline_labels ) {
 										$fact_label = preg_replace(
 											array( '/\s+Bedrooms?$/i', '/\s+Bathrooms?$/i', '/^Sleeps\s+/i' ),
 											array( ' bed', ' bath', '' ),
@@ -2428,7 +2430,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 										<span class="vvm-card-grid__card-fact-label"><?php echo esc_html( $fact_label ); ?></span>
 									</li>
 								<?php endforeach; ?>
-								<?php if ( 'inline' === $fact_style && '' !== $icon_price ) : ?>
+								<?php if ( $is_inline_fact_style && '' !== $icon_price ) : ?>
 									<li class="vvm-card-grid__card-fact vvm-card-grid__card-fact--price" aria-label="<?php echo esc_attr( $icon_price_aria ); ?>">
 										<span class="vvm-card-grid__card-fact-label"><?php echo esc_html( $icon_price ); ?></span>
 										<span class="vvm-card-grid__card-price-suffix"><?php echo esc_html( $icon_price_suffix ); ?></span>

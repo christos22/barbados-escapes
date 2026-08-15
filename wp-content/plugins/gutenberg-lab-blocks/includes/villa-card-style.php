@@ -16,8 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function gutenberg_lab_blocks_get_villa_card_style_choices() {
 	return array(
-		'separate' => __( 'Option A — Price on its own line', 'gutenberg-lab-blocks' ),
-		'inline'   => __( 'Option B — Price inline with icons', 'gutenberg-lab-blocks' ),
+		'separate'     => __( 'Option A — Price on its own line', 'gutenberg-lab-blocks' ),
+		'inline'       => __( 'Option B — Price inline with icons', 'gutenberg-lab-blocks' ),
+		'inline_faint' => __( 'Option C — Price inline with faint dividers', 'gutenberg-lab-blocks' ),
+		'inline_faint_facts' => __( 'Option D — Faint dividers and facts', 'gutenberg-lab-blocks' ),
 	);
 }
 
@@ -155,7 +157,7 @@ function gutenberg_lab_blocks_render_villa_card_style_page() {
 	<div class="wrap vvm-villa-card-style-admin">
 		<h1><?php esc_html_e( 'Villa Card Style', 'gutenberg-lab-blocks' ); ?></h1>
 		<p class="description">
-			<?php esc_html_e( 'Compare both search-result card treatments using live villa content, then choose the site-wide style.', 'gutenberg-lab-blocks' ); ?>
+			<?php esc_html_e( 'Compare the search-result card treatments using live villa content, then choose the site-wide style.', 'gutenberg-lab-blocks' ); ?>
 		</p>
 
 		<?php settings_errors(); ?>
