@@ -384,65 +384,331 @@ const setupSelectMenus = ( form ) => {
 	} );
 };
 
-const setupNumberFieldLabels = ( form ) => {
+const setupGuestFields = ( form ) => {
 	const hasVisibleLabels =
 		form.dataset.vvmVillaSearchHasVisibleLabels === 'true';
 	const fields = Array.from(
-		form.querySelectorAll( '[data-vvm-villa-search-number-field]' )
+		form.querySelectorAll( '[data-vvm-villa-search-guest-field]' )
 	);
+	const guestPanels = [];
+
+	const closeGuestPanel = ( guestPanel, restoreFocus = false ) => {
+		guestPanel.panel.hidden = true;
+		guestPanel.trigger.setAttribute( 'aria-expanded', 'false' );
+		guestPanel.field.classList.remove(
+			'vvm-villa-hero-search__field--counter-open'
+		);
+
+		if ( restoreFocus ) {
+			guestPanel.trigger.focus();
+		}
+	};
+
+	const closeOtherGuestPanels = ( activeGuestPanel ) => {
+		guestPanels.forEach( ( guestPanel ) => {
+			if ( guestPanel !== activeGuestPanel ) {
+				closeGuestPanel( guestPanel );
+			}
+		} );
+	};
 
 	fields.forEach( ( field ) => {
-		const input = field.querySelector(
-			'[data-vvm-villa-search-number-input]'
+		const totalInput = field.querySelector(
+			'[data-vvm-villa-search-guest-total]'
 		);
-		const display = field.querySelector(
-			'[data-vvm-villa-search-number-display]'
+		const countInputs = Array.from(
+			field.querySelectorAll( '[data-vvm-villa-search-guest-count]' )
 		);
+		const label = field.querySelector( 'label' );
 
-		if ( ! input || ! display ) {
+		if (
+			! totalInput ||
+			! label ||
+			! totalInput.id ||
+			! countInputs.length
+		) {
 			return;
 		}
 
-		const stepButtons = Array.from(
-			field.querySelectorAll( '[data-vvm-villa-search-number-step]' )
-		);
+		const labelText = label.textContent.trim();
+		const placeholder =
+			totalInput.getAttribute( 'placeholder' ) || labelText;
+		const trigger = document.createElement( 'button' );
+		const triggerValue = document.createElement( 'span' );
+		const panel = document.createElement( 'div' );
+		const panelLabel = document.createElement( 'span' );
+		const labelId = `${ totalInput.id }-label`;
+		const triggerId = `${ totalInput.id }-trigger`;
+		const valueId = `${ totalInput.id }-value`;
+		const panelId = `${ totalInput.id }-panel`;
+		const panelLabelId = `${ totalInput.id }-panel-label`;
 
-		const sync = () => {
-			const value = Number.parseInt( input.value, 10 );
-			const hasValue = Number.isInteger( value ) && value > 0;
-			let displayValue = '';
+		trigger.className = 'vvm-villa-hero-search__counter-trigger';
+		trigger.type = 'button';
+		trigger.id = triggerId;
+		trigger.setAttribute( 'aria-controls', panelId );
+		trigger.setAttribute( 'aria-expanded', 'false' );
+		triggerValue.className = 'vvm-villa-hero-search__counter-trigger-value';
+		triggerValue.id = valueId;
+		trigger.append( triggerValue );
 
-			if ( hasValue ) {
-				displayValue = hasVisibleLabels
-					? String( value )
-					: `${ value } ${
-							value === 1
-								? field.dataset.vvmVillaSearchSingular
-								: field.dataset.vvmVillaSearchPlural
-					  }`;
+		panel.className = 'vvm-villa-hero-search__counter-panel';
+		panel.id = panelId;
+		panel.hidden = true;
+		panel.setAttribute( 'role', 'group' );
+		panel.setAttribute( 'aria-labelledby', panelLabelId );
+		panelLabel.className = 'screen-reader-text';
+		panelLabel.id = panelLabelId;
+		panelLabel.textContent = labelText;
+		panel.append( panelLabel );
+
+		const categories = countInputs.map( ( input ) => {
+			const categoryLabel = input.dataset.vvmVillaSearchGuestLabel || '';
+			const description =
+				input.dataset.vvmVillaSearchGuestDescription || '';
+			const fieldName = input.dataset.vvmVillaSearchGuestName || '';
+			const row = document.createElement( 'div' );
+			const copy = document.createElement( 'span' );
+			const name = document.createElement( 'span' );
+			const age = document.createElement( 'span' );
+			const controls = document.createElement( 'span' );
+			const decrease = document.createElement( 'button' );
+			const count = document.createElement( 'output' );
+			const increase = document.createElement( 'button' );
+			const categoryLabelId = `${ input.id }-label`;
+			const categoryDescriptionId = `${ input.id }-description`;
+
+			input.name = fieldName;
+			row.className = 'vvm-villa-hero-search__guest-row';
+			row.setAttribute( 'role', 'group' );
+			row.setAttribute(
+				'aria-labelledby',
+				description
+					? `${ categoryLabelId } ${ categoryDescriptionId }`
+					: categoryLabelId
+			);
+			copy.className = 'vvm-villa-hero-search__guest-copy';
+			name.className = 'vvm-villa-hero-search__guest-label';
+			name.id = categoryLabelId;
+			name.textContent = categoryLabel;
+			age.className = 'vvm-villa-hero-search__guest-age';
+			age.id = categoryDescriptionId;
+			age.textContent = description;
+			controls.className = 'vvm-villa-hero-search__counter-controls';
+
+			decrease.className =
+				'vvm-villa-hero-search__counter-button vvm-villa-hero-search__counter-button--decrease';
+			decrease.type = 'button';
+			decrease.setAttribute(
+				'aria-label',
+				`Decrease ${ categoryLabel.toLowerCase() }`
+			);
+			count.className = 'vvm-villa-hero-search__counter-count';
+			count.setAttribute( 'for', input.id );
+			count.setAttribute( 'aria-live', 'polite' );
+			increase.className =
+				'vvm-villa-hero-search__counter-button vvm-villa-hero-search__counter-button--increase';
+			increase.type = 'button';
+			increase.setAttribute(
+				'aria-label',
+				`Increase ${ categoryLabel.toLowerCase() }`
+			);
+
+			copy.append( name );
+			if ( description ) {
+				copy.append( age );
 			}
+			controls.append( decrease, count, increase );
+			row.append( copy, controls );
+			panel.append( row );
 
-			field.classList.toggle( 'has-value', hasValue );
-			display.textContent = displayValue;
-		};
-
-		input.addEventListener( 'input', sync );
-
-		stepButtons.forEach( ( button ) => {
-			button.addEventListener( 'click', () => {
-				if ( button.dataset.vvmVillaSearchNumberStep === 'up' ) {
-					input.stepUp();
-				} else {
-					input.stepDown();
-				}
-
-				// Native stepUp/stepDown do not emit input events themselves.
-				input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
-				input.focus( { preventScroll: true } );
-			} );
+			return {
+				count,
+				decrease,
+				increase,
+				input,
+				isAdults: input.hasAttribute(
+					'data-vvm-villa-search-guest-adults'
+				),
+			};
 		} );
 
+		label.id = label.id || labelId;
+		label.htmlFor = triggerId;
+		trigger.setAttribute(
+			'aria-labelledby',
+			hasVisibleLabels ? `${ label.id } ${ valueId }` : valueId
+		);
+		field.insertBefore( trigger, totalInput );
+		field.insertBefore( panel, totalInput );
+		totalInput.hidden = true;
+		field.classList.add( 'vvm-villa-hero-search__field--counter' );
+
+		const readValue = ( input ) => {
+			const value = Number.parseInt( input.value, 10 );
+
+			return Number.isInteger( value ) && value >= 0 ? value : 0;
+		};
+		const adults = categories.find( ( category ) => category.isAdults );
+		const children = categories.filter(
+			( category ) => ! category.isAdults
+		);
+		const getChildrenTotal = () =>
+			children.reduce(
+				( sum, category ) => sum + readValue( category.input ),
+				0
+			);
+		const getTotal = () =>
+			categories.reduce(
+				( sum, category ) => sum + readValue( category.input ),
+				0
+			);
+
+		const formatValue = ( value ) => {
+			if ( ! value ) {
+				return placeholder;
+			}
+
+			if ( hasVisibleLabels ) {
+				return String( value );
+			}
+
+			const noun =
+				value === 1
+					? field.dataset.vvmVillaSearchSingular
+					: field.dataset.vvmVillaSearchPlural;
+
+			return `${ value } ${ noun }`;
+		};
+
+		const sync = () => {
+			const value = getTotal();
+			const childrenTotal = getChildrenTotal();
+
+			triggerValue.textContent = formatValue( value );
+			trigger.dataset.placeholder = value ? 'false' : 'true';
+			totalInput.value = value ? String( value ) : '';
+
+			categories.forEach( ( category ) => {
+				const categoryValue = readValue( category.input );
+				const maximum = Number.parseInt( category.input.max, 10 );
+
+				category.count.value = String( categoryValue );
+				category.count.textContent = String( categoryValue );
+				category.decrease.disabled =
+					categoryValue === 0 ||
+					( category.isAdults &&
+						categoryValue === 1 &&
+						childrenTotal > 0 );
+				category.increase.disabled =
+					Number.isInteger( maximum ) && categoryValue >= maximum;
+			} );
+		};
+
+		const dispatchChange = ( input ) => {
+			input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+			input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		};
+
+		const adjust = ( category, direction ) => {
+			const current = readValue( category.input );
+			const minimum = Number.parseInt( category.input.min, 10 ) || 0;
+			const maximum = Number.parseInt( category.input.max, 10 );
+			const step = Number.parseInt( category.input.step, 10 ) || 1;
+			let next = current;
+			let adultsAdded = false;
+
+			if ( direction > 0 ) {
+				if (
+					! category.isAdults &&
+					adults &&
+					! readValue( adults.input )
+				) {
+					adults.input.value = '1';
+					adultsAdded = true;
+				}
+
+				next = current + step;
+				if ( Number.isInteger( maximum ) ) {
+					next = Math.min( next, maximum );
+				}
+			} else {
+				if (
+					category.isAdults &&
+					current === 1 &&
+					getChildrenTotal() > 0
+				) {
+					return;
+				}
+
+				next = Math.max( minimum, current - step );
+			}
+
+			category.input.value = String( next );
+			sync();
+			if ( adultsAdded ) {
+				dispatchChange( adults.input );
+			}
+			dispatchChange( category.input );
+			dispatchChange( totalInput );
+		};
+
+		const guestPanel = { field, panel, trigger };
+		guestPanels.push( guestPanel );
+
+		trigger.addEventListener( 'click', () => {
+			if ( panel.hidden ) {
+				closeOtherGuestPanels( guestPanel );
+				panel.hidden = false;
+				trigger.setAttribute( 'aria-expanded', 'true' );
+				field.classList.add(
+					'vvm-villa-hero-search__field--counter-open'
+				);
+			} else {
+				closeGuestPanel( guestPanel );
+			}
+		} );
+
+		trigger.addEventListener( 'keydown', ( event ) => {
+			if ( event.key === 'Escape' && ! panel.hidden ) {
+				event.preventDefault();
+				closeGuestPanel( guestPanel, true );
+			}
+		} );
+
+		panel.addEventListener( 'keydown', ( event ) => {
+			if ( event.key === 'Escape' ) {
+				event.preventDefault();
+				closeGuestPanel( guestPanel, true );
+			}
+		} );
+
+		categories.forEach( ( category ) => {
+			category.decrease.addEventListener( 'click', () =>
+				adjust( category, -1 )
+			);
+			category.increase.addEventListener( 'click', () =>
+				adjust( category, 1 )
+			);
+			category.input.addEventListener( 'input', sync );
+			category.input.addEventListener( 'change', sync );
+		} );
+		field.addEventListener( 'focusout', () => {
+			window.setTimeout( () => {
+				if ( ! field.contains( field.ownerDocument.activeElement ) ) {
+					closeGuestPanel( guestPanel );
+				}
+			}, 0 );
+		} );
 		sync();
+	} );
+
+	document.addEventListener( 'click', ( event ) => {
+		guestPanels.forEach( ( guestPanel ) => {
+			if ( ! guestPanel.field.contains( event.target ) ) {
+				closeGuestPanel( guestPanel );
+			}
+		} );
 	} );
 };
 
@@ -586,17 +852,26 @@ const setupCleanSubmission = ( form ) => {
 	// Modern browsers expose the final successful form payload here, after
 	// native constraint validation and the date-range checks have passed.
 	form.addEventListener( 'formdata', ( event ) => {
-		[
+		const partyFields = [ 'adults', 'children_under_12', 'children_12_17' ];
+		const searchFields = [
 			'arrival',
 			'departure',
 			'villa_location',
 			'villa_collection',
 			'min_bedrooms',
 			'guests',
+			...partyFields,
 			'min_price',
 			'max_price',
-		].forEach( ( name ) => {
-			if ( event.formData.get( name ) === '' ) {
+		];
+
+		searchFields.forEach( ( name ) => {
+			const value = event.formData.get( name );
+
+			if (
+				value === '' ||
+				( partyFields.includes( name ) && value === '0' )
+			) {
 				event.formData.delete( name );
 			}
 		} );
@@ -605,6 +880,7 @@ const setupCleanSubmission = ( form ) => {
 
 const setupResponsiveHeroLauncher = ( form ) => {
 	const wrapper = form.closest( '.vvm-villa-hero-search' );
+	const mediaPanel = wrapper?.closest( '.media-panel' );
 	const launcher = wrapper?.querySelector(
 		'[data-vvm-villa-search-launcher]'
 	);
@@ -622,6 +898,10 @@ const setupResponsiveHeroLauncher = ( form ) => {
 		const isCompact = compactMedia.matches;
 
 		wrapper.classList.toggle( 'is-hero-collapsible', isCompact );
+		mediaPanel?.classList.toggle(
+			'has-expanded-villa-search',
+			isCompact && isExpanded
+		);
 
 		if ( ! isCompact ) {
 			isExpanded = false;
@@ -657,7 +937,7 @@ const setupVillaSearch = ( form ) => {
 	form.dataset.vvmVillaSearchReady = 'true';
 	setupDateRange( form );
 	setupSelectMenus( form );
-	setupNumberFieldLabels( form );
+	setupGuestFields( form );
 	setupPriceRange( form );
 	setupAdvancedFilters( form );
 	setupCleanSubmission( form );

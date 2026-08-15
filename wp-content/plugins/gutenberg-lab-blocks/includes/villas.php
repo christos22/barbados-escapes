@@ -1499,6 +1499,9 @@ function gutenberg_lab_blocks_get_villa_search_request() {
 		'villa_collection'  => '',
 		'min_bedrooms'      => 0,
 		'guests'            => 0,
+		'adults'            => 0,
+		'children_under_12' => 0,
+		'children_12_17'    => 0,
 		'min_price'         => 0,
 		'max_price'         => 0,
 	);
@@ -1517,12 +1520,37 @@ function gutenberg_lab_blocks_get_villa_search_request() {
 		}
 	}
 
-	foreach ( array( 'min_bedrooms', 'guests', 'min_price', 'max_price' ) as $number_key ) {
+	foreach ( array( 'min_bedrooms', 'guests', 'adults', 'children_under_12', 'children_12_17', 'min_price', 'max_price' ) as $number_key ) {
 		if ( isset( $_GET[ $number_key ] ) && is_scalar( $_GET[ $number_key ] ) ) {
 			$request[ $number_key ] = gutenberg_lab_blocks_sanitize_villa_search_integer(
 				wp_unslash( $_GET[ $number_key ] )
 			);
 		}
+	}
+
+	// The villa capacity query only needs one total, but retaining the party
+	// breakdown lets the enquiry journey carry useful, unambiguous detail.
+	$party_keys               = array( 'adults', 'children_under_12', 'children_12_17' );
+	$has_party_breakdown      = false;
+	$children_in_party        = $request['children_under_12'] + $request['children_12_17'];
+
+	foreach ( $party_keys as $party_key ) {
+		if ( isset( $_GET[ $party_key ] ) && is_scalar( $_GET[ $party_key ] ) ) {
+			$has_party_breakdown = true;
+			break;
+		}
+	}
+
+	if ( $has_party_breakdown ) {
+		// A party containing children must include at least one responsible adult.
+		if ( $children_in_party > 0 && 0 === $request['adults'] ) {
+			$request['adults'] = 1;
+		}
+
+		$request['guests'] = $request['adults'] + $children_in_party;
+	} elseif ( $request['guests'] > 0 ) {
+		// Preserve old bookmarks and links that only contain the original total.
+		$request['adults'] = $request['guests'];
 	}
 
 	$bedroom_options = range( 3, 8 );
@@ -2501,6 +2529,9 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 	$collection_field_id    = wp_unique_id( 'villa-search-collection-' );
 	$bedrooms_field_id      = wp_unique_id( 'villa-search-bedrooms-' );
 	$guests_field_id        = wp_unique_id( 'villa-search-guests-' );
+	$adults_field_id        = wp_unique_id( 'villa-search-adults-' );
+	$children_under_12_id   = wp_unique_id( 'villa-search-children-under-12-' );
+	$children_12_17_id      = wp_unique_id( 'villa-search-children-12-17-' );
 	$min_price_field_id     = wp_unique_id( 'villa-search-min-price-' );
 	$max_price_field_id     = wp_unique_id( 'villa-search-max-price-' );
 	$price_error_id         = wp_unique_id( 'villa-search-price-error-' );
@@ -2739,48 +2770,61 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 					</select>
 				</div>
 
-				<div class="vvm-villa-hero-search__field">
+				<div
+					class="vvm-villa-hero-search__field"
+					data-vvm-villa-search-guest-field
+					data-vvm-villa-search-singular="<?php esc_attr_e( 'Guest', 'gutenberg-lab-blocks' ); ?>"
+					data-vvm-villa-search-plural="<?php esc_attr_e( 'Guests', 'gutenberg-lab-blocks' ); ?>"
+				>
 					<label class="<?php echo esc_attr( $field_label_class ); ?>" for="<?php echo esc_attr( $guests_field_id ); ?>">
 						<?php esc_html_e( 'Guests', 'gutenberg-lab-blocks' ); ?>
 					</label>
-					<div
-						class="vvm-villa-hero-search__number-field"
-						data-vvm-villa-search-number-field
-						data-vvm-villa-search-singular="<?php esc_attr_e( 'Guest', 'gutenberg-lab-blocks' ); ?>"
-						data-vvm-villa-search-plural="<?php esc_attr_e( 'Guests', 'gutenberg-lab-blocks' ); ?>"
-					>
-						<input
-							id="<?php echo esc_attr( $guests_field_id ); ?>"
-							name="guests"
-							class="vvm-villa-hero-search__control"
-							type="number"
-							min="1"
-							step="1"
-							inputmode="numeric"
-							placeholder="<?php echo esc_attr( $show_field_labels ? $empty_filter_prompt : __( 'Guests', 'gutenberg-lab-blocks' ) ); ?>"
-							value="<?php echo $request['guests'] ? esc_attr( $request['guests'] ) : ''; ?>"
-							data-vvm-villa-search-number-input
-						/>
-						<span
-							class="vvm-villa-hero-search__number-display"
-							aria-hidden="true"
-							data-vvm-villa-search-number-display
-						></span>
-						<span class="vvm-villa-hero-search__number-steppers">
-							<button
-								type="button"
-								class="vvm-villa-hero-search__number-step vvm-villa-hero-search__number-step--up"
-								aria-label="<?php esc_attr_e( 'Increase guests', 'gutenberg-lab-blocks' ); ?>"
-								data-vvm-villa-search-number-step="up"
-							></button>
-							<button
-								type="button"
-								class="vvm-villa-hero-search__number-step vvm-villa-hero-search__number-step--down"
-								aria-label="<?php esc_attr_e( 'Decrease guests', 'gutenberg-lab-blocks' ); ?>"
-								data-vvm-villa-search-number-step="down"
-							></button>
-						</span>
-					</div>
+					<input
+						id="<?php echo esc_attr( $guests_field_id ); ?>"
+						name="guests"
+						class="vvm-villa-hero-search__control"
+						type="number"
+						min="1"
+						step="1"
+						inputmode="numeric"
+						placeholder="<?php echo esc_attr( $show_field_labels ? $empty_filter_prompt : __( 'Guests', 'gutenberg-lab-blocks' ) ); ?>"
+						value="<?php echo $request['guests'] ? esc_attr( $request['guests'] ) : ''; ?>"
+						data-vvm-villa-search-guest-total
+					/>
+					<input
+						id="<?php echo esc_attr( $adults_field_id ); ?>"
+						type="hidden"
+						min="0"
+						step="1"
+						value="<?php echo esc_attr( $request['adults'] ); ?>"
+						data-vvm-villa-search-guest-count
+						data-vvm-villa-search-guest-name="adults"
+						data-vvm-villa-search-guest-label="<?php esc_attr_e( 'Adults', 'gutenberg-lab-blocks' ); ?>"
+						data-vvm-villa-search-guest-description="<?php esc_attr_e( 'Ages 18+', 'gutenberg-lab-blocks' ); ?>"
+						data-vvm-villa-search-guest-adults
+					/>
+					<input
+						id="<?php echo esc_attr( $children_12_17_id ); ?>"
+						type="hidden"
+						min="0"
+						step="1"
+						value="<?php echo esc_attr( $request['children_12_17'] ); ?>"
+						data-vvm-villa-search-guest-count
+						data-vvm-villa-search-guest-name="children_12_17"
+						data-vvm-villa-search-guest-label="<?php esc_attr_e( 'Older children', 'gutenberg-lab-blocks' ); ?>"
+						data-vvm-villa-search-guest-description="<?php esc_attr_e( 'Ages 12–17', 'gutenberg-lab-blocks' ); ?>"
+					/>
+					<input
+						id="<?php echo esc_attr( $children_under_12_id ); ?>"
+						type="hidden"
+						min="0"
+						step="1"
+						value="<?php echo esc_attr( $request['children_under_12'] ); ?>"
+						data-vvm-villa-search-guest-count
+						data-vvm-villa-search-guest-name="children_under_12"
+						data-vvm-villa-search-guest-label="<?php esc_attr_e( 'Children', 'gutenberg-lab-blocks' ); ?>"
+						data-vvm-villa-search-guest-description="<?php esc_attr_e( 'Under 12', 'gutenberg-lab-blocks' ); ?>"
+					/>
 				</div>
 
 				<details class="vvm-villa-hero-search__field vvm-villa-hero-search__field--price">

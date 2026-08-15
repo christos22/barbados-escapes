@@ -276,10 +276,11 @@ function gutenberg_lab_blocks_get_villa_search_results( $request ) {
 }
 
 /**
- * Returns a villa enquiry URL carrying the active search dates.
+ * Returns a villa enquiry URL carrying the relevant stay and party details.
  *
- * Only the normalized date pair is forwarded. Other search filters describe
- * the results list, while the villa form only needs the requested stay.
+ * Location, collection, bedroom and price filters describe the results list.
+ * Dates and the guest breakdown belong to the selected villa enquiry, so only
+ * those values continue into the villa form.
  *
  * @param int                       $villa_id Villa post ID.
  * @param array<string, int|string> $request  Normalized search request.
@@ -292,21 +293,337 @@ function gutenberg_lab_blocks_get_villa_search_enquiry_url( $villa_id, $request 
 		return '';
 	}
 
-	$arrival   = isset( $request['arrival'] ) ? (string) $request['arrival'] : '';
-	$departure = isset( $request['departure'] ) ? (string) $request['departure'] : '';
+	$arrival      = isset( $request['arrival'] ) ? (string) $request['arrival'] : '';
+	$departure    = isset( $request['departure'] ) ? (string) $request['departure'] : '';
+	$enquiry_args = array();
 
 	if ( '' !== $arrival && '' !== $departure && $departure > $arrival ) {
-		$permalink = add_query_arg(
-			array(
-				'arrival'   => $arrival,
-				'departure' => $departure,
-			),
-			$permalink
-		);
+		$enquiry_args['arrival']   = $arrival;
+		$enquiry_args['departure'] = $departure;
+	}
+
+	foreach ( array( 'guests', 'adults', 'children_12_17', 'children_under_12' ) as $party_key ) {
+		$value = isset( $request[ $party_key ] ) ? absint( $request[ $party_key ] ) : 0;
+
+		if ( $value > 0 ) {
+			$enquiry_args[ $party_key ] = $value;
+		}
+	}
+
+	if ( $enquiry_args ) {
+		$permalink = add_query_arg( $enquiry_args, $permalink );
 	}
 
 	return $permalink . '#enquire';
 }
+
+/**
+ * Returns the trusted guest fields shared by the form, validation and email.
+ *
+ * @return array<string, array<string, int|string>>
+ */
+function gutenberg_lab_blocks_get_villa_enquiry_guest_fields() {
+	return array(
+		'villa-adults'            => array(
+			'request_key' => 'adults',
+			'label'       => __( 'Adults', 'gutenberg-lab-blocks' ),
+			'description' => __( 'Ages 18+', 'gutenberg-lab-blocks' ),
+			'minimum'     => 1,
+		),
+		'villa-children-12-17'    => array(
+			'request_key' => 'children_12_17',
+			'label'       => __( 'Children', 'gutenberg-lab-blocks' ),
+			'description' => __( 'Ages 12–17', 'gutenberg-lab-blocks' ),
+			'minimum'     => 0,
+		),
+		'villa-children-under-12' => array(
+			'request_key' => 'children_under_12',
+			'label'       => __( 'Children', 'gutenberg-lab-blocks' ),
+			'description' => __( 'Under 12', 'gutenberg-lab-blocks' ),
+			'minimum'     => 0,
+		),
+	);
+}
+
+/**
+ * Renders the guest breakdown forwarded by a results-page enquiry CTA.
+ *
+ * The fields remain editable on the villa page. Raw HTML inputs are used so
+ * every existing villa CF7 form gains the feature without a database edit;
+ * the explicit validator below keeps the same server-side trust boundary as
+ * a stored Contact Form 7 number tag.
+ *
+ * @param array<string, int|string> $request Normalized villa-search request.
+ * @return string
+ */
+function gutenberg_lab_blocks_render_villa_enquiry_guest_fields( $request ) {
+	if ( empty( $request['guests'] ) ) {
+		return '';
+	}
+
+	$markup = '<fieldset class="vvm-villa-contact-form__party vvm-villa-contact-form__wide" data-vvm-villa-guest-breakdown>';
+	$markup .= '<legend>' . esc_html__( 'Guests', 'gutenberg-lab-blocks' ) . '</legend>';
+	$markup .= '<div class="vvm-villa-contact-form__party-grid">';
+
+	foreach ( gutenberg_lab_blocks_get_villa_enquiry_guest_fields() as $field_name => $field ) {
+		$request_key = (string) $field['request_key'];
+		$minimum     = absint( $field['minimum'] );
+		$value       = isset( $request[ $request_key ] ) ? absint( $request[ $request_key ] ) : 0;
+		$value       = min( 30, max( $minimum, $value ) );
+		$field_id    = wp_unique_id( $field_name . '-' );
+
+		$markup .= sprintf(
+			'<label class="vvm-villa-contact-form__party-field" for="%1$s"><span class="vvm-villa-contact-form__party-label">%2$s <small>%3$s</small></span><span class="wpcf7-form-control-wrap" data-name="%4$s"><input id="%1$s" name="%4$s" class="wpcf7-form-control wpcf7-number vvm-villa-contact-form__field" type="number" min="%5$d" max="30" step="1" inputmode="numeric" value="%6$d" required aria-required="true" /></span></label>',
+			esc_attr( $field_id ),
+			esc_html( $field['label'] ),
+			esc_html( $field['description'] ),
+			esc_attr( $field_name ),
+			$minimum,
+			$value
+		);
+	}
+
+	$markup .= '</div>';
+	$markup .= '<input type="hidden" name="villa-guest-breakdown" value="1" />';
+	$markup .= '</fieldset>';
+
+	return $markup;
+}
+
+/**
+ * Adds a prefilled guest breakdown to the villa Contact Form 7 form.
+ *
+ * @param string $html Rendered CF7 form HTML.
+ * @return string
+ */
+function gutenberg_lab_blocks_add_villa_enquiry_guest_fields( $html ) {
+	if ( ! is_singular( 'villa' ) || false !== strpos( $html, 'data-vvm-villa-guest-breakdown' ) ) {
+		return $html;
+	}
+
+	$request = gutenberg_lab_blocks_get_villa_search_request();
+	$fields  = gutenberg_lab_blocks_render_villa_enquiry_guest_fields( $request );
+
+	if ( '' === $fields ) {
+		return $html;
+	}
+
+	if (
+		preg_match(
+			'~<p\b[^>]*>(?:(?!</p>).)*?\b(?:for|id|name)=(["\'])villa-escape-details\1(?:(?!</p>).)*?</p>~is',
+			$html,
+			$matches,
+			PREG_OFFSET_CAPTURE
+		)
+	) {
+		return substr_replace( $html, $fields, (int) $matches[0][1], 0 );
+	}
+
+	$grid_start = strpos( $html, 'vvm-villa-contact-form__grid' );
+	$grid_close = false !== $grid_start ? stripos( $html, '</div>', $grid_start ) : false;
+
+	return false === $grid_close ? $html : substr_replace( $html, $fields, $grid_close, 0 );
+}
+add_filter(
+	'wpcf7_form_elements',
+	'gutenberg_lab_blocks_add_villa_enquiry_guest_fields',
+	25
+);
+
+/**
+ * Normalizes the submitted guest fields and rejects malformed or partial data.
+ *
+ * @return array{present: bool, valid: bool, values: array<string, int>, total: int, error_field: string}
+ */
+function gutenberg_lab_blocks_get_submitted_villa_guest_breakdown() {
+	$result = array(
+		'present'     => isset( $_POST['villa-guest-breakdown'] ),
+		'valid'       => false,
+		'values'      => array(),
+		'total'       => 0,
+		'error_field' => 'villa-adults',
+	);
+
+	if ( ! $result['present'] ) {
+		return $result;
+	}
+
+	foreach ( gutenberg_lab_blocks_get_villa_enquiry_guest_fields() as $field_name => $field ) {
+		$result['error_field'] = $field_name;
+
+		if ( ! isset( $_POST[ $field_name ] ) || ! is_scalar( $_POST[ $field_name ] ) ) {
+			return $result;
+		}
+
+		$raw_value = trim( (string) wp_unslash( $_POST[ $field_name ] ) );
+		$minimum   = absint( $field['minimum'] );
+
+		if ( ! preg_match( '/^\d{1,2}$/D', $raw_value ) ) {
+			return $result;
+		}
+
+		$value = (int) $raw_value;
+
+		if ( $value < $minimum || $value > 30 ) {
+			return $result;
+		}
+
+		$result['values'][ $field_name ] = $value;
+		$result['total']                += $value;
+	}
+
+	$result['error_field'] = 'villa-adults';
+	$result['valid']       = $result['total'] > 0;
+
+	return $result;
+}
+
+/**
+ * Validates the injected guest fields during a villa Contact Form 7 request.
+ *
+ * @param WPCF7_Validation          $result Current validation result.
+ * @param array<int, WPCF7_FormTag> $_tags  Scanned CF7 form tags.
+ * @return WPCF7_Validation
+ */
+function gutenberg_lab_blocks_validate_villa_enquiry_guest_fields( $result, $_tags ) {
+	$breakdown = gutenberg_lab_blocks_get_submitted_villa_guest_breakdown();
+
+	if ( ! $breakdown['present'] || $breakdown['valid'] ) {
+		return $result;
+	}
+
+	$result->invalidate(
+		array(
+			'type'    => 'number',
+			'name'    => $breakdown['error_field'],
+			'options' => array( 'id:' . $breakdown['error_field'] ),
+		),
+		__( 'Please enter a valid guest breakdown.', 'gutenberg-lab-blocks' )
+	);
+
+	return $result;
+}
+add_filter(
+	'wpcf7_validate',
+	'gutenberg_lab_blocks_validate_villa_enquiry_guest_fields',
+	30,
+	2
+);
+
+/**
+ * Adds normalized injected guest values to Contact Form 7 posted data.
+ *
+ * @param array<string, mixed> $posted_data Sanitized CF7 posted data.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_blocks_add_villa_guest_breakdown_to_posted_data( $posted_data ) {
+	$breakdown = gutenberg_lab_blocks_get_submitted_villa_guest_breakdown();
+
+	if ( ! $breakdown['present'] || ! $breakdown['valid'] ) {
+		return $posted_data;
+	}
+
+	foreach ( $breakdown['values'] as $field_name => $value ) {
+		$posted_data[ $field_name ] = (string) $value;
+	}
+
+	$posted_data['villa-guests'] = (string) $breakdown['total'];
+
+	return $posted_data;
+}
+add_filter(
+	'wpcf7_posted_data',
+	'gutenberg_lab_blocks_add_villa_guest_breakdown_to_posted_data',
+	20
+);
+
+/**
+ * Formats the guest breakdown added to the villa enquiry email.
+ *
+ * Keeping this separate from Contact Form 7's submission singleton makes the
+ * output deterministic and easy to test without sending a real enquiry.
+ *
+ * @param array<string, int|string> $values Normalized guest values.
+ * @return string
+ */
+function gutenberg_lab_blocks_get_villa_guest_breakdown_mail_details( $values ) {
+	$adults            = isset( $values['villa-adults'] ) ? absint( $values['villa-adults'] ) : 0;
+	$children_12_17    = isset( $values['villa-children-12-17'] ) ? absint( $values['villa-children-12-17'] ) : 0;
+	$children_under_12 = isset( $values['villa-children-under-12'] ) ? absint( $values['villa-children-under-12'] ) : 0;
+
+	if ( $adults < 1 || $adults > 30 || $children_12_17 > 30 || $children_under_12 > 30 ) {
+		return '';
+	}
+
+	$total = $adults + $children_12_17 + $children_under_12;
+
+	return sprintf(
+		/* translators: 1: total guests, 2: adults, 3: children ages 12-17, 4: children under 12. */
+		__( "Guests: %1\$d total\nAdults (18+): %2\$d\nChildren (12–17): %3\$d\nChildren (under 12): %4\$d\n", 'gutenberg-lab-blocks' ),
+		$total,
+		$adults,
+		$children_12_17,
+		$children_under_12
+	);
+}
+
+/**
+ * Adds the complete guest breakdown to villa enquiry emails.
+ *
+ * @param array<string, mixed> $components   Mail components.
+ * @param WPCF7_ContactForm    $_contact_form Current form.
+ * @return array<string, mixed>
+ */
+function gutenberg_lab_blocks_add_villa_guest_breakdown_to_mail( $components, $_contact_form ) {
+	$submission = class_exists( 'WPCF7_Submission' )
+		? WPCF7_Submission::get_instance()
+		: null;
+
+	if (
+		! $submission instanceof WPCF7_Submission ||
+		empty( $components['body'] ) ||
+		! is_string( $components['body'] ) ||
+		false !== stripos( $components['body'], 'Adults (18+):' )
+	) {
+		return $components;
+	}
+
+	$details = gutenberg_lab_blocks_get_villa_guest_breakdown_mail_details(
+		array(
+			'villa-adults'            => $submission->get_posted_data( 'villa-adults' ),
+			'villa-children-12-17'    => $submission->get_posted_data( 'villa-children-12-17' ),
+			'villa-children-under-12' => $submission->get_posted_data( 'villa-children-under-12' ),
+		)
+	);
+
+	if ( '' === $details ) {
+		return $components;
+	}
+
+	$updated_body = preg_replace_callback(
+		'/^(Preferred departure date:[^\r\n]*(?:\r?\n))/m',
+		static function ( $matches ) use ( $details ) {
+			return $matches[0] . $details;
+		},
+		$components['body'],
+		1,
+		$replacement_count
+	);
+
+	if ( null === $updated_body || 0 === $replacement_count ) {
+		$components['body'] = rtrim( $components['body'] ) . "\n\n" . trim( $details );
+	} else {
+		$components['body'] = $updated_body;
+	}
+
+	return $components;
+}
+add_filter(
+	'wpcf7_mail_components',
+	'gutenberg_lab_blocks_add_villa_guest_breakdown_to_mail',
+	20,
+	2
+);
 
 /**
  * Renders result cards through the shared villa-card contract.

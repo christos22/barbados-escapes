@@ -93,6 +93,7 @@
 	&__control,
 	&__date-input,
 	&__select-trigger,
+	&__counter-trigger,
 	&__price-summary-value,
 	&__price-panel input {
 		background: transparent;
@@ -135,109 +136,14 @@
 		font-size: 0.78rem;
 	}
 
-	&__number-field {
-		color: var(--vvm-search-muted);
-		flex: 1 1 auto;
-		min-width: 0;
-		position: relative;
-	}
-
-	&__number-field.has-value {
-		color: var(--vvm-search-green);
-	}
-
-	&__number-field > &__control {
-		appearance: textfield;
-		height: calc(100% + 0.9rem);
-		margin-block: -0.45rem;
-		min-height: 2.4rem;
-		padding-right: 2.75rem;
-
-		// Match the optical baseline of the adjacent custom-select values.
-		padding-top: 1px;
-	}
-
-	&__number-field > &__control::-webkit-inner-spin-button,
-	&__number-field > &__control::-webkit-outer-spin-button {
-		appearance: none;
-		margin: 0;
-	}
-
-	&__number-steppers {
-		display: grid;
-		height: calc(100% + 0.9rem);
-		grid-template-rows: repeat(2, minmax(1.5rem, 1fr));
-		opacity: 0;
-		pointer-events: none;
-		position: absolute;
-		right: -0.35rem;
-		top: 50%;
-		transform: translateY(-50%);
-		transition: opacity 120ms ease;
-		width: 2.5rem;
-		z-index: 2;
-	}
-
-	&__number-field:hover &__number-steppers,
-	&__number-field:focus-within &__number-steppers {
-		opacity: 1;
-		pointer-events: auto;
-	}
-
-	&__number-step {
+	&__counter-trigger {
 		align-items: center;
 		appearance: none;
-		background: transparent;
-		border: 0;
-		color: var(--vvm-search-green);
 		cursor: pointer;
 		display: flex;
-		justify-content: center;
-		margin: 0;
-		min-height: 1.5rem;
-		padding: 0;
-		width: 100%;
-	}
-
-	&__number-step:hover,
-	&__number-step:focus-visible {
-		background: rgb(30 61 47 / 0.08);
-		outline: none;
-	}
-
-	&__number-step::before {
-		border-bottom: 1.5px solid currentcolor;
-		border-right: 1.5px solid currentcolor;
-		content: "";
-		height: 0.5rem;
-		width: 0.5rem;
-	}
-
-	&__number-step--up::before {
-		transform: translateY(20%) rotate(225deg);
-	}
-
-	&__number-step--down::before {
-		transform: translateY(-20%) rotate(45deg);
-	}
-
-	&__number-display {
-		align-items: center;
-		box-sizing: border-box;
-		color: var(--vvm-search-green);
-		display: none;
-		font-family: var(--wp--preset--font-family--refined-sans, inherit);
-		font-size: var(--vvm-search-value-font-size);
-		inset: 0;
-		line-height: 1.35;
-		min-height: 1.5rem;
-		overflow: hidden;
-		pointer-events: none;
-		position: absolute;
-		padding-right: 2.75rem;
+		padding-right: 1.25rem;
+		position: relative;
 		text-align: left;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
 
 	&__price-panel input {
@@ -252,7 +158,8 @@
 	&__date-input:placeholder-shown,
 	&__date-trigger[data-placeholder="true"],
 	&__select:has(option:checked[value=""]),
-	&__select-trigger[data-placeholder="true"] {
+	&__select-trigger[data-placeholder="true"],
+	&__counter-trigger[data-placeholder="true"] {
 		color: var(--vvm-search-muted);
 		opacity: 1;
 	}
@@ -260,56 +167,69 @@
 	&__control:focus,
 	&__date-input:focus,
 	&__select-trigger:focus,
+	&__counter-trigger:focus,
 	&__price-panel input:focus {
 		outline: 2px solid var(--vvm-search-focus);
 		outline-offset: 0.25rem;
 	}
 
-	&__number-field.has-value:not(:focus-within) &__control {
-		color: transparent;
-	}
-
-	&__number-field.has-value:not(:focus-within) &__number-display {
-		display: flex;
-	}
-
 	&__select-trigger::after,
-	&__number-field::after,
+	&__counter-trigger::after,
 	&__price-summary::after {
-		border-bottom: 1px solid currentcolor;
-		border-right: 1px solid currentcolor;
-		color: currentcolor;
+		background-color: currentcolor;
 		content: "";
-		height: 0.35rem;
+		height: 0.375rem;
+		mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='m1 1 4 4 4-4' fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.25'/%3E%3C/svg%3E");
+		mask-position: center;
+		mask-repeat: no-repeat;
+		mask-size: contain;
 		position: absolute;
 		right: 0.1rem;
 		top: 50%;
-		transform: translateY(-70%) rotate(45deg);
+		transform: translateY(-50%);
 		transition: transform 160ms ease;
-		width: 0.35rem;
-	}
-
-	// Align the custom cue with Chromium's native number-stepper gutter.
-	&__number-field::after {
-		right: 0.4rem;
-	}
-
-	// Give the idle field the same cue as the other filters. The browser's
-	// native number steppers take over as soon as the visitor interacts.
-	&__number-field:hover::after,
-	&__number-field:focus-within::after {
-		opacity: 0;
+		width: 0.625rem;
+		-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='m1 1 4 4 4-4' fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.25'/%3E%3C/svg%3E");
+		-webkit-mask-position: center;
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-size: contain;
 	}
 
 	&__select-menu--open &__select-trigger::after,
+	&__field--counter-open &__counter-trigger::after,
 	&__field--price[open] &__price-summary::after {
-		transform: translateY(-25%) rotate(225deg);
+		transform: translateY(-50%) rotate(180deg);
 	}
 
-	&__select-value {
+	&__select-value,
+	&__counter-trigger-value {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	&__field--counter-open {
+		z-index: 30;
+	}
+
+	&__counter-panel {
+		background: #fff;
+		border: 1px solid var(--vvm-search-border);
+		border-radius: 0.5rem;
+		box-shadow: 0 18px 38px rgb(15 45 35 / 0.16);
+		box-sizing: border-box;
+		display: grid;
+		left: 0;
+		min-width: 22rem;
+		padding: 0.35rem 1rem;
+		position: absolute;
+		top: calc(100% + 0.55rem);
+		width: max(100%, 22rem);
+		z-index: 20;
+	}
+
+	&__counter-panel[hidden] {
+		display: none;
 	}
 
 	&__price-panel label {
@@ -320,6 +240,120 @@
 		letter-spacing: 0.02em;
 		line-height: 1.25;
 		text-align: left;
+	}
+
+	&__guest-row {
+		align-items: center;
+		display: flex;
+		gap: 1.5rem;
+		justify-content: space-between;
+		min-height: 4rem;
+		padding: 0.65rem 0;
+	}
+
+	&__guest-row + &__guest-row {
+		border-top: 1px solid var(--vvm-search-border);
+	}
+
+	&__guest-copy {
+		display: grid;
+		gap: 0.15rem;
+		min-width: 0;
+		text-align: left;
+	}
+
+	&__guest-label {
+		color: var(--vvm-search-green);
+		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-size: 0.86rem;
+		font-weight: 600;
+		line-height: 1.25;
+	}
+
+	&__guest-age {
+		color: var(--vvm-search-muted);
+		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-size: 0.72rem;
+		line-height: 1.3;
+	}
+
+	&__counter-controls {
+		align-items: center;
+		display: flex;
+		flex: 0 0 auto;
+		gap: 0.75rem;
+	}
+
+	&__counter-button {
+		align-items: center;
+		background: transparent;
+		border: 1px solid var(--vvm-search-green);
+		border-radius: 50%;
+		box-sizing: border-box;
+		color: var(--vvm-search-green);
+		cursor: pointer;
+		display: inline-flex;
+		font: inherit;
+		font-size: 0;
+		height: 2.5rem;
+		justify-content: center;
+		line-height: 1;
+		padding: 0;
+		position: relative;
+		transition:
+			background-color 160ms ease,
+			color 160ms ease,
+			opacity 160ms ease;
+		width: 2.5rem;
+	}
+
+	// Draw the symbols from the exact centre so font metrics cannot shift them.
+	&__counter-button::before,
+	&__counter-button--increase::after {
+		background: currentcolor;
+		border-radius: 999px;
+		content: "";
+		left: 50%;
+		position: absolute;
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
+
+	&__counter-button::before {
+		height: 2px;
+		width: 0.9rem;
+	}
+
+	&__counter-button--increase::after {
+		height: 0.9rem;
+		width: 2px;
+	}
+
+	&__counter-button:focus-visible {
+		background: var(--vvm-search-green);
+		color: #fff;
+		outline: 2px solid var(--vvm-search-focus);
+		outline-offset: 2px;
+	}
+
+	&__counter-button:disabled {
+		cursor: not-allowed;
+		opacity: 0.3;
+	}
+
+	&__counter-button:hover:not(:disabled) {
+		background: var(--vvm-search-green);
+		color: #fff;
+	}
+
+	&__counter-count {
+		color: var(--vvm-search-green);
+		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-size: 1rem;
+		font-variant-numeric: tabular-nums;
+		line-height: 1;
+		min-width: 1.25rem;
+		text-align: center;
 	}
 
 
@@ -609,6 +643,15 @@
 }
 
 @media (max-width: 1199px) {
+	// On short compact screens the three-row guest panel extends below the
+	// original full-height hero. Give the expanded search enough real layout
+	// space so following sections cannot cover or intercept its controls.
+	.wp-block-gutenberg-lab-blocks-media-panel.media-panel.has-expanded-villa-search {
+		min-height: max(100vh, 54rem);
+		position: relative;
+		top: auto;
+		z-index: 2;
+	}
 
 	.media-panel .vvm-villa-hero-search.is-hero-collapsible {
 
@@ -790,6 +833,13 @@
 			right: 0.5rem;
 		}
 
+		&__counter-panel {
+			left: 0;
+			min-width: 0;
+			right: 0;
+			width: auto;
+		}
+
 		&__actions {
 			grid-column: auto;
 			padding: 0.5rem 0;
@@ -810,6 +860,7 @@
 
 	.vvm-villa-hero-search__launcher,
 	.vvm-villa-hero-search__submit,
+	.vvm-villa-hero-search__counter-trigger::after,
 	.vvm-villa-hero-search__price-summary::after,
 	.vvm-villa-hero-search__more-toggle-icon {
 		transition: none;
