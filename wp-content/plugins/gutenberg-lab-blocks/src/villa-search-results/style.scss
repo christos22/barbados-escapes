@@ -283,9 +283,15 @@
 	}
 
 	// Option C keeps Option B's compact layout, but softens the horizontal
-	// dividers and uses the client's requested exact vertical spacing.
-	:is(.vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-facts--icons {
-		padding: 9px 0;
+	// dividers. Keep the strip itself compact and place the requested breathing
+	// room outside it so the description and CTA do not crowd the borders.
+	&.wp-block-gutenberg-lab-blocks-card-grid.vvm-card-grid.vvm-card-grid--villa-presentation-collection
+		:is(.vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts)
+		> .vvm-card-grid__card-content
+		> .vvm-card-grid__card-meta
+		> .vvm-card-grid__card-facts--icons {
+		margin-block: 9px;
+		padding-block: 0;
 		border-block-color: rgb(30 61 47 / 0.09);
 	}
 
