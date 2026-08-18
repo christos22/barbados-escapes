@@ -282,15 +282,21 @@
 		font-weight: 400;
 	}
 
-	// Options E-J share a roomier inline strip and gold amenity icons. Modifier
-	// classes keep icon scale, label colour, and label size independently
-	// comparable without duplicating the card markup.
+	// Options E-K share a roomier inline strip. Modifier classes keep icon
+	// colour, scale, label colour, and label size independently comparable
+	// without duplicating the card markup.
 	.vvm-card-grid__card--fact-strip-roomy .vvm-card-grid__card-facts--icons {
 		padding-block: 0.95rem;
 	}
 
 	.vvm-card-grid__card--fact-icons-gold .vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) .vvm-card-grid__card-fact-icon {
 		color: var(--vvm-results-gold);
+	}
+
+	// Version 11 keeps Version 5's scale while returning the amenity icons to
+	// the site's primary green. The facts remain independently accessible text.
+	.vvm-card-grid__card--fact-icons-green .vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) .vvm-card-grid__card-fact-icon {
+		color: var(--vvm-results-green);
 	}
 
 	.vvm-card-grid__card--fact-icons-large .vvm-card-grid__card-fact-icon {
@@ -305,9 +311,12 @@
 		width: clamp(1.45rem, 2.6vw, 1.75rem);
 	}
 
-	// Version 6 only: keep one modest, typographic-space-sized separation
-	// between each enlarged amenity icon and its label.
+	// Versions 6 and 12: keep one modest, typographic-space-sized separation
+	// between each enlarged amenity icon and its label. Version 12 deliberately
+	// inherits this detail because it is the green-icon clone of Version 6.
 	.vvm-card-grid__card--facts-inline_gold_icons_xl
+	.vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price),
+	.vvm-card-grid__card--facts-inline_green_icons_xl_romely_numbers
 	.vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) {
 		gap: 0.35em;
 	}
@@ -318,6 +327,12 @@
 
 	.vvm-card-grid__card--fact-labels-large .vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) .vvm-card-grid__card-fact-label {
 		font-size: clamp(0.82rem, 1.1vw, 0.95rem);
+	}
+
+	// Version 11 highlights only the numeric value in Romely Display while
+	// retaining TT Norms for the descriptive words around it.
+	.vvm-card-grid__card--fact-numbers-romely .vvm-card-grid__card-fact-number {
+		font-family: var(--wp--preset--font-family--display-serif, "Romely", Georgia, serif);
 	}
 
 	// These outline buttons are rendered dynamically, so WordPress does not
@@ -339,6 +354,56 @@
 		background: var(--vvm-results-gold) !important;
 		border-color: var(--vvm-results-gold);
 		color: #163429 !important;
+	}
+
+	// Versions 11 and 12 retain the original outline palette in every state.
+	// Interaction adds only the same gold glow used by the primary Enquire CTA;
+	// no background, border, or text colour changes are introduced.
+	.vvm-card-grid__card-actions
+	.wp-block-button.vvm-card-grid__explore-cta--glow-only
+	:is(.wp-block-button__link, .wp-element-button) {
+		// Keep the label at its original size. The primary Enquire treatment gets
+		// its sense of movement from animated surfaces, so give this outline CTA
+		// an equivalent surface rather than scaling the link and its text.
+		background: transparent !important;
+		border-color: transparent;
+		overflow: visible;
+		transform: none;
+	}
+
+	.vvm-card-grid__card-actions
+	.wp-block-button.vvm-card-grid__explore-cta--glow-only
+	:is(.wp-block-button__link, .wp-element-button)::before {
+		background: #f4ecdb;
+		border: 1px solid var(--vvm-results-gold);
+		box-sizing: border-box;
+		content: "";
+		inset: 0;
+		position: absolute;
+		transform: translateZ(0) scale(1);
+		transform-origin: center;
+		transition:
+			box-shadow 320ms ease,
+			transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+		will-change: transform, box-shadow;
+		z-index: -1;
+	}
+
+	.vvm-card-grid__card-actions
+	.wp-block-button.vvm-card-grid__explore-cta--glow-only
+	:is(.wp-block-button__link, .wp-element-button):is(:hover, :focus-visible) {
+		background: transparent !important;
+		border-color: transparent;
+		color: var(--vvm-results-green) !important;
+		box-shadow: none;
+		transform: none;
+	}
+
+	.vvm-card-grid__card-actions
+	.wp-block-button.vvm-card-grid__explore-cta--glow-only
+	:is(.wp-block-button__link, .wp-element-button):is(:hover, :focus-visible)::before {
+		box-shadow: 0 0 40px rgb(196 146 42 / 0.4);
+		transform: translateZ(0) scale(1.03);
 	}
 
 	// Option C keeps Option B's compact layout, but softens the horizontal
