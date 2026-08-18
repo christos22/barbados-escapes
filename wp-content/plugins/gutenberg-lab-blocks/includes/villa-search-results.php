@@ -52,7 +52,7 @@ function gutenberg_lab_blocks_get_villa_search_url_args( $request ) {
  * @return string
  */
 function gutenberg_lab_blocks_get_villa_search_page_url( $page, $request ) {
-	$archive_url = get_post_type_archive_link( 'villa' );
+	$archive_url = gutenberg_lab_blocks_get_villa_search_results_url();
 
 	if ( ! $archive_url ) {
 		return '';
@@ -765,7 +765,7 @@ function gutenberg_lab_blocks_render_villa_search_pagination( $current, $pages, 
 		return '';
 	}
 
-	$archive_url = get_post_type_archive_link( 'villa' );
+	$archive_url = gutenberg_lab_blocks_get_villa_search_results_url();
 
 	if ( ! $archive_url ) {
 		return '';
@@ -859,7 +859,7 @@ function gutenberg_lab_blocks_render_villa_search_results_markup( $wrapper_attri
 	$request       = gutenberg_lab_blocks_get_villa_search_request();
 	$results       = gutenberg_lab_blocks_get_villa_search_results( $request );
 	$filter_labels = gutenberg_lab_blocks_get_villa_search_filter_labels( $request );
-	$archive_url   = get_post_type_archive_link( 'villa' );
+	$archive_url   = gutenberg_lab_blocks_get_villa_search_results_url();
 	$card_markup   = gutenberg_lab_blocks_render_villa_search_cards( $results['ids'], $request );
 
 	ob_start();

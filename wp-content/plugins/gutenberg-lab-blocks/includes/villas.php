@@ -2595,7 +2595,9 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 		: '';
 	// Keep the desktop grid aligned with only the filters that can be used.
 	$visible_filter_count   = 3 + ( empty( $locations ) ? 0 : 1 ) + ( empty( $collections ) ? 0 : 1 );
-	$archive_url            = get_post_type_archive_link( 'villa' );
+	$archive_url            = function_exists( 'gutenberg_lab_blocks_get_villa_search_results_url' )
+		? gutenberg_lab_blocks_get_villa_search_results_url()
+		: get_post_type_archive_link( 'villa' );
 	$date_field_id          = wp_unique_id( 'villa-search-dates-' );
 	$arrival_field_id       = wp_unique_id( 'villa-search-arrival-' );
 	$departure_field_id     = wp_unique_id( 'villa-search-departure-' );
