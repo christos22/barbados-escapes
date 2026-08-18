@@ -251,21 +251,21 @@
 		line-height: 1.2;
 	}
 
-	// Options B-D share the same compact semantic layout. Options C and D
-	// adjust divider tone and spacing below; D also softens amenity facts.
-	:is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-facts--icons {
+	// All inline options share the same compact semantic layout. Their modifier
+	// classes below vary colour, scale, divider tone, and spacing independently.
+	.vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-facts--icons {
 		flex-wrap: nowrap;
 		gap: clamp(0.45rem, 1.2vw, 1rem);
 	}
 
-	:is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-fact {
+	.vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-fact {
 		flex: 0 1 auto;
 		gap: 0.25rem;
 		font-size: clamp(0.7rem, 1vw, 0.8rem);
 		white-space: nowrap;
 	}
 
-	:is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-fact--price {
+	.vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-fact--price {
 		display: inline-flex;
 		align-items: baseline;
 		margin-left: auto;
@@ -273,13 +273,72 @@
 		font-weight: 400;
 	}
 
-	:is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-fact--price .vvm-card-grid__card-fact-label {
+	.vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-fact--price .vvm-card-grid__card-fact-label {
 		font-weight: inherit;
 	}
 
-	:is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-price-suffix {
+	.vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-price-suffix {
 		font-size: 0.55rem;
 		font-weight: 400;
+	}
+
+	// Options E-J share a roomier inline strip and gold amenity icons. Modifier
+	// classes keep icon scale, label colour, and label size independently
+	// comparable without duplicating the card markup.
+	.vvm-card-grid__card--fact-strip-roomy .vvm-card-grid__card-facts--icons {
+		padding-block: 0.95rem;
+	}
+
+	.vvm-card-grid__card--fact-icons-gold .vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) .vvm-card-grid__card-fact-icon {
+		color: var(--vvm-results-gold);
+	}
+
+	.vvm-card-grid__card--fact-icons-large .vvm-card-grid__card-fact-icon {
+		flex-basis: clamp(1.2rem, 2vw, 1.4rem);
+		height: clamp(1.2rem, 2vw, 1.4rem);
+		width: clamp(1.2rem, 2vw, 1.4rem);
+	}
+
+	.vvm-card-grid__card--fact-icons-xlarge .vvm-card-grid__card-fact-icon {
+		flex-basis: clamp(1.45rem, 2.6vw, 1.75rem);
+		height: clamp(1.45rem, 2.6vw, 1.75rem);
+		width: clamp(1.45rem, 2.6vw, 1.75rem);
+	}
+
+	// Version 6 only: keep one modest, typographic-space-sized separation
+	// between each enlarged amenity icon and its label.
+	.vvm-card-grid__card--facts-inline_gold_icons_xl
+	.vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) {
+		gap: 0.35em;
+	}
+
+	.vvm-card-grid__card--fact-labels-gold .vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) .vvm-card-grid__card-fact-label {
+		color: var(--vvm-results-gold);
+	}
+
+	.vvm-card-grid__card--fact-labels-large .vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) .vvm-card-grid__card-fact-label {
+		font-size: clamp(0.82rem, 1.1vw, 0.95rem);
+	}
+
+	// These outline buttons are rendered dynamically, so WordPress does not
+	// enqueue the core outline variation stylesheet for this results block.
+	// Restore that presentation here while retaining native Gutenberg classes.
+	.vvm-card-grid__card-actions
+	.wp-block-button.is-style-outline
+	:is(.wp-block-button__link, .wp-element-button) {
+		// Match the existing Experiences outline CTA exactly: softly tinted gold
+		// at rest, with the stronger brand gold reserved for interaction.
+		background: #f4ecdb !important;
+		border: 1px solid var(--vvm-results-gold);
+		color: var(--vvm-results-green) !important;
+	}
+
+	.vvm-card-grid__card-actions
+	.wp-block-button.is-style-outline
+	:is(.wp-block-button__link, .wp-element-button):is(:hover, :focus-visible) {
+		background: var(--vvm-results-gold) !important;
+		border-color: var(--vvm-results-gold);
+		color: #163429 !important;
 	}
 
 	// Option C keeps Option B's compact layout, but softens the horizontal
@@ -329,11 +388,19 @@
 		font-size: 12px;
 	}
 
-	.vvm-villa-search-results :is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-fact {
+	.vvm-villa-search-results .vvm-card-grid__card--fact-strip-roomy .vvm-card-grid__card-facts--icons {
+		box-sizing: border-box;
+		flex-wrap: wrap;
+		max-width: 100%;
+		min-width: 0;
+		row-gap: 0.65rem;
+	}
+
+	.vvm-villa-search-results .vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-fact {
 		font-size: clamp(0.62rem, 2.8vw, 0.72rem);
 	}
 
-	.vvm-villa-search-results :is(.vvm-card-grid__card--facts-inline, .vvm-card-grid__card--facts-inline_faint, .vvm-card-grid__card--facts-inline_faint_facts) .vvm-card-grid__card-fact--price {
+	.vvm-villa-search-results .vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-fact--price {
 		font-size: clamp(0.78rem, 3.5vw, 0.95rem);
 	}
 

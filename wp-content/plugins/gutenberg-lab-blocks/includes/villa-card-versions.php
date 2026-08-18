@@ -24,6 +24,12 @@ function gutenberg_lab_blocks_get_villa_card_versions() {
 		'two'   => 'inline',
 		'three' => 'inline_faint',
 		'four'  => 'inline_faint_facts',
+		'five'  => 'inline_gold_icons_lg',
+		'six'   => 'inline_gold_icons_xl',
+		'seven' => 'inline_gold_all_lg',
+		'eight' => 'inline_gold_all_xl',
+		'nine'  => 'inline_gold_icons_lg_text',
+		'ten'   => 'inline_gold_icons_xl_text',
 	);
 }
 
@@ -59,7 +65,7 @@ function gutenberg_lab_blocks_get_villa_card_style() {
  */
 function gutenberg_lab_blocks_register_villa_card_version_rewrites() {
 	add_rewrite_rule(
-		'^villas/version-(one|two|three|four)/?$',
+		'^villas/version-(one|two|three|four|five|six|seven|eight|nine|ten)/?$',
 		'index.php?post_type=villa&vvm_villa_card_version=$matches[1]',
 		'top'
 	);
@@ -82,7 +88,7 @@ add_filter( 'query_vars', 'gutenberg_lab_blocks_register_villa_card_version_quer
 /**
  * Returns a canonical frontend URL for a comparison version.
  *
- * @param string $version Version word: one, two, three, or four.
+ * @param string $version Version word: one through ten.
  * @return string
  */
 function gutenberg_lab_blocks_get_villa_card_version_url( $version = 'one' ) {
@@ -180,7 +186,7 @@ add_filter( 'wp_robots', 'gutenberg_lab_blocks_noindex_villa_card_versions' );
  * Flushes the new routes once after this route contract changes.
  */
 function gutenberg_lab_blocks_maybe_flush_villa_card_version_rewrites() {
-	$rewrite_version = '20260817-3';
+	$rewrite_version = '20260817-4';
 
 	if ( $rewrite_version === get_option( 'gutenberg_lab_blocks_villa_card_version_rewrites' ) ) {
 		return;

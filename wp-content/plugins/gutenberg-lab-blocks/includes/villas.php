@@ -2279,8 +2279,34 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 	$icon_price_aria  = $icon_price;
 	$icon_price_suffix = __( '/night + tax', 'gutenberg-lab-blocks' );
 	$display_fact_icon_items = $fact_icon_items;
-	$is_inline_fact_style = in_array( $fact_style, array( 'inline', 'inline_faint', 'inline_faint_facts' ), true );
+	$new_comparison_fact_styles = array(
+		'inline_gold_icons_lg',
+		'inline_gold_icons_xl',
+		'inline_gold_all_lg',
+		'inline_gold_all_xl',
+		'inline_gold_icons_lg_text',
+		'inline_gold_icons_xl_text',
+	);
+	$is_inline_fact_style = in_array(
+		$fact_style,
+		array_merge( array( 'inline', 'inline_faint', 'inline_faint_facts' ), $new_comparison_fact_styles ),
+		true
+	);
 	$uses_abbreviated_inline_labels = in_array( $fact_style, array( 'inline', 'inline_faint' ), true );
+	$uses_gold_fact_icons = in_array( $fact_style, $new_comparison_fact_styles, true );
+	$uses_xlarge_fact_icons = in_array(
+		$fact_style,
+		array( 'inline_gold_icons_xl', 'inline_gold_all_xl', 'inline_gold_icons_xl_text' ),
+		true
+	);
+	$uses_gold_fact_labels = in_array( $fact_style, array( 'inline_gold_all_lg', 'inline_gold_all_xl' ), true );
+	$uses_large_fact_labels = in_array(
+		$fact_style,
+		array( 'inline_gold_icons_lg_text', 'inline_gold_icons_xl_text' ),
+		true
+	);
+	$uses_outline_explore_cta = 'collection' === $args['presentation']
+		&& in_array( $fact_style, $new_comparison_fact_styles, true );
 
 	// Keep the compact visual order identical to the DOM reading order.
 	if ( $is_inline_fact_style ) {
@@ -2357,6 +2383,26 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 
 	if ( $fact_icon_items ) {
 		$card_classes[] = 'vvm-card-grid__card--facts-' . $fact_style;
+
+		if ( $is_inline_fact_style ) {
+			$card_classes[] = 'vvm-card-grid__card--facts-inline-layout';
+		}
+
+		if ( $uses_gold_fact_icons ) {
+			$card_classes[] = 'vvm-card-grid__card--fact-strip-roomy';
+			$card_classes[] = 'vvm-card-grid__card--fact-icons-gold';
+			$card_classes[] = $uses_xlarge_fact_icons
+				? 'vvm-card-grid__card--fact-icons-xlarge'
+				: 'vvm-card-grid__card--fact-icons-large';
+		}
+
+		if ( $uses_gold_fact_labels ) {
+			$card_classes[] = 'vvm-card-grid__card--fact-labels-gold';
+		}
+
+		if ( $uses_large_fact_labels ) {
+			$card_classes[] = 'vvm-card-grid__card--fact-labels-large';
+		}
 	}
 
 	ob_start();
@@ -2459,9 +2505,13 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 
 			<?php if ( ! empty( $villa_data['cta']['url'] ) && ! empty( $villa_data['cta']['label'] ) ) : ?>
 				<div class="wp-block-buttons<?php echo '' !== $args['enquiry_url'] ? ' vvm-card-grid__card-actions' : ''; ?>">
-					<div class="wp-block-button <?php echo 'collection' === $args['presentation'] ? 'is-style-vvm-link-primary' : 'is-style-vvm-ghost'; ?>">
+					<div class="wp-block-button <?php echo esc_attr(
+						'collection' === $args['presentation']
+							? ( $uses_outline_explore_cta ? 'is-style-outline' : 'is-style-vvm-link-primary' )
+							: 'is-style-vvm-ghost'
+					); ?>">
 						<a
-							class="wp-block-button__link wp-element-button"
+						class="wp-block-button__link wp-element-button<?php echo $uses_outline_explore_cta ? ' has-dark-green-color has-text-color has-background has-border-color' : ''; ?>"
 							href="<?php echo esc_url( $villa_data['cta']['url'] ); ?>"
 							aria-label="<?php echo esc_attr( sprintf(
 								/* translators: 1: CTA label, 2: villa title. */
