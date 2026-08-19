@@ -69,11 +69,9 @@
 ) :is(.wp-block-button__link, .wp-element-button) {
 	overflow: visible;
 	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
-	will-change: transform, box-shadow;
-	transition:
-		box-shadow 320ms ease,
-		color 240ms ease,
-		transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+	/* The pseudo-elements animate the button surface; the text stays still. */
+	will-change: auto;
+	transition: color 240ms ease;
 }
 
 /* Keep the hover growth visual so nearby layout never reflows. */
@@ -93,8 +91,10 @@
 	z-index: -1;
 	transform: scale(1);
 	transform-origin: center;
-	will-change: transform, opacity;
+	box-shadow: none;
+	will-change: transform, opacity, box-shadow;
 	transition:
+		box-shadow 320ms ease,
 		opacity 320ms ease,
 		transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -128,8 +128,8 @@
 	.wp-block-button.is-style-vvm-primary
 ) :is(.wp-block-button__link, .wp-element-button):focus-visible {
 	color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
-	transform: translateZ(0) scale(1.03);
-	box-shadow: 0 0 40px rgb(196 146 42 / 0.4);
+	transform: none;
+	box-shadow: none;
 }
 
 :where(
@@ -143,6 +143,7 @@
 	.wp-block-button.is-style-vvm-primary
 ) :is(.wp-block-button__link, .wp-element-button):focus-visible::before {
 	opacity: 0;
+	transform: translateZ(0) scale(1.03);
 }
 
 :where(
@@ -156,6 +157,8 @@
 	.wp-block-button.is-style-vvm-primary
 ) :is(.wp-block-button__link, .wp-element-button):focus-visible::after {
 	opacity: 1;
+	transform: translateZ(0) scale(1.03);
+	box-shadow: 0 0 40px rgb(196 146 42 / 0.4);
 }
 
 :where(
@@ -163,8 +166,17 @@
 	.wp-block-button.is-style-fill,
 	.wp-block-button.is-style-vvm-primary
 ) :is(.wp-block-button__link, .wp-element-button):active {
+	transform: none;
+	box-shadow: none;
+}
+
+:where(
+	.wp-block-button:not([class*="is-style-"]),
+	.wp-block-button.is-style-fill,
+	.wp-block-button.is-style-vvm-primary
+) :is(.wp-block-button__link, .wp-element-button):active::before {
+	opacity: 0;
 	transform: translateZ(0) scale(1.01);
-	box-shadow: 0 0 24px rgb(196 146 42 / 0.28);
 }
 
 :where(
@@ -173,6 +185,8 @@
 	.wp-block-button.is-style-vvm-primary
 ) :is(.wp-block-button__link, .wp-element-button):active::after {
 	opacity: 1;
+	transform: translateZ(0) scale(1.01);
+	box-shadow: 0 0 24px rgb(196 146 42 / 0.28);
 }
 
 .wp-block-button.is-style-vvm-secondary :is(.wp-block-button__link, .wp-element-button) {

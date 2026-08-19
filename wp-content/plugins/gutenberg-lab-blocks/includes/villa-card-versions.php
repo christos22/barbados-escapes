@@ -30,8 +30,8 @@ function gutenberg_lab_blocks_get_villa_card_versions() {
 		'eight'  => 'inline_gold_all_xl',
 		'nine'   => 'inline_gold_icons_lg_text',
 		'ten'    => 'inline_gold_icons_xl_text',
-		'eleven' => 'inline_green_icons_lg_romely_numbers',
-		'twelve' => 'inline_green_icons_xl_romely_numbers',
+		'eleven' => 'inline_green_icons_lg',
+		'twelve' => 'inline_green_icons_xl',
 	);
 }
 

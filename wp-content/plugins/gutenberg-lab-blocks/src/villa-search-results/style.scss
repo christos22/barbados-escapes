@@ -265,6 +265,14 @@
 		white-space: nowrap;
 	}
 
+	// TT Norms' visible glyphs sit slightly high inside their line box. Apply a
+	// small optical correction so amenity labels align with the SVG centres.
+	.vvm-card-grid__card--facts-inline-layout
+	.vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price)
+	.vvm-card-grid__card-fact-label {
+		transform: translateY(1px);
+	}
+
 	.vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-fact--price {
 		display: inline-flex;
 		align-items: baseline;
@@ -274,6 +282,7 @@
 	}
 
 	.vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-fact--price .vvm-card-grid__card-fact-label {
+		font-family: var(--wp--preset--font-family--display-serif, "Romely", Georgia, serif);
 		font-weight: inherit;
 	}
 
@@ -316,7 +325,7 @@
 	// inherits this detail because it is the green-icon clone of Version 6.
 	.vvm-card-grid__card--facts-inline_gold_icons_xl
 	.vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price),
-	.vvm-card-grid__card--facts-inline_green_icons_xl_romely_numbers
+	.vvm-card-grid__card--facts-inline_green_icons_xl
 	.vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) {
 		gap: 0.35em;
 	}
@@ -327,12 +336,6 @@
 
 	.vvm-card-grid__card--fact-labels-large .vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) .vvm-card-grid__card-fact-label {
 		font-size: clamp(0.82rem, 1.1vw, 0.95rem);
-	}
-
-	// Version 11 highlights only the numeric value in Romely Display while
-	// retaining TT Norms for the descriptive words around it.
-	.vvm-card-grid__card--fact-numbers-romely .vvm-card-grid__card-fact-number {
-		font-family: var(--wp--preset--font-family--display-serif, "Romely", Georgia, serif);
 	}
 
 	// These outline buttons are rendered dynamically, so WordPress does not
@@ -402,7 +405,9 @@
 	.vvm-card-grid__card-actions
 	.wp-block-button.vvm-card-grid__explore-cta--glow-only
 	:is(.wp-block-button__link, .wp-element-button):is(:hover, :focus-visible)::before {
-		box-shadow: 0 0 40px rgb(196 146 42 / 0.4);
+		// The pale outline surface makes its glow read more strongly than the
+		// filled Enquire CTA, so use a softer halo for comparable visual weight.
+		box-shadow: 0 0 24px rgb(196 146 42 / 0.28);
 		transform: translateZ(0) scale(1.03);
 	}
 
