@@ -2288,10 +2288,12 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		'inline_gold_icons_xl_text',
 		'inline_green_icons_lg',
 		'inline_green_icons_xl',
+		'inline_green_icons_xl_gold_rule_sans_price',
 	);
 	$green_fact_styles = array(
 		'inline_green_icons_lg',
 		'inline_green_icons_xl',
+		'inline_green_icons_xl_gold_rule_sans_price',
 	);
 	$is_inline_fact_style = in_array(
 		$fact_style,
@@ -2304,9 +2306,16 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		&& in_array( $fact_style, $new_comparison_fact_styles, true );
 	$uses_xlarge_fact_icons = in_array(
 		$fact_style,
-		array( 'inline_gold_icons_xl', 'inline_gold_all_xl', 'inline_gold_icons_xl_text', 'inline_green_icons_xl' ),
+		array(
+			'inline_gold_icons_xl',
+			'inline_gold_all_xl',
+			'inline_gold_icons_xl_text',
+			'inline_green_icons_xl',
+			'inline_green_icons_xl_gold_rule_sans_price',
+		),
 		true
 	);
+	$is_version_thirteen = 'inline_green_icons_xl_gold_rule_sans_price' === $fact_style;
 	$uses_gold_fact_labels = in_array( $fact_style, array( 'inline_gold_all_lg', 'inline_gold_all_xl' ), true );
 	$uses_large_fact_labels = in_array(
 		$fact_style,
@@ -2430,6 +2439,11 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 
 		if ( $uses_large_fact_labels ) {
 			$card_classes[] = 'vvm-card-grid__card--fact-labels-large';
+		}
+
+		if ( $is_version_thirteen ) {
+			$card_classes[] = 'vvm-card-grid__card--fact-rules-muted-gold';
+			$card_classes[] = 'vvm-card-grid__card--price-tt-norms';
 		}
 
 	}

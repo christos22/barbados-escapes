@@ -326,6 +326,8 @@
 	.vvm-card-grid__card--facts-inline_gold_icons_xl
 	.vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price),
 	.vvm-card-grid__card--facts-inline_green_icons_xl
+	.vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price),
+	.vvm-card-grid__card--facts-inline_green_icons_xl_gold_rule_sans_price
 	.vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) {
 		gap: 0.35em;
 	}
@@ -336,6 +338,20 @@
 
 	.vvm-card-grid__card--fact-labels-large .vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price) .vvm-card-grid__card-fact-label {
 		font-size: clamp(0.82rem, 1.1vw, 0.95rem);
+	}
+
+	// Version 13 clones Version 12 but softens the facts strip with a muted
+	// brand-gold rule. The colour remains deliberately subtle against white.
+	.vvm-card-grid__card--fact-rules-muted-gold .vvm-card-grid__card-facts--icons {
+		border-block-color: rgba(196, 146, 42, 0.28);
+	}
+
+	// Version 13 keeps the price hierarchy while using TT Norms instead of the
+	// display serif. The suffix already inherits the same sans-serif family.
+	.vvm-card-grid__card--price-tt-norms
+	.vvm-card-grid__card-fact--price
+	.vvm-card-grid__card-fact-label {
+		font-family: var(--wp--preset--font-family--refined-sans, "TT Norms", system-ui, sans-serif);
 	}
 
 	// These outline buttons are rendered dynamically, so WordPress does not
