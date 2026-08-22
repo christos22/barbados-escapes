@@ -120,7 +120,7 @@ function gutenberg_lab_blocks_get_villa_search_results_url() {
 }
 
 /**
- * Redirects the short comparison URL to version one while preserving filters.
+ * Redirects the main villas URL to the approved card version while preserving filters.
  */
 function gutenberg_lab_blocks_redirect_villa_card_version_index() {
 	$version      = sanitize_key( (string) get_query_var( 'vvm_villa_card_version' ) );
@@ -137,7 +137,7 @@ function gutenberg_lab_blocks_redirect_villa_card_version_index() {
 		return;
 	}
 
-	$destination = gutenberg_lab_blocks_get_villa_card_version_url( 'one' );
+	$destination = gutenberg_lab_blocks_get_villa_card_version_url( 'six' );
 
 	if ( function_exists( 'gutenberg_lab_blocks_get_villa_search_request' ) ) {
 		$destination = add_query_arg(
