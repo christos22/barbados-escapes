@@ -7,8 +7,6 @@
  *   wp eval-file tools/villa-search/seed-phase-1.php apply
  *
  * The default run is read-only. Pass `apply` only after reviewing its report.
- * This script intentionally leaves Landfall's guest capacity unchanged until
- * the client confirms whether the approved value is 12 or 14.
  *
  * @package GutenbergLabBlocks
  */
@@ -36,7 +34,7 @@ $approved_villas = array(
 	),
 	'landfall-house'    => array(
 		'bedrooms'    => 6,
-		'sleeps'      => null,
+		'sleeps'      => 14,
 		'location'    => 'Sandy Lane',
 		'collections' => array( 'Beachfront Villas', 'Wedding Villas', 'Family Villas', 'Villas with Pools', 'Fully Staffed Villas' ),
 	),
@@ -192,7 +190,7 @@ foreach ( $approved_villas as $slug => $approved ) {
 		'ID'          => $villa->ID,
 		'Villa'       => $villa->post_title,
 		'Bedrooms'    => $approved['bedrooms'],
-		'Guests'      => null === $approved['sleeps'] ? 'UNCHANGED' : $approved['sleeps'],
+		'Guests'      => $approved['sleeps'],
 		'Price'       => '$' . number_format_i18n( $starting_price ),
 		'Area'        => $approved['location'],
 		'Collections' => count( $approved['collections'] ),
@@ -219,7 +217,6 @@ if ( count( $validated ) !== count( $approved_villas ) ) {
 }
 
 if ( ! $apply ) {
-	WP_CLI::log( 'Preview only. Landfall guest capacity will remain unchanged.' );
 	WP_CLI::log( 'Re-run with the positional argument `apply` to write the validated values.' );
 	return;
 }
@@ -229,10 +226,7 @@ foreach ( $validated as $villa_id => $approved ) {
 	update_post_meta( $villa_id, 'villa_search_starting_price_usd', $approved['price'] );
 	update_post_meta( $villa_id, 'villa_search_guest_age_policy', 'all_ages' );
 
-	// The user explicitly asked us not to populate Landfall's guest value yet.
-	if ( null !== $approved['sleeps'] ) {
-		update_post_meta( $villa_id, 'villa_search_sleeps', $approved['sleeps'] );
-	}
+	update_post_meta( $villa_id, 'villa_search_sleeps', $approved['sleeps'] );
 
 	$location_id = gutenberg_lab_blocks_seed_search_term( 'villa_location', $approved['location'], true );
 
@@ -250,4 +244,4 @@ foreach ( $validated as $villa_id => $approved ) {
 	wp_set_object_terms( $villa_id, array_filter( $collection_ids ), 'villa_collection', false );
 }
 
-WP_CLI::success( 'Applied approved search data to 13 villas. Landfall guest capacity was left unchanged.' );
+WP_CLI::success( 'Applied approved search data to 13 villas.' );
