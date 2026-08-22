@@ -50,9 +50,10 @@ function gutenberg_lab_blocks_sanitize_villa_card_style( $value ) {
 }
 
 /**
- * Returns the card style fixed to the current comparison URL.
+ * Returns the approved default card style or the current comparison style.
  *
- * The selected version comes from the dedicated `/villas/version-*` route.
+ * `/villas/` uses version six. A dedicated `/villas/version-*` route can
+ * override that presentation so the remaining references stay available.
  *
  * @return string
  */
@@ -60,7 +61,7 @@ function gutenberg_lab_blocks_get_villa_card_style() {
 	$version  = sanitize_key( (string) get_query_var( 'vvm_villa_card_version' ) );
 	$versions = gutenberg_lab_blocks_get_villa_card_versions();
 
-	return isset( $versions[ $version ] ) ? $versions[ $version ] : 'separate';
+	return isset( $versions[ $version ] ) ? $versions[ $version ] : $versions['six'];
 }
 
 /**
@@ -118,40 +119,6 @@ function gutenberg_lab_blocks_get_villa_search_results_url() {
 
 	return is_string( $archive_url ) ? $archive_url : '';
 }
-
-/**
- * Redirects the main villas URL to the approved card version while preserving filters.
- */
-function gutenberg_lab_blocks_redirect_villa_card_version_index() {
-	$version      = sanitize_key( (string) get_query_var( 'vvm_villa_card_version' ) );
-	$request_path = isset( $_SERVER['REQUEST_URI'] )
-		? wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH )
-		: '';
-	$index_path   = wp_parse_url( home_url( user_trailingslashit( 'villas' ) ), PHP_URL_PATH );
-
-	if (
-		'' !== $version
-		|| ! is_post_type_archive( 'villa' )
-		|| untrailingslashit( (string) $request_path ) !== untrailingslashit( (string) $index_path )
-	) {
-		return;
-	}
-
-	$destination = gutenberg_lab_blocks_get_villa_card_version_url( 'six' );
-
-	if ( function_exists( 'gutenberg_lab_blocks_get_villa_search_request' ) ) {
-		$destination = add_query_arg(
-			gutenberg_lab_blocks_get_villa_search_url_args(
-				gutenberg_lab_blocks_get_villa_search_request()
-			),
-			$destination
-		);
-	}
-
-	wp_safe_redirect( $destination, 302, 'Gutenberg Lab Blocks' );
-	exit;
-}
-add_action( 'template_redirect', 'gutenberg_lab_blocks_redirect_villa_card_version_index', 5 );
 
 /**
  * Prevents WordPress from canonicalizing comparison URLs back to `/villas/`.
