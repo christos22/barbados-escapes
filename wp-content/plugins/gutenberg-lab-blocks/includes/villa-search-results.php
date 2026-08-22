@@ -824,6 +824,7 @@ function gutenberg_lab_blocks_render_villa_search_pagination( $current, $pages, 
  */
 function gutenberg_lab_blocks_serve_villa_search_fragment() {
 	if (
+		! gutenberg_lab_blocks_is_villa_search_public_enabled() ||
 		! is_post_type_archive( 'villa' ) ||
 		! isset( $_GET['villa_results_fragment'] ) ||
 		! is_scalar( $_GET['villa_results_fragment'] ) ||
@@ -856,6 +857,10 @@ add_action( 'template_redirect', 'gutenberg_lab_blocks_serve_villa_search_fragme
  * @return string
  */
 function gutenberg_lab_blocks_render_villa_search_results_markup( $wrapper_attributes = '' ) {
+	if ( ! gutenberg_lab_blocks_should_render_villa_search() ) {
+		return '';
+	}
+
 	$request       = gutenberg_lab_blocks_get_villa_search_request();
 	$results       = gutenberg_lab_blocks_get_villa_search_results( $request );
 	$filter_labels = gutenberg_lab_blocks_get_villa_search_filter_labels( $request );

@@ -2664,6 +2664,10 @@ function gutenberg_lab_blocks_render_villa_carousel_slide( $villa_id ) {
  * @return string
  */
 function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = array(), $wrapper_attributes = '' ) {
+	if ( ! gutenberg_lab_blocks_should_render_villa_search() ) {
+		return '';
+	}
+
 	$button_label = isset( $attributes['buttonLabel'] ) && is_string( $attributes['buttonLabel'] )
 		? sanitize_text_field( $attributes['buttonLabel'] )
 		: __( 'Search', 'gutenberg-lab-blocks' );

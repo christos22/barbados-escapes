@@ -22,6 +22,7 @@ require_once __DIR__ . '/includes/packages.php';
 require_once __DIR__ . '/includes/package-rendering.php';
 require_once __DIR__ . '/includes/peeking-carousel.php';
 require_once __DIR__ . '/includes/site-messages.php';
+require_once __DIR__ . '/includes/villa-search-launch.php';
 require_once __DIR__ . '/includes/villa-card-versions.php';
 require_once __DIR__ . '/includes/villas.php';
 require_once __DIR__ . '/includes/villa-bedroom-selector.php';
