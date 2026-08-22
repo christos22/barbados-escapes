@@ -1,12 +1,14 @@
 <?php
 /**
- * Seed the approved Phase 1 villa search data.
+ * Import the client-approved Phase 1 villa search data.
  *
  * Usage:
  *   wp eval-file tools/villa-search/seed-phase-1.php
  *   wp eval-file tools/villa-search/seed-phase-1.php apply
  *
  * The default run is read-only. Pass `apply` only after reviewing its report.
+ * This script intentionally leaves Landfall's guest capacity unchanged until
+ * the client confirms whether the approved value is 12 or 14.
  *
  * @package GutenbergLabBlocks
  */
@@ -17,132 +19,119 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $apply = isset( $args[0] ) && 'apply' === $args[0];
 
-// Values below are transcribed from the supplied Phase 1 workbook. For villas
-// with selectable capacities, search uses the maximum supported value.
+// Values are transcribed from the approved client workbook. Prices are not
+// duplicated here: each price is read from the villa specs ribbon below.
 $approved_villas = array(
-	'monkey-hill'    => array(
+	'monkey-hill'       => array(
 		'bedrooms'   => 8,
 		'sleeps'     => 16,
 		'location'   => 'Sugar Hill Villas',
-		'collections' => array(
-			'Wedding Villas',
-			'Family Villas',
-			'Villas with Pools',
-			'Ridgefront Villas',
-			'Villas with Community Gym',
-		),
+		'collections' => array( 'Wedding Villas', 'Family Villas', 'Villas with Pools', 'Ridgefront Villas', 'Villas with Community Gym' ),
 	),
-	'ocean-heights'  => array(
+	'ocean-heights'     => array(
 		'bedrooms'   => 7,
 		'sleeps'     => 12,
 		'location'   => 'Prospect',
-		'collections' => array(
-			'Family Villas',
-			'Beachfront Villas',
-		),
+		'collections' => array( 'Family Villas', 'Beachfront Villas' ),
 	),
-	'landfall-house' => array(
-		'bedrooms'      => 6,
-		'sleeps'        => 14,
-		'starting_price' => 5150,
-		'location'      => 'Sandy Lane Villas',
-		'collections'   => array(
-			'Beachfront Villas',
-			'Wedding Villas',
-			'Family Villas',
-			'Villas with Pools',
-			'Fully Staffed Villas',
-		),
+	'landfall-house'    => array(
+		'bedrooms'    => 6,
+		'sleeps'      => null,
+		'location'    => 'Sandy Lane',
+		'collections' => array( 'Beachfront Villas', 'Wedding Villas', 'Family Villas', 'Villas with Pools', 'Fully Staffed Villas' ),
 	),
-	'tara-house'      => array(
-		'bedrooms'   => 4,
-		'sleeps'     => 8,
-		'location'   => 'Speightstown',
-		'collections' => array(
-			'Family Villas',
-			'Villas with Pools',
-			'Villas with Private Gym / Gym Equipment',
-			'Ridgefront Villas',
-			'Fully Staffed Villas',
-		),
+	'tara-house'        => array(
+		'bedrooms'    => 4,
+		'sleeps'      => 8,
+		'location'    => 'Speightstown',
+		'collections' => array( 'Family Villas', 'Villas with Pools', 'Villas with Private Gym / Gym Equipment', 'Ridgefront Villas', 'Fully Staffed Villas' ),
 	),
-	'point-of-view'   => array(
-		'bedrooms'   => 5,
-		'sleeps'     => 10,
-		'location'   => 'Sandy Lane Villas',
-		'collections' => array(
-			'Family Villas',
-			'Villas with Pools',
-			'Ridgefront Villas',
-			'Fully Staffed Villas',
-		),
+	'point-of-view'     => array(
+		'bedrooms'    => 5,
+		'sleeps'      => 10,
+		'location'    => 'Sandy Lane',
+		'collections' => array( 'Family Villas', 'Villas with Pools', 'Ridgefront Villas', 'Fully Staffed Villas', 'Villas with Beach Club Access' ),
 	),
-	'benjoli-breeze'  => array(
-		'bedrooms'   => 5,
-		'sleeps'     => 10,
-		'location'   => 'Royal Westmoreland Villas',
-		'collections' => array(
-			'Family Villas',
-			'Villas with Pools',
-			'Golf Resort Villas',
-			'Fully Staffed Villas',
-			'Villas with Community Gym',
-		),
+	'benjoli-breeze'    => array(
+		'bedrooms'    => 5,
+		'sleeps'      => 10,
+		'location'    => 'Royal Westmoreland',
+		'collections' => array( 'Family Villas', 'Villas with Pools', 'Golf Resort Villas', 'Fully Staffed Villas', 'Villas with Community Gym', 'Villas with Beach Club Access' ),
 	),
-	'bananaquit'      => array(
-		'bedrooms'   => 5,
-		'sleeps'     => 10,
-		'location'   => 'Sugar Hill Villas',
-		'collections' => array(
-			'Family Villas',
-			'Villas with Pools',
-			'Villas with Community Gym',
-		),
+	'bananaquit'        => array(
+		'bedrooms'    => 5,
+		'sleeps'      => 10,
+		'location'    => 'Sugar Hill Villas',
+		'collections' => array( 'Family Villas', 'Villas with Pools', 'Villas with Community Gym' ),
 	),
-	'happy-trees'     => array(
-		'bedrooms'   => 4,
-		'sleeps'     => 8,
-		'location'   => 'Sandy Lane Villas',
-		'collections' => array(
-			'Family Villas',
-			'Villas with Pools',
-			'Fully Staffed Villas',
-		),
+	'happy-trees'       => array(
+		'bedrooms'    => 4,
+		'sleeps'      => 8,
+		'location'    => 'Sandy Lane',
+		'collections' => array( 'Family Villas', 'Villas with Pools', 'Fully Staffed Villas', 'Villas with Beach Club Access' ),
 	),
-	'ixora'           => array(
-		'bedrooms'   => 4,
-		'sleeps'     => 8,
-		'location'   => 'Royal Westmoreland Villas',
-		'collections' => array(
-			'Family Villas',
-			'Villas with Pools',
-			'Golf Resort Villas',
-			'Fully Staffed Villas',
-			'Villas with Community Gym',
-		),
+	'ixora'             => array(
+		'bedrooms'    => 4,
+		'sleeps'      => 8,
+		'location'    => 'Royal Westmoreland',
+		'collections' => array( 'Family Villas', 'Villas with Pools', 'Golf Resort Villas', 'Fully Staffed Villas', 'Villas with Community Gym', 'Villas with Beach Club Access' ),
+	),
+	'wild-cane-ridge-2' => array(
+		'bedrooms'    => 6,
+		'sleeps'      => 12,
+		'location'    => 'Royal Westmoreland',
+		'collections' => array( 'Family Villas', 'Villas with Pools', 'Golf Resort Villas', 'Fully Staffed Villas', 'Villas with Community Gym', 'Villas with Beach Club Access' ),
+	),
+	'cool-wind'         => array(
+		'bedrooms'    => 6,
+		'sleeps'      => 13,
+		'location'    => 'Westland Heights',
+		'collections' => array( 'Family Villas', 'Villas with Pools', 'Fully Staffed Villas', 'Villas with Private Gym / Gym Equipment', 'Villas with Beach Club Access' ),
+	),
+	'dene-court'        => array(
+		'bedrooms'    => 5,
+		'sleeps'      => 10,
+		'location'    => 'Sandy Lane',
+		'collections' => array( 'Family Villas', 'Villas with Pools', 'Fully Staffed Villas', 'Villas with Beach Club Access' ),
+	),
+	'sandalwood-house'  => array(
+		'bedrooms'    => 6,
+		'sleeps'      => 12,
+		'location'    => 'Sandy Lane',
+		'collections' => array( 'Family Villas', 'Villas with Pools', 'Fully Staffed Villas', 'Villas with Beach Club Access' ),
 	),
 );
 
 /**
- * Reads one exact whole number from saved card copy.
+ * Read the starting price from the saved villa specs ribbon.
  *
- * This is a guarded one-time fallback for villas that predate the workbook. It
- * never derives values from prose unless the expected label is an exact match.
+ * Only an exact `vvm-villa-specs__label` beginning with "From $" is accepted,
+ * so unrelated prices elsewhere in the post cannot enter the search index.
  *
- * @param string $value   Saved card meta.
- * @param string $pattern Strict numeric pattern.
+ * @param int $villa_id Villa post ID.
  * @return int
  */
-function gutenberg_lab_blocks_seed_search_read_number( $value, $pattern ) {
-	if ( ! preg_match( $pattern, $value, $matches ) ) {
+function gutenberg_lab_blocks_seed_search_specs_price( $villa_id ) {
+	$content = (string) get_post_field( 'post_content', $villa_id );
+	$pattern = '/<(?:p|span)\b[^>]*class=(["\'])[^"\']*\bvvm-villa-specs__label\b[^"\']*\1[^>]*>(.*?)<\/(?:p|span)>/is';
+
+	if ( ! preg_match_all( $pattern, $content, $matches ) ) {
 		return 0;
 	}
 
-	return absint( str_replace( ',', '', $matches[1] ) );
+	foreach ( $matches[2] as $raw_label ) {
+		$label = trim( html_entity_decode( wp_strip_all_tags( $raw_label ), ENT_QUOTES, 'UTF-8' ) );
+
+		if ( preg_match( '/^From\s+\$([0-9][0-9,]*)\s*(?:\/\s*Night)?$/i', $label, $price_match ) ) {
+			return absint( str_replace( ',', '', $price_match[1] ) );
+		}
+	}
+
+	return 0;
 }
 
 /**
- * Ensures an approved filter term exists and is visible in public search.
+ * Resolve or create one approved search term, then make it publicly searchable.
  *
  * @param string $taxonomy Target taxonomy.
  * @param string $name     Approved term label.
@@ -162,8 +151,7 @@ function gutenberg_lab_blocks_seed_search_term( $taxonomy, $name, $apply ) {
 		$created = wp_insert_term( $name, $taxonomy );
 
 		if ( is_wp_error( $created ) ) {
-			WP_CLI::warning( $created->get_error_message() );
-			return 0;
+			WP_CLI::error( $created->get_error_message() );
 		}
 
 		$term_id = absint( $created['term_id'] );
@@ -176,109 +164,90 @@ function gutenberg_lab_blocks_seed_search_term( $taxonomy, $name, $apply ) {
 	return $term_id;
 }
 
-$villa_ids = get_posts(
-	array(
-		'post_type'      => 'villa',
-		'post_status'    => 'publish',
-		'posts_per_page' => -1,
-		'fields'         => 'ids',
-	)
-);
-$rows      = array();
+$rows       = array();
+$validated  = array();
+$validation_errors = array();
 
-foreach ( $villa_ids as $villa_id ) {
-	$slug          = get_post_field( 'post_name', $villa_id );
-	$approved      = $approved_villas[ $slug ] ?? array();
-	$card_facts    = (string) get_post_meta( $villa_id, 'villa_card_facts', true );
-	$card_price    = (string) get_post_meta( $villa_id, 'villa_card_price', true );
-	$bedrooms      = absint( $approved['bedrooms'] ?? 0 );
-	$sleeps        = absint( $approved['sleeps'] ?? 0 );
-	$starting_price = absint( $approved['starting_price'] ?? 0 );
+// Validate every villa and price before performing the first write.
+foreach ( $approved_villas as $slug => $approved ) {
+	$villa = get_page_by_path( $slug, OBJECT, 'villa' );
 
-	// Dene Court, Cool Wind and Sandalwood House are not in the workbook.
-	// Their existing structured card labels provide exact guarded fallbacks.
-	if ( ! $bedrooms ) {
-		$bedrooms = gutenberg_lab_blocks_seed_search_read_number(
-			$card_facts,
-			'/\b([0-9]+)\s+Bedrooms?\b/i'
-		);
+	if ( ! $villa || 'publish' !== $villa->post_status ) {
+		$validation_errors[] = sprintf( 'Published villa not found for slug: %s', $slug );
+		continue;
 	}
 
-	if ( ! $sleeps ) {
-		$sleeps = gutenberg_lab_blocks_seed_search_read_number(
-			$card_facts,
-			'/\bSleeps\s+([0-9]+)\b/i'
-		);
-	}
+	$starting_price = gutenberg_lab_blocks_seed_search_specs_price( $villa->ID );
 
 	if ( ! $starting_price ) {
-		$starting_price = gutenberg_lab_blocks_seed_search_read_number(
-			$card_price,
-			'/\bFrom\s+\$([0-9][0-9,]*)/i'
-		);
+		$validation_errors[] = sprintf( 'No exact specs-ribbon price found for %s (%s).', $villa->post_title, $slug );
+		continue;
 	}
+
+	$approved['collections'] = array_values( array_unique( $approved['collections'] ) );
+	$approved['price']       = $starting_price;
+	$validated[ $villa->ID ] = $approved;
 
 	$rows[] = array(
-		'ID'       => $villa_id,
-		'Villa'    => get_the_title( $villa_id ),
-		'Bedrooms' => $bedrooms ?: 'MISSING',
-		'Sleeps'   => $sleeps ?: 'MISSING',
-		'Price'    => $starting_price ?: 'MISSING',
-		'Area'     => $approved['location'] ?? 'Not supplied',
-		'Source'   => $approved ? 'Workbook + saved card price' : 'Saved card fields',
+		'ID'          => $villa->ID,
+		'Villa'       => $villa->post_title,
+		'Bedrooms'    => $approved['bedrooms'],
+		'Guests'      => null === $approved['sleeps'] ? 'UNCHANGED' : $approved['sleeps'],
+		'Price'       => '$' . number_format_i18n( $starting_price ),
+		'Area'        => $approved['location'],
+		'Collections' => count( $approved['collections'] ),
+		'Age policy'  => 'All ages',
 	);
-
-	if ( ! $apply ) {
-		continue;
-	}
-
-	foreach (
-		array(
-			'villa_search_bedrooms'          => $bedrooms,
-			'villa_search_sleeps'            => $sleeps,
-			'villa_search_starting_price_usd' => $starting_price,
-		) as $meta_key => $meta_value
-	) {
-		if ( $meta_value ) {
-			update_post_meta( $villa_id, $meta_key, $meta_value );
-		}
-	}
-
-	if ( empty( $approved ) ) {
-		continue;
-	}
-
-	$location_id = gutenberg_lab_blocks_seed_search_term(
-		'villa_location',
-		$approved['location'],
-		true
-	);
-
-	if ( $location_id ) {
-		wp_set_object_terms( $villa_id, array( $location_id ), 'villa_location', true );
-	}
-
-	foreach ( $approved['collections'] as $collection_name ) {
-		$collection_id = gutenberg_lab_blocks_seed_search_term(
-			'villa_collection',
-			$collection_name,
-			true
-		);
-
-		if ( $collection_id ) {
-			wp_set_object_terms( $villa_id, array( $collection_id ), 'villa_collection', true );
-		}
-	}
 }
 
 WP_CLI\Utils\format_items(
 	'table',
 	$rows,
-	array( 'ID', 'Villa', 'Bedrooms', 'Sleeps', 'Price', 'Area', 'Source' )
+	array( 'ID', 'Villa', 'Bedrooms', 'Guests', 'Price', 'Area', 'Collections', 'Age policy' )
 );
 
-if ( $apply ) {
-	WP_CLI::success( 'Applied Phase 1 villa search data.' );
-} else {
-	WP_CLI::log( 'Preview only. Re-run with the positional argument `apply` to write these values.' );
+if ( $validation_errors ) {
+	foreach ( $validation_errors as $validation_error ) {
+		WP_CLI::warning( $validation_error );
+	}
+
+	WP_CLI::error( 'Validation failed. No production content was changed.' );
 }
+
+if ( count( $validated ) !== count( $approved_villas ) ) {
+	WP_CLI::error( 'The validated villa count does not match the approved workbook count.' );
+}
+
+if ( ! $apply ) {
+	WP_CLI::log( 'Preview only. Landfall guest capacity will remain unchanged.' );
+	WP_CLI::log( 'Re-run with the positional argument `apply` to write the validated values.' );
+	return;
+}
+
+foreach ( $validated as $villa_id => $approved ) {
+	update_post_meta( $villa_id, 'villa_search_bedrooms', $approved['bedrooms'] );
+	update_post_meta( $villa_id, 'villa_search_starting_price_usd', $approved['price'] );
+	update_post_meta( $villa_id, 'villa_search_guest_age_policy', 'all_ages' );
+
+	// The user explicitly asked us not to populate Landfall's guest value yet.
+	if ( null !== $approved['sleeps'] ) {
+		update_post_meta( $villa_id, 'villa_search_sleeps', $approved['sleeps'] );
+	}
+
+	$location_id = gutenberg_lab_blocks_seed_search_term( 'villa_location', $approved['location'], true );
+
+	// Keep parish/location context already attached to each villa and append the
+	// search-specific area instead of replacing useful editorial taxonomy data.
+	wp_set_object_terms( $villa_id, array( $location_id ), 'villa_location', true );
+
+	$collection_ids = array();
+	foreach ( $approved['collections'] as $collection_name ) {
+		$collection_ids[] = gutenberg_lab_blocks_seed_search_term( 'villa_collection', $collection_name, true );
+	}
+
+	// Collections come entirely from the approved workbook, so replace any old
+	// dummy assignments rather than silently retaining stale search matches.
+	wp_set_object_terms( $villa_id, array_filter( $collection_ids ), 'villa_collection', false );
+}
+
+WP_CLI::success( 'Applied approved search data to 13 villas. Landfall guest capacity was left unchanged.' );
