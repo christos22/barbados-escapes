@@ -2801,7 +2801,9 @@ body.admin-bar {
 	justify-items: center;
 }
 
-.vvm-header:not(.is-scrolled) .wp-block-site-logo {
+body.vvm-has-hero-header
+	.vvm-header:not(.is-scrolled)
+	.wp-block-site-logo {
 	margin: 0.5rem 0;
 }
 
@@ -2925,32 +2927,31 @@ body.vvm-has-hero-header .vvm-header {
 	box-shadow: var(--vvm-header-shadow);
 }
 
-.vvm-header.is-scrolled {
+/*
+ * Static/no-hero pages use the exact same compact visual state as a hero
+ * header after it becomes fixed. The static header deliberately remains in
+ * normal document flow; only its dimensions, spacing, colors and shadow are
+ * shared with the scrolled state.
+ */
+.vvm-header.is-scrolled,
+body.vvm-has-hero-header .vvm-header.is-scrolled,
+body.vvm-has-static-header .vvm-header {
 	--vvm-header-bg: var(--wp--preset--color--dark-green, #1e3d2f);
 	--vvm-header-fg: var(--wp--preset--color--light-gold, #f5ecd7);
 	--vvm-header-hover: var(--wp--preset--color--gold, #c4922a);
 	--vvm-header-shadow: 0 14px 40px rgba(13, 28, 22, 0.22);
 	--vvm-header-logo-width: 110px;
-	position: fixed;
-	top: var(--vvm-admin-bar-offset);
-	left: 0;
-	right: 0;
-	inset-inline: 0;
 	background-color: var(--vvm-header-bg);
 	backdrop-filter: none;
 	box-shadow: var(--vvm-header-shadow);
 }
 
-body.vvm-has-hero-header .vvm-header.is-scrolled {
-	--vvm-header-bg: var(--wp--preset--color--dark-green, #1e3d2f);
-	--vvm-header-fg: var(--wp--preset--color--light-gold, #f5ecd7);
-	--vvm-header-hover: var(--wp--preset--color--gold, #c4922a);
-	--vvm-header-shadow: 0 14px 40px rgba(13, 28, 22, 0.22);
-	--vvm-header-logo-width: 110px;
+.vvm-header.is-scrolled {
 	position: fixed;
-	background-color: var(--vvm-header-bg);
-	backdrop-filter: none;
-	box-shadow: var(--vvm-header-shadow);
+	top: var(--vvm-admin-bar-offset);
+	left: 0;
+	right: 0;
+	inset-inline: 0;
 }
 
 .vvm-header .wp-block-navigation__responsive-container {
@@ -3659,7 +3660,8 @@ body.vvm-has-hero-header .vvm-header.is-scrolled {
 	}
 
 	.vvm-header.is-scrolled,
-	body.vvm-has-hero-header .vvm-header.is-scrolled {
+	body.vvm-has-hero-header .vvm-header.is-scrolled,
+	body.vvm-has-static-header .vvm-header {
 		--vvm-header-logo-width: 88px;
 	}
 
