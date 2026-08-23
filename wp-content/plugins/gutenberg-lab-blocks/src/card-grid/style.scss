@@ -387,6 +387,27 @@
 		padding-top: 0.35rem;
 	}
 
+	// Collection cards can render a single Explore CTA without the search-only
+	// `card-actions` class. Keep its resting surface visible on homepage grids as
+	// well as result grids instead of relying on the core outline variation CSS.
+	.vvm-card-grid__card--villa
+		> .vvm-card-grid__card-content
+		.wp-block-button.is-style-outline
+		:is(.wp-block-button__link, .wp-element-button) {
+		background: #f4ecdb !important;
+		border: 1px solid var(--wp--preset--color--gold, #c4922a);
+		color: var(--wp--preset--color--dark-green, #1e3d2f) !important;
+	}
+
+	.vvm-card-grid__card--villa
+		> .vvm-card-grid__card-content
+		.wp-block-button.is-style-outline
+		:is(.wp-block-button__link, .wp-element-button):is(:hover, :focus-visible) {
+		background: var(--wp--preset--color--gold, #c4922a) !important;
+		border-color: var(--wp--preset--color--gold, #c4922a);
+		color: #163429 !important;
+	}
+
 	.vvm-card-grid__card--villa > .vvm-card-grid__card-content .vvm-card-grid__card-facts,
 	.vvm-card-grid__card--villa > .vvm-card-grid__card-content .vvm-card-grid__card-price {
 		color: inherit;
