@@ -23,6 +23,11 @@
 	--vvm-search-surface: rgb(255 255 255 / 0.97);
 	--vvm-search-value-font-size: 0.9rem;
 
+	// Prevent iOS Safari from applying decorative letter joins or contextual
+	// alternates to the compact labels, values and dropdown options.
+	font-feature-settings: "liga" 0, "clig" 0, "dlig" 0, "calt" 0;
+	font-variant-ligatures: none;
+
 	&__launcher {
 		display: none;
 	}
