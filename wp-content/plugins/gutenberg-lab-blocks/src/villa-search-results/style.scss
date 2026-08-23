@@ -384,8 +384,10 @@
 		// Keep the label at its original size. The primary Enquire treatment gets
 		// its sense of movement from animated surfaces, so give this outline CTA
 		// an equivalent surface rather than scaling the link and its text.
-		background: transparent !important;
-		border-color: transparent;
+		// Keep the resting surface on the real link so the border remains visible
+		// even if a browser paints the negative glow layer behind the card.
+		background: #f4ecdb !important;
+		border-color: var(--vvm-results-gold);
 		overflow: visible;
 		transform: none;
 	}
@@ -398,6 +400,7 @@
 		box-sizing: border-box;
 		content: "";
 		inset: 0;
+		opacity: 0;
 		position: absolute;
 		transform: translateZ(0) scale(1);
 		transform-origin: center;
@@ -411,8 +414,8 @@
 	.vvm-card-grid__card-actions
 	.wp-block-button.vvm-card-grid__explore-cta--glow-only
 	:is(.wp-block-button__link, .wp-element-button):is(:hover, :focus-visible) {
-		background: transparent !important;
-		border-color: transparent;
+		background: #f4ecdb !important;
+		border-color: var(--vvm-results-gold);
 		color: var(--vvm-results-green) !important;
 		box-shadow: none;
 		transform: none;
@@ -424,6 +427,7 @@
 		// The pale outline surface makes its glow read more strongly than the
 		// filled Enquire CTA, so use a softer halo for comparable visual weight.
 		box-shadow: 0 0 24px rgb(196 146 42 / 0.28);
+		opacity: 1;
 		transform: translateZ(0) scale(1.03);
 	}
 
