@@ -51,10 +51,11 @@ body {
 }
 
 /*
- * Single villa pages sit on a warmer canvas so transparent sections and block
- * gaps inherit the Barbados Escapes detail-page background instead of white.
+ * Villa pages sit on a warmer canvas so transparent sections and block gaps
+ * inherit the Barbados Escapes background instead of white.
  */
-body.single-villa {
+body.single-villa,
+body.post-type-archive-villa {
 	background: #f6f0e6;
 }
 
