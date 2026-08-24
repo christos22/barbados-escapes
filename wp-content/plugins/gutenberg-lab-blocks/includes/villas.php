@@ -2253,6 +2253,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		array(
 			'cta_label_override' => '',
 			'enquiry_url'        => '',
+			'explore_cta_style'  => 'link',
 			'fact_style'         => '',
 			'heading_level'      => 3,
 			'presentation'       => 'standard',
@@ -2342,10 +2343,17 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 		array( 'inline_gold_icons_lg_text', 'inline_gold_icons_xl_text' ),
 		true
 	);
+	$explore_cta_style = in_array(
+		$args['explore_cta_style'],
+		array( 'link', 'outline', 'outline-glow' ),
+		true
+	)
+		? $args['explore_cta_style']
+		: 'link';
 	$uses_glow_only_explore_cta = 'collection' === $args['presentation']
-		&& in_array( $fact_style, $green_fact_styles, true );
+		&& 'outline-glow' === $explore_cta_style;
 	$uses_outline_explore_cta = 'collection' === $args['presentation']
-		&& in_array( $fact_style, $new_comparison_fact_styles, true );
+		&& in_array( $explore_cta_style, array( 'outline', 'outline-glow' ), true );
 	$explore_button_class = 'is-style-vvm-ghost';
 
 	if ( 'collection' === $args['presentation'] ) {
@@ -2708,6 +2716,9 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 	$empty_filter_prompt    = $show_field_labels
 		? __( 'Select', 'gutenberg-lab-blocks' )
 		: '';
+	$date_placeholder      = $show_field_labels
+		? $empty_filter_prompt
+		: __( 'Select dates', 'gutenberg-lab-blocks' );
 	// Keep the desktop grid aligned with only the filters that can be used.
 	$visible_filter_count   = 3 + ( empty( $locations ) ? 0 : 1 ) + ( empty( $collections ) ? 0 : 1 );
 	$archive_url            = function_exists( 'gutenberg_lab_blocks_get_villa_search_results_url' )
@@ -2837,7 +2848,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 					id="<?php echo esc_attr( $date_field_id ); ?>"
 					class="vvm-villa-hero-search__control vvm-villa-hero-search__date-trigger"
 					type="text"
-					placeholder="<?php esc_attr_e( 'Select dates', 'gutenberg-lab-blocks' ); ?>"
+					placeholder="<?php echo esc_attr( $date_placeholder ); ?>"
 					value="<?php echo esc_attr( $date_display ); ?>"
 					readonly
 					hidden

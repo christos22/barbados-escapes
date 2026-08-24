@@ -657,13 +657,17 @@ add_filter(
  * @return string
  */
 function gutenberg_lab_blocks_render_villa_search_cards( $villa_ids, $request ) {
-	$card_markup = '';
+	$card_markup       = '';
+	$explore_cta_style = function_exists( 'gutenberg_lab_blocks_get_villa_card_explore_cta_style' )
+		? gutenberg_lab_blocks_get_villa_card_explore_cta_style()
+		: 'outline';
 
 	foreach ( $villa_ids as $villa_id ) {
 		$card_markup .= gutenberg_lab_blocks_render_villa_card(
 			$villa_id,
 			array(
 				'enquiry_url'      => gutenberg_lab_blocks_get_villa_search_enquiry_url( $villa_id, $request ),
+				'explore_cta_style' => $explore_cta_style,
 				'heading_level'    => 2,
 				'presentation'     => 'collection',
 				'show_description' => true,

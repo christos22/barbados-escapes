@@ -248,11 +248,8 @@
 			}
 
 			> .wp-block-gutenberg-lab-blocks-villa-hero-search {
-				// Give the hero copy room to breathe without changing the results-page search.
+				// Give the hero copy room to breathe above the shared search bar.
 				margin-top: clamp(1rem, 1.5vw, 1.5rem);
-				// Match the Young Estates desktop width, then retain comfortable
-				// viewport gutters as the screen narrows.
-				width: min(72.1875rem, calc(100vw - clamp(2rem, 4vw, 3rem)));
 				// The compact hero bar needs a slightly smaller value size so the
 				// descriptive search prompts remain on one line.
 				--vvm-search-value-font-size: 0.8rem;

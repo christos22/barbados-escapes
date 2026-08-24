@@ -65,6 +65,31 @@ function gutenberg_lab_blocks_get_villa_card_style() {
 }
 
 /**
+ * Returns the Explore CTA treatment for the active search-result version.
+ *
+ * CTA presentation is intentionally separate from the fact/icon style. This
+ * prevents a search-result experiment from changing shared villa cards used
+ * elsewhere on the site.
+ *
+ * @return string Link, outline, or outline-glow.
+ */
+function gutenberg_lab_blocks_get_villa_card_explore_cta_style() {
+	$version  = sanitize_key( (string) get_query_var( 'vvm_villa_card_version' ) );
+	$versions = gutenberg_lab_blocks_get_villa_card_versions();
+	$version  = isset( $versions[ $version ] ) ? $version : 'six';
+
+	if ( in_array( $version, array( 'eleven', 'twelve', 'thirteen' ), true ) ) {
+		return 'outline-glow';
+	}
+
+	if ( in_array( $version, array( 'five', 'six', 'seven', 'eight', 'nine', 'ten' ), true ) ) {
+		return 'outline';
+	}
+
+	return 'link';
+}
+
+/**
  * Registers the fixed comparison routes before WordPress resolves requests.
  */
 function gutenberg_lab_blocks_register_villa_card_version_rewrites() {
