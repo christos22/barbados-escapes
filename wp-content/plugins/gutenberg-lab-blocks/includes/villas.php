@@ -1719,11 +1719,11 @@ function gutenberg_lab_blocks_get_villa_collection_terms() {
 }
 
 /**
- * Returns a concise public label for Area and Collection search options.
+ * Returns a concise public label for Area search options.
  *
- * Taxonomy names and slugs remain untouched; only the dropdown copy omits the
- * repetitive word "Villas". A leading "with" is also removed when it would be
- * left behind, for example "Villas with Community Gym" becomes "Community Gym".
+ * Location taxonomy names and slugs remain untouched; only the dropdown copy
+ * omits the repetitive word "Villas". A leading "with" is also removed when it
+ * would be left behind.
  *
  * @param string $term_name Stored taxonomy term name.
  * @return string
@@ -1740,6 +1740,26 @@ function gutenberg_lab_blocks_format_villa_search_term_label( $term_name ) {
 	$label = preg_replace( '/\s+/u', ' ', trim( (string) $label ) );
 
 	return is_string( $label ) && '' !== $label ? $label : $term_name;
+}
+
+/**
+ * Returns the client-facing label for a Villa Collection search option.
+ *
+ * Collection names intentionally retain "Villas" so each option reads as a
+ * complete phrase. The Beach Club wording is reordered to stay concise within
+ * the fixed-width search field; the stored term name and slug are unchanged.
+ *
+ * @param string $term_name Stored taxonomy term name.
+ * @return string
+ */
+function gutenberg_lab_blocks_format_villa_search_collection_label( $term_name ) {
+	$term_name = trim( (string) $term_name );
+
+	if ( 0 === strcasecmp( $term_name, 'Villas with Beach Club Access' ) ) {
+		return __( 'Beach Club Access Villas', 'gutenberg-lab-blocks' );
+	}
+
+	return $term_name;
 }
 
 /**
@@ -2901,7 +2921,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 									value="<?php echo esc_attr( $collection->slug ); ?>"
 									<?php selected( $request['villa_collection'], $collection->slug ); ?>
 								>
-									<?php echo esc_html( gutenberg_lab_blocks_format_villa_search_term_label( $collection->name ) ); ?>
+									<?php echo esc_html( gutenberg_lab_blocks_format_villa_search_collection_label( $collection->name ) ); ?>
 								</option>
 							<?php endforeach; ?>
 						</select>

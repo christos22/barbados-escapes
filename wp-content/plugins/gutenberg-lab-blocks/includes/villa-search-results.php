@@ -707,7 +707,9 @@ function gutenberg_lab_blocks_get_villa_search_filter_labels( $request ) {
 		);
 
 		if ( $term ) {
-			$labels[] = $term->name;
+			$labels[] = 'villa_collection' === $taxonomy
+				? gutenberg_lab_blocks_format_villa_search_collection_label( $term->name )
+				: $term->name;
 		}
 	}
 

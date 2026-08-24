@@ -392,7 +392,7 @@
 	// well as result grids instead of relying on the core outline variation CSS.
 	.vvm-card-grid__card--villa
 		> .vvm-card-grid__card-content
-		.wp-block-button.is-style-outline
+		.wp-block-button.is-style-outline:not(.vvm-card-grid__explore-cta--glow-only)
 		:is(.wp-block-button__link, .wp-element-button) {
 		background: #f4ecdb !important;
 		border: 1px solid var(--wp--preset--color--gold, #c4922a);
@@ -401,7 +401,7 @@
 
 	.vvm-card-grid__card--villa
 		> .vvm-card-grid__card-content
-		.wp-block-button.is-style-outline
+		.wp-block-button.is-style-outline:not(.vvm-card-grid__explore-cta--glow-only)
 		:is(.wp-block-button__link, .wp-element-button):is(:hover, :focus-visible) {
 		background: var(--wp--preset--color--gold, #c4922a) !important;
 		border-color: var(--wp--preset--color--gold, #c4922a);
