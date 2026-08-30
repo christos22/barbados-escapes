@@ -2471,7 +2471,7 @@ function gutenberg_lab_blocks_render_villa_card( $villa_id, $args = array() ) {
 
 		if ( $is_version_thirteen ) {
 			$card_classes[] = 'vvm-card-grid__card--fact-rules-muted-gold';
-			$card_classes[] = 'vvm-card-grid__card--price-tt-norms';
+			$card_classes[] = 'vvm-card-grid__card--price-figtree';
 		}
 
 	}
