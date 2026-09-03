@@ -142,6 +142,16 @@ jobs:
           rsync -a "$REPOPATH/wp-content/themes/$THEME_SLUG/" "$THEMEPATH/"
           rsync -a "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/" "$PLUGINPATH/"
 
+          # The staging sync intentionally preserves destination-only files.
+          # Remove this superseded commercial font only after confirming the
+          # selected source commit no longer contains it.
+          legacy_romely='assets/fonts/romely/Romely-Regular.woff2'
+
+          if [ ! -e "$REPOPATH/wp-content/themes/$THEME_SLUG/$legacy_romely" ]; then
+            rm -f "$THEMEPATH/$legacy_romely"
+            rmdir "$THEMEPATH/assets/fonts/romely" 2>/dev/null || true
+          fi
+
           # Verify every repository-owned source file after the copy.
           theme_drift=$(rsync -acni "$REPOPATH/wp-content/themes/$THEME_SLUG/" "$THEMEPATH/")
           plugin_drift=$(rsync -acni "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/" "$PLUGINPATH/")
