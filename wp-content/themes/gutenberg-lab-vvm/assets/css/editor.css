@@ -56,10 +56,22 @@ body.post-type-villa.editor-styles-wrapper
 	margin-bottom: 1.25rem;
 }
 
-/* Font-family presets preserve the typography of the families they replace. */
-.editor-styles-wrapper :is(.has-display-serif-font-family, .has-site-primary-font-family) {
+/* Explicit Italiana display selections use the client-approved heading treatment. */
+.editor-styles-wrapper .has-display-serif-font-family {
+	font-weight: bold !important;
+	letter-spacing: normal !important;
+}
+
+/* Keep the tracked treatment for non-heading site-primary selections. */
+.editor-styles-wrapper .has-site-primary-font-family {
 	font-weight: bold !important;
 	letter-spacing: 2px !important;
+}
+
+/* Match the untracked bold heading treatment used on the front end. */
+.editor-styles-wrapper :is(h1, h2, h3, h5, h6) {
+	font-weight: bold !important;
+	letter-spacing: normal !important;
 }
 
 .editor-styles-wrapper :where(.has-refined-sans-font-family) {

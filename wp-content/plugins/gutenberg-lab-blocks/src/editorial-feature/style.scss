@@ -152,7 +152,7 @@
 		color: currentColor;
 		font-family: var(--wp--preset--font-family--display-serif, Georgia, serif);
 		font-size: clamp(1.3rem, 2vw, 1.75rem);
-		letter-spacing: 2px;
+		letter-spacing: normal;
 		font-style: italic;
 		font-weight: bold;
 		line-height: 1.05;
@@ -166,7 +166,7 @@
 		font-family: var(--wp--preset--font-family--display-serif, Georgia, serif);
 		font-size: var(--vvm-editorial-feature-title-size);
 		font-weight: bold;
-		letter-spacing: 2px;
+		letter-spacing: normal;
 		line-height: 0.94;
 		text-transform: uppercase;
 	}

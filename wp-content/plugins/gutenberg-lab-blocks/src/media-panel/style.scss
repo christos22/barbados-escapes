@@ -231,9 +231,16 @@
 
 		.media-panel__overlay-content {
 			> .wp-block-heading {
-				// Keep the villa hero visual treatment, but let the heading itself
-				// inherit its font family and selected font size from global styles.
+				// Italiana is slightly narrower without tracking, so this responsive
+				// scale keeps the line close to the former Romely width.
 				color: var(--wp--preset--color--white, #ffffff);
+				font-size: clamp(
+					3.25rem,
+					3.25rem + ((1vw - 0.2rem) * 1.8),
+					4.65rem
+				) !important;
+				font-weight: 400 !important;
+				letter-spacing: normal !important;
 				text-shadow: 0 10px 35px rgb(0 0 0 / 0.2);
 			}
 
@@ -247,6 +254,14 @@
 				font-size: clamp(1rem, 1.3vw, 1.15rem);
 				color: rgb(255 255 255 / 0.84);
 				text-shadow: 0 4px 18px rgb(0 0 0 / 0.16);
+			}
+
+			> p.has-display-serif-font-family {
+				// Removing 2px tracking narrows this long line substantially; the
+				// fluid size restores approximately the same visual width.
+				font-size: clamp(1.25rem, 1.05rem + 1vw, 1.75rem) !important;
+				font-weight: bold;
+				letter-spacing: normal;
 			}
 
 			> .wp-block-gutenberg-lab-blocks-villa-hero-search {
