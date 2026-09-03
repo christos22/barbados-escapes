@@ -230,7 +230,7 @@
 		--media-panel-overlay-vignette-alpha: 0.14;
 
 		.media-panel__overlay-content {
-			> .wp-block-heading {
+			> h1.wp-block-heading {
 				// Italiana is slightly narrower without tracking, so this responsive
 				// scale keeps the line close to the former Romely width.
 				color: var(--wp--preset--color--white, #ffffff);
@@ -256,18 +256,29 @@
 				text-shadow: 0 4px 18px rgb(0 0 0 / 0.16);
 			}
 
-			> p.has-display-serif-font-family {
+			> p.has-display-serif-font-family,
+			> h1.wp-block-heading + .wp-block-heading {
 				// Match the live XL scale explicitly. Staging can carry a saved global
 				// preset with a different `xl` value, so this must not depend on that
 				// environment-specific custom property. Italiana is about 4.7% narrower
 				// than Romely; the subtle horizontal scale restores the live line width.
+				margin-inline: auto;
+				max-width: 44rem;
+				font-family: var(
+					--wp--preset--font-family--display-serif,
+					Italiana,
+					Georgia,
+					serif
+				);
 				font-size: clamp(
 					1.25rem,
 					calc(1.1874rem + 0.313vw),
 					1.5rem
 				) !important;
-				font-weight: bold;
-				letter-spacing: normal;
+				font-weight: bold !important;
+				letter-spacing: normal !important;
+				color: rgb(255 255 255 / 0.84);
+				text-shadow: 0 4px 18px rgb(0 0 0 / 0.16);
 				transform: scaleX(1.0472);
 				transform-origin: center;
 			}
