@@ -103,9 +103,10 @@
 
 .vvm-villa-availability-calendar .vvm-villa-availability-calendar__month-title {
 	color: #5d5855;
-	font-family: var(--wp--preset--font-family--serif, Georgia, serif);
+	font-family: var(--wp--preset--font-family--display-serif, Italiana, Georgia, serif);
 	font-size: 1rem;
-	font-weight: 500;
+	font-weight: bold;
+	letter-spacing: normal;
 	line-height: 1.2;
 	margin: 0 0 8px;
 	padding-inline-start: 0.28rem;

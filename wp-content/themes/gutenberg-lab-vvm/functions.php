@@ -1300,21 +1300,23 @@ function gutenberg_lab_vvm_filter_body_class( $classes ) {
 add_filter( 'body_class', 'gutenberg_lab_vvm_filter_body_class' );
 
 /**
- * Returns a cache-busting asset version from a theme file path.
+ * Returns a content-based cache-busting version from a theme file path.
  *
- * Using `filemtime()` during local development means CSS/JS changes show up
- * immediately without needing a separate build step for plain theme assets.
+ * Content fingerprints stay stable until an asset changes and avoid stale CSS
+ * when deployment tooling preserves timestamps or production caches are warm.
  *
  * @param string $relative_path Theme-relative asset path.
  * @return string
  */
 function gutenberg_lab_vvm_asset_version( $relative_path ) {
 	$absolute_path = get_theme_file_path( $relative_path );
-	$environment   = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
-	$is_dev_env    = in_array( $environment, array( 'local', 'development' ), true ) || ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG );
 
-	if ( $is_dev_env && file_exists( $absolute_path ) ) {
-		return (string) filemtime( $absolute_path );
+	if ( file_exists( $absolute_path ) ) {
+		$asset_hash = hash_file( 'sha256', $absolute_path );
+
+		if ( is_string( $asset_hash ) ) {
+			return substr( $asset_hash, 0, 12 );
+		}
 	}
 
 	return (string) wp_get_theme()->get( 'Version' );

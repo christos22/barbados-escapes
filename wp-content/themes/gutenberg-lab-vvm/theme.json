@@ -260,11 +260,11 @@
 			},
 			"h4": {
 				"typography": {
-					"fontFamily": "var(--wp--preset--font-family--refined-sans)",
+					"fontFamily": "var(--wp--preset--font-family--display-serif)",
 					"fontSize": "clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem)",
-					"fontWeight": "400",
-					"letterSpacing": "0.34em",
-					"textTransform": "uppercase",
+					"fontWeight": "bold",
+					"letterSpacing": "normal",
+					"textTransform": "none",
 					"lineHeight": "1rem"
 				}
 			},

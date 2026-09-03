@@ -97,15 +97,15 @@
 		line-height: 1;
 	}
 
-	/* Match the front-end eyebrow treatment for semantic H4 headings. */
+	/* Match the front-end Italiana treatment for semantic H4 headings. */
 	.vvm-feature-carousel__slide-editor-panel-flow .wp-block-heading.h4 {
 		color: var(--wp--preset--color--gold, #c4922a);
-		font-family: var(--wp--preset--font-family--refined-sans);
+		font-family: var(--wp--preset--font-family--display-serif);
 		font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
-		font-weight: 400;
-		letter-spacing: 0.34em;
+		font-weight: bold;
+		letter-spacing: normal;
 		line-height: 1rem;
-		text-transform: uppercase;
+		text-transform: none;
 	}
 
 	.vvm-feature-carousel__slide-editor-panel-flow p {

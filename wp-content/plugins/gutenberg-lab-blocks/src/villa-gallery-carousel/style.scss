@@ -254,12 +254,10 @@
 .vvm-villa-gallery-carousel .vvm-villa-gallery-carousel__title {
 	margin: 8px 0 0;
 	color: var(--vvm-villa-gallery-carousel-overlay-ink);
-	font-family:
-		var(--wp--preset--font-family--heading, "Cormorant Garamond"),
-		Georgia,
-		serif;
+	font-family: var(--wp--preset--font-family--display-serif, Italiana, Georgia, serif);
 	font-size: 24px;
-	font-weight: 400;
+	font-weight: bold;
+	letter-spacing: normal;
 	line-height: 1;
 	text-wrap: balance;
 }

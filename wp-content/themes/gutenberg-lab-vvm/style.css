@@ -452,8 +452,8 @@ body.page-id-1724 .wp-site-blocks .vvm-about-team-row > .wp-block-paragraph {
 
 /* All visible headings use the untracked bold treatment; the homepage hero
  * has a more specific regular-weight exception in the media-panel block. */
-.wp-site-blocks :is(h1, h2, h3, h5, h6),
-.editor-styles-wrapper :is(h1, h2, h3, h5, h6) {
+.wp-site-blocks :is(h1, h2, h3, h4, h5, h6),
+.editor-styles-wrapper :is(h1, h2, h3, h4, h5, h6) {
 	font-weight: bold !important;
 	letter-spacing: normal !important;
 }
@@ -489,12 +489,12 @@ body.page-id-1724 .wp-site-blocks .vvm-about-team-row > .wp-block-paragraph {
 }
 
 .wp-site-blocks :where(.h4) {
-	font-family: var(--wp--preset--font-family--refined-sans);
+	font-family: var(--wp--preset--font-family--display-serif);
 	font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
-	font-weight: 400;
-	letter-spacing: 0.34em;
+	font-weight: bold;
+	letter-spacing: normal;
 	line-height: 1rem;
-	text-transform: uppercase;
+	text-transform: none;
 	color: var(--wp--preset--color--dark-green);
 }
 
@@ -504,8 +504,8 @@ body.page-id-1724 .wp-site-blocks .vvm-about-team-row > .wp-block-paragraph {
 
 .wp-site-blocks :where(.h6) {
 	font-size: var(--wp--preset--font-size--xl);
-	font-weight: 400;
-	letter-spacing: 0.0625rem;
+	font-weight: bold;
+	letter-spacing: normal;
 	line-height: 1;
 }
 

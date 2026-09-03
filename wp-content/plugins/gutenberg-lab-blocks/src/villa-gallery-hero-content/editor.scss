@@ -73,13 +73,13 @@
 	h4.wp-block-heading,
 	.h4 {
 		margin: 0;
-		font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
+		font-family: var(--wp--preset--font-family--display-serif, Italiana, Georgia, serif);
 		font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
-		font-weight: 400;
-		letter-spacing: 0.34em;
+		font-weight: bold;
+		letter-spacing: normal;
 		line-height: 1rem;
 		text-align: left;
-		text-transform: uppercase;
+		text-transform: none;
 	}
 
 	.wp-block-post-excerpt,

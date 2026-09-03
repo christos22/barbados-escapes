@@ -69,7 +69,7 @@ body.post-type-villa.editor-styles-wrapper
 }
 
 /* Match the untracked bold heading treatment used on the front end. */
-.editor-styles-wrapper :is(h1, h2, h3, h5, h6) {
+.editor-styles-wrapper :is(h1, h2, h3, h4, h5, h6) {
 	font-weight: bold !important;
 	letter-spacing: normal !important;
 }
@@ -79,17 +79,14 @@ body.post-type-villa.editor-styles-wrapper
 	letter-spacing: normal;
 }
 
-/*
- * Mirror the front-end H4 label treatment so editor content matches the site,
- * including cases where a block or pattern uses the reusable `.h4` utility.
- */
+/* Keep reusable H4 utilities aligned with the global Italiana heading style. */
 .editor-styles-wrapper .wp-site-blocks :where(.h4) {
-	font-family: var(--wp--preset--font-family--refined-sans);
+	font-family: var(--wp--preset--font-family--display-serif);
 	font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
-	font-weight: 400;
-	letter-spacing: 0.34em;
+	font-weight: bold;
+	letter-spacing: normal;
 	line-height: 1rem;
-	text-transform: uppercase;
+	text-transform: none;
 }
 
 .editor-styles-wrapper .wp-site-blocks > main.wp-block-group,
