@@ -85,11 +85,11 @@ function gutenberg_lab_blocks_asset_version( $relative_path ) {
 }
 
 /**
- * Versions generated block assets from their built files.
+ * Versions generated block assets from their built contents.
  *
  * WordPress uses the static `version` value in block.json for file-based block
- * styles. Production caches those URLs aggressively, so we replace that static
- * value with the newest mtime from the block's generated CSS/JS files.
+ * styles. Browsers cache those URLs aggressively, so the version must change
+ * whenever any registered CSS/JS file changes, regardless of server mtimes.
  *
  * @param array<string, mixed> $metadata Block metadata read from block.json.
  * @return array<string, mixed>
@@ -114,7 +114,7 @@ function gutenberg_lab_blocks_version_block_metadata_assets( $metadata ) {
 		'style',
 		'viewStyle',
 	);
-	$asset_times  = array();
+	$asset_hashes = array();
 
 	foreach ( $asset_fields as $asset_field ) {
 		if ( empty( $metadata[ $asset_field ] ) ) {
@@ -129,13 +129,17 @@ function gutenberg_lab_blocks_version_block_metadata_assets( $metadata ) {
 			$asset_path = realpath( $block_dir . '/' . substr( $asset_reference, 5 ) );
 
 			if ( $asset_path && file_exists( $asset_path ) ) {
-				$asset_times[] = filemtime( $asset_path );
+				$asset_hash = hash_file( 'sha256', $asset_path );
+
+				if ( is_string( $asset_hash ) ) {
+					$asset_hashes[] = $asset_hash;
+				}
 			}
 		}
 	}
 
-	if ( ! empty( $asset_times ) ) {
-		$metadata['version'] = (string) max( $asset_times );
+	if ( ! empty( $asset_hashes ) ) {
+		$metadata['version'] = substr( hash( 'sha256', implode( '|', $asset_hashes ) ), 0, 12 );
 	}
 
 	return $metadata;

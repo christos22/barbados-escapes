@@ -263,7 +263,7 @@
 				// than Romely; the subtle horizontal scale restores the live line width.
 				font-size: clamp(
 					1.25rem,
-					1.25rem + ((1vw - 0.2rem) * 0.313),
+					calc(1.1874rem + 0.313vw),
 					1.5rem
 				) !important;
 				font-weight: bold;
