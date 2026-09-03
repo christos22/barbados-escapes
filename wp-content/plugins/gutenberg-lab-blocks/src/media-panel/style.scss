@@ -257,11 +257,14 @@
 			}
 
 			> p.has-display-serif-font-family {
-				// Removing 2px tracking narrows this long line substantially; the
-				// fluid size restores approximately the same visual width.
-				font-size: clamp(1.25rem, 1.05rem + 1vw, 1.75rem) !important;
+				// Match the live XL size. Italiana is about 4.7% narrower than the
+				// former Romely face, so a subtle horizontal scale restores the live
+				// line width without reintroducing letter spacing.
+				font-size: var(--wp--preset--font-size--xl) !important;
 				font-weight: bold;
 				letter-spacing: normal;
+				transform: scaleX(1.0472);
+				transform-origin: center;
 			}
 
 			> .wp-block-gutenberg-lab-blocks-villa-hero-search {
