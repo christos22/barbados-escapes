@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.58
+Version: 0.1.59
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -26,6 +26,16 @@ html.vvm-has-scrollbar {
 body {
 	margin: 0;
 	background: #ffffff;
+}
+
+/*
+ * Older iOS Safari versions can expose TT Norms' decorative "st" glyph.
+ * Keep the element-level guard for Gutenberg content alongside the
+ * font-face defaults in theme.json, without changing the serif families.
+ */
+.has-refined-sans-font-family {
+	font-feature-settings: "liga" 0, "clig" 0, "dlig" 0, "calt" 0 !important;
+	font-variant-ligatures: none !important;
 }
 
 /*

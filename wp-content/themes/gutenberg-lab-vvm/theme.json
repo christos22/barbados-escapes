@@ -106,24 +106,28 @@
 					"fontFace": [
 						{
 							"fontFamily": "TT Norms",
+							"fontFeatureSettings": "\"liga\" 0, \"clig\" 0, \"dlig\" 0, \"calt\" 0",
 							"fontStyle": "normal",
 							"fontWeight": "300",
 							"src": [ "file:./assets/fonts/tt-norms/TT-Norms-Light.otf" ]
 						},
 						{
 							"fontFamily": "TT Norms",
+							"fontFeatureSettings": "\"liga\" 0, \"clig\" 0, \"dlig\" 0, \"calt\" 0",
 							"fontStyle": "normal",
 							"fontWeight": "400",
 							"src": [ "file:./assets/fonts/tt-norms/TT-Norms-Regular.otf" ]
 						},
 						{
 							"fontFamily": "TT Norms",
+							"fontFeatureSettings": "\"liga\" 0, \"clig\" 0, \"dlig\" 0, \"calt\" 0",
 							"fontStyle": "normal",
 							"fontWeight": "500",
 							"src": [ "file:./assets/fonts/tt-norms/TT-Norms-Medium.otf" ]
 						},
 						{
 							"fontFamily": "TT Norms",
+							"fontFeatureSettings": "\"liga\" 0, \"clig\" 0, \"dlig\" 0, \"calt\" 0",
 							"fontStyle": "normal",
 							"fontWeight": "700",
 							"src": [ "file:./assets/fonts/tt-norms/TT-Norms-Bold.otf" ]
