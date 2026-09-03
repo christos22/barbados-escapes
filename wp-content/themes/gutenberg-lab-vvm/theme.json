@@ -53,8 +53,8 @@
 			"customFontSize": true,
 			"fontFamilies": [
 				{
-					"fontFamily": "\"Romely\", Georgia, serif",
-					"name": "Romely Display",
+					"fontFamily": "\"Italiana\", Georgia, serif",
+					"name": "Italiana Display",
 					"slug": "display-serif"
 				},
 				{
@@ -86,16 +86,16 @@
 					]
 				},
 				{
-					"fontFamily": "\"Romely\", Georgia, serif",
-					"name": "Romely",
+					"fontFamily": "\"Italiana\", Georgia, serif",
+					"name": "Italiana",
 					"slug": "site-primary",
 					"fontFace": [
 						{
 							"fontDisplay": "swap",
-							"fontFamily": "Romely",
+							"fontFamily": "Italiana",
 							"fontStyle": "normal",
 							"fontWeight": "400",
-							"src": [ "file:./assets/fonts/romely/Romely-Regular.woff2" ]
+							"src": [ "file:./assets/fonts/italiana/Italiana-Regular.woff2" ]
 						}
 					]
 				},

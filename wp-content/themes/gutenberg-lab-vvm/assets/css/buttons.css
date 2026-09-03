@@ -28,7 +28,7 @@
 	--vvm-button-border-width: 1px;
 	--vvm-button-padding-inline: 32px;
 	--vvm-button-padding-block: 12px;
-	--vvm-button-optical-offset-y: 2px;
+	--vvm-button-optical-offset-y: 0px;
 
 	display: inline-flex;
 	align-items: center;
@@ -39,17 +39,16 @@
 	box-sizing: border-box;
 	min-block-size: var(--vvm-button-height);
 
-	/* Romely's visible capitals sit high inside their line box, so offset the
-	 * padding without changing the button's total height. */
+	/* Keep the display face optically centred without changing button height. */
 	padding-block-start: calc(var(--vvm-button-padding-block) + var(--vvm-button-optical-offset-y));
 	padding-block-end: calc(var(--vvm-button-padding-block) - var(--vvm-button-optical-offset-y));
 	padding-inline: var(--vvm-button-padding-inline);
 	border: var(--vvm-button-border-width) solid transparent;
 	border-radius: 0;
 	background: transparent !important;
-	font-family: "Romely", sans-serif;
+	font-family: var(--wp--preset--font-family--site-primary, "Italiana", Georgia, serif);
 	font-size: var(--vvm-button-font-size);
-	font-weight: 600;
+	font-weight: 400;
 	line-height: var(--vvm-button-line-height);
 	letter-spacing: 0.15em;
 	text-decoration: none !important;
@@ -312,8 +311,8 @@
 	gap: 0.5rem;
 	/* Gutenberg text-colour classes or inline selections can override this default. */
 	color: var(--wp--preset--color--gold, #c4922a);
-	font-family: "Romely", sans-serif;
-	font-weight: 600;
+	font-family: var(--wp--preset--font-family--site-primary, "Italiana", Georgia, serif);
+	font-weight: 400;
 	letter-spacing: 0.025em;
 	text-decoration: none !important;
 	text-transform: none;
