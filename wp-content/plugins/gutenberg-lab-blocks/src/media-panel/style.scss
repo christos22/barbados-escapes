@@ -257,10 +257,15 @@
 			}
 
 			> p.has-display-serif-font-family {
-				// Match the live XL size. Italiana is about 4.7% narrower than the
-				// former Romely face, so a subtle horizontal scale restores the live
-				// line width without reintroducing letter spacing.
-				font-size: var(--wp--preset--font-size--xl) !important;
+				// Match the live XL scale explicitly. Staging can carry a saved global
+				// preset with a different `xl` value, so this must not depend on that
+				// environment-specific custom property. Italiana is about 4.7% narrower
+				// than Romely; the subtle horizontal scale restores the live line width.
+				font-size: clamp(
+					1.25rem,
+					1.25rem + ((1vw - 0.2rem) * 0.313),
+					1.5rem
+				) !important;
 				font-weight: bold;
 				letter-spacing: normal;
 				transform: scaleX(1.0472);
