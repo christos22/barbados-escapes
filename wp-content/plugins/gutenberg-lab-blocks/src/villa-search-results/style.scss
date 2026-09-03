@@ -24,6 +24,8 @@
 		margin: 0;
 		color: var(--vvm-results-green);
 		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-weight: 400;
+		letter-spacing: normal;
 		font-size: clamp(1.05rem, 1.8vw, 1.35rem);
 	}
 
@@ -43,6 +45,8 @@
 		border-radius: 999px;
 		color: var(--vvm-results-green);
 		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-weight: 400;
+		letter-spacing: normal;
 		font-size: 0.78rem;
 		line-height: 1.2;
 	}
@@ -50,6 +54,8 @@
 	&__clear {
 		color: var(--vvm-results-gold-text);
 		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-weight: 400;
+		letter-spacing: normal;
 		text-underline-offset: 0.2em;
 	}
 
@@ -89,6 +95,8 @@
 		border: 1px solid var(--vvm-results-border);
 		color: var(--vvm-results-green);
 		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-weight: 400;
+		letter-spacing: normal;
 		text-decoration: none;
 	}
 
@@ -110,6 +118,8 @@
 		min-height: 2rem;
 		color: var(--vvm-results-green);
 		font-family: var(--wp--preset--font-family--refined-sans, inherit);
+		font-weight: 400;
+		letter-spacing: normal;
 		font-size: 0.9rem;
 	}
 
@@ -192,6 +202,7 @@
 		color: var(--vvm-results-green);
 		font-family: var(--wp--preset--font-family--refined-sans, "Figtree", system-ui, sans-serif);
 		font-size: inherit;
+		letter-spacing: normal;
 		font-weight: 400;
 	}
 
@@ -239,7 +250,8 @@
 	.vvm-card-grid__card-price-value {
 		font-family: var(--wp--preset--font-family--display-serif, "Italiana", Georgia, serif);
 		font-size: clamp(1.4rem, 2vw, 1.75rem);
-		font-weight: 400;
+		letter-spacing: 2px;
+		font-weight: bold;
 		line-height: 1.05;
 	}
 
@@ -247,6 +259,7 @@
 		color: currentcolor;
 		font-family: var(--wp--preset--font-family--refined-sans, "Figtree", system-ui, sans-serif);
 		font-size: 0.65rem;
+		letter-spacing: normal;
 		font-weight: 400;
 		line-height: 1.2;
 	}
@@ -275,7 +288,8 @@
 
 	.vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-fact--price .vvm-card-grid__card-fact-label {
 		font-family: var(--wp--preset--font-family--display-serif, "Italiana", Georgia, serif);
-		font-weight: inherit;
+		font-weight: bold;
+		letter-spacing: 2px;
 	}
 
 	.vvm-card-grid__card--facts-inline-layout .vvm-card-grid__card-price-suffix {
@@ -344,6 +358,8 @@
 	.vvm-card-grid__card-fact--price
 	.vvm-card-grid__card-fact-label {
 		font-family: var(--wp--preset--font-family--refined-sans, "Figtree", system-ui, sans-serif);
+		font-weight: 400;
+		letter-spacing: normal;
 	}
 
 	// These outline buttons are rendered dynamically, so WordPress does not

@@ -233,7 +233,8 @@
 	color: var(--vvm-feature-carousel-ink);
 	font-family: var(--wp--preset--font-family--display-serif);
 	font-size: clamp(2rem, 4vw, 3.25rem);
-	font-weight: 400;
+	letter-spacing: 2px;
+	font-weight: bold;
 	line-height: 0.96;
 	text-wrap: balance;
 }
@@ -268,6 +269,7 @@
 	color: var(--vvm-feature-carousel-muted);
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: clamp(1rem, 1.1vw, 1.125rem);
+	letter-spacing: normal;
 	font-weight: 400;
 	line-height: 1.72;
 }

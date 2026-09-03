@@ -48,9 +48,9 @@
 	background: transparent !important;
 	font-family: var(--wp--preset--font-family--site-primary, "Italiana", Georgia, serif);
 	font-size: var(--vvm-button-font-size);
-	font-weight: 400;
+	font-weight: bold;
 	line-height: var(--vvm-button-line-height);
-	letter-spacing: 0.15em;
+	letter-spacing: 2px;
 	text-decoration: none !important;
 	text-transform: uppercase;
 	box-shadow: none;
@@ -312,8 +312,8 @@
 	/* Gutenberg text-colour classes or inline selections can override this default. */
 	color: var(--wp--preset--color--gold, #c4922a);
 	font-family: var(--wp--preset--font-family--site-primary, "Italiana", Georgia, serif);
-	font-weight: 400;
-	letter-spacing: 0.025em;
+	font-weight: bold;
+	letter-spacing: 2px;
 	text-decoration: none !important;
 	text-transform: none;
 	transition:

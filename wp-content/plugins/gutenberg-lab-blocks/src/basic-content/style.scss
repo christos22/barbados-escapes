@@ -97,9 +97,9 @@
 		&.vvm-basic-content--content-align-center .vvm-basic-content__main-column > .wp-block-heading:first-child + .wp-block-heading {
 			font-family: var(--wp--preset--font-family--display-serif, Georgia, serif);
 			font-size: 1.5rem;
-			font-weight: 400;
+			font-weight: bold;
 			line-height: 1;
-			letter-spacing: normal;
+			letter-spacing: 2px;
 			text-transform: none;
 		}
 

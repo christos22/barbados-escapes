@@ -346,6 +346,8 @@
 	.vvm-card-grid__card--villa > .vvm-card-grid__card-content .vvm-card-grid__card-facts,
 	.vvm-card-grid__card--villa > .vvm-card-grid__card-content .vvm-card-grid__card-price {
 		font-family: var(--wp--preset--font-family--refined-sans);
+		font-weight: 400;
+		letter-spacing: normal;
 	}
 
 	.vvm-card-grid__card--villa > .vvm-card-grid__card-content > .vvm-card-grid__card-eyebrow {
@@ -532,8 +534,8 @@
 		max-width: 14rem;
 		font-family: var(--wp--preset--font-family--site-primary);
 		font-size: 0.95rem;
-		font-weight: 400;
-		letter-spacing: 0.08em;
+		font-weight: bold;
+		letter-spacing: 2px;
 		text-transform: uppercase;
 	}
 
@@ -558,8 +560,8 @@
 		color: #f5ecd7;
 		font-family: var(--wp--preset--font-family--site-primary);
 		font-size: 1.875rem;
-		font-weight: 600;
-		letter-spacing: 0.04em;
+		font-weight: bold;
+		letter-spacing: 2px;
 		line-height: 1.1;
 		text-transform: none;
 	}
@@ -574,7 +576,8 @@
 		color: rgba(245, 236, 215, 0.9);
 		font-family: var(--wp--preset--font-family--site-primary);
 		font-size: 1rem;
-		font-weight: 400;
+		letter-spacing: 2px;
+		font-weight: bold;
 		line-height: 1.45;
 	}
 
@@ -703,8 +706,8 @@
 		color: #f5ecd7;
 		font-family: var(--wp--preset--font-family--site-primary);
 		font-size: 1.875rem;
-		font-weight: 600;
-		letter-spacing: 0.04em;
+		font-weight: bold;
+		letter-spacing: 2px;
 		line-height: 1.1;
 		text-transform: none;
 	}
@@ -719,7 +722,8 @@
 		color: rgba(245, 236, 215, 0.9);
 		font-family: var(--wp--preset--font-family--site-primary);
 		font-size: 1rem;
-		font-weight: 400;
+		letter-spacing: 2px;
+		font-weight: bold;
 		line-height: 1.45;
 	}
 

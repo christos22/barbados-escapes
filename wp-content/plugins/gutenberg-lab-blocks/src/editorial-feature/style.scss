@@ -138,6 +138,8 @@
 			system-ui,
 			sans-serif
 		);
+		font-weight: 400;
+		letter-spacing: normal;
 		max-width: var(--vvm-editorial-feature-body-width);
 	}
 
@@ -150,8 +152,9 @@
 		color: currentColor;
 		font-family: var(--wp--preset--font-family--display-serif, Georgia, serif);
 		font-size: clamp(1.3rem, 2vw, 1.75rem);
+		letter-spacing: 2px;
 		font-style: italic;
-		font-weight: 400;
+		font-weight: bold;
 		line-height: 1.05;
 		opacity: 0.68;
 		text-transform: none;
@@ -162,8 +165,8 @@
 		color: inherit;
 		font-family: var(--wp--preset--font-family--display-serif, Georgia, serif);
 		font-size: var(--vvm-editorial-feature-title-size);
-		font-weight: 400;
-		letter-spacing: 0;
+		font-weight: bold;
+		letter-spacing: 2px;
 		line-height: 0.94;
 		text-transform: uppercase;
 	}
@@ -191,6 +194,8 @@
 			system-ui,
 			sans-serif
 		);
+		font-weight: 600;
+		letter-spacing: 0.15em;
 	}
 
 	.vvm-editorial-feature__empty-state {

@@ -56,6 +56,17 @@ body.post-type-villa.editor-styles-wrapper
 	margin-bottom: 1.25rem;
 }
 
+/* Font-family presets preserve the typography of the families they replace. */
+.editor-styles-wrapper :is(.has-display-serif-font-family, .has-site-primary-font-family) {
+	font-weight: bold !important;
+	letter-spacing: 2px !important;
+}
+
+.editor-styles-wrapper :where(.has-refined-sans-font-family) {
+	font-weight: 400;
+	letter-spacing: normal;
+}
+
 /*
  * Mirror the front-end H4 label treatment so editor content matches the site,
  * including cases where a block or pattern uses the reusable `.h4` utility.
@@ -124,6 +135,8 @@ body.post-type-villa.editor-styles-wrapper
 	flex-direction: column;
 	gap: 1rem;
 	font-family: var(--wp--preset--font-family--refined-sans);
+	font-weight: 400;
+	letter-spacing: normal;
 	font-size: 0.875rem;
 	line-height: 1.75;
 	color: rgba(245, 236, 215, 0.88);
@@ -161,6 +174,7 @@ body.post-type-villa.editor-styles-wrapper
 	counter-reset: vvm-numbered-list;
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: clamp(1rem, 0.96rem + 0.18vw, 1.125rem);
+	letter-spacing: normal;
 	font-weight: 400;
 	line-height: 1.55;
 	color: var(--vvm-numbered-list-text);
@@ -224,6 +238,7 @@ body.post-type-villa.editor-styles-wrapper
 	background: transparent;
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: 1rem;
+	letter-spacing: normal;
 	font-weight: 400;
 	line-height: 1.55;
 	color: rgb(30 61 47 / 0.88);

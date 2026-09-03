@@ -269,7 +269,8 @@ body.vvm-has-hero-header
 	color: #f5ecd7;
 	font-family: var(--wp--preset--font-family--display-serif);
 	font-size: clamp(2.9rem, 7.6vw, 4.875rem);
-	font-weight: 400;
+	letter-spacing: 2px;
+	font-weight: bold;
 	line-height: 0.94;
 	text-align: left;
 	text-wrap: balance;
@@ -286,6 +287,8 @@ body.vvm-has-hero-header
 	margin-top: 1.5rem;
 	color: rgba(245, 236, 215, 0.84);
 	font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
+	font-weight: 400;
+	letter-spacing: normal;
 	font-size: clamp(1rem, 1.4vw, 1.125rem);
 	line-height: 1.65;
 	text-align: left;

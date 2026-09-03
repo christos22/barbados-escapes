@@ -64,7 +64,8 @@
 	color: var(--wp--preset--color--gold);
 	font-family: var(--wp--preset--font-family--display-serif);
 	font-size: clamp(1rem, 1.6vw, 1.3rem);
-	font-weight: 400;
+	letter-spacing: 2px;
+	font-weight: bold;
 	line-height: 0.95;
 	overflow-wrap: anywhere;
 }
