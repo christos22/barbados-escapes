@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.58
+Version: 0.1.60
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -456,6 +456,87 @@ body.page-id-1724 .wp-site-blocks .vvm-about-team-row > .wp-block-paragraph {
 .editor-styles-wrapper :is(h1, h2, h3, h4, h5, h6) {
 	font-weight: bold !important;
 	letter-spacing: normal !important;
+}
+
+/* Staging font-review families for the TT Norms baseline. */
+body.fontreview-dm-sans {
+	--wp--preset--font-family--refined-sans: "DM Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+body.fontreview-manrope {
+	--wp--preset--font-family--refined-sans: "Manrope", "Helvetica Neue", Arial, sans-serif;
+}
+
+body.fontreview-plus-jakarta-sans {
+	--wp--preset--font-family--refined-sans: "Plus Jakarta Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.fontreview-tt-norms .vvm-fontreview-links,
+.fontreview-dm-sans .vvm-fontreview-links,
+.fontreview-manrope .vvm-fontreview-links,
+.fontreview-plus-jakarta-sans .vvm-fontreview-links {
+	display: flex;
+}
+
+.vvm-fontreview-links {
+	display: none;
+	align-items: center;
+	background: rgba(30, 61, 47, 0.96);
+	border-radius: 999px;
+	bottom: auto;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+	color: #f5ecd7;
+	flex-wrap: wrap;
+	font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+	gap: 0.6rem;
+	left: 50%;
+	padding: 0.5rem 0.75rem;
+	position: fixed;
+	top: var(--vvm-admin-bar-offset);
+	transform: translateX(-50%);
+	z-index: 1200;
+}
+
+.vvm-fontreview-links,
+.vvm-fontreview-links__list,
+.vvm-fontreview-links__list li {
+	display: flex;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.vvm-fontreview-links__list li {
+	margin: 0;
+}
+
+.vvm-fontreview-links__label {
+	font-size: 0.75rem;
+	font-weight: 500;
+	margin-inline-end: 0.35rem;
+	white-space: nowrap;
+}
+
+.vvm-fontreview-links__link {
+	color: #f5ecd7;
+	display: inline-block;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	padding: 0.25rem 0.55rem;
+	text-decoration: none;
+}
+
+.vvm-fontreview-links__link.is-current,
+.vvm-fontreview-links__link:hover,
+.vvm-fontreview-links__link:focus-visible {
+	background: #c4922a;
+	border-radius: 999px;
+	color: #ffffff;
+}
+
+.vvm-fontreview-links__link:focus-visible {
+	outline: 1px solid #f5ecd7;
+	outline-offset: 2px;
 }
 
 :where(.has-refined-sans-font-family) {

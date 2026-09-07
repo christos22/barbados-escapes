@@ -100,39 +100,9 @@
 					]
 				},
 				{
-					"fontFamily": "\"Figtree\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
-					"name": "Figtree",
-					"slug": "refined-sans",
-					"fontFace": [
-						{
-							"fontDisplay": "swap",
-							"fontFamily": "Figtree",
-							"fontStyle": "normal",
-							"fontWeight": "300",
-							"src": [ "file:./assets/fonts/figtree/Figtree-Light.woff2" ]
-						},
-						{
-							"fontDisplay": "swap",
-							"fontFamily": "Figtree",
-							"fontStyle": "normal",
-							"fontWeight": "400",
-							"src": [ "file:./assets/fonts/figtree/Figtree-Regular.woff2" ]
-						},
-						{
-							"fontDisplay": "swap",
-							"fontFamily": "Figtree",
-							"fontStyle": "normal",
-							"fontWeight": "500",
-							"src": [ "file:./assets/fonts/figtree/Figtree-Medium.woff2" ]
-						},
-						{
-							"fontDisplay": "swap",
-							"fontFamily": "Figtree",
-							"fontStyle": "normal",
-							"fontWeight": "700",
-							"src": [ "file:./assets/fonts/figtree/Figtree-Bold.woff2" ]
-						}
-					]
+					"fontFamily": "\"TT Norms\", Georgia, serif",
+					"name": "TT Norms",
+					"slug": "refined-sans"
 				}
 			],
 			"fontSizes": [

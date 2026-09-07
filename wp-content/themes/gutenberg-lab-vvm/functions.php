@@ -125,6 +125,102 @@ function gutenberg_lab_vvm_add_villa_slug_body_class( $classes ) {
 add_filter( 'body_class', 'gutenberg_lab_vvm_add_villa_slug_body_class' );
 
 /**
+ * Adds heading-font showcase body classes for the staging home page variants.
+ *
+ * The front page shows the live TT Norms baseline.
+ * The cloned variants use alternate families so we can compare only TT Norms usage.
+ */
+function gutenberg_lab_vvm_add_font_review_body_class( $classes ) {
+	if ( is_front_page() && is_page() ) {
+		$classes[] = 'fontreview-tt-norms';
+		return $classes;
+	}
+
+	if ( is_page( 'home-dm-sans' ) ) {
+		$classes[] = 'fontreview-dm-sans';
+	}
+
+	if ( is_page( 'home-manrope' ) ) {
+		$classes[] = 'fontreview-manrope';
+	}
+
+	if ( is_page( 'home-plus-jakarta-sans' ) ) {
+		$classes[] = 'fontreview-plus-jakarta-sans';
+	}
+
+	return $classes;
+}
+add_filter( 'body_class', 'gutenberg_lab_vvm_add_font_review_body_class' );
+
+/**
+ * Renders a temporary review menu so the client can switch among font variants.
+ */
+function gutenberg_lab_vvm_render_font_review_nav() {
+	if ( is_admin() || wp_is_json_request() || is_customize_preview() ) {
+		return;
+	}
+
+	if ( is_front_page() ) {
+		$current_key = 'tt-norms';
+	} elseif ( is_page( array( 'home-dm-sans', 'home-manrope', 'home-plus-jakarta-sans' ) ) ) {
+		$current_key = is_page( 'home-dm-sans' ) ? 'dm-sans' : ( is_page( 'home-manrope' ) ? 'manrope' : 'plus-jakarta-sans' );
+	} else {
+		return;
+	}
+
+	$dm_post    = get_page_by_path( 'home-dm-sans' );
+	$manrope    = get_page_by_path( 'home-manrope' );
+	$jakarta    = get_page_by_path( 'home-plus-jakarta-sans' );
+
+	$links = array(
+		array(
+			'label'  => 'TT Norms (baseline)',
+			'url'    => esc_url( home_url( '/' ) ),
+			'key'    => 'tt-norms',
+			'active' => 'tt-norms' === $current_key,
+		),
+		array(
+			'label'  => 'DM Sans',
+			'url'    => $dm_post instanceof WP_Post ? esc_url( get_permalink( $dm_post ) ) : esc_url( home_url( '/home-dm-sans/' ) ),
+			'key'    => 'dm-sans',
+			'active' => 'dm-sans' === $current_key,
+		),
+		array(
+			'label'  => 'Manrope',
+			'url'    => $manrope instanceof WP_Post ? esc_url( get_permalink( $manrope ) ) : esc_url( home_url( '/home-manrope/' ) ),
+			'key'    => 'manrope',
+			'active' => 'manrope' === $current_key,
+		),
+		array(
+			'label'  => 'Plus Jakarta Sans',
+			'url'    => $jakarta instanceof WP_Post ? esc_url( get_permalink( $jakarta ) ) : esc_url( home_url( '/home-plus-jakarta-sans/' ) ),
+			'key'    => 'plus-jakarta-sans',
+			'active' => 'plus-jakarta-sans' === $current_key,
+		),
+	);
+
+	echo '<nav class="vvm-fontreview-links" aria-label="Font family review pages">';
+	echo '<span class="vvm-fontreview-links__label">Font review pages:</span>';
+	echo '<ul class="vvm-fontreview-links__list">';
+	foreach ( $links as $link ) {
+		$classes = array( 'vvm-fontreview-links__link' );
+		if ( ! empty( $link['active'] ) ) {
+			$classes[] = 'is-current';
+		}
+		$class_attr = esc_attr( implode( ' ', $classes ) );
+		echo sprintf(
+			'<li><a class="%1$s" href="%2$s">%3$s</a></li>',
+			$class_attr,
+			esc_url( $link['url'] ),
+			esc_html( $link['label'] )
+		);
+	}
+	echo '</ul>';
+	echo '</nav>';
+}
+add_action( 'wp_footer', 'gutenberg_lab_vvm_render_font_review_nav' );
+
+/**
  * Returns the navigation post ID for a stable slug, or zero if missing.
  *
  * @param string $slug Navigation post slug.
@@ -1480,6 +1576,23 @@ function gutenberg_lab_vvm_enqueue_assets() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'gutenberg_lab_vvm_enqueue_assets' );
+
+/**
+ * Loads Google font families used by the temporary heading-family showcase pages.
+ */
+function gutenberg_lab_vvm_enqueue_font_review_headings() {
+	if ( ! is_page( array( 'home-dm-sans', 'home-manrope', 'home-plus-jakarta-sans' ) ) ) {
+		return;
+	}
+
+	wp_enqueue_style(
+		'gutenberg-lab-vvm-font-review-headings',
+		'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Manrope:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap',
+		array(),
+		null
+	);
+}
+add_action( 'wp_enqueue_scripts', 'gutenberg_lab_vvm_enqueue_font_review_headings' );
 
 /**
  * Prints the Elfsight All-in-One Chat mount nodes on every public page.
