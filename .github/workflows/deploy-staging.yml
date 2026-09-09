@@ -142,6 +142,14 @@ jobs:
           rsync -a "$REPOPATH/wp-content/themes/$THEME_SLUG/" "$THEMEPATH/"
           rsync -a "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/" "$PLUGINPATH/"
 
+          # Font files are theme-owned assets. Mirror only this directory so
+          # retired font trials cannot survive a source-code deployment.
+          test -f "$REPOPATH/wp-content/themes/$THEME_SLUG/assets/fonts/dm-sans/DM-Sans-Latin.woff2"
+          test -f "$REPOPATH/wp-content/themes/$THEME_SLUG/assets/fonts/romely/Romely-Regular.woff2"
+          rsync -a --delete \
+            "$REPOPATH/wp-content/themes/$THEME_SLUG/assets/fonts/" \
+            "$THEMEPATH/assets/fonts/"
+
           # Verify every repository-owned source file after the copy.
           theme_drift=$(rsync -acni "$REPOPATH/wp-content/themes/$THEME_SLUG/" "$THEMEPATH/")
           plugin_drift=$(rsync -acni "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/" "$PLUGINPATH/")

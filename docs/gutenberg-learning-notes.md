@@ -58,6 +58,10 @@
 - Use a block style variation for presentation options, such as showing three reviews at a time, before adding custom Inspector controls.
 - Carousel scripts need to resync when their block starts inside a hidden tab panel, because hidden elements report zero width.
 
+## Typography
+
+- Font replacements belong in the existing `theme.json` presets: keep stable slugs so saved blocks inherit the new family. The theme now uses self-hosted DM Sans for `refined-sans` and Romely for the serif presets, including the legacy `heading` alias.
+
 ## Villa Availability
 
 - Use PHP for availability storage, iCal sync, and final calendar markup so date rules are enforced outside the browser.

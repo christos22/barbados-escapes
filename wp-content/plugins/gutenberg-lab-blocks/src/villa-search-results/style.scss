@@ -190,7 +190,7 @@
 
 	.vvm-card-grid__card-fact-label {
 		color: var(--vvm-results-green);
-		font-family: var(--wp--preset--font-family--refined-sans, "TT Norms", system-ui, sans-serif);
+		font-family: var(--wp--preset--font-family--refined-sans, "DM Sans", system-ui, sans-serif);
 		font-size: inherit;
 		font-weight: 400;
 	}
@@ -226,7 +226,7 @@
 	}
 
 	.vvm-card-grid__card-price-prefix {
-		font-family: var(--wp--preset--font-family--refined-sans, "TT Norms", system-ui, sans-serif);
+		font-family: var(--wp--preset--font-family--refined-sans, "DM Sans", system-ui, sans-serif);
 		font-size: 0.65rem;
 		font-weight: 400;
 		flex-basis: 100%;
@@ -245,7 +245,7 @@
 
 	.vvm-card-grid__card-price-suffix {
 		color: currentcolor;
-		font-family: var(--wp--preset--font-family--refined-sans, "TT Norms", system-ui, sans-serif);
+		font-family: var(--wp--preset--font-family--refined-sans, "DM Sans", system-ui, sans-serif);
 		font-size: 0.65rem;
 		font-weight: 400;
 		line-height: 1.2;
@@ -265,8 +265,8 @@
 		white-space: nowrap;
 	}
 
-	// TT Norms' visible glyphs sit slightly high inside their line box. Apply a
-	// small optical correction so amenity labels align with the SVG centres.
+	// Keep the existing optical alignment of amenity labels and SVG centres.
+	// This offset is independent of the selected sans-serif font family.
 	.vvm-card-grid__card--facts-inline-layout
 	.vvm-card-grid__card-fact:not(.vvm-card-grid__card-fact--price)
 	.vvm-card-grid__card-fact-label {
@@ -346,12 +346,12 @@
 		border-block-color: rgba(196, 146, 42, 0.28);
 	}
 
-	// Version 13 keeps the price hierarchy while using TT Norms instead of the
+	// Version 13 keeps the price hierarchy while using the sans-serif preset instead of the
 	// display serif. The suffix already inherits the same sans-serif family.
-	.vvm-card-grid__card--price-tt-norms
+	.vvm-card-grid__card--price-refined-sans
 	.vvm-card-grid__card-fact--price
 	.vvm-card-grid__card-fact-label {
-		font-family: var(--wp--preset--font-family--refined-sans, "TT Norms", system-ui, sans-serif);
+		font-family: var(--wp--preset--font-family--refined-sans, "DM Sans", system-ui, sans-serif);
 	}
 
 	// These outline buttons are rendered dynamically, so WordPress does not

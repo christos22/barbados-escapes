@@ -3,7 +3,7 @@ Theme Name: Gutenberg Lab VVM
 Theme URI: https://example.com
 Author: Christos
 Description: A Gutenberg lab theme for porting the VVM site system.
-Version: 0.1.59
+Version: 0.1.61
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
@@ -29,16 +29,6 @@ body {
 }
 
 /*
- * Older iOS Safari versions can expose TT Norms' decorative "st" glyph.
- * Keep the element-level guard for Gutenberg content alongside the
- * font-face defaults in theme.json, without changing the serif families.
- */
-.has-refined-sans-font-family {
-	font-feature-settings: "liga" 0, "clig" 0, "dlig" 0, "calt" 0 !important;
-	font-variant-ligatures: none !important;
-}
-
-/*
  * Elfsight renders the chat UI inside a shadow root. The shadow tree inherits
  * from this host element, so set the host font to avoid the site's serif
  * display family leaking into the widget.
@@ -47,7 +37,7 @@ body {
 .elfsight-app-5f976442-bb60-49fe-837c-7c24128cac9d,
 .eapps-all-in-one-chat-00ed413b-b198-48a2-a248-4560584516e6-custom-css-root,
 .eapps-all-in-one-chat-5f976442-bb60-49fe-837c-7c24128cac9d-custom-css-root {
-	font-family: "TT Norms", system-ui, -apple-system, "Segoe UI", sans-serif !important;
+	font-family: var(--wp--preset--font-family--refined-sans, "DM Sans", sans-serif) !important;
 }
 
 @supports not (scrollbar-gutter: stable) {
