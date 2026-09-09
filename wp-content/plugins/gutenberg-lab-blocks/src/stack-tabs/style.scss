@@ -192,7 +192,7 @@
 	color: inherit;
 	font-size: clamp(1rem, 1.25vw, 1.15rem);
 	font-weight: 500;
-	line-height: 1.5;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 .vvm-stack-tabs__item.is-active .vvm-stack-tabs__item-button,

@@ -253,7 +253,7 @@ body.vvm-has-hero-header
 	font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
 	font-weight: 400;
 	letter-spacing: 0.34em;
-	line-height: 1rem;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	text-align: left;
 	text-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
 	text-transform: uppercase;
@@ -270,7 +270,7 @@ body.vvm-has-hero-header
 	font-family: var(--wp--preset--font-family--display-serif);
 	font-size: clamp(2.9rem, 7.6vw, 4.875rem);
 	font-weight: 400;
-	line-height: 0.94;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	text-align: left;
 	text-wrap: balance;
 	text-shadow: 0 10px 35px rgba(0, 0, 0, 0.22);
@@ -287,7 +287,7 @@ body.vvm-has-hero-header
 	color: rgba(245, 236, 215, 0.84);
 	font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
 	font-size: clamp(1rem, 1.4vw, 1.125rem);
-	line-height: 1.65;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	text-align: left;
 	text-shadow: 0 4px 18px rgba(0, 0, 0, 0.16);
 }
@@ -547,7 +547,7 @@ body.vvm-has-hero-header
 	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content-inner > p {
 		margin-top: 1rem;
 		font-size: 1rem;
-		line-height: 1.55;
+		line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	}
 
 	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner

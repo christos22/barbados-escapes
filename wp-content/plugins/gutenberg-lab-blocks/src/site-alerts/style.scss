@@ -34,7 +34,7 @@
 	width: 100%;
 	min-width: 0;
 	font-size: 0.95rem;
-	line-height: 1.45;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 .vvm-site-alert__content > * {

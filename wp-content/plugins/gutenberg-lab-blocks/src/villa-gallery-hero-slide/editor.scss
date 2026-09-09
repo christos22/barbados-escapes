@@ -90,11 +90,11 @@
 	color: #f5ecd7;
 	font-size: 0.88rem;
 	font-weight: 600;
-	line-height: 1.45;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero-slide .vvm-villa-gallery-hero__slide-caption {
 	color: rgba(245, 236, 215, 0.72);
 	font-size: 0.8rem;
-	line-height: 1.5;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }

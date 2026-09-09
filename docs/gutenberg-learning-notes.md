@@ -60,6 +60,7 @@
 
 ## Typography
 
+- Keep line-height ratios in `settings.custom.typography.lineHeight`. Native block defaults and component/editor CSS share the body and heading tokens; paragraphs belong under `styles.blocks.core/paragraph`, not the unsupported `styles.elements.paragraph` key. Clear old saved block overrides when adopting a shared default.
 - Font replacements belong in the existing `theme.json` presets: keep stable slugs so saved blocks inherit the new family. The theme now uses self-hosted DM Sans for `refined-sans` and Romely for the serif presets, including the legacy `heading` alias.
 
 ## Villa Availability

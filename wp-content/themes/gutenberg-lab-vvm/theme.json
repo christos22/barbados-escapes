@@ -9,6 +9,12 @@
 		},
 		"useRootPaddingAwareAlignments": true,
 		"custom": {
+			"typography": {
+				"lineHeight": {
+					"body": 1.6,
+					"heading": 1.3
+				}
+			},
 			"brand": {
 				"accessibleGold": "#8A631D",
 				"darkGreen": "#1E3D2F",
@@ -144,7 +150,7 @@
 			"fontFamily": "var(--wp--preset--font-family--site-primary)",
 			"fontSize": "15px",
 			"fontWeight": "400",
-			"lineHeight": "1.6"
+			"lineHeight": "var(--wp--custom--typography--line-height--body)"
 		},
 		"spacing": {
 			"blockGap": "1.5rem",
@@ -196,18 +202,11 @@
 				"typography": {
 					"fontFamily": "var(--wp--preset--font-family--display-serif)",
 					"fontWeight": "400",
-					"lineHeight": "1.3",
+					"lineHeight": "var(--wp--custom--typography--line-height--heading)",
 					"letterSpacing": "normal"
 				},
 				"color": {
 					"text": "var(--wp--preset--color--dark-green)"
-				}
-			},
-			"paragraph": {
-				"typography": {
-					"fontSize": "1.125rem",
-					"fontWeight": "400",
-					"lineHeight": "1.333333"
 				}
 			},
 			"h1": {
@@ -232,7 +231,7 @@
 					"fontWeight": "400",
 					"letterSpacing": "0.34em",
 					"textTransform": "uppercase",
-					"lineHeight": "1rem"
+					"lineHeight": "var(--wp--custom--typography--line-height--heading)"
 				}
 			},
 			"h5": {
@@ -245,7 +244,7 @@
 					"fontSize": "var:preset|font-size|xl",
 					"fontWeight": "400",
 					"letterSpacing": "0.0625rem",
-					"lineHeight": "1"
+					"lineHeight": "var(--wp--custom--typography--line-height--heading)"
 				}
 			}
 		},
@@ -260,7 +259,23 @@
 			},
 			"core/paragraph": {
 				"typography": {
-					"fontFamily": "var(--wp--preset--font-family--refined-sans)"
+					"fontFamily": "var(--wp--preset--font-family--refined-sans)",
+					"lineHeight": "var(--wp--custom--typography--line-height--body)"
+				}
+			},
+			"core/list": {
+				"typography": {
+					"lineHeight": "var(--wp--custom--typography--line-height--body)"
+				}
+			},
+			"core/quote": {
+				"typography": {
+					"lineHeight": "var(--wp--custom--typography--line-height--body)"
+				}
+			},
+			"core/table": {
+				"typography": {
+					"lineHeight": "var(--wp--custom--typography--line-height--body)"
 				}
 			},
 			"core/button": {

@@ -87,7 +87,7 @@ body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 	font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
 	font-weight: 400;
 	letter-spacing: 0.28em;
-	line-height: 1rem;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	text-transform: uppercase;
 }
 
@@ -99,7 +99,7 @@ body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 .vvm-password-hero__title {
 	color: var(--wp--preset--color--light-gold, #f5ecd7);
 	font-size: var(--wp--preset--font-size--five-xl);
-	line-height: 1.05;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	margin: 0;
 	max-inline-size: 820px;
 }
@@ -108,7 +108,7 @@ body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 	color: rgba(245, 236, 215, 0.82);
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: var(--wp--preset--font-size--xl);
-	line-height: 1.55;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	margin: 1.25rem 0 0;
 	max-inline-size: 680px;
 }
@@ -158,7 +158,7 @@ body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 .vvm-password-form__title {
 	color: var(--wp--preset--color--dark-green, #1e3d2f);
 	font-size: var(--wp--preset--font-size--three-xl);
-	line-height: 1.15;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	margin: 0;
 }
 
@@ -166,7 +166,7 @@ body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 	color: rgba(30, 61, 47, 0.74);
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: var(--wp--preset--font-size--lg);
-	line-height: 1.65;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	margin-top: 1rem;
 	max-inline-size: 34rem;
 }
@@ -190,7 +190,7 @@ body.single-villa .wp-block-post-content > :where(:not(.alignfull)) {
 	color: var(--wp--preset--color--dark-green, #1e3d2f);
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: var(--wp--preset--font-size--md);
-	line-height: 1.55;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	margin-top: 1.25rem;
 	padding: 0.875rem 1rem;
 }
@@ -431,11 +431,13 @@ body.page-id-1724 .wp-site-blocks .vvm-about-team-row > .wp-block-paragraph {
 /*
  * Heading utility classes let editors keep the correct semantic heading level
  * while borrowing another heading's visual style, e.g. an H2 styled like H4.
+ * Unitless line-height tokens come from theme.json, keeping the same rhythm
+ * in native blocks, custom components, and responsive heading treatments.
  */
 .wp-site-blocks :where(.h1, .h2, .h3, .h5, .h6) {
 	font-family: var(--wp--preset--font-family--display-serif);
 	font-weight: 400;
-	line-height: 1.3;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	letter-spacing: normal;
 	text-transform: none;
 	color: var(--wp--preset--color--dark-green);
@@ -458,7 +460,7 @@ body.page-id-1724 .wp-site-blocks .vvm-about-team-row > .wp-block-paragraph {
 	font-size: clamp(0.6875rem, 0.66rem + 0.18vw, 0.75rem);
 	font-weight: 400;
 	letter-spacing: 0.34em;
-	line-height: 1rem;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	text-transform: uppercase;
 	color: var(--wp--preset--color--dark-green);
 }
@@ -471,7 +473,7 @@ body.page-id-1724 .wp-site-blocks .vvm-about-team-row > .wp-block-paragraph {
 	font-size: var(--wp--preset--font-size--xl);
 	font-weight: 400;
 	letter-spacing: 0.0625rem;
-	line-height: 1;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 }
 
 /*
@@ -575,7 +577,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	gap: 1rem;
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: 0.875rem;
-	line-height: 1.75;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	color: rgba(245, 236, 215, 0.88);
 }
 
@@ -613,7 +615,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: clamp(1rem, 0.96rem + 0.18vw, 1.125rem);
 	font-weight: 400;
-	line-height: 1.55;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	color: var(--vvm-numbered-list-text);
 }
 
@@ -676,7 +678,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: 1rem;
 	font-weight: 400;
-	line-height: 1.55;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	color: rgb(30 61 47 / 0.88);
 }
 
@@ -860,7 +862,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-weight: 400;
 	letter-spacing: 0.24em;
-	line-height: 1.15;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	text-transform: uppercase;
 }
 
@@ -874,7 +876,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	margin: 0.9rem 0 0;
 	color: var(--vvm-bedroom-levels-muted);
 	font-size: 1rem;
-	line-height: 1.55;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-bedroom-levels__title {
@@ -886,7 +888,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-size: 24px;
 	font-weight: 400;
 	letter-spacing: normal;
-	line-height: 1.3;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	text-transform: none;
 }
 
@@ -919,7 +921,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	margin: 0;
 	color: rgb(23 53 40 / 0.54);
 	font-size: 0.62rem;
-	line-height: 1.45;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 .wp-site-blocks .vvm-bedroom-levels__badge {
@@ -984,7 +986,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	background: var(--vvm-bedroom-levels-soft);
 	color: rgb(23 53 40 / 0.58);
 	font-size: 0.56rem;
-	line-height: 1.15;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 }
 
 .wp-site-blocks .vvm-bedroom-levels__chip--bed {
@@ -1051,7 +1053,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-weight: 400;
 	letter-spacing: 0.24em;
-	line-height: 1.15;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	text-transform: uppercase;
 }
 
@@ -1068,7 +1070,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	color: var(--vvm-villa-amenities-muted);
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: 0.95rem;
-	line-height: 1.7;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__chips {
@@ -1274,7 +1276,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	color: var(--vvm-villa-amenities-muted);
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: 0.94rem;
-	line-height: 1.55;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-amenities__card--dark .vvm-villa-amenities__item {
@@ -1477,7 +1479,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: clamp(1.2rem, 1.5vw, 1.45rem);
 	font-weight: 400;
-	line-height: 1.45;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-reviews__copy,
@@ -1693,7 +1695,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	color: rgb(23 53 40 / 0.52);
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: 0.82rem;
-	line-height: 1.55;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__table {
@@ -1726,14 +1728,14 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-size: 0.62rem;
 	font-weight: 400;
 	letter-spacing: 0.24em;
-	line-height: 1.15;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	text-transform: uppercase;
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__table td {
 	color: var(--vvm-villa-amenities-muted);
 	font-size: 0.94rem;
-	line-height: 1.55;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__table tbody td:nth-child(2) {
@@ -1764,7 +1766,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__terms-copy {
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: 0.94rem;
-	line-height: 1.55;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__terms-title {
@@ -2245,7 +2247,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	color: rgb(247 241 231 / 0.72);
 	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: 0.76rem;
-	line-height: 1.45;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form .wpcf7-not-valid-tip {
@@ -2350,23 +2352,23 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-staff h5.wp-block-heading {
 	font-size: 1.45rem;
-	line-height: 1.18;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 }
 
 @media (max-width: 1299px) {
 	body.single-villa .wp-site-blocks .wp-block-post-content h2.wp-block-heading {
 		font-size: 2rem;
-		line-height: 1.22;
+		line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	}
 
 	body.single-villa .wp-site-blocks .wp-block-post-content h3.wp-block-heading {
 		font-size: 1.75rem;
-		line-height: 1.22;
+		line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	}
 
 	body.single-villa .wp-site-blocks .wp-block-post-content h5.wp-block-heading {
 		font-size: 1.45rem;
-		line-height: 1.18;
+		line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	}
 }
 
@@ -2381,7 +2383,7 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 
 	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-staff h5.wp-block-heading {
 		font-size: 1.35rem;
-		line-height: 1.15;
+		line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	}
 }
 
@@ -3398,7 +3400,7 @@ body.vvm-has-static-header .vvm-header {
 	margin-bottom: 0;
 	max-width: 18rem;
 	font-size: 1rem;
-	line-height: 1.6;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	opacity: 0.8;
 	color: var(--vvm-footer-text);
 }
@@ -3409,7 +3411,7 @@ body.vvm-has-static-header .vvm-header {
 	font-size: 14px;
 	font-weight: 400;
 	letter-spacing: 0.14em;
-	line-height: 1.4;
+	line-height: var(--wp--custom--typography--line-height--heading, 1.3);
 	text-transform: uppercase;
 	color: var(--vvm-footer-accent);
 }
@@ -3438,7 +3440,7 @@ body.vvm-has-static-header .vvm-header {
 	font-size: 1rem;
 	font-weight: 400;
 	letter-spacing: 0;
-	line-height: 1.5;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	text-transform: none;
 	color: var(--vvm-footer-text);
 	text-decoration: none;
@@ -3480,7 +3482,7 @@ body.vvm-has-static-header .vvm-header {
 	gap: 0.875rem;
 	margin: 0;
 	font-size: 1rem;
-	line-height: 1.65;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	letter-spacing: 0;
 	color: var(--vvm-footer-text);
 	font-family: "Liberation Serif", Georgia, serif;
@@ -3562,7 +3564,7 @@ body.vvm-has-static-header .vvm-header {
 .vvm-footer__copyright {
 	margin: 0;
 	font-size: 0.875rem;
-	line-height: 1.5;
+	line-height: var(--wp--custom--typography--line-height--body, 1.6);
 	opacity: 0.7;
 	color: var(--vvm-footer-text);
 }
