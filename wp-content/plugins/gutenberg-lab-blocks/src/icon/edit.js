@@ -93,7 +93,7 @@ export default function Edit( { attributes, setAttributes } ) {
 			.filter( Boolean )
 			.join( ' ' ),
 		style: isCustomSize
-			? getIconSizeStyle( customSize, '--vvm-icon-block-size' )
+			? getIconSizeStyle( customSize, '--vvm-icon-block-size', { min: 0.75 } )
 			: undefined,
 	} );
 

@@ -143,6 +143,19 @@ function gutenberg_lab_blocks_get_villa_amenity_icon_registry() {
 			'label' => __( 'Closet', 'gutenberg-lab-blocks' ),
 			'asset' => $theme_asset_dir . 'closet.svg',
 		),
+		// Reuse the footer artwork. Explicit strokes keep its weight and allow native text colours.
+		'contact-email'      => array(
+			'label' => __( 'Contact - Email', 'gutenberg-lab-blocks' ),
+			'paths' => '<path d="M4 6.5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.75"/><path d="m4 8 8 5 8-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"/>',
+		),
+		'contact-location'   => array(
+			'label' => __( 'Contact - Location', 'gutenberg-lab-blocks' ),
+			'paths' => '<path d="M12 21s6-4.35 6-10a6 6 0 1 0-12 0c0 5.65 6 10 6 10Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.75"/><circle cx="12" cy="11" r="2" fill="none" stroke="currentColor" stroke-width="1.75"/>',
+		),
+		'contact-phone'      => array(
+			'label' => __( 'Contact - Phone', 'gutenberg-lab-blocks' ),
+			'paths' => '<path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1-.24 11.72 11.72 0 0 0 3.68.59 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.47a1 1 0 0 1 1 1 11.72 11.72 0 0 0 .59 3.68 1 1 0 0 1-.24 1Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"/>',
+		),
 		'cooking-pot'        => array(
 			'label' => __( 'Cooking Pot', 'gutenberg-lab-blocks' ),
 			'asset' => $theme_asset_dir . 'cooking-pot.svg',

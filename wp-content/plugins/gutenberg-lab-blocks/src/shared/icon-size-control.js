@@ -19,8 +19,9 @@ export function normalizeIconSize(
 	return Math.min( max, Math.max( min, numericValue ) );
 }
 
-export function getIconSizeStyle( iconSize, cssVariableName ) {
-	const normalizedSize = normalizeIconSize( iconSize );
+export function getIconSizeStyle( iconSize, cssVariableName, sizeOptions = {} ) {
+	// Let each block use the same bounds for its preview and size control.
+	const normalizedSize = normalizeIconSize( iconSize, 0, sizeOptions );
 
 	if ( ! normalizedSize || ! cssVariableName ) {
 		return undefined;

@@ -58,6 +58,11 @@
 - Use a block style variation for presentation options, such as showing three reviews at a time, before adding custom Inspector controls.
 - Carousel scripts need to resync when their block starts inside a hidden tab panel, because hidden elements report zero width.
 
+## Shared Icons
+
+- Add reusable SVG artwork to the shared registry in `includes/villas.php`; its labels and markup feed the native block selector, editor preview and PHP renderer together. The Contact icons reuse the footer paths with `currentColor`, so Gutenberg's text colour control also colours the icon.
+- Keep custom size limits consistent between the editor control, preview and PHP renderer. Shared Icon permits `0.75rem`; other blocks retain their existing limits.
+
 ## Typography
 
 - Keep line-height ratios in `settings.custom.typography.lineHeight`. Native block defaults and component/editor CSS share the body and heading tokens; paragraphs belong under `styles.blocks.core/paragraph`, not the unsupported `styles.elements.paragraph` key. Clear old saved block overrides when adopting a shared default.
