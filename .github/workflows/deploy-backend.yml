@@ -94,6 +94,18 @@ jobs:
           mkdir -p $PLUGINPATH
           cp -R wp-content/plugins/gutenberg-lab-blocks/* $PLUGINPATH/
 
+          # Copying alone leaves retired fonts publicly downloadable. Mirror
+          # theme-owned fonts, preserving the existing Romely directory.
+          test "$THEMEPATH" = '/home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm'
+          test -f 'wp-content/themes/gutenberg-lab-vvm/assets/fonts/dm-sans/DM-Sans-Latin.woff2'
+          test -f 'wp-content/themes/gutenberg-lab-vvm/assets/fonts/romely/Romely-Regular.woff2'
+          rsync -a --delete --exclude='/romely/' \
+            'wp-content/themes/gutenberg-lab-vvm/assets/fonts/' \
+            "$THEMEPATH/assets/fonts/"
+          test ! -e "$THEMEPATH/assets/fonts/tt-norms"
+          cmp -s 'wp-content/themes/gutenberg-lab-vvm/assets/fonts/romely/Romely-Regular.woff2' \
+            "$THEMEPATH/assets/fonts/romely/Romely-Regular.woff2"
+
           # Check a few sentinel files so we know the copy step reached both targets.
           test -f "$THEMEPATH/style.css"
           test -f "$THEMEPATH/functions.php"
@@ -102,6 +114,7 @@ jobs:
 
           cmp -s "wp-content/themes/gutenberg-lab-vvm/style.css" "$THEMEPATH/style.css"
           cmp -s "wp-content/themes/gutenberg-lab-vvm/functions.php" "$THEMEPATH/functions.php"
+          cmp -s "wp-content/themes/gutenberg-lab-vvm/theme.json" "$THEMEPATH/theme.json"
           cmp -s "wp-content/plugins/gutenberg-lab-blocks/gutenberg-lab-blocks.php" "$PLUGINPATH/gutenberg-lab-blocks.php"
           REMOTE_SCRIPT
 

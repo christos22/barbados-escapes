@@ -6,6 +6,13 @@ deployment:
     - /bin/mkdir -p $THEMEPATH
     - /bin/cp -R wp-content/themes/gutenberg-lab-vvm/* $THEMEPATH/
 
+    # Remove retired theme fonts while preserving the existing Romely files.
+    - test "$THEMEPATH" = /home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm
+    - test -f wp-content/themes/gutenberg-lab-vvm/assets/fonts/dm-sans/DM-Sans-Latin.woff2
+    - test -f wp-content/themes/gutenberg-lab-vvm/assets/fonts/romely/Romely-Regular.woff2
+    - rsync -a --delete --exclude='/romely/' wp-content/themes/gutenberg-lab-vvm/assets/fonts/ "$THEMEPATH/assets/fonts/"
+    - test ! -e "$THEMEPATH/assets/fonts/tt-norms"
+
     # Mirror the custom blocks plugin, including committed build assets.
     - export PLUGINPATH=/home/grapsa5/barbadosescapes.com/wp-content/plugins/gutenberg-lab-blocks
     - /bin/mkdir -p $PLUGINPATH
