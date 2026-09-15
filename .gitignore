@@ -38,6 +38,9 @@ wp-content/themes/*
 !wp-content/themes/gutenberg-lab-vvm/
 !wp-content/themes/gutenberg-lab-vvm/**
 
+# Purchased Romely files are installed privately, never published in Git.
+wp-content/themes/gutenberg-lab-vvm/assets/fonts/romely/
+
 # Never track generated content or local site state.
 wp-content/uploads/
 

@@ -1,17 +1,19 @@
 ---
 deployment:
   tasks:
+    # Purchased font files and the EULA must already exist outside the web root.
+    - bash docs/scripts/install-licensed-romely.sh check /home/grapsa5/barbados-private-assets/romely/2026-09-15
     # Mirror the custom block theme into the live WordPress install.
     - export THEMEPATH=/home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm
     - /bin/mkdir -p $THEMEPATH
-    - /bin/cp -R wp-content/themes/gutenberg-lab-vvm/* $THEMEPATH/
+    - rsync -a --exclude='/assets/fonts/romely/' wp-content/themes/gutenberg-lab-vvm/ "$THEMEPATH/"
 
-    # Remove retired theme fonts while preserving the existing Romely files.
+    # Remove retired open-licensed fonts and install Romely from private storage.
     - test "$THEMEPATH" = /home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm
     - test -f wp-content/themes/gutenberg-lab-vvm/assets/fonts/dm-sans/DM-Sans-Latin.woff2
-    - test -f wp-content/themes/gutenberg-lab-vvm/assets/fonts/romely/Romely-Regular.woff2
     - rsync -a --delete --exclude='/romely/' wp-content/themes/gutenberg-lab-vvm/assets/fonts/ "$THEMEPATH/assets/fonts/"
     - test ! -e "$THEMEPATH/assets/fonts/tt-norms"
+    - bash docs/scripts/install-licensed-romely.sh install /home/grapsa5/barbados-private-assets/romely/2026-09-15 "$THEMEPATH"
 
     # Mirror the custom blocks plugin, including committed build assets.
     - export PLUGINPATH=/home/grapsa5/barbadosescapes.com/wp-content/plugins/gutenberg-lab-blocks

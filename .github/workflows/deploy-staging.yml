@@ -82,6 +82,7 @@ jobs:
           readonly PLUGIN_SLUG='gutenberg-lab-blocks'
           readonly THEMEPATH="$WORDPRESSPATH/wp-content/themes/$THEME_SLUG"
           readonly PLUGINPATH="$WORDPRESSPATH/wp-content/plugins/$PLUGIN_SLUG"
+          readonly ROMELY_PRIVATE='/home/grapsa5/barbados-private-assets/romely/2026-09-15'
 
           # Fail closed before creating or copying anything. A staging-path
           # typo must never fall through to the production WordPress install.
@@ -137,21 +138,24 @@ jobs:
           test -f "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/gutenberg-lab-blocks.php"
           test -d "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/build"
 
+          # Fail before copying code if the privately uploaded font or EULA is missing.
+          bash "$REPOPATH/docs/scripts/install-licensed-romely.sh" check "$ROMELY_PRIVATE"
+
           # Deploy only source-controlled custom code. Staging content, uploads,
           # WordPress core, third-party plugins, and local backups are untouched.
-          rsync -a "$REPOPATH/wp-content/themes/$THEME_SLUG/" "$THEMEPATH/"
+          rsync -a --exclude='/assets/fonts/romely/' "$REPOPATH/wp-content/themes/$THEME_SLUG/" "$THEMEPATH/"
           rsync -a "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/" "$PLUGINPATH/"
 
-          # Font files are theme-owned assets. Mirror only this directory so
-          # retired font trials cannot survive a source-code deployment.
+          # Mirror open-licensed fonts, then install purchased Romely privately.
           test -f "$REPOPATH/wp-content/themes/$THEME_SLUG/assets/fonts/dm-sans/DM-Sans-Latin.woff2"
-          test -f "$REPOPATH/wp-content/themes/$THEME_SLUG/assets/fonts/romely/Romely-Regular.woff2"
-          rsync -a --delete \
+          rsync -a --delete --exclude='/romely/' \
             "$REPOPATH/wp-content/themes/$THEME_SLUG/assets/fonts/" \
             "$THEMEPATH/assets/fonts/"
+          bash "$REPOPATH/docs/scripts/install-licensed-romely.sh" install "$ROMELY_PRIVATE" "$THEMEPATH"
+          test ! -e "$THEMEPATH/assets/fonts/tt-norms"
 
           # Verify every repository-owned source file after the copy.
-          theme_drift=$(rsync -acni "$REPOPATH/wp-content/themes/$THEME_SLUG/" "$THEMEPATH/")
+          theme_drift=$(rsync -acni --exclude='/assets/fonts/romely/' "$REPOPATH/wp-content/themes/$THEME_SLUG/" "$THEMEPATH/")
           plugin_drift=$(rsync -acni "$REPOPATH/wp-content/plugins/$PLUGIN_SLUG/" "$PLUGINPATH/")
 
           if [ -n "$theme_drift" ] || [ -n "$plugin_drift" ]; then

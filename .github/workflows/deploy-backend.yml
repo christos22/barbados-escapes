@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/deploy-backend.yml'
       - '.cpanel.yml'
+      - 'docs/scripts/install-licensed-romely.sh'
       - 'wp-content/themes/gutenberg-lab-vvm/**'
       - 'wp-content/plugins/gutenberg-lab-blocks/**'
 
@@ -73,6 +74,7 @@ jobs:
           export REPOPATH=/home/grapsa5/repositories/barbados-escapes
           export THEMEPATH=/home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm
           export PLUGINPATH=/home/grapsa5/barbadosescapes.com/wp-content/plugins/gutenberg-lab-blocks
+          readonly ROMELY_PRIVATE='/home/grapsa5/barbados-private-assets/romely/2026-09-15'
 
           cd $REPOPATH
 
@@ -87,24 +89,23 @@ jobs:
             exit 1
           fi
 
+          bash docs/scripts/install-licensed-romely.sh check "$ROMELY_PRIVATE"
+
           # Keep these copy paths aligned with the cPanel deploy config.
           mkdir -p $THEMEPATH
-          cp -R wp-content/themes/gutenberg-lab-vvm/* $THEMEPATH/
+          rsync -a --exclude='/assets/fonts/romely/' wp-content/themes/gutenberg-lab-vvm/ "$THEMEPATH/"
 
           mkdir -p $PLUGINPATH
           cp -R wp-content/plugins/gutenberg-lab-blocks/* $PLUGINPATH/
 
-          # Copying alone leaves retired fonts publicly downloadable. Mirror
-          # theme-owned fonts, preserving the existing Romely directory.
+          # Mirror open-licensed fonts; Romely comes only from private storage.
           test "$THEMEPATH" = '/home/grapsa5/barbadosescapes.com/wp-content/themes/gutenberg-lab-vvm'
           test -f 'wp-content/themes/gutenberg-lab-vvm/assets/fonts/dm-sans/DM-Sans-Latin.woff2'
-          test -f 'wp-content/themes/gutenberg-lab-vvm/assets/fonts/romely/Romely-Regular.woff2'
           rsync -a --delete --exclude='/romely/' \
             'wp-content/themes/gutenberg-lab-vvm/assets/fonts/' \
             "$THEMEPATH/assets/fonts/"
           test ! -e "$THEMEPATH/assets/fonts/tt-norms"
-          cmp -s 'wp-content/themes/gutenberg-lab-vvm/assets/fonts/romely/Romely-Regular.woff2' \
-            "$THEMEPATH/assets/fonts/romely/Romely-Regular.woff2"
+          bash docs/scripts/install-licensed-romely.sh install "$ROMELY_PRIVATE" "$THEMEPATH"
 
           # Check a few sentinel files so we know the copy step reached both targets.
           test -f "$THEMEPATH/style.css"

@@ -29,6 +29,9 @@ Verified on April 12-13, 2026. Updated for the production launch target on June 
 
 ## Deploy Contract
 
+- Purchased Romely is a private deployment asset, not a Git-tracked binary.
+  See [licensed-romely.md](licensed-romely.md) for provisioning and verification.
+
 - Only custom backend code is deployed from this repo.
 - `.cpanel.yml` copies:
   - `wp-content/themes/gutenberg-lab-vvm`
@@ -45,7 +48,9 @@ Verified on April 12-13, 2026. Updated for the production launch target on June 
 There are two separate SSH trust relationships in this setup:
 
 1. Server -> GitHub
-   The InMotion server pulls the private GitHub repo with a repo-specific deploy key.
+   The InMotion server pulls the GitHub repo with a repo-specific deploy key.
+   The repository was verified public on 15 September 2026; do not commit
+   purchased font packages, licences or customer records.
 
 2. GitHub Actions -> Server
    GitHub Actions logs into the InMotion server over SSH and runs the deployment script.
