@@ -28,6 +28,131 @@ body {
 	background: #ffffff;
 }
 
+/* Contact content stays in native blocks; only the photo crop and CF7 need CSS. */
+.wp-site-blocks .vvm-contact-hero .media-panel__media img {
+	object-position: center 78%;
+}
+
+/* Leave room for the shared overlay header, including on narrow screens. */
+.wp-site-blocks .vvm-contact-hero .media-panel__overlay {
+	padding-top: 10rem;
+	padding-bottom: var(--wp--preset--spacing--lg);
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-contact-details a {
+	overflow-wrap: anywhere;
+}
+
+/* Visible labels and focus rings make the simple form usable without placeholders. */
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-contact-form {
+	color: var(--wp--preset--color--dark-green);
+	font-family: var(--wp--preset--font-family--refined-sans);
+	font-size: 1rem;
+	line-height: 1.6;
+}
+
+.vvm-contact-form .vvm-contact-form__fields {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--wp--preset--spacing--md);
+}
+
+.vvm-contact-form .vvm-contact-form__wide {
+	grid-column: 1 / -1;
+}
+
+.vvm-contact-form p {
+	margin: 0;
+}
+
+.vvm-contact-form label,
+.vvm-contact-form .wpcf7-form-control-wrap {
+	display: block;
+}
+
+.vvm-contact-form label {
+	font-weight: 500;
+}
+
+.vvm-contact-form .wpcf7-form-control-wrap {
+	margin-top: 0.4rem;
+}
+
+.vvm-contact-form :where(input:not([type="submit"]):not([type="hidden"]), textarea) {
+	box-sizing: border-box;
+	width: 100%;
+	min-width: 0;
+	min-height: 48px;
+	padding: 0.75rem 0.875rem;
+	border: 1px solid rgb(30 61 47 / 35%);
+	border-radius: 0;
+	background: var(--wp--preset--color--ivory);
+	color: var(--wp--preset--color--dark-green);
+	font: inherit;
+	font-weight: 400;
+}
+
+.vvm-contact-form textarea {
+	min-height: 150px;
+	resize: vertical;
+}
+
+.vvm-contact-form :where(input, textarea):focus-visible {
+	outline: 2px solid var(--wp--preset--color--dark-green);
+	outline-offset: 3px;
+}
+
+.vvm-contact-form .vvm-contact-form__submit {
+	min-height: 48px;
+	padding: 0.8rem 1.75rem;
+	border: 1px solid var(--wp--preset--color--gold);
+	border-radius: 0;
+	background: var(--wp--preset--color--gold);
+	color: var(--wp--preset--color--dark-green);
+	font: inherit;
+	font-size: 0.875rem;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.vvm-contact-form .vvm-contact-form__submit:hover {
+	background: var(--wp--preset--color--dark-green);
+	border-color: var(--wp--preset--color--dark-green);
+	color: var(--wp--preset--color--light-gold);
+}
+
+.vvm-contact-form .vvm-contact-form__submit:disabled {
+	opacity: 0.65;
+	cursor: wait;
+}
+
+.vvm-contact-form .wpcf7-not-valid-tip {
+	margin-top: 0.4rem;
+	color: #a32626;
+	font-size: 0.875rem;
+}
+
+.vvm-contact-form :where(input, textarea)[aria-invalid="true"] {
+	border-color: #a32626;
+}
+
+.vvm-contact-form .wpcf7-response-output {
+	margin: var(--wp--preset--spacing--md) 0 0;
+	padding: var(--wp--preset--spacing--sm);
+}
+
+.vvm-contact-form.sent .wpcf7-response-output {
+	border-color: var(--wp--preset--color--dark-green);
+}
+
+@media (max-width: 600px) {
+	.vvm-contact-form .vvm-contact-form__fields {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
 /*
  * Elfsight renders the chat UI inside a shadow root. The shadow tree inherits
  * from this host element, so set the host font to avoid the site's serif

@@ -63,6 +63,13 @@
 - Add reusable SVG artwork to the shared registry in `includes/villas.php`; its labels and markup feed the native block selector, editor preview and PHP renderer together. The Contact icons reuse the footer paths with `currentColor`, so Gutenberg's text colour control also colours the icon.
 - Keep custom size limits consistent between the editor control, preview and PHP renderer. Shared Icon permits `0.75rem`; other blocks retain their existing limits.
 
+## Contact Page Composition
+
+- Compose the page with Media Panel, native Groups/Columns, Shared Icon, Google Map and Contact Form 7. A new custom block is unnecessary for this layout.
+- Native block attributes hold content, spacing and colours; the theme stylesheet supplies the contact photo crop and scoped form styling. The page and CF7 form are database content, so deploying CSS alone does not transfer them.
+- In this WordPress version, a fixed-width child in a native Row uses `style.layout.selfStretch: "fixed"` with `flexSize`. This keeps the icon wrapper compact while its neighbouring text can wrap.
+- Keep general enquiries in a separate CF7 form from villa enquiries. Verify required fields and the resulting email through DDEV Mailpit before enabling production delivery.
+
 ## Typography
 
 - Keep line-height ratios in `settings.custom.typography.lineHeight`. Native block defaults and component/editor CSS share the body and heading tokens; paragraphs belong under `styles.blocks.core/paragraph`, not the unsupported `styles.elements.paragraph` key. Clear old saved block overrides when adopting a shared default.
