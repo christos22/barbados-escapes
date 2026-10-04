@@ -115,6 +115,10 @@ body {
 	text-decoration: underline;
 }
 
+.wp-site-blocks .vvm-contact-details a[href^="mailto:"] {
+	font-family: var(--wp--preset--font-family--refined-sans);
+}
+
 /* Visible labels and focus rings make the simple form usable without placeholders. */
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-contact-form {
 	color: var(--wp--preset--color--dark-green);
