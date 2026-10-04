@@ -49,7 +49,6 @@ body {
 	line-height: 1.08;
 }
 
-.wp-site-blocks .vvm-contact-details > p:not(.h4),
 .wp-site-blocks .vvm-contact-details .is-layout-flex > .wp-block-group > p:last-child {
 	font-family: var(--wp--preset--font-family--display-serif) !important;
 	font-size: 1.125rem !important;
@@ -57,7 +56,9 @@ body {
 }
 
 .wp-site-blocks .vvm-contact-details > p:not(.h4) {
+	/* Keep the native paragraph font while preserving the editorial spacing. */
 	font-size: 1rem !important;
+	line-height: 1.45;
 }
 
 /* The short rule is decorative; it adds no extra wording to the eyebrow. */
