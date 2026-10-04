@@ -97,6 +97,11 @@ body {
 	border-bottom: 0;
 }
 
+/* The location value uses the same paragraph font as the other contact details. */
+.wp-site-blocks .vvm-contact-details > .wp-block-group > .is-layout-flex:last-child p:not(.h4) {
+	font-family: var(--wp--preset--font-family--refined-sans) !important;
+}
+
 .wp-site-blocks .vvm-contact-details .is-layout-flex > .wp-block-group {
 	margin: 0;
 }
