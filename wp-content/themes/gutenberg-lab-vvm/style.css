@@ -28,7 +28,7 @@ body {
 	background: #ffffff;
 }
 
-/* Contact content stays in native blocks; only the photo crop and CF7 need CSS. */
+/* Contact content stays in native blocks; the theme supplies its presentation. */
 .wp-site-blocks .vvm-contact-hero .media-panel__media img {
 	object-position: center 78%;
 }
@@ -42,6 +42,84 @@ body {
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-contact-details a {
 	overflow-wrap: anywhere;
+}
+
+/* Editorial contact treatment: preserve all saved copy and link destinations. */
+.wp-site-blocks .vvm-contact-details > .wp-block-heading {
+	line-height: 1.08;
+}
+
+.wp-site-blocks .vvm-contact-details > p:not(.h4),
+.wp-site-blocks .vvm-contact-details .is-layout-flex > .wp-block-group > p:last-child {
+	font-family: var(--wp--preset--font-family--display-serif) !important;
+	font-size: 1.125rem !important;
+	line-height: 1.45;
+}
+
+.wp-site-blocks .vvm-contact-details > p:not(.h4) {
+	font-size: 1rem !important;
+}
+
+.wp-site-blocks .vvm-contact-details > .h4,
+.wp-site-blocks .vvm-contact-details .is-layout-flex > .wp-block-group > p:first-child {
+	color: var(--wp--custom--brand--accessible-gold);
+	font-size: 0.6875rem !important;
+	font-weight: 600;
+	letter-spacing: 0.18em !important;
+	line-height: 1.5;
+}
+
+/* The short rule is decorative; it adds no extra wording to the eyebrow. */
+.wp-site-blocks .vvm-contact-details > .h4::after {
+	content: "";
+	display: block;
+	width: 2rem;
+	height: 1px;
+	margin-top: 0.75rem;
+	background: var(--wp--preset--color--gold);
+}
+
+.wp-site-blocks .vvm-contact-details > .wp-block-group {
+	margin-top: 2rem !important;
+}
+
+/* Keep the decorative icon blocks saved, but present the reference's text rows. */
+.wp-site-blocks .vvm-contact-details .vvm-icon {
+	/* Icon rendering supplies an inline display value. */
+	display: none !important;
+}
+
+.wp-site-blocks .vvm-contact-details > .wp-block-group > .is-layout-flex {
+	display: block;
+	margin-top: 1rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid rgb(138 99 29 / 0.22);
+}
+
+.wp-site-blocks .vvm-contact-details > .wp-block-group > .is-layout-flex:first-child {
+	margin-top: 0;
+}
+
+.wp-site-blocks .vvm-contact-details > .wp-block-group > .is-layout-flex:last-child {
+	padding-bottom: 0;
+	border-bottom: 0;
+}
+
+.wp-site-blocks .vvm-contact-details .is-layout-flex > .wp-block-group {
+	margin: 0;
+}
+
+/* Enlarge the two phone numbers; the separate WhatsApp CTA keeps its text size. */
+.wp-site-blocks .vvm-contact-details a[href^="tel:"],
+.wp-site-blocks .vvm-contact-details a[href^="https://wa.me/"]:only-child {
+	display: inline-block;
+	font-size: clamp(1.5rem, 3vw, 2rem);
+	line-height: 1.2;
+	text-decoration: none;
+}
+
+.wp-site-blocks .vvm-contact-details a:hover {
+	text-decoration: underline;
 }
 
 /* Visible labels and focus rings make the simple form usable without placeholders. */
