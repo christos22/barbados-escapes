@@ -69,6 +69,7 @@
 - Native block attributes hold content, spacing and colours; the theme stylesheet supplies the contact photo crop and scoped form styling. The page and CF7 form are database content, so deploying CSS alone does not transfer them.
 - In this WordPress version, a fixed-width child in a native Row uses `style.layout.selfStretch: "fixed"` with `flexSize`. This keeps the icon wrapper compact while its neighbouring text can wrap.
 - Keep general enquiries in a separate CF7 form from villa enquiries. Verify required fields and the resulting email through DDEV Mailpit before enabling production delivery.
+- Match the shared Media Panel hero's responsive bottom inset when adding page-specific header clearance; a fixed bottom inset can leave text too close to the image edge on desktop.
 
 ## Typography
 

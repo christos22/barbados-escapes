@@ -36,7 +36,8 @@ body {
 /* Leave room for the shared overlay header, including on narrow screens. */
 .wp-site-blocks .vvm-contact-hero .media-panel__overlay {
 	padding-top: 10rem;
-	padding-bottom: var(--wp--preset--spacing--lg);
+	/* Match the shared hero's 6vw inset, retaining the mobile 2.5rem minimum. */
+	padding-bottom: clamp(var(--wp--preset--spacing--lg), 6vw, 6rem);
 }
 
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-contact-details a {
