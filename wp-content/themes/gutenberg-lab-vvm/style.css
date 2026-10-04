@@ -50,7 +50,7 @@ body {
 }
 
 .wp-site-blocks .vvm-contact-details .is-layout-flex > .wp-block-group > p:last-child {
-	font-family: var(--wp--preset--font-family--display-serif) !important;
+	/* All contact values retain their native DM Sans paragraph font. */
 	font-size: 1.125rem !important;
 	line-height: 1.45;
 }
@@ -97,31 +97,19 @@ body {
 	border-bottom: 0;
 }
 
-/* The location value uses the same paragraph font as the other contact details. */
-.wp-site-blocks .vvm-contact-details > .wp-block-group > .is-layout-flex:last-child p:not(.h4) {
-	font-family: var(--wp--preset--font-family--refined-sans) !important;
-}
-
 .wp-site-blocks .vvm-contact-details .is-layout-flex > .wp-block-group {
 	margin: 0;
 }
 
-/* Use the paragraph font for both enlarged phone numbers. */
+/* Phone links inherit the same size and font as the other contact values. */
 .wp-site-blocks .vvm-contact-details a[href^="tel:"],
 .wp-site-blocks .vvm-contact-details a[href^="https://wa.me/"]:only-child {
 	display: inline-block;
-	font-family: var(--wp--preset--font-family--refined-sans);
-	font-size: clamp(1.5rem, 3vw, 2rem);
-	line-height: 1.2;
 	text-decoration: none;
 }
 
 .wp-site-blocks .vvm-contact-details a:hover {
 	text-decoration: underline;
-}
-
-.wp-site-blocks .vvm-contact-details a[href^="mailto:"] {
-	font-family: var(--wp--preset--font-family--refined-sans);
 }
 
 /* Visible labels and focus rings make the simple form usable without placeholders. */
