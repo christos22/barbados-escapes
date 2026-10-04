@@ -101,10 +101,11 @@ body {
 	margin: 0;
 }
 
-/* Enlarge the two phone numbers; the separate WhatsApp CTA keeps its text size. */
+/* Use the paragraph font for both enlarged phone numbers. */
 .wp-site-blocks .vvm-contact-details a[href^="tel:"],
 .wp-site-blocks .vvm-contact-details a[href^="https://wa.me/"]:only-child {
 	display: inline-block;
+	font-family: var(--wp--preset--font-family--refined-sans);
 	font-size: clamp(1.5rem, 3vw, 2rem);
 	line-height: 1.2;
 	text-decoration: none;
