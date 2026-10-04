@@ -71,6 +71,7 @@
 - Keep general enquiries in a separate CF7 form from villa enquiries. Verify required fields and the resulting email through DDEV Mailpit before enabling production delivery.
 - Match the shared Media Panel hero's responsive bottom inset when adding page-specific header clearance; a fixed bottom inset can leave text too close to the image edge on desktop.
 - For presentation-only reference changes, scope typography and divider rules to the section and verify that the saved wording, link destinations and widget triggers remain unchanged.
+- Use the shared `h4` utility for Contact eyebrows; remove saved font-size/weight/tracking overrides so section labels inherit the site treatment. Hero eyebrows keep the shared XL size used on other page heroes.
 
 ## Typography
 

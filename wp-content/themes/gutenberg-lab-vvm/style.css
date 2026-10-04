@@ -60,15 +60,6 @@ body {
 	font-size: 1rem !important;
 }
 
-.wp-site-blocks .vvm-contact-details > .h4,
-.wp-site-blocks .vvm-contact-details .is-layout-flex > .wp-block-group > p:first-child {
-	color: var(--wp--custom--brand--accessible-gold);
-	font-size: 0.6875rem !important;
-	font-weight: 600;
-	letter-spacing: 0.18em !important;
-	line-height: 1.5;
-}
-
 /* The short rule is decorative; it adds no extra wording to the eyebrow. */
 .wp-site-blocks .vvm-contact-details > .h4::after {
 	content: "";
