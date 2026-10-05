@@ -73,6 +73,7 @@
 - For presentation-only reference changes, scope typography and divider rules to the section and verify that the saved wording, link destinations and widget triggers remain unchanged.
 - Use the shared `h4` utility for Contact eyebrows; remove saved font-size/weight/tracking overrides so section labels inherit the site treatment. Hero eyebrows keep the shared XL size used on other page heroes.
 - Equal-height Columns do not automatically stretch their inner Groups. On desktop, let the Contact details Group and its rows grow with flex layout; keep natural content heights below Gutenberg's 782px column breakpoint.
+- Keep the CF7 submit button inside a full-width action Group: Turnstile injects block markup before it, which otherwise breaks a paragraph into extra grid rows. Preserve the widget's own space when a challenge appears.
 
 ## Typography
 

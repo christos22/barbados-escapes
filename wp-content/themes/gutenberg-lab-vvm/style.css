@@ -114,8 +114,12 @@ body {
 
 /* Stretch the details to the form only while Gutenberg displays two columns. */
 @media (min-width: 782px) {
-	.wp-site-blocks .wp-block-column:has(> .vvm-contact-details) {
+	.wp-site-blocks .vvm-contact-columns > .wp-block-column {
 		display: flex;
+	}
+
+	.wp-site-blocks .vvm-contact-card {
+		flex: 1;
 	}
 
 	.wp-site-blocks .vvm-contact-details {
@@ -123,7 +127,7 @@ body {
 		flex-direction: column;
 		flex: 1;
 		/* Match the form card's bottom inset; its height remains content-driven. */
-		padding-bottom: clamp(1.5rem, 3vw, 3rem);
+		padding-bottom: var(--wp--preset--spacing--md);
 	}
 
 	.wp-site-blocks .vvm-contact-details > .wp-block-group {
@@ -159,7 +163,7 @@ body {
 .vvm-contact-form .vvm-contact-form__fields {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--wp--preset--spacing--md);
+	gap: 1.25rem var(--wp--preset--spacing--md);
 }
 
 .vvm-contact-form .vvm-contact-form__wide {
@@ -167,6 +171,33 @@ body {
 }
 
 .vvm-contact-form p {
+	margin: 0;
+}
+
+/* Keep injected Turnstile markup inside one action row, not separate grid rows. */
+.vvm-contact-form__actions {
+	position: relative;
+}
+
+.vvm-contact-form__actions > br,
+.vvm-contact-form__actions > p:empty {
+	display: none;
+}
+
+.vvm-contact-form__actions .cf7-cf-turnstile {
+	/* Let the widget reserve its own space only when a challenge is shown. */
+	margin: 0 !important;
+}
+
+.vvm-contact-form__actions .vvm-contact-form__submit {
+	width: calc((100% - var(--wp--preset--spacing--md)) / 2);
+	vertical-align: middle;
+}
+
+.vvm-contact-form__actions .wpcf7-spinner {
+	position: absolute;
+	bottom: 13px;
+	left: calc(50% + 12px);
 	margin: 0;
 }
 
@@ -255,6 +286,15 @@ body {
 @media (max-width: 600px) {
 	.vvm-contact-form .vvm-contact-form__fields {
 		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.vvm-contact-form__actions .vvm-contact-form__submit {
+		width: 100%;
+	}
+
+	.vvm-contact-form__actions .wpcf7-spinner {
+		right: 12px;
+		left: auto;
 	}
 }
 
