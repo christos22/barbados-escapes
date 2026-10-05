@@ -72,6 +72,7 @@
 - Match the shared Media Panel hero's responsive bottom inset when adding page-specific header clearance; a fixed bottom inset can leave text too close to the image edge on desktop.
 - For presentation-only reference changes, scope typography and divider rules to the section and verify that the saved wording, link destinations and widget triggers remain unchanged.
 - Use the shared `h4` utility for Contact eyebrows; remove saved font-size/weight/tracking overrides so section labels inherit the site treatment. Hero eyebrows keep the shared XL size used on other page heroes.
+- Equal-height Columns do not automatically stretch their inner Groups. On desktop, let the Contact details Group and its rows grow with flex layout; keep natural content heights below Gutenberg's 782px column breakpoint.
 
 ## Typography
 

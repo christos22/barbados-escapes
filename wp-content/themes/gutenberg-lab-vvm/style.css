@@ -112,6 +112,42 @@ body {
 	text-decoration: underline;
 }
 
+/* Stretch the details to the form only while Gutenberg displays two columns. */
+@media (min-width: 782px) {
+	.wp-site-blocks .wp-block-column:has(> .vvm-contact-details) {
+		display: flex;
+	}
+
+	.wp-site-blocks .vvm-contact-details {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		/* Match the form card's bottom inset; its height remains content-driven. */
+		padding-bottom: clamp(1.5rem, 3vw, 3rem);
+	}
+
+	.wp-site-blocks .vvm-contact-details > .wp-block-group {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+	}
+
+	.wp-site-blocks .vvm-contact-details > .wp-block-group > .is-layout-flex {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: center;
+		flex: 1;
+		margin-top: 0;
+		padding-top: 1rem;
+	}
+
+	.wp-site-blocks .vvm-contact-details > .wp-block-group > .is-layout-flex:last-child {
+		/* Keep the location text level with the form's final line of content. */
+		flex: 0 0 auto;
+	}
+}
+
 /* Visible labels and focus rings make the simple form usable without placeholders. */
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-contact-form {
 	color: var(--wp--preset--color--dark-green);
