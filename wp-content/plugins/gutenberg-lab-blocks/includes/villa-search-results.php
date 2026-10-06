@@ -115,8 +115,8 @@ function gutenberg_lab_blocks_query_villa_search_candidate_ids( $request ) {
 		'ignore_sticky_posts'    => true,
 		'no_found_rows'          => true,
 		'orderby'                => array(
-			'menu_order' => 'ASC',
-			'title'      => 'ASC',
+			'villa_starting_price' => 'DESC',
+			'ID'                   => 'ASC',
 		),
 		'update_post_meta_cache' => false,
 		'update_post_term_cache' => false,
@@ -171,7 +171,24 @@ function gutenberg_lab_blocks_query_villa_search_candidate_ids( $request ) {
 			'compare' => '<=',
 		),
 	);
-	$meta_query   = array();
+	// Sort numerically by the same starting rate used by the price filters.
+	// The first NOT EXISTS clause anchors sorting to a LEFT JOIN on this key,
+	// so missing rates sort last instead of borrowing unrelated post metadata.
+	$meta_query = array(
+		'relation' => 'AND',
+		array(
+			'relation'             => 'OR',
+			'villa_starting_price' => array(
+				'key'     => 'villa_search_starting_price_usd',
+				'compare' => 'NOT EXISTS',
+				'type'    => 'NUMERIC',
+			),
+			array(
+				'key'     => 'villa_search_starting_price_usd',
+				'compare' => 'EXISTS',
+			),
+		),
+	);
 
 	foreach ( $meta_filters as $request_key => $filter ) {
 		if ( empty( $request[ $request_key ] ) ) {
@@ -186,10 +203,7 @@ function gutenberg_lab_blocks_query_villa_search_candidate_ids( $request ) {
 		);
 	}
 
-	if ( $meta_query ) {
-		$meta_query['relation']   = 'AND';
-		$query_args['meta_query'] = $meta_query;
-	}
+	$query_args['meta_query'] = $meta_query;
 
 	$query = new WP_Query( $query_args );
 	$candidate_ids = array_values( array_map( 'absint', $query->posts ) );

@@ -86,3 +86,7 @@
 - Use a dynamic block when the editor needs a pluggable calendar but the frontend data comes from villa meta, cron sync, and a custom lookup table.
 - Keep the frontend script small: it should only select dates, validate the visible range against the rendered unavailable dates, and fill the enquiry form.
 - When a calendar block controls related form fields, scan saved block attributes in PHP so hidden calendars also remove server-rendered CF7 fields and submit data.
+
+## Villa Search Ordering
+
+- Sort the complete candidate query by numeric starting nightly price, highest first, before availability filtering and pagination. A named `WP_Meta_Query` clause supplies the numeric sort; an `EXISTS`/`NOT EXISTS` group retains unpriced villas at the end. Post ID keeps equal-price results stable between pages.
