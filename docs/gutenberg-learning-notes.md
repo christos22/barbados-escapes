@@ -39,6 +39,7 @@
 - When a hero needs to feel viewport-sized, cap the stage with the visible viewport minus the shared admin-bar offset, then reserve rail space only on viewports tall enough to show the whole hero in one screen.
 - Vimeo embeds need iframe/player handling instead of a native `<video>` tag, so the block should store the source choice and URL while PHP/front-end JS decide how to render the real player shell.
 - Keep `edit.js` preview-only for remote video sources: let the editor collect the Vimeo URL and poster image, then let dynamic PHP plus view scripts handle autoplay, fallback posters, and player lifecycle on the frontend.
+- Gallery responsiveness belongs in `view.js`: prepare and decode the requested photo before moving the slider. Keep PHP's first-image priority and deferred hidden sources; warm only two neighbouring photos after the opening render and gallery intent, with low priority and respect for Save-Data/2G connections.
 
 ## Value Pillars
 

@@ -15,6 +15,8 @@ import {
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 const THUMB_ACTIVE_CLASS = 'vvm-villa-gallery-hero__thumb-slide--active';
 const MAX_VISIBLE_THUMBNAILS = 5;
+const GALLERY_FADE_MS = 240;
+const GALLERY_PRELOAD_AHEAD = 2;
 const PAGE_INTENT_EVENTS = [
 	'focusin',
 	'keydown',
@@ -123,8 +125,11 @@ function loadDeferredStageImage( image ) {
 		return;
 	}
 
-	const { villaGalleryDeferredSrc, villaGalleryDeferredSrcset, villaGalleryDeferredSizes } =
-		image.dataset;
+	const {
+		villaGalleryDeferredSrc,
+		villaGalleryDeferredSrcset,
+		villaGalleryDeferredSizes,
+	} = image.dataset;
 
 	if ( villaGalleryDeferredSizes ) {
 		image.setAttribute( 'sizes', villaGalleryDeferredSizes );
@@ -142,13 +147,210 @@ function loadDeferredStageImage( image ) {
 }
 
 function loadStageSlideMedia( stageElement, activeIndex ) {
-	const activeSlide = stageElement?.querySelectorAll( '.splide__slide' )?.[
-		activeIndex
-	];
+	const activeSlide =
+		stageElement?.querySelectorAll( '.splide__slide' )?.[ activeIndex ];
 
 	activeSlide
 		?.querySelectorAll( '[data-villa-gallery-deferred-image]' )
 		.forEach( loadDeferredStageImage );
+}
+
+// Prepare photos without moving the visible slide or starting hidden videos.
+function createGalleryNavigation( rootElement, stageElement, stage ) {
+	const slides = Array.from(
+		stageElement.querySelectorAll( '.splide__slide' )
+	);
+	const pendingImages = new WeakMap();
+	const decodedSources = new WeakMap();
+	let requestedIndex = stage.index;
+	let requestVersion = 0;
+	let direction = 1;
+	let hasGalleryIntent = false;
+	let initialImageReady = false;
+	let warming = false;
+	let warmScheduled = false;
+	const wrapIndex = ( index ) => ( index + slides.length ) % slides.length;
+	const getImage = ( index ) => slides[ index ]?.querySelector( 'img' );
+
+	const prepareImage = ( image, priority = 'low' ) => {
+		if ( ! image ) {
+			return Promise.resolve( true );
+		}
+
+		// A clicked photo takes priority over an already-running background fetch.
+		if ( priority === 'high' || image.fetchPriority !== 'high' ) {
+			image.fetchPriority = priority;
+		}
+		if ( pendingImages.has( image ) ) {
+			return pendingImages.get( image );
+		}
+		if (
+			image.complete &&
+			image.naturalWidth &&
+			decodedSources.get( image ) === image.currentSrc
+		) {
+			return Promise.resolve( true );
+		}
+
+		const ready = new Promise( ( resolve ) => {
+			const finish = async () => {
+				image.removeEventListener( 'load', finish );
+				image.removeEventListener( 'error', finish );
+				// Download completion alone does not guarantee pixels are ready to paint.
+				if ( image.naturalWidth && image.decode ) {
+					await image.decode().catch( () => {} );
+				}
+				const loaded = image.complete && image.naturalWidth > 0;
+				if ( loaded ) {
+					decodedSources.set( image, image.currentSrc );
+				}
+				resolve( loaded );
+			};
+
+			image.addEventListener( 'load', finish );
+			image.addEventListener( 'error', finish );
+			// Hidden slides must actually fetch when deliberately prepared.
+			image.loading = 'eager';
+			if ( image.dataset.villaGalleryDeferredSrc ) {
+				loadDeferredStageImage( image );
+			} else if ( image.complete && ! image.naturalWidth && image.src ) {
+				// Reassign the source so a failed photo can be retried.
+				image.setAttribute( 'src', image.getAttribute( 'src' ) );
+			}
+			if ( image.complete ) {
+				void finish();
+			}
+		} );
+		pendingImages.set( image, ready );
+		void ready.then( () => pendingImages.delete( image ) );
+		return ready;
+	};
+
+	const canWarm = () => {
+		const connection = window.navigator?.connection;
+		const rect = rootElement.getBoundingClientRect();
+		return (
+			initialImageReady &&
+			hasGalleryIntent &&
+			! document.hidden &&
+			! connection?.saveData &&
+			! /(^|-)2g$/.test( connection?.effectiveType || '' ) &&
+			requestedIndex === stage.index &&
+			rect.bottom > 0 &&
+			rect.top < window.innerHeight
+		);
+	};
+
+	const warmNeighbours = () => {
+		if ( warmScheduled || warming || ! canWarm() ) {
+			return;
+		}
+		warmScheduled = true;
+		const run = async () => {
+			warmScheduled = false;
+			if ( ! canWarm() ) {
+				return;
+			}
+			warming = true;
+			const version = requestVersion;
+			// Sequential, low-priority requests keep the look-ahead budget bounded.
+			for (
+				let offset = 1;
+				offset <= Math.min( GALLERY_PRELOAD_AHEAD, slides.length - 1 );
+				offset++
+			) {
+				if ( version !== requestVersion || ! canWarm() ) {
+					break;
+				}
+				await prepareImage(
+					getImage( wrapIndex( stage.index + direction * offset ) )
+				);
+			}
+			warming = false;
+			if ( version !== requestVersion ) {
+				warmNeighbours();
+			}
+		};
+		if ( window.requestIdleCallback ) {
+			window.requestIdleCallback( () => void run() );
+		} else {
+			window.setTimeout( () => void run(), 100 );
+		}
+	};
+
+	const select = async ( index ) => {
+		index = wrapIndex( index );
+		if (
+			requestedIndex === index &&
+			rootElement.getAttribute( 'aria-busy' ) === 'true'
+		) {
+			return; // Mouse pointerdown and click may select the same thumbnail.
+		}
+		requestedIndex = index;
+		const version = ++requestVersion;
+		if ( index === stage.index ) {
+			rootElement.removeAttribute( 'aria-busy' );
+			warmNeighbours();
+			return;
+		}
+		rootElement.setAttribute( 'aria-busy', 'true' );
+		const ready = await prepareImage( getImage( index ), 'high' );
+		// Rapid clicks honour the latest destination, even if older downloads finish later.
+		if ( version !== requestVersion ) {
+			return;
+		}
+		rootElement.removeAttribute( 'aria-busy' );
+		if ( ready ) {
+			stage.go( index );
+		} else {
+			requestedIndex = stage.index; // Retain the current photo on a network error.
+		}
+		warmNeighbours();
+	};
+
+	// Real browsing intent avoids downloading a gallery during the initial render.
+	const intentEvents = [
+		'pointermove',
+		'pointerdown',
+		'focusin',
+		'touchstart',
+	];
+	const onIntent = () => {
+		hasGalleryIntent = true;
+		intentEvents.forEach( ( name ) =>
+			rootElement.removeEventListener( name, onIntent )
+		);
+		warmNeighbours();
+	};
+	intentEvents.forEach( ( name ) =>
+		rootElement.addEventListener( name, onIntent, { passive: true } )
+	);
+
+	const afterLoad = async () => {
+		await prepareImage( getImage( stage.index ), 'high' );
+		// Let the opening image paint before any optional background preparation.
+		window.requestAnimationFrame( () =>
+			window.requestAnimationFrame( () => {
+				initialImageReady = true;
+				warmNeighbours();
+			} )
+		);
+	};
+	if ( document.readyState === 'complete' ) {
+		void afterLoad();
+	} else {
+		window.addEventListener( 'load', () => void afterLoad(), {
+			once: true,
+		} );
+	}
+
+	return {
+		select,
+		step: ( delta ) => {
+			direction = delta;
+			void select( requestedIndex + delta );
+		},
+	};
 }
 
 function syncStageNativeVideos( stageElement, shouldAutoplay ) {
@@ -156,8 +358,12 @@ function syncStageNativeVideos( stageElement, shouldAutoplay ) {
 		return;
 	}
 
-	const activeSlide = stageElement.querySelector( '.splide__slide.is-active' );
-	const videos = stageElement.querySelectorAll( '[data-villa-gallery-video]' );
+	const activeSlide = stageElement.querySelector(
+		'.splide__slide.is-active'
+	);
+	const videos = stageElement.querySelectorAll(
+		'[data-villa-gallery-video]'
+	);
 
 	videos.forEach( ( video ) => {
 		const isActive = activeSlide?.contains( video );
@@ -177,7 +383,9 @@ function syncStageNativeVideos( stageElement, shouldAutoplay ) {
 }
 
 function syncStaticNativeVideo( rootElement, shouldAutoplay ) {
-	const video = rootElement.querySelector( '[data-villa-gallery-static-video]' );
+	const video = rootElement.querySelector(
+		'[data-villa-gallery-static-video]'
+	);
 
 	if ( ! video ) {
 		return;
@@ -196,8 +404,12 @@ function syncStageVimeoShells( stageElement, shouldAutoplay ) {
 		return;
 	}
 
-	const activeSlide = stageElement.querySelector( '.splide__slide.is-active' );
-	const shells = stageElement.querySelectorAll( '[data-villa-gallery-vimeo]' );
+	const activeSlide = stageElement.querySelector(
+		'.splide__slide.is-active'
+	);
+	const shells = stageElement.querySelectorAll(
+		'[data-villa-gallery-vimeo]'
+	);
 
 	shells.forEach( ( shell ) => {
 		const isActive = activeSlide?.contains( shell );
@@ -252,9 +464,8 @@ function revealActiveThumbIfNeeded(
 	prefersReducedMotion
 ) {
 	const track = thumbsElement?.querySelector( '.splide__track' );
-	const activeSlide = thumbsElement?.querySelectorAll( '.splide__slide' )?.[
-		activeIndex
-	];
+	const activeSlide =
+		thumbsElement?.querySelectorAll( '.splide__slide' )?.[ activeIndex ];
 
 	// Center only hidden/partially hidden thumbs so a click does not shove the
 	// newly active thumbnail against the far edge of the viewport.
@@ -269,15 +480,19 @@ function syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion ) {
 	}
 
 	setActiveThumbState( thumbsElement, activeIndex );
-	revealActiveThumbIfNeeded( thumbsElement, activeIndex, prefersReducedMotion );
+	revealActiveThumbIfNeeded(
+		thumbsElement,
+		activeIndex,
+		prefersReducedMotion
+	);
 }
 
 function getThumbRailGapPixels( thumbsElement ) {
 	const listElement = thumbsElement?.querySelector( '.splide__list' );
-	const listStyles = listElement ? getComputedStyle( listElement ) : null;
-	const gap = parseFloat(
-		listStyles?.columnGap || listStyles?.gap || '0'
-	);
+	const listStyles = listElement
+		? window.getComputedStyle( listElement )
+		: null;
+	const gap = parseFloat( listStyles?.columnGap || listStyles?.gap || '0' );
 
 	return Number.isFinite( gap ) ? gap : 0;
 }
@@ -325,15 +540,20 @@ function syncActiveGalleryState(
 	syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion );
 }
 
-function bindThumbInteractions( thumbsElement, stage, prefersReducedMotion ) {
-	const thumbSlides = thumbsElement?.querySelectorAll( '.splide__slide' ) ?? [];
+function bindThumbInteractions(
+	thumbsElement,
+	navigation,
+	prefersReducedMotion
+) {
+	const thumbSlides =
+		thumbsElement?.querySelectorAll( '.splide__slide' ) ?? [];
 
 	thumbSlides.forEach( ( slide, slideIndex ) => {
 		slide.setAttribute( 'role', 'button' );
 		slide.setAttribute( 'tabindex', '0' );
 
 		const activateSlide = () => {
-			stage.go( slideIndex );
+			void navigation.select( slideIndex );
 		};
 
 		slide.addEventListener( 'pointerdown', ( event ) => {
@@ -402,7 +622,10 @@ function bindGalleryCtaScroll( rootElement, prefersReducedMotion ) {
 		);
 		const scrollY = Math.min(
 			maxScrollY,
-			Math.max( 0, window.scrollY + targetRect.bottom - window.innerHeight )
+			Math.max(
+				0,
+				window.scrollY + targetRect.bottom - window.innerHeight
+			)
 		);
 
 		// Align the bottom of the thumbnail rail with the bottom of the viewport.
@@ -418,10 +641,12 @@ function bindGalleryCtaScroll( rootElement, prefersReducedMotion ) {
 }
 
 function initializeVillaGalleryHero( rootElement ) {
-	const stageElement = rootElement.querySelector( '[data-villa-gallery-stage]' );
-	const thumbsElement = rootElement.querySelector( '[data-villa-gallery-thumbs]' );
-	const previousButton = rootElement.querySelector( '[data-villa-gallery-prev]' );
-	const nextButton = rootElement.querySelector( '[data-villa-gallery-next]' );
+	const stageElement = rootElement.querySelector(
+		'[data-villa-gallery-stage]'
+	);
+	const thumbsElement = rootElement.querySelector(
+		'[data-villa-gallery-thumbs]'
+	);
 	const reducedMotionMediaQuery = window.matchMedia(
 		REDUCED_MOTION_MEDIA_QUERY
 	);
@@ -457,11 +682,9 @@ function initializeVillaGalleryHero( rootElement ) {
 		return;
 	}
 
-	const thumbCount = thumbsElement.querySelectorAll( '.splide__slide' ).length;
+	const thumbCount =
+		thumbsElement.querySelectorAll( '.splide__slide' ).length;
 	const prefersReducedMotion = reducedMotionMediaQuery.matches;
-	const thumbSlides = Array.from(
-		thumbsElement.querySelectorAll( '.splide__slide' )
-	);
 	const thumbTrack = thumbsElement.querySelector( '.splide__track' );
 	const previousThumbRailButton = rootElement.querySelector(
 		'[data-villa-gallery-thumbs-prev]'
@@ -500,14 +723,22 @@ function initializeVillaGalleryHero( rootElement ) {
 		return;
 	}
 
+	const previousButton = rootElement.querySelector(
+		'[data-villa-gallery-prev]'
+	);
+	const nextButton = rootElement.querySelector( '[data-villa-gallery-next]' );
+	const thumbSlides = Array.from(
+		thumbsElement.querySelectorAll( '.splide__slide' )
+	);
 	const stage = new Splide( stageElement, {
 		arrows: false,
 		drag: false,
-		keyboard: 'focused',
+		// All navigation goes through the image-ready gate, including keyboard input.
+		keyboard: false,
 		pagination: false,
 		rewind: true,
 		type: 'fade',
-		speed: prefersReducedMotion ? 0 : 700,
+		speed: prefersReducedMotion ? 0 : GALLERY_FADE_MS,
 		updateOnMove: true,
 		// Thumbnail clicks should be able to interrupt a fade started by arrows.
 		waitForTransition: false,
@@ -566,19 +797,42 @@ function initializeVillaGalleryHero( rootElement ) {
 	} );
 
 	stage.mount();
+	const navigation = createGalleryNavigation(
+		rootElement,
+		stageElement,
+		stage
+	);
 
 	previousButton?.addEventListener( 'click', () => {
-		stage.go( '<' );
+		navigation.step( -1 );
 	} );
 
 	nextButton?.addEventListener( 'click', () => {
-		stage.go( '>' );
+		navigation.step( 1 );
 	} );
 
-	bindThumbInteractions( thumbsElement, stage, prefersReducedMotion );
+	rootElement.addEventListener( 'keydown', ( event ) => {
+		if (
+			event.altKey ||
+			event.ctrlKey ||
+			event.metaKey ||
+			! [ 'ArrowLeft', 'ArrowRight' ].includes( event.key )
+		) {
+			return;
+		}
+		event.preventDefault();
+		navigation.step( event.key === 'ArrowLeft' ? -1 : 1 );
+	} );
+
+	bindThumbInteractions( thumbsElement, navigation, prefersReducedMotion );
 	syncActiveState();
 	syncThumbRailButtons();
-	bindReducedMotionPreference( reducedMotionMediaQuery, syncActiveState );
+	bindReducedMotionPreference( reducedMotionMediaQuery, () => {
+		stage.options = {
+			speed: reducedMotionMediaQuery.matches ? 0 : GALLERY_FADE_MS,
+		};
+		syncActiveState();
+	} );
 }
 
 window.addEventListener( 'DOMContentLoaded', () => {
