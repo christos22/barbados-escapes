@@ -730,6 +730,9 @@ function initializeVillaGalleryHero( rootElement ) {
 	const thumbSlides = Array.from(
 		thumbsElement.querySelectorAll( '.splide__slide' )
 	);
+	const contentElement = rootElement.querySelector(
+		'.vvm-villa-gallery-hero__content'
+	);
 	const stage = new Splide( stageElement, {
 		arrows: false,
 		drag: false,
@@ -745,6 +748,20 @@ function initializeVillaGalleryHero( rootElement ) {
 	} );
 
 	const syncActiveState = ( activeIndex = stage.index ) => {
+		if ( contentElement ) {
+			// The opening copy is shared markup, so hide its links as well as its text.
+			if (
+				activeIndex !== 0 &&
+				contentElement.contains( document.activeElement )
+			) {
+				// Keep keyboard focus in the gallery when its introductory CTA disappears.
+				( nextButton || thumbSlides[ activeIndex ] )?.focus( {
+					preventScroll: true,
+				} );
+			}
+			contentElement.hidden = activeIndex !== 0;
+		}
+
 		syncActiveGalleryState(
 			stageElement,
 			thumbsElement,

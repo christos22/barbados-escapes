@@ -152,6 +152,10 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 					/>
 					<SelectControl
 						label={ __( 'Overlay treatment', 'gutenberg-lab-blocks' ) }
+						help={ __(
+							'The overlay and introductory content appear only on the first slide.',
+							'gutenberg-lab-blocks'
+						) }
 						value={ overlayStyle }
 						options={ OVERLAY_STYLE_OPTIONS }
 						onChange={ ( value ) =>
