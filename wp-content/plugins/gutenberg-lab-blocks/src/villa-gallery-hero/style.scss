@@ -332,6 +332,17 @@ body.vvm-has-hero-header
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs,
 .vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumbs {
+	// Resolve the rail's own count here, and never squeeze captions below 16rem.
+	--vvm-villa-gallery-hero-thumb-width: min(
+		100%,
+		max(
+			16rem,
+			calc(
+				(100% - var(--vvm-villa-gallery-hero-thumb-visible-gap-total)) /
+				var(--vvm-villa-gallery-hero-thumb-visible-count)
+			)
+		)
+	);
 	padding: 0;
 	width: 100%;
 	max-width: none;
@@ -365,16 +376,6 @@ body.vvm-has-hero-header
 	width: var(--vvm-villa-gallery-hero-thumb-width);
 	cursor: pointer;
 	outline: none;
-}
-
-.wp-block-gutenberg-lab-blocks-villa-gallery-hero
-	.vvm-villa-gallery-hero__thumbs.vvm-villa-gallery-hero__thumbs--full-width
-	.splide__track,
-.vvm-villa-gallery-hero
-	.vvm-villa-gallery-hero__thumbs.vvm-villa-gallery-hero__thumbs--full-width
-	.splide__track {
-	overflow: hidden;
-	overflow: clip;
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumbs .splide__slide:last-child,

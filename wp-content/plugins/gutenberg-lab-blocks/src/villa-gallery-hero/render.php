@@ -595,6 +595,12 @@ if ( empty( $slides ) ) {
 
 $slide_count         = count( $slides );
 $has_thumb_navigation = $slide_count > 1;
+$thumb_visible_count = min( 5, max( 1, $slide_count ) );
+$thumb_sizes = sprintf(
+	'(max-width: %dpx) 16rem, %.2fvw',
+	256 * $thumb_visible_count,
+	100 / $thumb_visible_count
+);
 $hero_id_base        = ! empty( $attributes['anchor'] )
 	? sanitize_html_class( $attributes['anchor'] )
 	: sanitize_html_class( wp_unique_id( 'villa-gallery-hero-' ) );
@@ -928,7 +934,7 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 														'attachment_id' => $slide['thumb_media_id'],
 														'fallback_url'  => $slide['thumb_media_url'],
 														'size'          => 'gutenberg-lab-thumb',
-														'sizes'         => '(max-width: 782px) 42vw, 240px',
+														'sizes'         => $thumb_sizes,
 													)
 												); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 												?>
