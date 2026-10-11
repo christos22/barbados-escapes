@@ -30,6 +30,8 @@
 				"gutterXl": "80px"
 			},
 			"hero": {
+				"textShadow": "0 1px 3px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5)",
+				"headingShadow": "0 1px 4px rgba(0,0,0,0.65), 0 4px 18px rgba(0,0,0,0.3)",
 				"accent": "#C4922A",
 				"lineColor": "rgba(196,146,42,0.56)",
 				"searchSurface": "rgba(245,236,215,0.94)",

@@ -28,6 +28,40 @@ body {
 	background: #ffffff;
 }
 
+/* Page-opening heroes use text contrast instead of tinting the photography.
+ * The PHP marker identifies the hero, keeping supporting media panels separate.
+ * The front-page guard also protects the homepage when blocks are reused there.
+ */
+body:not(.home) .wp-site-blocks .vvm-page-hero {
+	--vvm-villa-gallery-hero-overlay-background: none;
+}
+
+body:not(.home) .wp-site-blocks .vvm-page-hero .media-panel__overlay::before,
+body:not(.home) .wp-site-blocks .vvm-page-hero .vvm-villa-gallery-hero__stage-slide::before,
+body:not(.home) .wp-site-blocks .vvm-page-hero .vvm-villa-gallery-hero__stage-static-media::before,
+body:not(.home) .wp-site-blocks .vvm-page-hero .vvm-villa-gallery-hero__thumb-card::after,
+body:not(.home) .wp-site-blocks .vvm-page-hero.vvm-atmosphere-edge::before,
+body:not(.home) .wp-site-blocks .vvm-page-hero.vvm-atmosphere-edge::after,
+body:not(.home) .wp-site-blocks .vvm-page-hero.wp-block-cover::before,
+body:not(.home) .wp-site-blocks .vvm-page-hero.wp-block-cover > .wp-block-cover__background {
+	display: none;
+}
+
+body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .vvm-villa-gallery-hero__content-inner, .wp-block-cover__inner-container),
+body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .vvm-villa-gallery-hero__content-inner, .wp-block-cover__inner-container) :is(p, li, .wp-block-post-terms),
+body:not(.home) .wp-site-blocks .vvm-page-hero .vvm-villa-gallery-hero__thumb-label {
+	text-shadow: var(--wp--custom--hero--text-shadow);
+}
+
+body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .vvm-villa-gallery-hero__content-inner, .wp-block-cover__inner-container) :is(h1, h2, h3, h4, h5, h6) {
+	text-shadow: var(--wp--custom--hero--heading-shadow);
+}
+
+/* Filled buttons already provide a contrasting surface for their labels. */
+body:not(.home) .wp-site-blocks .vvm-page-hero .wp-block-button:not(.is-style-outline) .wp-block-button__link {
+	text-shadow: none;
+}
+
 /* Contact content stays in native blocks; the theme supplies its presentation. */
 .wp-site-blocks .vvm-contact-hero .media-panel__media img {
 	object-position: center 78%;

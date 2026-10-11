@@ -1300,6 +1300,35 @@ function gutenberg_lab_vvm_filter_body_class( $classes ) {
 add_filter( 'body_class', 'gutenberg_lab_vvm_filter_body_class' );
 
 /**
+ * Give the opening hero a shared presentation rule without changing saved blocks.
+ *
+ * Media panels further down the page keep their own styling. Front-page heroes
+ * retain the homepage design, even when they use the same reusable block.
+ *
+ * @param string $block_content Rendered block HTML.
+ * @param array  $block         Parsed block definition.
+ * @return string
+ */
+function gutenberg_lab_vvm_mark_page_hero( $block_content, $block ) {
+	static $marked_hero = false;
+
+	if ( $marked_hero || is_admin() || ! gutenberg_lab_vvm_is_hero_block( $block ) || is_front_page() || ! gutenberg_lab_vvm_current_view_has_hero() ) {
+		return $block_content;
+	}
+
+	$tags = new WP_HTML_Tag_Processor( $block_content );
+
+	if ( $tags->next_tag() ) {
+		$tags->add_class( 'vvm-page-hero' );
+		$marked_hero = true;
+		return $tags->get_updated_html();
+	}
+
+	return $block_content;
+}
+add_filter( 'render_block', 'gutenberg_lab_vvm_mark_page_hero', 20, 2 );
+
+/**
  * Returns a content-based cache-busting version from a theme file path.
  *
  * Content fingerprints stay stable until an asset changes and avoid stale CSS
