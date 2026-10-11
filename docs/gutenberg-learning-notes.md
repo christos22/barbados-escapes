@@ -91,3 +91,9 @@
 ## Villa Search Ordering
 
 - Sort the complete candidate query by numeric starting nightly price, highest first, before availability filtering and pagination. A named `WP_Meta_Query` clause supplies the numeric sort; an `EXISTS`/`NOT EXISTS` group retains unpriced villas at the end. Post ID keeps equal-price results stable between pages.
+
+## Image Quality
+
+- `includes/images.php` controls source selection separately from the CSS hero layout. Hero requests now use `full` with uncropped responsive photo sizes up to 5120px and the full master as the largest candidate. The source-width cap is removed only while rendering a hero.
+- Full-width cover images can scale by height, so their `sizes` hint includes the photo's aspect ratio and viewport height. This changes the file the browser chooses, not the visible layout.
+- JPEG generation uses a minimum quality of 95; automatic 2560px master scaling is disabled. These settings do not repair existing files. Finish restoring originals and disable automatic lossy optimisation before regenerating existing sizes from those originals, then clear image/page caches and verify the delivered files.
