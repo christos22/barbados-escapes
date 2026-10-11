@@ -330,6 +330,44 @@ Use these checks after setup changes or deployment troubleshooting:
 
    - `www-authenticate: Basic realm="Access to A Bun In The Oven"`
 
+## Frontend assets and cache purges
+
+The blocks plugin's `includes/frontend-assets.php` makes Autoptimize serve
+WordPress's versioned CSS/JS URLs directly. Built block bundles and WordPress
+assets are already minified; theme files keep their content-based versions.
+Autoptimize's other settings remain available. This policy is code-managed,
+so enabling CSS/JS optimization in its settings cannot reintroduce temporary
+asset URLs.
+
+Existing Autoptimize files must remain available for old page-cache responses
+and open browser tabs. The plugin blocks Autoptimize's destructive cache clear,
+including clears triggered by Nginx Helper. New pages no longer generate these
+CSS/JS copies, so the retained legacy set does not keep growing (728 KB at the
+2026-10-11 rollout). Do not manually delete or rename this directory during a
+deployment or maintenance job.
+
+Purge **HTML pages**, then request their ordinary public URLs and inspect the
+referenced assets. In this host configuration, `wp nginx-helper purge-all`
+attempts filesystem deletion and does not reliably clear the proxy cache.
+Use the existing Nginx Helper `purge_url()` path for specific pages; verify a
+fresh response rather than trusting the command's success message. Query-string
+variants need their exact purge URL, with the query encoded into the purge path.
+Keeping legacy assets available protects variants that have not been purged.
+
+After an asset-policy change, check `/`, `/villas/`, a filtered results page,
+a villa, and `/contact/`: current HTML should not reference
+`/cache/autoptimize/` CSS/JS, all local assets should return 200, and mobile
+search, navigation, galleries and enquiry controls should initialize.
+
+Run `wp eval-file docs/scripts/check-frontend-asset-cache.php` from a checkout
+with the WordPress `--path` set explicitly. It requires this fix and Autoptimize
+to be active, retains a sentinel through a real cache-clear call, and verifies
+that Autoptimize leaves representative WordPress asset tags intact. Use staging
+for the cache-clear regression before releasing to production.
+
+Rollback: revert the code commit and purge the affected HTML URLs. The stored
+Autoptimize settings are unchanged. Keep the retained files during rollback.
+
 ## Normal Workflow
 
 Use the short branch-pick workflow in

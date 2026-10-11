@@ -11,6 +11,7 @@
 - `theme.json` defines the design system and global defaults.
 - `block.json` defines what a block supports.
 - Block code defines behavior, structure, and constraints.
+- A block's versioned `style` and `viewScript` files must outlive cached HTML that references them. Serve deployed build files directly; clearing a page cache must not remove the assets needed by older responses.
 - Editors control content and styling only where those layers allow it.
 - Global block abilities can be editor attributes in JavaScript, but frontend behavior should still be enforced in PHP when it affects rendered markup.
 
