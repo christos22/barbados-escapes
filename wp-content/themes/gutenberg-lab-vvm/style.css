@@ -31,6 +31,7 @@ body {
 /* Page-opening heroes use text contrast instead of tinting the photography.
  * The PHP marker identifies the hero, keeping supporting media panels separate.
  * The front-page guard also protects the homepage when blocks are reused there.
+ * Thumbnail navigation retains the gallery block's original shading and labels.
  */
 body:not(.home) .wp-site-blocks .vvm-page-hero {
 	--vvm-villa-gallery-hero-overlay-background: none;
@@ -39,7 +40,6 @@ body:not(.home) .wp-site-blocks .vvm-page-hero {
 body:not(.home) .wp-site-blocks .vvm-page-hero .media-panel__overlay::before,
 body:not(.home) .wp-site-blocks .vvm-page-hero .vvm-villa-gallery-hero__stage-slide::before,
 body:not(.home) .wp-site-blocks .vvm-page-hero .vvm-villa-gallery-hero__stage-static-media::before,
-body:not(.home) .wp-site-blocks .vvm-page-hero .vvm-villa-gallery-hero__thumb-card::after,
 body:not(.home) .wp-site-blocks .vvm-page-hero.vvm-atmosphere-edge::before,
 body:not(.home) .wp-site-blocks .vvm-page-hero.vvm-atmosphere-edge::after,
 body:not(.home) .wp-site-blocks .vvm-page-hero.wp-block-cover::before,
@@ -48,8 +48,7 @@ body:not(.home) .wp-site-blocks .vvm-page-hero.wp-block-cover > .wp-block-cover_
 }
 
 body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .vvm-villa-gallery-hero__content-inner, .wp-block-cover__inner-container),
-body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .vvm-villa-gallery-hero__content-inner, .wp-block-cover__inner-container) :is(p, li, .wp-block-post-terms),
-body:not(.home) .wp-site-blocks .vvm-page-hero .vvm-villa-gallery-hero__thumb-label {
+body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .vvm-villa-gallery-hero__content-inner, .wp-block-cover__inner-container) :is(p, li, .wp-block-post-terms) {
 	text-shadow: var(--wp--custom--hero--text-shadow);
 }
 
