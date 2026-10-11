@@ -112,7 +112,7 @@ $is_card_interactive = false !== ( $attributes['isCardInteractive'] ?? true );
 $show_caption = false !== ( $attributes['showCaption'] ?? true );
 $gallery_card_sizes = $is_card_interactive
 	? '(max-width: 600px) 72vw, (max-width: 782px) 56vw, (max-width: 960px) 30vw, 18rem'
-	: '(max-width: 600px) 72vw, (max-width: 782px) 56vw, 25vw';
+	: '(max-width: 1024px) 16rem, 25vw';
 $wrapper_class = 'vvm-villa-gallery-carousel' . ( $is_card_interactive ? '' : ' vvm-villa-gallery-carousel--noninteractive' );
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(

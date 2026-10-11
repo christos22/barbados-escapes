@@ -140,13 +140,40 @@
 	.vvm-villa-gallery-carousel__card,
 .vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
 	.vvm-villa-gallery-carousel__card {
+	display: grid;
+	aspect-ratio: auto;
 	cursor: default;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__card::before,
+.vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__card::before {
+	// An in-flow ratio spacer and the caption share one grid cell; the taller wins.
+	position: relative;
+	grid-area: 1 / 1;
+	aspect-ratio: var(--vvm-villa-gallery-carousel-thumb-aspect-ratio);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__copy,
+.vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__copy {
+	// Let longer captions establish the card's minimum height instead of clipping.
+	position: relative;
+	grid-area: 1 / 1;
+	align-self: end;
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive,
 .vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive {
-	--vvm-villa-gallery-carousel-thumb-width: calc(
-		(100% - (var(--vvm-villa-gallery-carousel-rail-gap) * 3)) / 4
+	// Keep four desktop cards, but scroll readable cards in narrower containers.
+	--vvm-villa-gallery-carousel-thumb-width: min(
+		100%,
+		max(
+			16rem,
+			calc((100% - (var(--vvm-villa-gallery-carousel-rail-gap) * 3)) / 4)
+		)
 	);
 }
 
@@ -154,7 +181,34 @@
 	.vvm-villa-gallery-carousel__slide,
 .vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
 	.vvm-villa-gallery-carousel__slide {
+	display: flex;
 	opacity: 1;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__carousel,
+.vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__carousel {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__controls.vvm-slider-controls--preset-center,
+.vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__controls.vvm-slider-controls--preset-center {
+	// Default arrows belong below captioned photos, not over the room names.
+	position: relative;
+	inset: auto;
+	order: 1;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	transform: none;
+
+	&:has(button:not([hidden])) {
+		margin-top: 0.75rem;
+	}
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
