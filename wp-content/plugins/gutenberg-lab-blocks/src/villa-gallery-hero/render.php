@@ -267,7 +267,13 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_link_gallery_ct
 			$root = $document->getElementById( 'vvm-gallery-hero-content-root' );
 
 			if ( $root ) {
+				// Patch attributes in the original HTML so authored character references survive.
+				$processor = class_exists( 'WP_HTML_Tag_Processor' ) ? new WP_HTML_Tag_Processor( $content_markup ) : null;
+
 				foreach ( $root->getElementsByTagName( 'a' ) as $link ) {
+					if ( $processor && ! $processor->next_tag( 'a' ) ) {
+						$processor = null;
+					}
 					$link_text = gutenberg_lab_blocks_villa_gallery_hero_normalize_cta_text( $link->textContent );
 
 					if ( ! gutenberg_lab_blocks_villa_gallery_hero_is_gallery_cta_text( $link_text ) ) {
@@ -276,6 +282,14 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_link_gallery_ct
 
 					$link->setAttribute( 'href', $target_href );
 					$link->setAttribute( 'data-villa-gallery-hero-cta', 'gallery' );
+					if ( $processor ) {
+						$processor->set_attribute( 'href', $target_href );
+						$processor->set_attribute( 'data-villa-gallery-hero-cta', 'gallery' );
+					}
+				}
+
+				if ( $processor ) {
+					return $processor->get_updated_html();
 				}
 
 				$updated_markup = '';
