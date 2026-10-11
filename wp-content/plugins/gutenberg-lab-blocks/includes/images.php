@@ -21,6 +21,11 @@ if ( ! function_exists( 'gutenberg_lab_blocks_register_image_sizes' ) ) {
 		add_image_size( 'gutenberg-lab-hero-md', 1280, 800, true );
 		add_image_size( 'gutenberg-lab-hero-sm', 960, 600, true );
 		add_image_size( 'gutenberg-lab-hero-xs', 640, 400, true );
+		// Preserve the source aspect ratio; CSS still controls the visible hero crop.
+		add_image_size( 'gutenberg-lab-photo-1920', 1920, 0, false );
+		add_image_size( 'gutenberg-lab-photo-2560', 2560, 0, false );
+		add_image_size( 'gutenberg-lab-photo-3840', 3840, 0, false );
+		add_image_size( 'gutenberg-lab-photo-5120', 5120, 0, false );
 		add_image_size( 'gutenberg-lab-card-landscape', 960, 640, true );
 		add_image_size( 'gutenberg-lab-card-landscape-sm', 720, 480, true );
 		add_image_size( 'gutenberg-lab-card-portrait', 960, 1280, true );
@@ -31,6 +36,51 @@ if ( ! function_exists( 'gutenberg_lab_blocks_register_image_sizes' ) ) {
 	}
 }
 add_action( 'after_setup_theme', 'gutenberg_lab_blocks_register_image_sizes' );
+
+/**
+ * Keep generated JPEGs at high quality without lowering a higher existing setting.
+ * Originals are not re-encoded by this filter. Existing sizes need regeneration.
+ */
+function gutenberg_lab_blocks_jpeg_quality( $quality, $mime_type = 'image/jpeg' ) {
+	return 'image/jpeg' === $mime_type ? max( 95, (int) $quality ) : $quality;
+}
+add_filter( 'wp_editor_set_quality', 'gutenberg_lab_blocks_jpeg_quality', 100, 2 );
+add_filter( 'jpeg_quality', 'gutenberg_lab_blocks_jpeg_quality', 100 );
+
+// Retain the uploaded master instead of replacing it with WordPress's 2560px copy.
+add_filter( 'big_image_size_threshold', '__return_false', 100 );
+
+/**
+ * Render a hero from the full image and its native responsive candidates.
+ * Larger screens can use the new photo sizes or the original, without a 1920px cap.
+ */
+function gutenberg_lab_blocks_render_hero_image( $attachment_id, $attrs ) {
+	$source = wp_get_attachment_image_src( $attachment_id, 'full' );
+
+	if ( $source && ! empty( $source[2] ) && '100vw' === ( $attrs['sizes'] ?? '' ) ) {
+		// Cover can scale by height on tall screens. Tell the browser the width of
+		// the uncropped photo, not just the narrower box through which it is seen.
+		$cover_width    = round( 100 * $source[1] / $source[2], 4 );
+		$attrs['sizes'] = sprintf( '(max-aspect-ratio: %d/%d) %svh, 100vw', $source[1], $source[2], $cover_width );
+	}
+
+	// Scope these exceptions to this image; cards retain normal WP source selection.
+	$no_width_cap = static function () {
+		return 0;
+	};
+	$no_auto_size = static function () {
+		return false;
+	};
+	add_filter( 'max_srcset_image_width', $no_width_cap, 100 );
+	add_filter( 'wp_img_tag_add_auto_sizes', $no_auto_size, 100 );
+
+	try {
+		return wp_get_attachment_image( $attachment_id, 'full', false, $attrs );
+	} finally {
+		remove_filter( 'max_srcset_image_width', $no_width_cap, 100 );
+		remove_filter( 'wp_img_tag_add_auto_sizes', $no_auto_size, 100 );
+	}
+}
 
 if ( ! function_exists( 'gutenberg_lab_blocks_claim_frontend_priority_image' ) ) {
 	/**
@@ -363,8 +413,11 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_responsive_image' ) ) {
 
 		$attachment_id = (int) $args['attachment_id'];
 		$fallback_url  = is_string( $args['fallback_url'] ) ? trim( $args['fallback_url'] ) : '';
+		$is_hero       = 'gutenberg-lab-hero' === $args['size'];
 
-		if ( $attachment_id && wp_attachment_is_image( $attachment_id ) && '' !== $fallback_url ) {
+		// A valid hero attachment is authoritative; a similarly named duplicate
+		// must not replace it just because that duplicate has more thumbnail sizes.
+		if ( ! $is_hero && $attachment_id && wp_attachment_is_image( $attachment_id ) && '' !== $fallback_url ) {
 			$current_srcset = wp_get_attachment_image_srcset( $attachment_id, $args['size'] );
 			$filename_attachment_id = gutenberg_lab_blocks_get_attachment_id_from_generated_url_filename( $fallback_url );
 			$filename_srcset        = $filename_attachment_id ? wp_get_attachment_image_srcset( $filename_attachment_id, $args['size'] ) : '';
@@ -408,6 +461,10 @@ if ( ! function_exists( 'gutenberg_lab_blocks_render_responsive_image' ) ) {
 		);
 
 		if ( $attachment_id && wp_attachment_is_image( $attachment_id ) ) {
+			if ( $is_hero ) {
+				return gutenberg_lab_blocks_render_hero_image( $attachment_id, $image_attrs );
+			}
+
 			return wp_get_attachment_image(
 				$attachment_id,
 				$args['size'],
