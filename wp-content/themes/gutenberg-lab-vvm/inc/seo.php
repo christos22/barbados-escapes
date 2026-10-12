@@ -382,6 +382,20 @@ function gutenberg_lab_vvm_seo_get_context() {
 		return $context;
 	}
 
+	if ( is_post_type_archive( 'villa' ) ) {
+		$args = gutenberg_lab_blocks_get_villa_search_url_args( gutenberg_lab_blocks_get_villa_search_request() );
+		$page = gutenberg_lab_blocks_get_villa_search_page();
+		$context['filtered'] = ! empty( $args );
+		if ( $page > 1 ) {
+			$args['villa_page'] = $page;
+		}
+		$context['url'] = add_query_arg( $args, get_post_type_archive_link( 'villa' ) );
+		$context['title'] = 'Barbados Villa Rentals' . ( $page > 1 ? ' - Page ' . $page : '' ) . ' | Barbados Escapes';
+		$context['description'] = 'Explore our collection of Barbados villas. Refine your search by location, bedrooms, guests, nightly price and villa collection.';
+		$context['kind'] = 'villa_archive';
+		return $context;
+	}
+
 	if ( $post instanceof WP_Post ) {
 		$slug = $post->post_name;
 
@@ -401,7 +415,7 @@ function gutenberg_lab_vvm_seo_get_context() {
 			? $post->post_excerpt
 			: wp_trim_words( wp_strip_all_tags( $post->post_content ), 28 );
 
-		$context['title']       = sprintf( '%s | %s', get_the_title( $post ), get_bloginfo( 'name' ) );
+		$context['title']       = sprintf( '%s | %s', html_entity_decode( get_the_title( $post ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ), get_bloginfo( 'name' ) );
 		$context['description'] = gutenberg_lab_vvm_seo_clean_description( $description );
 		$context['kind']        = 'villa' === $post->post_type ? 'villa' : 'page';
 		return $context;
@@ -440,6 +454,19 @@ function gutenberg_lab_vvm_seo_document_title( $title ) {
 	return $context && ! empty( $context['title'] ) ? $context['title'] : $title;
 }
 add_filter( 'pre_get_document_title', 'gutenberg_lab_vvm_seo_document_title', 20 );
+
+/** Keep filter combinations out of the index; unfiltered pagination stays crawlable. */
+function gutenberg_lab_vvm_seo_villa_archive_robots( $robots ) {
+	if ( is_post_type_archive( 'villa' ) ) {
+		$context = gutenberg_lab_vvm_seo_get_context();
+		if ( ! empty( $context['filtered'] ) ) {
+			unset( $robots['index'] );
+			$robots['noindex'] = true;
+		}
+	}
+	return $robots;
+}
+add_filter( 'wp_robots', 'gutenberg_lab_vvm_seo_villa_archive_robots', 25 );
 
 /**
  * Fills empty rendered image alt attributes from Media Library metadata.
@@ -836,7 +863,7 @@ function gutenberg_lab_vvm_seo_get_breadcrumb_items( $context ) {
 	if ( 'villa' === $context['kind'] ) {
 		$items[] = array(
 			'name' => 'Villas',
-			'url'  => home_url( '/#explore-villas' ),
+			'url'  => get_post_type_archive_link( 'villa' ),
 		);
 	}
 
@@ -1127,7 +1154,19 @@ function gutenberg_lab_vvm_seo_get_villa_schema( $context, $image ) {
 
 	$locations = gutenberg_lab_vvm_seo_get_villa_location_names( $post->ID );
 	$known_location = isset( $context['location'] ) ? (string) $context['location'] : '';
-	$locality = '' !== $known_location ? $known_location : ( $locations[0] ?? 'Barbados' );
+	$locality = '';
+	$region = '';
+	// Search category suffixes are not place names; parishes belong in region.
+	foreach ( $locations as $location ) {
+		if ( preg_match( '/^St\.?\s+/i', $location ) ) {
+			$region = $location;
+		} elseif ( '' === $locality ) {
+			$locality = preg_replace( '/\s+Villas$/i', '', $location );
+		}
+	}
+	if ( '' !== $known_location && ! preg_match( '/^St\.?\s+/i', $known_location ) ) {
+		$locality = $known_location;
+	}
 	$facts = get_post_meta( $post->ID, 'villa_card_facts', true );
 	$price_range = '';
 	$latitude    = gutenberg_lab_vvm_seo_get_villa_coordinate( $post->ID, 'villa_schema_latitude', -90, 90 );
@@ -1151,7 +1190,7 @@ function gutenberg_lab_vvm_seo_get_villa_schema( $context, $image ) {
 			'@type'          => 'VacationRental',
 			'@id'            => $context['url'] . '#vacation-rental',
 			'identifier'     => 'barbados-escapes-villa-' . (int) $post->ID,
-			'name'           => get_the_title( $post ),
+			'name'           => html_entity_decode( get_the_title( $post ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
 			'url'            => $context['url'],
 			'description'    => $context['description'],
 			'mainEntityOfPage' => array(
@@ -1167,14 +1206,14 @@ function gutenberg_lab_vvm_seo_get_villa_schema( $context, $image ) {
 				'@type'           => 'PostalAddress',
 				'streetAddress'   => get_post_meta( $post->ID, 'villa_schema_street_address', true ),
 				'addressLocality' => $locality,
-				'addressRegion'   => 'Barbados',
+				'addressRegion'   => $region,
 				'postalCode'      => get_post_meta( $post->ID, 'villa_schema_postal_code', true ),
 				'addressCountry'  => 'BB',
 			),
 			'containsPlace'  => array(
 				'@type'          => 'Accommodation',
 				'@id'            => $context['url'] . '#accommodation',
-				'name'           => get_the_title( $post ),
+				'name'           => html_entity_decode( get_the_title( $post ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
 				'additionalType' => 'EntirePlace',
 				'occupancy'      => array(
 					'@type' => 'QuantitativeValue',
@@ -1257,7 +1296,7 @@ function gutenberg_lab_vvm_seo_get_schema_graph( $context, $image ) {
 		),
 		gutenberg_lab_vvm_seo_remove_empty(
 			array(
-				'@type'       => 'WebPage',
+				'@type'       => 'villa_archive' === $context['kind'] ? 'CollectionPage' : 'WebPage',
 				'@id'         => $context['url'] . '#webpage',
 				'url'         => $context['url'],
 				'name'        => $context['title'],
@@ -1312,7 +1351,12 @@ function gutenberg_lab_vvm_seo_print_head_metadata() {
 	}
 
 	$image = gutenberg_lab_vvm_seo_get_primary_image( $context['object'] ?? null );
-	$type  = 'front' === $context['kind'] ? 'website' : 'article';
+	$type  = in_array( $context['kind'], array( 'front', 'villa_archive' ), true ) ? 'website' : 'article';
+
+	// WordPress emits singular canonicals itself, but not this custom archive.
+	if ( 'villa_archive' === $context['kind'] ) {
+		printf( '<link rel="canonical" href="%s" />' . "\n", esc_url( $context['url'] ) );
+	}
 
 	gutenberg_lab_vvm_seo_print_meta( 'name', 'description', $context['description'] );
 	gutenberg_lab_vvm_seo_print_meta( 'property', 'og:locale', str_replace( '-', '_', get_bloginfo( 'language' ) ) );

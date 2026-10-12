@@ -808,6 +808,11 @@ function gutenberg_lab_blocks_get_villa_meta_schema() {
 			'default'           => '',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
+		'villa_plain_hyphens' => array(
+			'type'              => 'boolean',
+			'default'           => false,
+			'sanitize_callback' => 'rest_sanitize_boolean',
+		),
 		'villa_card_cta_label' => array(
 			'type'              => 'string',
 			'default'           => '',
@@ -893,6 +898,51 @@ function gutenberg_lab_blocks_register_villa_meta() {
 	}
 }
 add_action( 'init', 'gutenberg_lab_blocks_register_villa_meta' );
+
+/**
+ * Keep an opted-in villa's short hyphens after WordPress typography runs.
+ * HTML text tokens exclude attributes, comments, scripts and styles.
+ */
+function gutenberg_lab_blocks_villa_plain_hyphens( $content ) {
+	if ( ! is_singular( 'villa' ) || ! get_post_meta( get_queried_object_id(), 'villa_plain_hyphens', true ) ) {
+		return $content;
+	}
+
+	// Block templates run wptexturize again after the_content. Protect text
+	// hyphens with an entity without touching URLs or raw script/style content.
+	$marker = 'VVMHYPHEN' . str_replace( '-', '', wp_generate_uuid4() );
+	$processor = new WP_HTML_Tag_Processor( $content );
+	while ( $processor->next_token() ) {
+		if ( '#text' !== $processor->get_token_type() ) {
+			continue;
+		}
+		$text = $processor->get_modifiable_text();
+		$plain = str_replace( array( "\u{2013}", "\u{2014}", '-' ), $marker, $text );
+		if ( $plain !== $text ) {
+			$processor->set_modifiable_text( $plain );
+		}
+	}
+	return str_replace( $marker, '&#45;', $processor->get_updated_html() );
+}
+add_filter( 'the_content', 'gutenberg_lab_blocks_villa_plain_hyphens', 99 );
+
+/**
+ * The editable Site Map uses a native Query Loop, restricted to public villas.
+ */
+function gutenberg_lab_blocks_public_villa_sitemap_query( $query, $block ) {
+	if ( 'gutenberg-lab/public-villa-sitemap' !== ( $block->context['query']['namespace'] ?? '' ) ) {
+		return $query;
+	}
+	$query['post_type'] = 'villa';
+	$query['post_status'] = 'publish';
+	$query['has_password'] = false;
+	$query['posts_per_page'] = -1;
+	$query['orderby'] = 'title';
+	$query['order'] = 'ASC';
+	$query['offset'] = 0;
+	return $query;
+}
+add_filter( 'query_loop_block_query_vars', 'gutenberg_lab_blocks_public_villa_sitemap_query', 10, 2 );
 
 /**
  * Adds focused villa meta boxes instead of relying on generic custom fields.

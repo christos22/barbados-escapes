@@ -94,3 +94,11 @@
 ## Villa Search Ordering
 
 - Sort the complete candidate query by numeric starting nightly price, highest first, before availability filtering and pagination. A named `WP_Meta_Query` clause supplies the numeric sort; an `EXISTS`/`NOT EXISTS` group retains unpriced villas at the end. Post ID keeps equal-price results stable between pages.
+
+## Villa Publication QA
+
+- Calendar month navigation (`minimumStart`) and the first bookable date (`minimumDate`) are separate concerns. Enforce today in site time on both the frontend and CF7 validation; recompute it in JS so cached HTML does not admit yesterday.
+- Block themes can run `wptexturize` again after `the_content`. Opt-in `villa_plain_hyphens` meta protects rendered text with hyphen entities using the HTML API; URLs, scripts, styles and stored editorial content stay untouched.
+- A native Query Loop with `query.namespace: gutenberg-lab/public-villa-sitemap` lists all published, unprotected villas. Keep the surrounding Site Map headings and links as editable core blocks.
+- Villa archive pages get descriptions, social metadata and self-canonicals, including `villa_page=2`. Filter combinations use `noindex` and fragment responses use `X-Robots-Tag`; villa detail pages stay indexable. Guidance: https://developers.google.com/search/docs/specialty/ecommerce/pagination-and-incremental-page-loading
+- Regression commands: `ddev wp eval-file wp-content/plugins/gutenberg-lab-blocks/tests/villa-publication-qa.php` and `node wp-content/plugins/gutenberg-lab-blocks/tests/villa-date-policy.mjs`. PHP fixture tests refuse production and remove only their temporary posts and terms.

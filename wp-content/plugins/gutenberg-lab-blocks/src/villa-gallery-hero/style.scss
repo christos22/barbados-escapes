@@ -530,6 +530,23 @@ body.vvm-has-hero-header
 }
 
 @media (max-width: 781px) {
+	/* Reserve a separate arrow row; long titles may grow beyond one viewport. */
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-shell {
+		height: auto;
+		max-height: none;
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__controls,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__controls {
+		inset: auto 1rem 1rem;
+		width: auto;
+		margin: 0;
+		padding: 0;
+		justify-content: space-between;
+		transform: none;
+	}
+
 	.wp-block-gutenberg-lab-blocks-villa-gallery-hero,
 	.vvm-villa-gallery-hero {
 		--vvm-villa-gallery-hero-stage-preferred-height: 46rem;
@@ -538,7 +555,9 @@ body.vvm-has-hero-header
 
 	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content,
 	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content {
-		padding: 5rem 1rem 3rem;
+		min-height: var(--vvm-villa-gallery-hero-stage-height);
+		height: auto;
+		padding: 7rem 1rem 6rem;
 	}
 
 	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content-inner

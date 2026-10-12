@@ -1,4 +1,5 @@
 import flatpickr from 'flatpickr';
+import { getMinimumDate } from './date-policy';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -229,6 +230,7 @@ const initializeCalendar = ( root ) => {
 	const allowUnavailableEndpoints = data.allowUnavailableEndpoints === true;
 	const monthsToShow = Number( data.monthsToShow || 12 );
 	const minimumStart = data.minimumStart || data.windowStart;
+	const minimumDate = () => getMinimumDate( data );
 	let dayButtons = Array.from( root.querySelectorAll( '[data-vvm-calendar-day]' ) );
 	let selectedArrival = '';
 	let selectedDeparture = '';
@@ -297,12 +299,16 @@ const initializeCalendar = ( root ) => {
 		isUnavailableRangeEnd( date );
 
 	const canSelectArrivalDate = ( date ) =>
-		! isUnavailableDate( date ) ||
-		( allowUnavailableEndpoints && isSelectableUnavailableRangeEnd( date ) );
+		date >= minimumDate() && (
+			! isUnavailableDate( date ) ||
+			( allowUnavailableEndpoints && isSelectableUnavailableRangeEnd( date ) )
+		);
 
 	const canSelectDepartureDate = ( date ) =>
-		! isUnavailableDate( date ) ||
-		( allowUnavailableEndpoints && isSelectableUnavailableRangeStart( date ) );
+		date >= minimumDate() && (
+			! isUnavailableDate( date ) ||
+			( allowUnavailableEndpoints && isSelectableUnavailableRangeStart( date ) )
+		);
 
 	const rangeIsAvailable = ( arrival, departure ) => {
 		const arrivalKey = parseDateKey( arrival );
@@ -351,6 +357,8 @@ const initializeCalendar = ( root ) => {
 
 		dayButtons.forEach( ( button ) => {
 			const date = button.dataset.date;
+			const isPast = date < minimumDate();
+			button.disabled = isPast;
 			const dateKey = parseDateKey( date );
 			const isUnavailable = isUnavailableDate( date );
 			const isCheckoutBuffer = isCheckoutBufferDate( date );
@@ -414,7 +422,7 @@ const initializeCalendar = ( root ) => {
 			button.setAttribute( 'aria-pressed', isArrival || isDeparture ? 'true' : 'false' );
 			button.setAttribute(
 				'aria-disabled',
-				isUnavailable && ! canSelectBoundary && ! isArrival && ! isDeparture
+				isPast || ( isUnavailable && ! canSelectBoundary && ! isArrival && ! isDeparture )
 					? 'true'
 					: 'false'
 			);
@@ -662,9 +670,9 @@ const initializeCalendar = ( root ) => {
 		setDateFieldValidity( arrivalField );
 		setDateFieldValidity( departureField );
 
-		if ( minimumStart ) {
-			arrivalField.min = minimumStart;
-			departureField.min = arrival ? addDays( arrival, 1 ) : minimumStart;
+		if ( minimumDate() ) {
+			arrivalField.min = minimumDate();
+			departureField.min = getLaterDate( minimumDate(), arrival ? addDays( arrival, 1 ) : '' );
 		}
 
 		if ( arrival && ! canSelectArrivalDate( arrival ) ) {
@@ -744,14 +752,14 @@ const initializeCalendar = ( root ) => {
 		const pickerMaxDate = loadedWindowEnd || null;
 
 		if ( arrivalPicker ) {
-			arrivalPicker.set( 'minDate', minimumStart || null );
+			arrivalPicker.set( 'minDate', minimumDate() );
 			arrivalPicker.set( 'maxDate', pickerMaxDate );
 			arrivalPicker.set( 'disable', getArrivalDisableRules() );
 			arrivalPicker.redraw();
 		}
 
 		if ( departurePicker ) {
-			departurePicker.set( 'minDate', arrival ? addDays( arrival, 1 ) : minimumStart || null );
+			departurePicker.set( 'minDate', getLaterDate( minimumDate(), arrival ? addDays( arrival, 1 ) : '' ) );
 			departurePicker.set( 'maxDate', pickerMaxDate );
 			departurePicker.set( 'disable', getDepartureDisableRules( arrival ) );
 			departurePicker.redraw();
@@ -788,7 +796,7 @@ const initializeCalendar = ( root ) => {
 			dateFormat: 'Y-m-d',
 			disableMobile: true,
 			maxDate: loadedWindowEnd || null,
-			minDate: options.minDate || minimumStart || null,
+			minDate: options.minDate || minimumDate(),
 			monthSelectorType: 'static',
 			onChange: options.onChange,
 			onDayCreate: ( _selectedDates, _dateStr, _instance, dayElement ) => {
@@ -864,7 +872,7 @@ const initializeCalendar = ( root ) => {
 
 		departurePicker = setupDatePicker( departureField, {
 			appendTo,
-			minDate: minimumStart,
+			minDate: minimumDate(),
 			onChange: () => {
 				if ( isSyncingPickers ) {
 					return;

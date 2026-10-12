@@ -1798,6 +1798,7 @@ function gutenberg_lab_blocks_get_villa_availability_window_rest( WP_REST_Reques
 	$allow_unavailable_endpoints = rest_sanitize_boolean( $request->get_param( 'allowEndpoints' ) );
 	$response                    = gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, $month_start, $months_to_show, $allow_unavailable_endpoints );
 	$response['minimumStart']    = $minimum_start->format( 'Y-m-d' );
+	$response['minimumDate']     = wp_date( 'Y-m-d' );
 
 	return rest_ensure_response( $response );
 }
@@ -1850,7 +1851,7 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 	$window         = gutenberg_lab_blocks_get_villa_availability_calendar_window( $villa_id, $month_start, $months_to_show, $allow_unavailable_endpoints );
 	$payload        = array(
 		'villaId'                    => $villa_id,
-		'villaTitle'                 => get_the_title( $villa_id ),
+		'villaTitle'                 => html_entity_decode( get_the_title( $villa_id ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
 		'villaUrl'                   => get_permalink( $villa_id ),
 		'formSelector'               => $form_selector,
 		'allowUnavailableEndpoints'  => $allow_unavailable_endpoints,
@@ -1858,6 +1859,8 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 		'windowStart'                => $window['start'],
 		'windowEnd'                  => $window['end'],
 		'minimumStart'               => $window['start'],
+		'minimumDate'                => wp_date( 'Y-m-d' ),
+		'timeZone'                   => wp_timezone_string(),
 		'monthsToShow'               => $months_to_show,
 		'unavailableDates'           => $window['unavailableDates'],
 		'bufferDates'                => $window['bufferDates'],
@@ -1891,7 +1894,7 @@ function gutenberg_lab_blocks_render_villa_availability_calendar( $attributes, $
 		<div class="vvm-villa-availability-calendar__header">
 			<h2 class="vvm-villa-availability-calendar__title"><?php echo esc_html( $heading ); ?></h2>
 			<p class="vvm-villa-availability-calendar__status" data-vvm-calendar-status aria-live="polite">
-				<?php esc_html_e( 'Choose your check-in date. 24 hours is reserved for arrival preparation between bookings.', 'gutenberg-lab-blocks' ); ?>
+				<?php esc_html_e( 'Choose your check-in date. Availability will be confirmed when you enquire.', 'gutenberg-lab-blocks' ); ?>
 			</p>
 		</div>
 		<nav class="vvm-villa-availability-calendar__navigation" aria-label="<?php esc_attr_e( 'Availability calendar navigation', 'gutenberg-lab-blocks' ); ?>">
@@ -1979,6 +1982,7 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 							<?php
 							$date               = $month_start->setDate( (int) $month_start->format( 'Y' ), (int) $month_start->format( 'm' ), $day )->format( 'Y-m-d' );
 							$unavailable        = isset( $unavailable_lookup[ $date ] );
+							$is_past            = $date < $today;
 							$is_buffer          = isset( $buffer_lookup[ $date ] );
 							$classes            = array( 'vvm-villa-availability-calendar__day' );
 
@@ -2016,8 +2020,9 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 									data-date="<?php echo esc_attr( $date ); ?>"
 									data-unavailable="<?php echo $unavailable ? 'true' : 'false'; ?>"
 									data-buffer="<?php echo $is_buffer ? 'true' : 'false'; ?>"
-									aria-disabled="<?php echo $unavailable ? 'true' : 'false'; ?>"
-									aria-label="<?php echo esc_attr( sprintf( '%1$s %2$s', $month_start->setDate( (int) $month_start->format( 'Y' ), (int) $month_start->format( 'm' ), $day )->format( 'F j, Y' ), $unavailable ? __( 'unavailable', 'gutenberg-lab-blocks' ) : __( 'available', 'gutenberg-lab-blocks' ) ) ); ?>"
+									<?php disabled( $is_past ); ?>
+									aria-disabled="<?php echo $is_past || $unavailable ? 'true' : 'false'; ?>"
+									aria-label="<?php echo esc_attr( sprintf( '%1$s %2$s', $month_start->setDate( (int) $month_start->format( 'Y' ), (int) $month_start->format( 'm' ), $day )->format( 'F j, Y' ), $is_past || $unavailable ? __( 'unavailable', 'gutenberg-lab-blocks' ) : __( 'available', 'gutenberg-lab-blocks' ) ) ); ?>"
 								>
 									<?php echo esc_html( (string) $day ); ?>
 								</button>
@@ -2058,6 +2063,12 @@ function gutenberg_lab_blocks_validate_cf7_villa_availability( $result, $tag ) {
 	$departure = isset( $_POST['preferred-departure'] ) ? gutenberg_lab_blocks_normalize_iso_date( sanitize_text_field( wp_unslash( $_POST['preferred-departure'] ) ) ) : '';
 	$villa_id  = isset( $_POST['villa-id'] ) ? absint( $_POST['villa-id'] ) : 0;
 	$allow_unavailable_endpoints = isset( $_POST['allow-unavailable-endpoints'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['allow-unavailable-endpoints'] ) );
+
+	// Client-side restrictions are not a substitute for submission validation.
+	if ( '' !== $arrival && $arrival < wp_date( 'Y-m-d' ) ) {
+		$result->invalidate( $tag, __( 'Check-in cannot be in the past. Please choose today or a future date.', 'gutenberg-lab-blocks' ) );
+		return $result;
+	}
 
 	if ( '' !== $arrival && '' !== $departure && $departure <= $arrival ) {
 		$result->invalidate( $tag, __( 'Check-out date must be after check-in date.', 'gutenberg-lab-blocks' ) );

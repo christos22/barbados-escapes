@@ -859,6 +859,8 @@ function gutenberg_lab_blocks_serve_villa_search_fragment() {
 		? gutenberg_lab_blocks_get_villa_search_page_url( $results['page'] + 1, $request )
 		: '';
 
+	// Fragments are transport responses, not standalone search landing pages.
+	header( 'X-Robots-Tag: noindex, follow', true );
 	wp_send_json_success(
 		array(
 			'html'    => gutenberg_lab_blocks_render_villa_search_cards( $results['ids'], $request ),
