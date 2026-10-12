@@ -944,6 +944,13 @@ function gutenberg_lab_blocks_public_villa_sitemap_query( $query, $block ) {
 }
 add_filter( 'query_loop_block_query_vars', 'gutenberg_lab_blocks_public_villa_sitemap_query', 10, 2 );
 
+/** Refresh the public sitemap when Nginx Helper handles a publication change. */
+function gutenberg_lab_blocks_villa_sitemap_purge_urls( $urls ) {
+	$urls[] = wp_parse_url( home_url( '/site-map/' ), PHP_URL_PATH );
+	return array_values( array_unique( $urls ) );
+}
+add_filter( 'rt_nginx_helper_purge_urls', 'gutenberg_lab_blocks_villa_sitemap_purge_urls' );
+
 /**
  * Adds focused villa meta boxes instead of relying on generic custom fields.
  */

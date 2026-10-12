@@ -101,6 +101,8 @@ try {
 	$assert( str_contains( $html, get_permalink( $id ) ), 'Sitemap includes new public villa.' );
 	$assert( ! str_contains( $html, get_permalink( $ids['draft'] ) ), 'Sitemap excludes drafts.' );
 	$assert( ! str_contains( $html, get_permalink( $ids['protected'] ) ), 'Sitemap excludes password-protected villas.' );
+	$purge_urls = gutenberg_lab_blocks_villa_sitemap_purge_urls( array( '/existing/', '/site-map/' ) );
+	$assert( array( '/existing/', '/site-map/' ) === $purge_urls, 'Publication cache purge includes sitemap once and preserves existing targets.' );
 
 	foreach ( array( array(), array( 'villa_page' => 2 ), array( 'villa_location' => 'gibbes-villas' ) ) as $request ) {
 		$_GET = $request;
