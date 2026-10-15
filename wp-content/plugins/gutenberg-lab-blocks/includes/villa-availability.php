@@ -489,9 +489,10 @@ function gutenberg_lab_blocks_should_ignore_villa_ical_event( $event ) {
  *
  * @param string $ical_body              Raw iCal body.
  * @param int    $checkout_buffer_nights Extra nights to block before check-in and after checkout.
+ * @param string $feed_url               Source URL for provider-specific date conventions.
  * @return array{dates: array<int, string>, buffer_dates: array<int, string>}|WP_Error
  */
-function gutenberg_lab_blocks_parse_ical_availability_dates( $ical_body, $checkout_buffer_nights = 0 ) {
+function gutenberg_lab_blocks_parse_ical_availability_dates( $ical_body, $checkout_buffer_nights = 0, $feed_url = '' ) {
 	if ( ! class_exists( '\Sabre\VObject\Reader' ) ) {
 		return new WP_Error(
 			'ical_parser_missing',
@@ -500,6 +501,8 @@ function gutenberg_lab_blocks_parse_ical_availability_dates( $ical_body, $checko
 	}
 
 	try {
+		$feed_host         = strtolower( (string) wp_parse_url( $feed_url, PHP_URL_HOST ) );
+		$dream_villas_feed = in_array( $feed_host, array( 'worldwidedreamvillas.com', 'www.worldwidedreamvillas.com' ), true );
 		$calendar = \Sabre\VObject\Reader::read( $ical_body );
 		$start    = new DateTimeImmutable( 'first day of this month 00:00:00', wp_timezone() );
 		$end      = $start->modify( '+24 months' );
@@ -535,13 +538,20 @@ function gutenberg_lab_blocks_parse_ical_availability_dates( $ical_body, $checko
 				continue;
 			}
 
-			$event_start = $event_start->setTimezone( wp_timezone() );
+			// Dream Villas exports calendar dates as midnight UTC. Keep those dates
+			// aligned with its booking calendar instead of shifting to the previous
+			// evening in Barbados. Other feeds and actual timed stays keep timezone conversion.
+			$preserve_calendar_dates = $dream_villas_feed
+				&& preg_match( '/^\d{8}T000000Z$/', (string) $event->DTSTART )
+				&& ( ! isset( $event->DTEND ) || preg_match( '/^\d{8}T000000Z$/', (string) $event->DTEND ) );
+			$event_timezone = $preserve_calendar_dates ? new DateTimeZone( 'UTC' ) : wp_timezone();
+			$event_start    = $event_start->setTimezone( $event_timezone );
 
 			if ( ! $event_end instanceof DateTimeInterface ) {
 				$event_end = $event_start->modify( '+1 day' );
 			}
 
-			$event_end = $event_end->setTimezone( wp_timezone() );
+			$event_end = $event_end->setTimezone( $event_timezone );
 
 			$start_date = $event_start->format( 'Y-m-d' );
 			$end_date   = $event_end->format( 'Y-m-d' );
@@ -672,7 +682,7 @@ function gutenberg_lab_blocks_sync_villa_availability( $villa_id ) {
 			continue;
 		}
 
-		$availability = gutenberg_lab_blocks_parse_ical_availability_dates( wp_remote_retrieve_body( $response ), $checkout_buffer_nights );
+		$availability = gutenberg_lab_blocks_parse_ical_availability_dates( wp_remote_retrieve_body( $response ), $checkout_buffer_nights, $feed['url'] );
 
 		if ( is_wp_error( $availability ) ) {
 			$status['error']       = $availability->get_error_message();
