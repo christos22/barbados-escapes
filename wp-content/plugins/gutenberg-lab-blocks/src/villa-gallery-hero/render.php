@@ -584,6 +584,8 @@ $overlay_style = in_array( $attributes['overlayStyle'] ?? 'brand-green', array( 
 	? $attributes['overlayStyle']
 	: 'brand-green';
 $show_arrows   = ! empty( $attributes['showArrows'] );
+// Existing saved heroes keep the full-cover layout until editors opt in.
+$use_framed_photos = ! empty( $attributes['useFramedPhotos'] );
 $hero_regions  = gutenberg_lab_blocks_villa_gallery_hero_get_regions( $block ?? null );
 $slides        = $hero_regions['slides'];
 $is_template_fallback = empty( $attributes['anchor'] );
@@ -654,6 +656,8 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 						<ul class="splide__list">
 							<?php foreach ( $slides as $slide_index => $slide ) : ?>
 								<?php
+								// Only later photos use the contained gallery treatment.
+								$is_contained_photo = $use_framed_photos && $slide_index > 0 && 'image' === $slide['media_type'];
 								$has_priority_candidate = ( 'video' === $slide['media_type'] && 'vimeo' === $slide['video_source'] && ! empty( $slide['poster_url'] ) ) ||
 									( 'image' === $slide['media_type'] && ! empty( $slide['image_url'] ) );
 								$should_prioritize_slide = 0 === $slide_index && $has_priority_candidate && function_exists( 'gutenberg_lab_blocks_claim_frontend_priority_image' )
@@ -670,7 +674,7 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 									);
 								?>
 								<li class="splide__slide">
-									<figure class="vvm-villa-gallery-hero__stage-slide">
+									<figure class="vvm-villa-gallery-hero__stage-slide<?php echo $is_contained_photo ? ' vvm-villa-gallery-hero__stage-slide--contained' : ''; ?>">
 										<?php if ( 'video' === $slide['media_type'] ) : ?>
 											<?php if ( 'vimeo' === $slide['video_source'] ) : ?>
 												<?php
@@ -732,24 +736,41 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 											?>
 										<?php endif; ?>
 										<?php else : ?>
-											<?php
-											$stage_media_markup = gutenberg_lab_blocks_render_responsive_image(
-												array(
-													'alt'           => $slide['image_alt'],
-													'attachment_id' => $slide['image_id'],
-													'class'         => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
-													'fallback_url'  => $slide['image_url'],
-													'fetchpriority' => $slide_loading_attrs['fetchpriority'] ?? '',
-													'loading'       => $slide_loading_attrs['loading'],
-													'size'          => 'gutenberg-lab-hero',
-													'sizes'         => '100vw',
-												)
-											);
+											<div class="vvm-villa-gallery-hero__stage-photo">
+												<?php
+												$stage_media_markup = gutenberg_lab_blocks_render_responsive_image(
+													array(
+														'alt'           => $slide['image_alt'],
+														'attachment_id' => $slide['image_id'],
+														'class'         => 'vvm-villa-gallery-hero__stage-media vvm-villa-gallery-hero__stage-media--image',
+														'fallback_url'  => $slide['image_url'],
+														'fetchpriority' => $slide_loading_attrs['fetchpriority'] ?? '',
+														'loading'       => $slide_loading_attrs['loading'],
+														'size'          => $is_contained_photo ? 'full' : 'gutenberg-lab-hero',
+														'sizes'         => '100vw',
+													)
+												);
 
-											echo $should_prioritize_slide
-												? $stage_media_markup
-												: gutenberg_lab_blocks_villa_gallery_hero_defer_stage_image_markup( $stage_media_markup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-											?>
+												if ( $is_contained_photo && class_exists( 'WP_HTML_Tag_Processor' ) ) {
+													// Keep the uncropped master: responsive candidates can cap the
+													// natural size or substitute a smaller generated JPEG.
+													$photo = new WP_HTML_Tag_Processor( $stage_media_markup );
+													if ( $photo->next_tag( 'img' ) ) {
+														$photo->remove_attribute( 'srcset' );
+														$photo->remove_attribute( 'sizes' );
+													}
+													$stage_media_markup = $photo->get_updated_html();
+												}
+
+												echo $should_prioritize_slide
+													? $stage_media_markup
+													: gutenberg_lab_blocks_villa_gallery_hero_defer_stage_image_markup( $stage_media_markup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+												?>
+												<?php if ( $slide_index > 0 ) : ?>
+													<?php // Reuse the thumbnail label; the opening hero keeps its own content. ?>
+													<span class="vvm-villa-gallery-hero__stage-label"><?php echo esc_html( $slide['thumb_label'] ); ?></span>
+												<?php endif; ?>
+											</div>
 										<?php endif; ?>
 									</figure>
 								</li>

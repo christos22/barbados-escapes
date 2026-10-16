@@ -172,6 +172,52 @@ body.vvm-has-hero-header
 	object-fit: cover;
 }
 
+/* Anchor each label to its photo, including when the photo has a smaller frame. */
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-photo,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-photo {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-label,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-label {
+	position: absolute;
+	bottom: clamp(0.85rem, 1.5vw, 1.25rem);
+	left: clamp(0.85rem, 1.5vw, 1.25rem);
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	max-width: calc(100% - 2.5rem);
+	padding: 0.25rem 0.75rem;
+	background: rgba(0, 0, 0, 0.68);
+	color: #f5ecd7;
+	overflow-wrap: anywhere;
+	pointer-events: none;
+}
+
+/* Use one 3:2 photo frame, matching the reference's landscape lightbox geometry. */
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	padding: 44px 0;
+	background: #1e1e1e;
+
+	.vvm-villa-gallery-hero__stage-photo {
+		flex: none;
+		/* Fit the same rectangle between the 44px insets, regardless of source size. */
+		width: min(100%, calc((var(--vvm-villa-gallery-hero-stage-height) - 88px) * 1.5));
+		height: auto;
+		aspect-ratio: 3 / 2;
+		max-width: 100%;
+		max-height: 100%;
+		margin: 0;
+	}
+}
+
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-static-placeholder,
 .vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-static-placeholder {
 	display: flex;
@@ -462,8 +508,12 @@ body.vvm-has-hero-header
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-label,
-.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-label {
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-label,
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-label,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-label {
 	margin: 0;
+	/* Spans and paragraphs must share the thumbnail's sans-serif font. */
+	font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
 	font-size: clamp(0.64rem, 0.72vw, 0.8rem);
 	letter-spacing: 0.28em;
 	line-height: 1.35;
@@ -589,8 +639,16 @@ body.vvm-has-hero-header
 	}
 
 	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__thumb-label,
-	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-label {
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__thumb-label,
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-label,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-label {
 		font-size: 0.62rem;
+	}
+
+	/* Full-cover photos need room for the mobile arrow row below the label. */
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide:not(.vvm-villa-gallery-hero__stage-slide--contained) .vvm-villa-gallery-hero__stage-label,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide:not(.vvm-villa-gallery-hero__stage-slide--contained) .vvm-villa-gallery-hero__stage-label {
+		bottom: 5.5rem;
 	}
 
 }

@@ -23,6 +23,10 @@
 
 ## Hero Composition
 
+- Villa gallery photos use the uncropped `full` attachment inside a consistent 3:2 display frame. CSS `object-fit: cover` crops the display without distorting the source, including enlarging small originals to the shared frame. A 44px vertical inset and charcoal surround match the reference gallery without a modal; the opening hero and thumbnail styling keep their own treatments.
+- `useFramedPhotos` is a per-hero boolean attribute, exposed as a native `ToggleControl` in Hero layout. It defaults to false to preserve existing full-cover galleries. PHP applies the frame only to later photo slides when enabled; the opening hero and videos always retain their full-cover treatment.
+- Later photo slides reuse the existing `thumbnailLabel` in PHP, so one editor field controls both labels. A positioned photo wrapper keeps the label attached to the image in either layout; the opening slide and videos have no photo label.
+
 - Keep the hero shell and the search behavior separate when they solve different problems.
 - `media-panel` is the reusable visual container for video, overlay, and hero layout.
 - `villa-hero-search` is a dynamic block because its options come from real taxonomy terms and current query state.

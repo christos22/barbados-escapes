@@ -94,7 +94,7 @@ function getPreviewState( heroBlock ) {
 }
 
 export default function Edit( { attributes, clientId, setAttributes } ) {
-	const { align, heroHeight, overlayStyle, showArrows } = attributes;
+	const { align, heroHeight, overlayStyle, showArrows, useFramedPhotos } = attributes;
 	const { previewMediaUrl, slideCount } = useSelect(
 		( select ) => {
 			const heroBlock = select( 'core/block-editor' ).getBlock( clientId );
@@ -161,6 +161,15 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 						onChange={ ( value ) =>
 							setAttributes( { overlayStyle: value } )
 						}
+					/>
+					<ToggleControl
+						label={ __( 'Use framed gallery photos', 'gutenberg-lab-blocks' ) }
+						help={ useFramedPhotos
+							? __( 'Following photos fill a 3:2 frame on a dark background. The opening slide stays full-hero.', 'gutenberg-lab-blocks' )
+							: __( 'All images cover the full hero area.', 'gutenberg-lab-blocks' )
+						}
+						checked={ useFramedPhotos }
+						onChange={ ( value ) => setAttributes( { useFramedPhotos: value } ) }
 					/>
 					<ToggleControl
 						label={ __( 'Show slider arrows', 'gutenberg-lab-blocks' ) }

@@ -25,6 +25,10 @@
       "type": "string",
       "default": "brand-green"
     },
+    "useFramedPhotos": {
+      "type": "boolean",
+      "default": false
+    },
     "showArrows": {
       "type": "boolean",
       "default": false
