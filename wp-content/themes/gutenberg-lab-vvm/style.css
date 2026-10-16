@@ -3040,6 +3040,7 @@ body.post-type-archive-packages
 	--vvm-header-hover: var(--wp--preset--color--gold, #c4922a);
 	--vvm-header-shadow: none;
 	--vvm-header-logo-width: 150px;
+	--vvm-header-compact-logo-width: 110px;
 	position: relative;
 	z-index: 40;
 	background-color: var(--vvm-header-bg);
@@ -3246,7 +3247,7 @@ body.vvm-has-static-header .vvm-header {
 	--vvm-header-fg: var(--wp--preset--color--light-gold, #f5ecd7);
 	--vvm-header-hover: var(--wp--preset--color--gold, #c4922a);
 	--vvm-header-shadow: 0 14px 40px rgba(13, 28, 22, 0.22);
-	--vvm-header-logo-width: 110px;
+	--vvm-header-logo-width: var(--vvm-header-compact-logo-width);
 	background-color: var(--vvm-header-bg);
 	backdrop-filter: none;
 	box-shadow: var(--vvm-header-shadow);
@@ -3258,6 +3259,24 @@ body.vvm-has-static-header .vvm-header {
 	left: 0;
 	right: 0;
 	inset-inline: 0;
+}
+
+/* A framed gallery photo reserves one compact header row above the image. */
+body.vvm-has-hero-header:has(.vvm-villa-gallery-hero__stage .is-active > .vvm-villa-gallery-hero__stage-slide--contained)
+	.vvm-header:not(.is-scrolled) {
+	--vvm-header-logo-width: var(--vvm-header-compact-logo-width);
+}
+
+body.vvm-has-hero-header:has(.vvm-villa-gallery-hero__stage .is-active > .vvm-villa-gallery-hero__stage-slide--contained)
+	.vvm-header:not(.is-scrolled) .wp-block-site-logo {
+	/* Match sticky-header spacing so the logo centres in the clear top band. */
+	margin: 0;
+}
+
+body.vvm-has-hero-header:has(.vvm-villa-gallery-hero__stage .is-active > .vvm-villa-gallery-hero__stage-slide--contained)
+	.vvm-header:not(.is-scrolled) .vvm-header__bar {
+	/* Narrower photos leave a taller band; keep all header items centred in it. */
+	min-height: var(--vvm-header-framed-band-height, var(--vvm-header-height, 96px));
 }
 
 .vvm-header .wp-block-navigation__responsive-container {
@@ -3963,12 +3982,13 @@ body.vvm-has-static-header .vvm-header {
 
 	.vvm-header {
 		--vvm-header-logo-width: 176px;
+		--vvm-header-compact-logo-width: 88px;
 	}
 
 	.vvm-header.is-scrolled,
 	body.vvm-has-hero-header .vvm-header.is-scrolled,
 	body.vvm-has-static-header .vvm-header {
-		--vvm-header-logo-width: 88px;
+		--vvm-header-logo-width: var(--vvm-header-compact-logo-width);
 	}
 
 	.vvm-header__nav .wp-block-navigation__responsive-container-open {

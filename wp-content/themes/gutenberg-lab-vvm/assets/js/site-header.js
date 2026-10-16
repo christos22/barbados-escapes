@@ -552,6 +552,39 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		return;
 	}
 
+	// Centre the compact header in the actual dark band above a framed photo.
+	const galleryStage = document.querySelector( '.vvm-villa-gallery-hero__stage' );
+	if ( galleryStage ) {
+		let galleryHeaderFrame = 0;
+		const syncGalleryHeaderSpacing = () => {
+			if ( galleryHeaderFrame ) {
+				return;
+			}
+			galleryHeaderFrame = window.requestAnimationFrame( () => {
+				galleryHeaderFrame = 0;
+				const photo = galleryStage.querySelector(
+					'.splide__slide.is-active > .vvm-villa-gallery-hero__stage-slide--contained .vvm-villa-gallery-hero__stage-photo'
+				);
+				if ( ! photo ) {
+					header.style.removeProperty( '--vvm-header-framed-band-height' );
+					return;
+				}
+				// Relative coordinates keep the measurement stable while scrolling.
+				const bandHeight = photo.getBoundingClientRect().top -
+					galleryStage.getBoundingClientRect().top;
+				header.style.setProperty( '--vvm-header-framed-band-height', `${ bandHeight }px` );
+			} );
+		};
+		// Splide owns the active slide; observe its classes rather than duplicate state.
+		new MutationObserver( syncGalleryHeaderSpacing ).observe( galleryStage, {
+			attributes: true,
+			attributeFilter: [ 'class' ],
+			subtree: true,
+		} );
+		new ResizeObserver( syncGalleryHeaderSpacing ).observe( galleryStage );
+		syncGalleryHeaderSpacing();
+	}
+
 	// Hero pages keep the transparent overlay until the visitor scrolls a bit.
 	const syncHeaderState = () => {
 		const isScrolled = window.scrollY > 32;

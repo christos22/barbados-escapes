@@ -199,17 +199,20 @@ body.vvm-has-hero-header
 /* Use one 3:2 photo frame, matching the reference's landscape lightbox geometry. */
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained,
 .vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained {
+	/* Reserve the compact header above the photo, with only a small gap below. */
+	--vvm-gallery-frame-top: var(--vvm-header-height, 96px);
+	--vvm-gallery-frame-bottom: 16px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
-	padding: 44px 0;
+	padding: var(--vvm-gallery-frame-top) 0 var(--vvm-gallery-frame-bottom);
 	background: #1e1e1e;
 
 	.vvm-villa-gallery-hero__stage-photo {
 		flex: none;
-		/* Fit the same rectangle between the 44px insets, regardless of source size. */
-		width: min(100%, calc((var(--vvm-villa-gallery-hero-stage-height) - 88px) * 1.5));
+		/* Keep the 3:2 crop inside the space left by the header and bottom inset. */
+		width: min(100%, calc((var(--vvm-villa-gallery-hero-stage-height) - var(--vvm-gallery-frame-top) - var(--vvm-gallery-frame-bottom)) * 1.5));
 		height: auto;
 		aspect-ratio: 3 / 2;
 		max-width: 100%;
