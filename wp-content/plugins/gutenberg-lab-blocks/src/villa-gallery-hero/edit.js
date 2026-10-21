@@ -165,7 +165,7 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 					<ToggleControl
 						label={ __( 'Use framed gallery photos', 'gutenberg-lab-blocks' ) }
 						help={ useFramedPhotos
-							? __( 'Following photos fill a 3:2 frame on a dark background. The opening slide stays full-hero.', 'gutenberg-lab-blocks' )
+							? __( 'Following photos fill a 3:2 frame over the dimmed opening photo or video poster. The opening slide stays full-hero.', 'gutenberg-lab-blocks' )
 							: __( 'All images cover the full hero area.', 'gutenberg-lab-blocks' )
 						}
 						checked={ useFramedPhotos }

@@ -106,6 +106,31 @@ body.vvm-has-hero-header
 	isolation: isolate;
 }
 
+/* One still backdrop sits below the slider, so the tint never darkens the photos. */
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__backdrop,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__backdrop {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	background: #1e1e1e;
+
+	.vvm-villa-gallery-hero__backdrop-image {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	&::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		/* Young Estates' lightbox uses #1e1e1e at 90% opacity. */
+		background: rgba(30, 30, 30, 0.9);
+	}
+}
+
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero.vvm-villa-gallery-hero--overlay-dark-vignette
 	.vvm-villa-gallery-hero__stage-shell,
 .vvm-villa-gallery-hero.vvm-villa-gallery-hero--overlay-dark-vignette
@@ -207,7 +232,7 @@ body.vvm-has-hero-header
 	justify-content: center;
 	box-sizing: border-box;
 	padding: var(--vvm-gallery-frame-top) 0 var(--vvm-gallery-frame-bottom);
-	background: #1e1e1e;
+	background: transparent;
 
 	.vvm-villa-gallery-hero__stage-photo {
 		flex: none;

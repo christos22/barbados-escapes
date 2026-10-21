@@ -646,6 +646,27 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 
 <section <?php echo $wrapper_attributes; ?>>
 	<div class="vvm-villa-gallery-hero__stage-shell vvm-slider-surface">
+		<?php if ( $use_framed_photos && $has_thumb_navigation ) : ?>
+			<div class="vvm-villa-gallery-hero__backdrop" aria-hidden="true">
+				<?php
+				// Reuse the opening photo/poster behind every frame, without another player.
+				$opening_slide = $slides[0];
+				$is_video_backdrop = 'video' === $opening_slide['media_type'];
+				echo gutenberg_lab_blocks_render_responsive_image(
+					array(
+						'attachment_id' => $is_video_backdrop ? $opening_slide['poster_id'] : $opening_slide['image_id'],
+						'fallback_url'  => $is_video_backdrop ? $opening_slide['poster_url'] : $opening_slide['image_url'],
+						'class'         => 'vvm-villa-gallery-hero__backdrop-image',
+						'fetchpriority' => 'low',
+						'loading'       => 'lazy',
+						// Match the opening media's candidates so the browser can reuse its image.
+						'size'          => 'gutenberg-lab-hero',
+						'sizes'         => '100vw',
+					)
+				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
+			</div>
+		<?php endif; ?>
 		<?php if ( $has_thumb_navigation ) : ?>
 			<div
 				class="vvm-villa-gallery-hero__stage splide"
