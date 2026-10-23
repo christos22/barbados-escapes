@@ -113,7 +113,7 @@ body.vvm-has-hero-header
 	inset: 0;
 	z-index: 0;
 	pointer-events: none;
-	background: #1e1e1e;
+	background: var(--wp--preset--color--dark-green, #1e3d2f);
 
 	.vvm-villa-gallery-hero__backdrop-image {
 		display: block;
@@ -126,8 +126,9 @@ body.vvm-has-hero-header
 		content: "";
 		position: absolute;
 		inset: 0;
-		/* Young Estates' lightbox uses #1e1e1e at 90% opacity. */
-		background: rgba(30, 30, 30, 0.9);
+		/* Use the header colour at the same opacity, without dimming the photos. */
+		background: var(--wp--preset--color--dark-green, #1e3d2f);
+		opacity: 0.9;
 	}
 }
 
