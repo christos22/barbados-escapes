@@ -1,5 +1,6 @@
 import flatpickr from 'flatpickr';
 import { getMinimumDate } from './date-policy';
+import { canArrive, canDepart, isBlockedRangeStart, isStayAvailable } from './availability-policy';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -286,61 +287,17 @@ const initializeCalendar = ( root ) => {
 
 	const isCheckoutBufferDate = ( date ) => checkoutBufferDates.has( date );
 
-	const isUnavailableRangeStart = ( date ) =>
-		isUnavailableDate( date ) && ! isUnavailableDate( addDays( date, -1 ) );
-
-	const isUnavailableRangeEnd = ( date ) =>
-		isUnavailableDate( date ) && ! isUnavailableDate( addDays( date, 1 ) );
-
 	const isSelectableUnavailableRangeStart = ( date ) =>
-		isUnavailableRangeStart( date );
-
-	const isSelectableUnavailableRangeEnd = ( date ) =>
-		isUnavailableRangeEnd( date );
+		isBlockedRangeStart( date, unavailableDates );
 
 	const canSelectArrivalDate = ( date ) =>
-		date >= minimumDate() && (
-			! isUnavailableDate( date ) ||
-			( allowUnavailableEndpoints && isSelectableUnavailableRangeEnd( date ) )
-		);
+		canArrive( date, unavailableDates, minimumDate() );
 
 	const canSelectDepartureDate = ( date ) =>
-		date >= minimumDate() && (
-			! isUnavailableDate( date ) ||
-			( allowUnavailableEndpoints && isSelectableUnavailableRangeStart( date ) )
-		);
+		canDepart( date, unavailableDates, allowUnavailableEndpoints, minimumDate() );
 
-	const rangeIsAvailable = ( arrival, departure ) => {
-		const arrivalKey = parseDateKey( arrival );
-		const departureKey = parseDateKey( departure );
-
-		if ( arrivalKey === null || departureKey === null || departureKey <= arrivalKey ) {
-			return false;
-		}
-
-		if ( ! canSelectArrivalDate( arrival ) || ! canSelectDepartureDate( departure ) ) {
-			return false;
-		}
-
-		for ( let cursor = arrivalKey; cursor < departureKey; cursor += DAY_MS ) {
-			const cursorDate = new Date( cursor ).toISOString().slice( 0, 10 );
-
-			// When endpoint selection is enabled, a grey check-in date is only
-			// allowed if it is the final date in a blocked run.
-			if (
-				isUnavailableDate( cursorDate ) &&
-					! (
-						allowUnavailableEndpoints &&
-						cursorDate === arrival &&
-						isSelectableUnavailableRangeEnd( cursorDate )
-					)
-				) {
-					return false;
-			}
-		}
-
-		return true;
-	};
+	const rangeIsAvailable = ( arrival, departure ) =>
+		isStayAvailable( arrival, departure, unavailableDates, allowUnavailableEndpoints, minimumDate() );
 
 	const syncButtons = () => {
 		const arrivalKey = parseDateKey( selectedArrival );
@@ -366,18 +323,12 @@ const initializeCalendar = ( root ) => {
 				allowUnavailableEndpoints &&
 				isUnavailable &&
 				isSelectableUnavailableRangeStart( date );
-			const isRangeEnd =
-				allowUnavailableEndpoints &&
-				isUnavailable &&
-				isSelectableUnavailableRangeEnd( date );
 			const isArrival = date === selectedArrival;
 			const isDeparture = date === selectedDeparture;
+			// A blocked date is selectable only as checkout after a free stay.
 			const canSelectBoundary =
-				allowUnavailableEndpoints &&
-				isUnavailable &&
-				( selectedArrival && ! selectedDeparture && date > selectedArrival
-					? isSelectableUnavailableRangeStart( date )
-					: isSelectableUnavailableRangeEnd( date ) );
+				isUnavailable && selectedArrival && ! selectedDeparture &&
+				rangeIsAvailable( selectedArrival, date );
 			const isInRange =
 				arrivalKey !== null &&
 				departureKey !== null &&
@@ -417,7 +368,6 @@ const initializeCalendar = ( root ) => {
 			button.classList.toggle( 'is-unavailable', isUnavailable );
 			button.classList.toggle( 'is-checkout-buffer', isCheckoutBuffer );
 			button.classList.toggle( 'is-unavailable-range-start', isRangeStart );
-			button.classList.toggle( 'is-unavailable-range-end', isRangeEnd );
 			button.classList.toggle( 'is-boundary-selectable', canSelectBoundary );
 			button.setAttribute( 'aria-pressed', isArrival || isDeparture ? 'true' : 'false' );
 			button.setAttribute(
@@ -810,17 +760,14 @@ const initializeCalendar = ( root ) => {
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-unavailable-start',
-						allowUnavailableEndpoints && isSelectableUnavailableRangeStart( date )
-					);
-					dayElement.classList.toggle(
-						'vvm-flatpickr-unavailable-end',
-						allowUnavailableEndpoints && isSelectableUnavailableRangeEnd( date )
+						field.name === data.fields?.departure &&
+							allowUnavailableEndpoints && isSelectableUnavailableRangeStart( date )
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-boundary-selectable',
-						allowUnavailableEndpoints &&
-							( isSelectableUnavailableRangeStart( date ) ||
-								isSelectableUnavailableRangeEnd( date ) )
+						field.name === data.fields?.departure &&
+							! dayElement.classList.contains( 'flatpickr-disabled' ) &&
+							allowUnavailableEndpoints && isSelectableUnavailableRangeStart( date )
 					);
 					dayElement.setAttribute(
 						'title',
