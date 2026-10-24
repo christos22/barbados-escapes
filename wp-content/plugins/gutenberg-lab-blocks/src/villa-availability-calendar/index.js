@@ -59,8 +59,8 @@ const Edit = ( { attributes, setAttributes } ) => {
 						onChange={ ( value ) => setAttributes( { formSelector: value } ) }
 					/>
 					<ToggleControl
-						label={ __( 'Allow boundary check-in/out', 'gutenberg-lab-blocks' ) }
-						help={ __( 'When enabled, guests may check out on the first greyed-out date or check in on the last greyed-out date. Dates inside the grey range stay blocked.', 'gutenberg-lab-blocks' ) }
+						label={ __( 'Allow checkout on the first blocked date', 'gutenberg-lab-blocks' ) }
+						help={ __( 'Checkout does not occupy that night. Arrivals and overnight stays always require an available date, including any turnaround buffer.', 'gutenberg-lab-blocks' ) }
 						checked={ !! allowUnavailableEndpoints }
 						onChange={ ( value ) =>
 							setAttributes( { allowUnavailableEndpoints: value } )

@@ -102,3 +102,9 @@
 - A native Query Loop with `query.namespace: gutenberg-lab/public-villa-sitemap` lists all published, unprotected villas. Keep the surrounding Site Map headings and links as editable core blocks.
 - Villa archive pages get descriptions, social metadata and self-canonicals, including `villa_page=2`. Filter combinations use `noindex` and fragment responses use `X-Robots-Tag`; villa detail pages stay indexable. Guidance: https://developers.google.com/search/docs/specialty/ecommerce/pagination-and-incremental-page-loading
 - Regression commands: `ddev wp eval-file wp-content/plugins/gutenberg-lab-blocks/tests/villa-publication-qa.php` and `node wp-content/plugins/gutenberg-lab-blocks/tests/villa-date-policy.mjs`. PHP fixture tests refuse production and remove only their temporary posts and terms.
+
+### Availability uses occupied nights
+
+The dynamic calendar receives occupied nights from PHP, not inclusive booking dates. A booking from the 11th to checkout on the 14th blocks the 11th, 12th and 13th. JavaScript selection and PHP search/CF7 validation must check every night in `[arrival, departure)`, including any configured buffer. The legacy `allowUnavailableEndpoints` attribute only permits checkout on the first blocked date; it never permits an occupied arrival. Existing blocks need no content migration.
+
+Run `php tests/villa-availability-boundaries.php` and `node tests/villa-availability-boundaries.mjs` from the block plugin to check both implementations against the shared boundary fixtures.
