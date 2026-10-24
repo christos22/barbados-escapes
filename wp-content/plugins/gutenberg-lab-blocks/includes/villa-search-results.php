@@ -259,8 +259,8 @@ function gutenberg_lab_blocks_filter_villa_ids_by_availability( $villa_ids, $req
 		array_filter(
 			$villa_ids,
 			static function ( $villa_id ) use ( $arrival, $departure, $lookups ) {
-				// Match the public calendar: turnaround-day edges may be used,
-				// but unavailable nights inside the stay still exclude a villa.
+				// Match the calendar: checkout can start a blocked run, but every
+				// occupied night (including arrival and buffers) excludes a villa.
 				return isset( $lookups[ $villa_id ] ) &&
 					gutenberg_lab_blocks_is_villa_date_lookup_available(
 						$lookups[ $villa_id ],

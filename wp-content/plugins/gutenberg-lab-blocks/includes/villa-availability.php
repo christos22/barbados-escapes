@@ -861,7 +861,7 @@ function gutenberg_lab_blocks_is_unavailable_range_end( $date, $lookup ) {
  * @param array<string, bool> $lookup                      Unavailable dates keyed by Y-m-d.
  * @param string              $arrival_date                Arrival date.
  * @param string              $departure_date              Departure date.
- * @param bool                $allow_unavailable_endpoints Whether unavailable range edges are selectable.
+ * @param bool                $allow_unavailable_endpoints Whether checkout on the first blocked date is allowed.
  * @return bool
  */
 function gutenberg_lab_blocks_is_villa_date_lookup_available( $lookup, $arrival_date, $departure_date, $allow_unavailable_endpoints = false ) {
@@ -869,14 +869,6 @@ function gutenberg_lab_blocks_is_villa_date_lookup_available( $lookup, $arrival_
 	$departure_date = gutenberg_lab_blocks_normalize_iso_date( $departure_date );
 
 	if ( '' === $arrival_date || '' === $departure_date || $departure_date <= $arrival_date ) {
-		return false;
-	}
-
-	if (
-		$allow_unavailable_endpoints &&
-		isset( $lookup[ $arrival_date ] ) &&
-		! gutenberg_lab_blocks_is_unavailable_range_end( $arrival_date, $lookup )
-	) {
 		return false;
 	}
 
@@ -897,16 +889,9 @@ function gutenberg_lab_blocks_is_villa_date_lookup_available( $lookup, $arrival_
 	while ( $cursor < $end && $limit < 1095 ) {
 		$date = $cursor->format( 'Y-m-d' );
 
-		// A grey check-in date is allowed only when it is the final date in an
-		// unavailable run; every other blocked night excludes the villa.
-		if (
-			isset( $lookup[ $date ] ) &&
-			! (
-				$allow_unavailable_endpoints &&
-				$date === $arrival_date &&
-				gutenberg_lab_blocks_is_unavailable_range_end( $date, $lookup )
-			)
-		) {
+		// Stored dates are occupied nights, including manual and buffer blocks.
+		// Arrival is a night spent here; checkout is excluded from the stay.
+		if ( isset( $lookup[ $date ] ) ) {
 			return false;
 		}
 
@@ -2006,14 +1991,9 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 								if ( $allow_unavailable_endpoints ) {
 									$date_context  = new DateTimeImmutable( $date, wp_timezone() );
 									$previous_date = $date_context->modify( '-1 day' )->format( 'Y-m-d' );
-									$next_date     = $date_context->modify( '+1 day' )->format( 'Y-m-d' );
 
 									if ( ! isset( $unavailable_lookup[ $previous_date ] ) ) {
 										$classes[] = 'is-unavailable-range-start';
-									}
-
-									if ( ! isset( $unavailable_lookup[ $next_date ] ) ) {
-										$classes[] = 'is-unavailable-range-end';
 									}
 								}
 							}
