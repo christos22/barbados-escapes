@@ -15,6 +15,17 @@ export const isBlockedRangeStart = ( date, blocked ) => {
 		! blocked.has( new Date( key - DAY_MS ).toISOString().slice( 0, 10 ) );
 };
 
+// A checkout marker belongs to the first free day after an occupied night.
+// Buffer days and back-to-back bookings must never look partly available.
+export const isCheckoutDate = ( date, blocked, buffers = new Set() ) => {
+	const key = dateKey( date );
+	if ( key === null || blocked.has( date ) || buffers.has( date ) ) {
+		return false;
+	}
+	const previous = new Date( key - DAY_MS ).toISOString().slice( 0, 10 );
+	return blocked.has( previous ) && ! buffers.has( previous );
+};
+
 export const canArrive = ( date, blocked, minimumDate = '' ) =>
 	dateKey( date ) !== null && date >= minimumDate && ! blocked.has( date );
 

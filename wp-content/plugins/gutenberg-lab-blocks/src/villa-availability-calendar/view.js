@@ -1,6 +1,6 @@
 import flatpickr from 'flatpickr';
 import { getMinimumDate } from './date-policy';
-import { canArrive, canDepart, isBlockedRangeStart, isStayAvailable } from './availability-policy';
+import { canArrive, canDepart, isBlockedRangeStart, isCheckoutDate, isStayAvailable } from './availability-policy';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -287,6 +287,9 @@ const initializeCalendar = ( root ) => {
 
 	const isCheckoutBufferDate = ( date ) => checkoutBufferDates.has( date );
 
+	const hasCheckoutMarker = ( date ) =>
+		allowUnavailableEndpoints && isCheckoutDate( date, unavailableDates, checkoutBufferDates );
+
 	const isSelectableUnavailableRangeStart = ( date ) =>
 		isBlockedRangeStart( date, unavailableDates );
 
@@ -322,6 +325,7 @@ const initializeCalendar = ( root ) => {
 			const isRangeStart =
 				allowUnavailableEndpoints &&
 				isUnavailable &&
+				! isCheckoutBuffer &&
 				isSelectableUnavailableRangeStart( date );
 			const isArrival = date === selectedArrival;
 			const isDeparture = date === selectedDeparture;
@@ -367,6 +371,7 @@ const initializeCalendar = ( root ) => {
 			button.classList.toggle( 'is-preview-invalid', isPreviewInvalid );
 			button.classList.toggle( 'is-unavailable', isUnavailable );
 			button.classList.toggle( 'is-checkout-buffer', isCheckoutBuffer );
+			button.classList.toggle( 'is-checkout-day', hasCheckoutMarker( date ) );
 			button.classList.toggle( 'is-unavailable-range-start', isRangeStart );
 			button.classList.toggle( 'is-boundary-selectable', canSelectBoundary );
 			button.setAttribute( 'aria-pressed', isArrival || isDeparture ? 'true' : 'false' );
@@ -752,6 +757,11 @@ const initializeCalendar = ( root ) => {
 			onDayCreate: ( _selectedDates, _dateStr, _instance, dayElement ) => {
 				const date = formatPickerDate( dayElement.dateObj );
 
+				// Shading describes occupancy; picker disable rules still control selection.
+				if ( hasCheckoutMarker( date ) ) {
+					dayElement.classList.add( 'vvm-flatpickr-checkout' );
+				}
+
 				if ( unavailableDates.has( date ) ) {
 					dayElement.classList.add( 'vvm-flatpickr-unavailable' );
 					dayElement.classList.toggle(
@@ -760,7 +770,7 @@ const initializeCalendar = ( root ) => {
 					);
 					dayElement.classList.toggle(
 						'vvm-flatpickr-unavailable-start',
-						field.name === data.fields?.departure &&
+						! isCheckoutBufferDate( date ) &&
 							allowUnavailableEndpoints && isSelectableUnavailableRangeStart( date )
 					);
 					dayElement.classList.toggle(

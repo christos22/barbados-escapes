@@ -1,0 +1,21 @@
+[
+  {"name":"check-in keeps its first half free","date":"2030-05-11","blocked":["2030-05-11","2030-05-12","2030-05-13"],"start":true,"checkout":false},
+  {"name":"last occupied night is fully blocked","date":"2030-05-13","blocked":["2030-05-11","2030-05-12","2030-05-13"],"start":false,"checkout":false},
+  {"name":"actual checkout is half shaded and free","date":"2030-05-14","blocked":["2030-05-11","2030-05-12","2030-05-13"],"start":false,"checkout":true},
+  {"name":"following free day has no marker","date":"2030-05-15","blocked":["2030-05-13"],"start":false,"checkout":false},
+  {"name":"single-night booking retains check-in marker","date":"2030-05-13","blocked":["2030-05-13"],"start":true,"checkout":false},
+  {"name":"single-night checkout is next day","date":"2030-05-14","blocked":["2030-05-13"],"start":false,"checkout":true},
+  {"name":"back-to-back turnover is fully occupied","date":"2030-05-14","blocked":["2030-05-13","2030-05-14","2030-05-15"],"start":false,"checkout":false},
+  {"name":"end of back-to-back stays is free","date":"2030-05-16","blocked":["2030-05-13","2030-05-14","2030-05-15"],"start":false,"checkout":true},
+  {"name":"one-night gap is a free checkout date","date":"2030-05-14","blocked":["2030-05-13","2030-05-15"],"start":false,"checkout":true},
+  {"name":"cleaning buffer is fully blocked","date":"2030-05-14","blocked":["2030-05-13","2030-05-14"],"buffers":["2030-05-14"],"start":false,"checkout":false},
+  {"name":"day after buffer is entirely free","date":"2030-05-15","blocked":["2030-05-13","2030-05-14"],"buffers":["2030-05-14"],"start":false,"checkout":false},
+  {"name":"isolated preparation buffer has no half marker","date":"2030-05-10","blocked":["2030-05-10","2030-05-11"],"buffers":["2030-05-10"],"start":false,"checkout":false},
+  {"name":"month-boundary checkout","date":"2030-05-01","blocked":["2030-04-30"],"start":false,"checkout":true},
+  {"name":"year-boundary checkout","date":"2031-01-01","blocked":["2030-12-31"],"start":false,"checkout":true},
+  {"name":"leap-day checkout","date":"2032-03-01","blocked":["2032-02-29"],"start":false,"checkout":true},
+  {"name":"DST boundary checkout uses calendar days","date":"2030-03-11","blocked":["2030-03-10"],"start":false,"checkout":true},
+  {"name":"strict endpoint mode has no partial marker","date":"2030-05-14","blocked":["2030-05-13"],"endpoints":false,"start":false,"checkout":false},
+  {"name":"strict endpoint mode keeps check-in fully blocked","date":"2030-05-13","blocked":["2030-05-13"],"endpoints":false,"start":false,"checkout":false},
+  {"name":"empty calendar has no markers","date":"2030-05-14","blocked":[],"start":false,"checkout":false}
+]

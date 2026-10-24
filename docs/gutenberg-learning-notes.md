@@ -114,3 +114,5 @@
 The dynamic calendar receives occupied nights from PHP, not inclusive booking dates. A booking from the 11th to checkout on the 14th blocks the 11th, 12th and 13th. JavaScript selection and PHP search/CF7 validation must check every night in `[arrival, departure)`, including any configured buffer. The legacy `allowUnavailableEndpoints` attribute only permits checkout on the first blocked date; it never permits an occupied arrival. Existing blocks need no content migration.
 
 Run `php tests/villa-availability-boundaries.php` and `node tests/villa-availability-boundaries.mjs` from the block plugin to check both implementations against the shared boundary fixtures.
+
+Checkout shading is separate from date validation. Render the opposite diagonal on the first free date after an occupied night, in both PHP calendar markup and the enquiry pickers. Do not shade the last occupied night, a buffer day, or the free day after a buffer as checkout. The shared marker fixtures cover month/year boundaries, single nights and back-to-back stays.
