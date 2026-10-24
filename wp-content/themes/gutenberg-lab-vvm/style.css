@@ -2045,11 +2045,12 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	font-weight: 700;
 }
 
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__table tbody tr:nth-child(odd) {
+/* Bedroom filtering hides rows; stripe only the rows guests can see. */
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__table tbody tr:nth-child(odd of :not([hidden])) {
 	background: #fbf8f2;
 }
 
-:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__table tbody tr:nth-child(even) {
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-pricing__table tbody tr:nth-child(even of :not([hidden])) {
 	background: #ffffff;
 }
 

@@ -27,7 +27,7 @@
     },
     "useFramedPhotos": {
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "showArrows": {
       "type": "boolean",

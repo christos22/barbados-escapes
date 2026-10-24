@@ -24,10 +24,10 @@
 ## Hero Composition
 
 - Villa gallery photos use the uncropped `full` attachment inside a consistent 3:2 display frame. CSS `object-fit: cover` crops the display without distorting the source, including enlarging small originals to the shared frame. The charcoal surround reserves the compact header height above the photo and a 16px minimum gap below; the opening hero and thumbnail styling keep their own treatments.
-- `useFramedPhotos` is a per-hero boolean attribute, exposed as a native `ToggleControl` in Hero layout. It defaults to false to preserve existing full-cover galleries. PHP applies the frame only to later photo slides when enabled; the opening hero and videos always retain their full-cover treatment.
+- `useFramedPhotos` is a per-hero boolean attribute, exposed as a native `ToggleControl` in Hero layout. It defaults to true, so existing galleries with no saved preference inherit framed photos. An explicit false remains a per-villa opt-out, without a content migration. PHP applies the frame only to later photo slides when enabled; the opening hero and videos always retain their full-cover treatment.
 - Later photo slides reuse the existing `thumbnailLabel` in PHP, so one editor field controls both labels. A positioned photo wrapper keeps the label attached to the image in either layout; the opening slide and videos have no photo label.
 - The theme uses the active framed slide to select the existing compact logo size. Its header script measures the dark band on slide changes and resize, keeping the logo centred without duplicating gallery state. The first slide and full-cover galleries keep their usual header sizing.
-- Framed galleries reuse the opening photo or video poster as one decorative backdrop beneath the slider. A separate layer uses the header's `dark-green` theme colour at 90% opacity without dimming the foreground photos or adding another video player.
+- Framed galleries reuse the opening photo or video poster as one decorative backdrop beneath the slider. A separate layer uses Young Estates' `#1e1e1e` dark backdrop at 90% opacity without dimming the foreground photos or adding another video player.
 
 - Keep the hero shell and the search behavior separate when they solve different problems.
 - `media-panel` is the reusable visual container for video, overlay, and hero layout.

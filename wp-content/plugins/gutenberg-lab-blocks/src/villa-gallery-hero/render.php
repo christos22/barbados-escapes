@@ -584,7 +584,7 @@ $overlay_style = in_array( $attributes['overlayStyle'] ?? 'brand-green', array( 
 	? $attributes['overlayStyle']
 	: 'brand-green';
 $show_arrows   = ! empty( $attributes['showArrows'] );
-// Existing saved heroes keep the full-cover layout until editors opt in.
+// The registered default enables framed photos; an explicit false keeps full-cover photos.
 $use_framed_photos = ! empty( $attributes['useFramedPhotos'] );
 $hero_regions  = gutenberg_lab_blocks_villa_gallery_hero_get_regions( $block ?? null );
 $slides        = $hero_regions['slides'];
