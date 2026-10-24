@@ -113,7 +113,7 @@ body.vvm-has-hero-header
 	inset: 0;
 	z-index: 0;
 	pointer-events: none;
-	background: var(--wp--preset--color--dark-green, #1e3d2f);
+	background: #1e1e1e;
 
 	.vvm-villa-gallery-hero__backdrop-image {
 		display: block;
@@ -126,8 +126,8 @@ body.vvm-has-hero-header
 		content: "";
 		position: absolute;
 		inset: 0;
-		/* Use the header colour at the same opacity, without dimming the photos. */
-		background: var(--wp--preset--color--dark-green, #1e3d2f);
+		/* Match Young Estates' dark backdrop without dimming the photos. */
+		background: #1e1e1e;
 		opacity: 0.9;
 	}
 }
@@ -216,9 +216,7 @@ body.vvm-has-hero-header
 	align-items: center;
 	max-width: calc(100% - 2.5rem);
 	padding: 0.25rem 0.75rem;
-	/* Give the entire caption the same transparency as the gallery tint. */
-	background: var(--wp--preset--color--dark-green, #1e3d2f);
-	opacity: 0.9;
+	background: rgba(0, 0, 0, 0.68);
 	color: #f5ecd7;
 	overflow-wrap: anywhere;
 	pointer-events: none;
@@ -227,8 +225,8 @@ body.vvm-has-hero-header
 /* Use one 3:2 photo frame, matching the reference's landscape lightbox geometry. */
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained,
 .vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained {
-	/* Reserve the compact header above the photo, with only a small gap below. */
-	--vvm-gallery-frame-top: var(--vvm-header-height, 96px);
+	/* YE leaves 88px vertically; shift that allowance up to clear our logo. */
+	--vvm-gallery-frame-top: 72px;
 	--vvm-gallery-frame-bottom: 16px;
 	display: flex;
 	align-items: center;
@@ -239,13 +237,33 @@ body.vvm-has-hero-header
 
 	.vvm-villa-gallery-hero__stage-photo {
 		flex: none;
-		/* Keep the 3:2 crop inside the space left by the header and bottom inset. */
-		width: min(100%, calc((var(--vvm-villa-gallery-hero-stage-height) - var(--vvm-gallery-frame-top) - var(--vvm-gallery-frame-bottom)) * 1.5));
+		/* Match the reference's 3:2 frame and its 2100px maximum image width. */
+		width: min(100%, 2100px, calc((var(--vvm-villa-gallery-hero-stage-height) - var(--vvm-gallery-frame-top) - var(--vvm-gallery-frame-bottom)) * 1.5));
 		height: auto;
 		aspect-ratio: 3 / 2;
 		max-width: 100%;
 		max-height: 100%;
 		margin: 0;
+	}
+}
+
+/* YE reduces its vertical inset to 6px on short screens. */
+@media (max-height: 576px) and (orientation: landscape) {
+	:is(.wp-block-gutenberg-lab-blocks-villa-gallery-hero, .vvm-villa-gallery-hero):has(.vvm-villa-gallery-hero__stage .is-active > .vvm-villa-gallery-hero__stage-slide--contained) {
+		/* A photo needs the visible viewport, rather than the opening copy's minimum height. */
+		--vvm-villa-gallery-hero-stage-height: calc(100vh - var(--vvm-admin-bar-offset, 0px));
+	}
+
+	@supports (height: 100dvh) {
+		:is(.wp-block-gutenberg-lab-blocks-villa-gallery-hero, .vvm-villa-gallery-hero):has(.vvm-villa-gallery-hero__stage .is-active > .vvm-villa-gallery-hero__stage-slide--contained) {
+			--vvm-villa-gallery-hero-stage-height: calc(100dvh - var(--vvm-admin-bar-offset, 0px));
+		}
+	}
+
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained {
+		--vvm-gallery-frame-top: 6px;
+		--vvm-gallery-frame-bottom: 6px;
 	}
 }
 

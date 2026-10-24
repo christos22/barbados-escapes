@@ -3279,6 +3279,14 @@ body.vvm-has-hero-header:has(.vvm-villa-gallery-hero__stage .is-active > .vvm-vi
 	min-height: var(--vvm-header-framed-band-height, var(--vvm-header-height, 96px));
 }
 
+@media (max-height: 576px) and (orientation: landscape) {
+	/* Photo slides use YE's full viewing area; the opening slide and sticky header stay accessible. */
+	body.vvm-has-hero-header:has(.vvm-villa-gallery-hero__stage .is-active > .vvm-villa-gallery-hero__stage-slide--contained)
+		.vvm-header:not(.is-scrolled) {
+		display: none;
+	}
+}
+
 .vvm-header .wp-block-navigation__responsive-container {
 	padding: 0;
 	position: fixed;
