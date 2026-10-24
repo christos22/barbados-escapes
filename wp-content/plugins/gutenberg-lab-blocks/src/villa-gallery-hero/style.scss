@@ -216,9 +216,9 @@ body.vvm-has-hero-header
 	align-items: center;
 	max-width: calc(100% - 2.5rem);
 	padding: 0.25rem 0.75rem;
-	/* Match the gallery tint while keeping the caption text fully opaque. */
-	background: rgba(30, 61, 47, 0.9);
-	background: color-mix(in srgb, var(--wp--preset--color--dark-green, #1e3d2f) 90%, transparent);
+	/* Give the entire caption the same transparency as the gallery tint. */
+	background: var(--wp--preset--color--dark-green, #1e3d2f);
+	opacity: 0.9;
 	color: #f5ecd7;
 	overflow-wrap: anywhere;
 	pointer-events: none;
