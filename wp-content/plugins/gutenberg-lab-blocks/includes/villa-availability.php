@@ -1980,6 +1980,15 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 							$is_past            = $date < $today;
 							$is_buffer          = isset( $buffer_lookup[ $date ] );
 							$classes            = array( 'vvm-villa-availability-calendar__day' );
+							$date_context       = new DateTimeImmutable( $date, wp_timezone() );
+							$previous_date      = $date_context->modify( '-1 day' )->format( 'Y-m-d' );
+							// DTEND is exclusive: shade the free checkout date, not the last occupied night.
+							$is_checkout = $allow_unavailable_endpoints && ! $unavailable && ! $is_buffer &&
+								isset( $unavailable_lookup[ $previous_date ] ) && ! isset( $buffer_lookup[ $previous_date ] );
+
+							if ( $is_checkout ) {
+								$classes[] = 'is-checkout-day';
+							}
 
 							if ( $unavailable ) {
 								$classes[] = 'is-unavailable';
@@ -1988,10 +1997,7 @@ function gutenberg_lab_blocks_render_villa_availability_month( DateTimeImmutable
 									$classes[] = 'is-checkout-buffer';
 								}
 
-								if ( $allow_unavailable_endpoints ) {
-									$date_context  = new DateTimeImmutable( $date, wp_timezone() );
-									$previous_date = $date_context->modify( '-1 day' )->format( 'Y-m-d' );
-
+								if ( $allow_unavailable_endpoints && ! $is_buffer ) {
 									if ( ! isset( $unavailable_lookup[ $previous_date ] ) ) {
 										$classes[] = 'is-unavailable-range-start';
 									}

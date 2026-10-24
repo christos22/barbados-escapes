@@ -184,6 +184,15 @@
 	cursor: pointer;
 }
 
+// Checkout is an available arrival date, so it must not use .is-unavailable.
+.vvm-villa-availability-calendar__day.is-checkout-day {
+	background: linear-gradient(
+		135deg,
+		var(--vvm-calendar-unavailable) 0 49%,
+		transparent 50% 100%
+	);
+}
+
 .vvm-villa-availability-calendar__day.is-in-range,
 .vvm-villa-availability-calendar__day.is-preview-in-range {
 	background: var(--vvm-calendar-range);
@@ -406,6 +415,16 @@
 
 .flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-boundary-selectable {
 	cursor: pointer;
+}
+
+// Keep disabled and selected dates visually distinct from a free checkout day.
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-checkout:not(.flatpickr-disabled):not(.selected),
+.flatpickr-calendar.vvm-villa-date-picker .flatpickr-day.vvm-flatpickr-checkout:not(.flatpickr-disabled):not(.selected):hover {
+	background: linear-gradient(
+		135deg,
+		var(--vvm-date-picker-unavailable) 0 49%,
+		transparent 50% 100%
+	);
 }
 
 @media (max-width: 1200px) {
