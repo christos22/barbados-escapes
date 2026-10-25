@@ -121,3 +121,5 @@ Checkout shading is separate from date validation. Render the opposite diagonal 
 ### Closing framed gallery photos
 
 PHP renders one accessible X outside the slide markup; JavaScript shows it only for later framed photos. X and gallery-focused Escape reuse the existing fade navigation to return to the opening view without scrolling. The opening video retains its position and prior play/pause state; confirmed playback restarts the existing five-second title/CTA fade timer.
+
+Gallery Escape listens at document level while a photo is visible, because clicking an image leaves keyboard focus on the page. The capture listener checks open menus and dialogs before their own Escape handlers run, and ignores editable fields and an off-screen hero.

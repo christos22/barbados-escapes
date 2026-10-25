@@ -1066,6 +1066,38 @@ function initializeVillaGalleryHero( rootElement ) {
 	};
 	closeButton?.addEventListener( 'click', returnToOpeningView );
 
+	if ( closeButton ) {
+		// Clicking a photo leaves focus on the page, so Escape cannot depend on gallery focus.
+		document.addEventListener( 'keydown', ( event ) => {
+			if (
+				'Escape' !== event.key ||
+				event.defaultPrevented ||
+				event.altKey || event.ctrlKey || event.metaKey || event.isComposing ||
+				closeButton.hidden ||
+				document.documentElement.classList.contains( 'has-modal-open' ) ||
+				event.target.closest?.(
+					'input, textarea, select, [contenteditable]:not([contenteditable="false"]), dialog, [role="dialog"], [role="alertdialog"]'
+				)
+			) {
+				return;
+			}
+
+			// Leave Escape to dialogs and to page content once the hero is off screen.
+			const stageBounds = stageElement.getBoundingClientRect();
+			const hasOpenDialog = Array.from(
+				document.querySelectorAll( 'dialog[open], [aria-modal="true"]' )
+			).some( ( dialog ) => dialog.getClientRects().length &&
+				window.getComputedStyle( dialog ).visibility !== 'hidden' );
+			if ( stageBounds.bottom <= 0 || stageBounds.top >= window.innerHeight || hasOpenDialog ) {
+				return;
+			}
+
+			event.preventDefault();
+			returnToOpeningView();
+		// Check menu state before its own Escape handler closes the menu.
+		}, { capture: true } );
+	}
+
 	rootElement.addEventListener( 'keydown', ( event ) => {
 		if (
 			event.defaultPrevented ||
@@ -1076,15 +1108,6 @@ function initializeVillaGalleryHero( rootElement ) {
 				'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="dialog"]'
 			)
 		) {
-			return;
-		}
-		// Escape belongs to this focused gallery, not the page's menu or forms.
-		if (
-			'Escape' === event.key &&
-			closeButton && ! closeButton.hidden
-		) {
-			event.preventDefault();
-			returnToOpeningView();
 			return;
 		}
 		if ( ! [ 'ArrowLeft', 'ArrowRight' ].includes( event.key ) ) {
