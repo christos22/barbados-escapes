@@ -116,3 +116,8 @@ The dynamic calendar receives occupied nights from PHP, not inclusive booking da
 Run `php tests/villa-availability-boundaries.php` and `node tests/villa-availability-boundaries.mjs` from the block plugin to check both implementations against the shared boundary fixtures.
 
 Checkout shading is separate from date validation. Render the opposite diagonal on the first free date after an occupied night, in both PHP calendar markup and the enquiry pickers. Do not shade the last occupied night, a buffer day, or the free day after a buffer as checkout. The shared marker fixtures cover month/year boundaries, single nights and back-to-back stays.
+
+
+### Closing framed gallery photos
+
+PHP renders one accessible X outside the slide markup; JavaScript shows it only for later framed photos. X and gallery-focused Escape reuse the existing fade navigation to return to the opening view without scrolling. The opening video retains its position and prior play/pause state; confirmed playback restarts the existing five-second title/CTA fade timer.

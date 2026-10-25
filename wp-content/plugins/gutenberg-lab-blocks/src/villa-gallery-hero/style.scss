@@ -222,6 +222,53 @@ body.vvm-has-hero-header
 	pointer-events: none;
 }
 
+/* Match the reference's gallery-corner control, outside the photo's fade layer. */
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__close {
+	/* Stay aligned with the fixed hero header during small viewport scrolls. */
+	position: fixed;
+	top: var(--vvm-admin-bar-offset, 0px);
+	right: 0;
+	/* Clear the transparent header; its menu hides this control below. */
+	z-index: 41;
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: rgba(30, 30, 30, 0.6);
+	color: #ccc;
+	cursor: pointer;
+
+	&[hidden] {
+		display: none;
+	}
+
+	&:hover {
+		color: #fff;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #fff;
+		outline-offset: 2px;
+	}
+
+	svg {
+		width: 24px;
+		height: 24px;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.5;
+	}
+}
+
+/* Never float gallery chrome over an open menu or the scrolled sticky header. */
+html.has-modal-open .vvm-villa-gallery-hero__close,
+body:has(.vvm-header.is-scrolled) .vvm-villa-gallery-hero__close {
+	visibility: hidden;
+}
+
 /* Use one 3:2 photo frame, matching the reference's landscape lightbox geometry. */
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained,
 .vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained {
@@ -264,6 +311,11 @@ body.vvm-has-hero-header
 	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__stage-slide--contained {
 		--vvm-gallery-frame-top: 6px;
 		--vvm-gallery-frame-bottom: 6px;
+
+		.vvm-villa-gallery-hero__stage-photo {
+			/* Keep the corner's 44px target outside the photo even at nearly 3:2 viewports. */
+			max-width: calc(100% - 88px);
+		}
 	}
 }
 

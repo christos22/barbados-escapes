@@ -645,6 +645,19 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 ?>
 
 <section <?php echo $wrapper_attributes; ?>>
+	<?php if ( $use_framed_photos && $has_thumb_navigation ) : ?>
+		<?php // Gallery chrome belongs outside the individual photos and their fade layers. ?>
+		<button
+			type="button"
+			class="vvm-villa-gallery-hero__close"
+			data-villa-gallery-close
+			aria-label="<?php esc_attr_e( 'Return to opening view', 'gutenberg-lab-blocks' ); ?>"
+			title="<?php esc_attr_e( 'Back to cover', 'gutenberg-lab-blocks' ); ?>"
+			hidden
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M6 18 18 6" /></svg>
+		</button>
+	<?php endif; ?>
 	<div class="vvm-villa-gallery-hero__stage-shell vvm-slider-surface">
 		<?php if ( $use_framed_photos && $has_thumb_navigation ) : ?>
 			<div class="vvm-villa-gallery-hero__backdrop" aria-hidden="true">

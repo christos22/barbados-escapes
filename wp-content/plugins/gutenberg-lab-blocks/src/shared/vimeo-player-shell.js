@@ -31,6 +31,7 @@ function getShellState( shell ) {
 		requestId: 0,
 		resizeObserver: null,
 		resizeHandler: null,
+		suspension: null,
 	};
 
 	VIMEO_SHELL_STATE.set( shell, state );
@@ -361,9 +362,21 @@ async function ensureShellPlayer( shell, mode ) {
 
 	await destroyShellPlayer( { player: previousPlayer } );
 
-	const VimeoPlayer = await loadVimeoPlayerConstructor();
+	const PlayerConstructor = await loadVimeoPlayerConstructor();
 
-	state.player = new VimeoPlayer( nextIframe );
+	state.player = new PlayerConstructor( nextIframe );
+	// A photo view may open while the iframe's own autoplay is still starting.
+	state.player.on( 'play', () => {
+		if ( state.suspension ) {
+			void state.player.pause().catch( () => {} );
+			return;
+		}
+
+		dispatchVimeoPlaybackStarted( shell );
+	} );
+	if ( state.suspension ) {
+		void state.player.pause().catch( () => {} );
+	}
 
 	bindShellResizeObserver( shell );
 
@@ -494,6 +507,9 @@ export function bindVimeoShellTransportControls( root = document ) {
 
 async function playVimeoShellFromTransportControl( shell ) {
 	const state = getShellState( shell );
+	if ( state.suspension ) {
+		return;
+	}
 
 	if (
 		state.player &&
@@ -586,7 +602,7 @@ export function bindNativeVideoControls( root = document ) {
 }
 
 export async function attemptVimeoShellAutoplay( shell ) {
-	if ( ! shell ) {
+	if ( ! shell || getShellState( shell ).suspension ) {
 		return false;
 	}
 
@@ -625,10 +641,16 @@ export async function attemptVimeoShellAutoplay( shell ) {
 	}
 
 	await ensureShellAspectRatio( shell, state );
+	if ( ! isActiveRequest( shell, requestId ) ) {
+		return false;
+	}
 
 	const didPlay = await playPlayerInstance( state.player, true );
 
-	if ( ! didPlay || ! isActiveRequest( shell, requestId ) ) {
+	if ( ! isActiveRequest( shell, requestId ) ) {
+		return false;
+	}
+	if ( ! didPlay ) {
 		setPosterVisibility( shell, true );
 		setVimeoTransportControlState( shell, 'paused' );
 		return false;
@@ -642,7 +664,7 @@ export async function attemptVimeoShellAutoplay( shell ) {
 }
 
 async function playVimeoShellFromUserAction( shell ) {
-	if ( ! shell ) {
+	if ( ! shell || getShellState( shell ).suspension ) {
 		return false;
 	}
 
@@ -672,6 +694,9 @@ async function playVimeoShellFromUserAction( shell ) {
 	}
 
 	await ensureShellAspectRatio( shell, state );
+	if ( ! isActiveRequest( shell, requestId ) ) {
+		return false;
+	}
 
 	let didPlay = await playPlayerInstance( state.player, false );
 
@@ -681,7 +706,10 @@ async function playVimeoShellFromUserAction( shell ) {
 
 	setShellBusy( shell, false );
 
-	if ( ! didPlay || ! isActiveRequest( shell, requestId ) ) {
+	if ( ! isActiveRequest( shell, requestId ) ) {
+		return false;
+	}
+	if ( ! didPlay ) {
 		setPosterVisibility( shell, true );
 		setVimeoTransportControlState( shell, 'paused' );
 		return false;
@@ -692,6 +720,50 @@ async function playVimeoShellFromUserAction( shell ) {
 	setVimeoTransportControlState( shell, 'playing' );
 
 	return true;
+}
+
+/**
+ * Pause an existing player without seeking or replacing its iframe.
+ *
+ * @param {HTMLElement} shell The hero's existing Vimeo shell.
+ * @return {Function} Restore playback only when it was previously running.
+ */
+export function suspendVimeoShell( shell ) {
+	const state = getShellState( shell );
+	const token = {};
+	const player = state.player;
+	state.suspension = token;
+	beginShellRequest( shell ); // Cancel in-flight autoplay promises.
+	const wasPlaying =
+		player
+			?.getPaused()
+			.then( ( paused ) => ! paused )
+			.catch( () => false ) ?? Promise.resolve( false );
+	const paused = player?.pause().catch( () => {} ) ?? Promise.resolve();
+	setShellBusy( shell, false );
+	setVimeoTransportControlState( shell, 'paused' );
+	return async () => {
+		const [ shouldResume ] = await Promise.all( [ wasPlaying, paused ] );
+		// An older close must not resume playback under a newly opened viewer.
+		if ( state.suspension !== token ) {
+			return;
+		}
+		state.suspension = null;
+		if ( shouldResume && player === state.player ) {
+			try {
+				await player.play();
+				if ( state.suspension ) {
+					await player.pause();
+					return;
+				}
+				setPosterVisibility( shell, false );
+				setVimeoTransportControlState( shell, 'playing' );
+				dispatchVimeoPlaybackStarted( shell );
+			} catch ( error ) {
+				setVimeoTransportControlState( shell, 'paused' );
+			}
+		}
+	};
 }
 
 export async function resetVimeoShell(

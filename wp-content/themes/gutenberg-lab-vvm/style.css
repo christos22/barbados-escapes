@@ -3263,6 +3263,12 @@ body.vvm-has-static-header .vvm-header {
 }
 
 /* A framed gallery photo reserves one compact header row above the image. */
+body.vvm-has-hero-header:has(.vvm-villa-gallery-hero__close:not([hidden]))
+	.vvm-header:not(.is-scrolled) .vvm-header__utility--right {
+	/* Leave the gallery's top-right close target clear of the social links. */
+	margin-inline-end: 44px;
+}
+
 body.vvm-has-hero-header:has(.vvm-villa-gallery-hero__stage .is-active > .vvm-villa-gallery-hero__stage-slide--contained)
 	.vvm-header:not(.is-scrolled) {
 	--vvm-header-logo-width: var(--vvm-header-compact-logo-width);

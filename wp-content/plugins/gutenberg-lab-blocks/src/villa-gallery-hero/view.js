@@ -10,6 +10,7 @@ import {
 	bindVimeoShellTransportControls,
 	resetVimeoShell,
 	setNativeVideoControlState,
+	suspendVimeoShell,
 } from '../shared/vimeo-player-shell';
 
 const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
@@ -511,7 +512,7 @@ function createGalleryNavigation( rootElement, stageElement, stage ) {
 	};
 }
 
-function syncStageNativeVideos( stageElement, shouldAutoplay ) {
+function syncStageNativeVideos( stageElement, shouldAutoplay, preservedMedia ) {
 	if ( ! stageElement ) {
 		return;
 	}
@@ -524,6 +525,9 @@ function syncStageNativeVideos( stageElement, shouldAutoplay ) {
 	);
 
 	videos.forEach( ( video ) => {
+		if ( video === preservedMedia ) {
+			return; // The opening video keeps its position and previous play/pause choice.
+		}
 		const isActive = activeSlide?.contains( video );
 
 		if ( ! isActive ) {
@@ -557,7 +561,7 @@ function syncStaticNativeVideo( rootElement, shouldAutoplay ) {
 	resetManagedVideo( video );
 }
 
-function syncStageVimeoShells( stageElement, shouldAutoplay ) {
+function syncStageVimeoShells( stageElement, shouldAutoplay, preservedMedia ) {
 	if ( ! stageElement ) {
 		return;
 	}
@@ -570,6 +574,9 @@ function syncStageVimeoShells( stageElement, shouldAutoplay ) {
 	);
 
 	shells.forEach( ( shell ) => {
+		if ( shell === preservedMedia ) {
+			return;
+		}
 		const isActive = activeSlide?.contains( shell );
 
 		if ( ! isActive ) {
@@ -690,11 +697,16 @@ function syncActiveGalleryState(
 	activeIndex,
 	shouldAutoplayNativeVideo,
 	shouldAutoplayVimeo,
-	prefersReducedMotion
+	prefersReducedMotion,
+	preservedMedia
 ) {
 	loadStageSlideMedia( stageElement, activeIndex );
-	syncStageNativeVideos( stageElement, shouldAutoplayNativeVideo );
-	syncStageVimeoShells( stageElement, shouldAutoplayVimeo );
+	syncStageNativeVideos(
+		stageElement,
+		shouldAutoplayNativeVideo,
+		preservedMedia
+	);
+	syncStageVimeoShells( stageElement, shouldAutoplayVimeo, preservedMedia );
 	syncThumbRail( thumbsElement, activeIndex, prefersReducedMotion );
 }
 
@@ -898,6 +910,19 @@ function initializeVillaGalleryHero( rootElement ) {
 		'[data-villa-gallery-prev]'
 	);
 	const nextButton = rootElement.querySelector( '[data-villa-gallery-next]' );
+	const closeButton = rootElement.querySelector(
+		'[data-villa-gallery-close]'
+	);
+	const openingMedia = closeButton
+		? stageElement
+				.querySelector( '.splide__slide' )
+				?.querySelector(
+					'[data-villa-gallery-video], [data-villa-gallery-vimeo]'
+				)
+		: null;
+	let previousActiveIndex = 0;
+	let hasSuspendedOpeningVideo = false;
+	let resumeOpeningVideo;
 	const thumbSlides = Array.from(
 		thumbsElement.querySelectorAll( '.splide__slide' )
 	);
@@ -930,13 +955,51 @@ function initializeVillaGalleryHero( rootElement ) {
 		}
 		contentPlaybackController.syncActiveSlide( activeIndex );
 
+		// Framed photos pause the opening video without losing its position or intent.
+		if ( openingMedia && activeIndex !== previousActiveIndex ) {
+			if ( 0 === previousActiveIndex ) {
+				hasSuspendedOpeningVideo = true;
+				if ( openingMedia.matches( '[data-villa-gallery-vimeo]' ) ) {
+					resumeOpeningVideo = suspendVimeoShell( openingMedia );
+				} else {
+					const wasPlaying =
+						! openingMedia.paused && ! openingMedia.ended;
+					openingMedia.pause();
+					resumeOpeningVideo = () => {
+						if ( wasPlaying ) {
+							attemptManagedVideoAutoplay( openingMedia );
+						}
+					};
+				}
+			} else if ( 0 === activeIndex && resumeOpeningVideo ) {
+				// Playback confirmation starts a fresh copy fade timer.
+				void resumeOpeningVideo();
+				resumeOpeningVideo = undefined;
+			}
+		}
+		previousActiveIndex = activeIndex;
+
+		const activeSlide = stageElement.querySelectorAll( '.splide__slide' )[ activeIndex ];
+		if ( closeButton ) {
+			const isFramedPhoto = Boolean(
+				activeSlide?.querySelector( '.vvm-villa-gallery-hero__stage-slide--contained' )
+			);
+			if ( ! isFramedPhoto && closeButton === document.activeElement ) {
+				( nextButton || thumbSlides[ 0 ] )?.focus( {
+					preventScroll: true,
+				} );
+			}
+			closeButton.hidden = ! isFramedPhoto;
+		}
+
 		syncActiveGalleryState(
 			stageElement,
 			thumbsElement,
 			activeIndex,
 			shouldAutoplayNativeVideos(),
 			canAutoplayVimeoAfterIntent(),
-			prefersReducedMotion
+			prefersReducedMotion,
+			hasSuspendedOpeningVideo ? openingMedia : null
 		);
 	};
 
@@ -996,13 +1059,35 @@ function initializeVillaGalleryHero( rootElement ) {
 		navigation.step( 1 );
 	} );
 
+	const returnToOpeningView = () => {
+		// Reuse image preparation and request cancellation, including rapid clicks.
+		void navigation.select( 0 );
+		( nextButton || thumbSlides[ 0 ] )?.focus( { preventScroll: true } );
+	};
+	closeButton?.addEventListener( 'click', returnToOpeningView );
+
 	rootElement.addEventListener( 'keydown', ( event ) => {
 		if (
+			event.defaultPrevented ||
 			event.altKey ||
 			event.ctrlKey ||
 			event.metaKey ||
-			! [ 'ArrowLeft', 'ArrowRight' ].includes( event.key )
+			event.target.closest(
+				'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="dialog"]'
+			)
 		) {
+			return;
+		}
+		// Escape belongs to this focused gallery, not the page's menu or forms.
+		if (
+			'Escape' === event.key &&
+			closeButton && ! closeButton.hidden
+		) {
+			event.preventDefault();
+			returnToOpeningView();
+			return;
+		}
+		if ( ! [ 'ArrowLeft', 'ArrowRight' ].includes( event.key ) ) {
 			return;
 		}
 		event.preventDefault();
