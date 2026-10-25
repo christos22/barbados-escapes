@@ -17,7 +17,7 @@ const THUMB_ACTIVE_CLASS = 'vvm-villa-gallery-hero__thumb-slide--active';
 const MAX_VISIBLE_THUMBNAILS = 5;
 const GALLERY_FADE_MS = 240;
 const GALLERY_PRELOAD_AHEAD = 2;
-const HERO_VIDEO_CONTENT_DELAY_MS = 3000;
+const HERO_VIDEO_CONTENT_DELAY_MS = 5000;
 const HERO_CONTENT_FADE_MS = 350;
 const HERO_CONTENT_FADE_CLASS =
 	'vvm-villa-gallery-hero__content--video-fade-out';

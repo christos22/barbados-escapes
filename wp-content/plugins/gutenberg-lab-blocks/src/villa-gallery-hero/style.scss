@@ -300,7 +300,7 @@ body.vvm-has-hero-header
 	transition: opacity 350ms ease;
 }
 
-/* Leave hero video unobstructed after its three-second opening interval. */
+/* Leave hero video unobstructed after its five-second opening interval. */
 .wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content--video-fade-out,
 .vvm-villa-gallery-hero .vvm-villa-gallery-hero__content--video-fade-out {
 	opacity: 0;
