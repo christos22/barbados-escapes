@@ -194,6 +194,16 @@ function setVimeoTransportControlState( shell, state ) {
 	setVideoControlElementState( control, state );
 }
 
+function dispatchVimeoPlaybackStarted( shell ) {
+	if ( ! shell ) {
+		return;
+	}
+
+	shell.dispatchEvent(
+		new window.CustomEvent( 'vvm:vimeo-playing', { bubbles: true } )
+	);
+}
+
 function beginShellRequest( shell ) {
 	const state = getShellState( shell );
 
@@ -495,6 +505,7 @@ async function playVimeoShellFromTransportControl( shell ) {
 		try {
 			await state.player.play();
 			setVimeoTransportControlState( shell, 'playing' );
+			dispatchVimeoPlaybackStarted( shell );
 		} catch ( error ) {
 			setVimeoTransportControlState( shell, 'paused' );
 		}
@@ -623,6 +634,7 @@ export async function attemptVimeoShellAutoplay( shell ) {
 		return false;
 	}
 
+	dispatchVimeoPlaybackStarted( shell );
 	setPosterVisibility( shell, false );
 	setVimeoTransportControlState( shell, 'playing' );
 
@@ -675,6 +687,7 @@ async function playVimeoShellFromUserAction( shell ) {
 		return false;
 	}
 
+	dispatchVimeoPlaybackStarted( shell );
 	setPosterVisibility( shell, false );
 	setVimeoTransportControlState( shell, 'playing' );
 

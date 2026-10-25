@@ -17,6 +17,10 @@ const THUMB_ACTIVE_CLASS = 'vvm-villa-gallery-hero__thumb-slide--active';
 const MAX_VISIBLE_THUMBNAILS = 5;
 const GALLERY_FADE_MS = 240;
 const GALLERY_PRELOAD_AHEAD = 2;
+const HERO_VIDEO_CONTENT_DELAY_MS = 3000;
+const HERO_CONTENT_FADE_MS = 350;
+const HERO_CONTENT_FADE_CLASS =
+	'vvm-villa-gallery-hero__content--video-fade-out';
 const PAGE_INTENT_EVENTS = [
 	'focusin',
 	'keydown',
@@ -89,6 +93,160 @@ function isSaveDataEnabled() {
 
 function hasVillaGalleryVimeoShells( rootElement ) {
 	return Boolean( rootElement.querySelector( '[data-villa-gallery-vimeo]' ) );
+}
+
+function setHeroContentInert( contentElement, isInert ) {
+	if ( ! contentElement || ! ( 'inert' in contentElement ) ) {
+		return;
+	}
+
+	contentElement.inert = isInert;
+}
+
+function createHeroContentPlaybackController(
+	contentElement,
+	reducedMotionMediaQuery
+) {
+	let activeIndex = null;
+	let delayTimerId;
+	let hideTimerId;
+	let hasTimedOut = false;
+
+	const clearTimers = () => {
+		window.clearTimeout( delayTimerId );
+		window.clearTimeout( hideTimerId );
+		delayTimerId = undefined;
+		hideTimerId = undefined;
+	};
+
+	const revealContent = () => {
+		if ( ! contentElement ) {
+			return;
+		}
+
+		contentElement.hidden = false;
+		contentElement.classList.remove( HERO_CONTENT_FADE_CLASS );
+		contentElement.removeAttribute( 'aria-hidden' );
+		setHeroContentInert( contentElement, false );
+	};
+
+	const hideContentForAnotherSlide = () => {
+		if ( ! contentElement ) {
+			return;
+		}
+
+		contentElement.hidden = true;
+		contentElement.classList.remove( HERO_CONTENT_FADE_CLASS );
+		contentElement.setAttribute( 'aria-hidden', 'true' );
+		setHeroContentInert( contentElement, true );
+	};
+
+	return {
+		syncActiveSlide( nextActiveIndex ) {
+			activeIndex = nextActiveIndex;
+
+			if ( 0 === activeIndex ) {
+				if ( ! hasTimedOut ) {
+					revealContent();
+				}
+				return;
+			}
+
+			clearTimers();
+			hasTimedOut = false;
+			hideContentForAnotherSlide();
+		},
+		startVideoTimer() {
+			if (
+				! contentElement ||
+				0 !== activeIndex ||
+				hasTimedOut ||
+				delayTimerId
+			) {
+				return;
+			}
+
+			delayTimerId = window.setTimeout( () => {
+				delayTimerId = undefined;
+
+				if ( 0 !== activeIndex || hasTimedOut ) {
+					return;
+				}
+
+				hasTimedOut = true;
+				contentElement.setAttribute( 'aria-hidden', 'true' );
+				setHeroContentInert( contentElement, true );
+				contentElement.classList.add( HERO_CONTENT_FADE_CLASS );
+
+				const fadeDuration = reducedMotionMediaQuery.matches
+					? 0
+					: HERO_CONTENT_FADE_MS;
+				hideTimerId = window.setTimeout( () => {
+					hideTimerId = undefined;
+					if ( hasTimedOut && 0 === activeIndex ) {
+						contentElement.hidden = true;
+					}
+				}, fadeDuration );
+			}, HERO_VIDEO_CONTENT_DELAY_MS );
+		},
+		isOpeningVideo( videoElement, stageElement ) {
+			if ( 0 !== activeIndex ) {
+				return false;
+			}
+
+			if ( ! stageElement ) {
+				return true;
+			}
+
+			const activeSlide = stageElement.querySelector(
+				'.splide__slide.is-active'
+			);
+
+			if ( activeSlide ) {
+				return activeSlide.contains( videoElement );
+			}
+
+			return (
+				1 === stageElement.querySelectorAll( '.splide__slide' ).length &&
+				stageElement.contains( videoElement )
+			);
+		},
+	};
+}
+
+function bindHeroContentVideoFade(
+	rootElement,
+	stageElement,
+	contentPlaybackController
+) {
+	const startTimerForOpeningVideo = ( videoElement ) => {
+		if (
+			contentPlaybackController.isOpeningVideo(
+				videoElement,
+				stageElement
+			)
+		) {
+			contentPlaybackController.startVideoTimer();
+		}
+	};
+
+	rootElement
+		.querySelectorAll(
+			'[data-villa-gallery-video], [data-villa-gallery-static-video]'
+		)
+		.forEach( ( video ) => {
+			video.addEventListener( 'playing', () => {
+				startTimerForOpeningVideo( video );
+			} );
+
+			if ( ! video.paused && ! video.ended ) {
+				startTimerForOpeningVideo( video );
+			}
+		} );
+
+	rootElement.addEventListener( 'vvm:vimeo-playing', ( event ) => {
+		startTimerForOpeningVideo( event.target );
+	} );
 }
 
 function bindPageIntentAutoplay( callback ) {
@@ -647,8 +805,15 @@ function initializeVillaGalleryHero( rootElement ) {
 	const thumbsElement = rootElement.querySelector(
 		'[data-villa-gallery-thumbs]'
 	);
+	const contentElement = rootElement.querySelector(
+		'.vvm-villa-gallery-hero__content'
+	);
 	const reducedMotionMediaQuery = window.matchMedia(
 		REDUCED_MOTION_MEDIA_QUERY
+	);
+	const contentPlaybackController = createHeroContentPlaybackController(
+		contentElement,
+		reducedMotionMediaQuery
 	);
 	let hasPageVideoIntent = false;
 	const shouldAutoplayNativeVideos = () => ! reducedMotionMediaQuery.matches;
@@ -660,6 +825,12 @@ function initializeVillaGalleryHero( rootElement ) {
 	bindGalleryCtaScroll( rootElement, reducedMotionMediaQuery.matches );
 	bindNativeVideoControls( rootElement );
 	bindVimeoShellTransportControls( rootElement );
+	contentPlaybackController.syncActiveSlide( 0 );
+	bindHeroContentVideoFade(
+		rootElement,
+		stageElement,
+		contentPlaybackController
+	);
 
 	if ( ! stageElement || ! thumbsElement ) {
 		const syncStaticState = () => {
@@ -730,9 +901,6 @@ function initializeVillaGalleryHero( rootElement ) {
 	const thumbSlides = Array.from(
 		thumbsElement.querySelectorAll( '.splide__slide' )
 	);
-	const contentElement = rootElement.querySelector(
-		'.vvm-villa-gallery-hero__content'
-	);
 	const stage = new Splide( stageElement, {
 		arrows: false,
 		drag: false,
@@ -759,8 +927,8 @@ function initializeVillaGalleryHero( rootElement ) {
 					preventScroll: true,
 				} );
 			}
-			contentElement.hidden = activeIndex !== 0;
 		}
+		contentPlaybackController.syncActiveSlide( activeIndex );
 
 		syncActiveGalleryState(
 			stageElement,

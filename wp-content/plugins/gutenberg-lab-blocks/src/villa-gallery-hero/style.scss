@@ -297,6 +297,22 @@ body.vvm-has-hero-header
 		var(--vvm-villa-gallery-hero-inline-gutter)
 		3rem;
 	pointer-events: none;
+	transition: opacity 350ms ease;
+}
+
+/* Leave hero video unobstructed after its three-second opening interval. */
+.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content--video-fade-out,
+.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content--video-fade-out {
+	opacity: 0;
+	transition: opacity 350ms ease, visibility 0s linear 350ms;
+	visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wp-block-gutenberg-lab-blocks-villa-gallery-hero .vvm-villa-gallery-hero__content,
+	.vvm-villa-gallery-hero .vvm-villa-gallery-hero__content {
+		transition: none;
+	}
 }
 
 /* The shared flex layout must not override the native hidden state. */
