@@ -3,7 +3,8 @@
  * Server rendering for the Villa Gallery Carousel block.
  *
  * The parent block owns the Splide shell and caption line while each child
- * slide stores the authored image and compact overlay copy.
+ * slide stores the authored image and copy. Bedroom previews place the copy
+ * below each image; selectable gallery thumbnails retain their overlay.
  */
 
 if ( ! function_exists( 'gutenberg_lab_villa_gallery_carousel_is_editor_preview' ) ) {
@@ -112,7 +113,9 @@ $is_card_interactive = false !== ( $attributes['isCardInteractive'] ?? true );
 $show_caption = false !== ( $attributes['showCaption'] ?? true );
 $gallery_card_sizes = $is_card_interactive
 	? '(max-width: 600px) 72vw, (max-width: 782px) 56vw, (max-width: 960px) 30vw, 18rem'
-	: '(max-width: 1024px) 16rem, 25vw';
+	: '(max-width: 600px) 86vw, (max-width: 1024px) 50vw, 33vw';
+// Use the uncropped source family for the taller bedroom photo frames.
+$gallery_image_size = $is_card_interactive ? 'gutenberg-lab-card-landscape' : 'large';
 $wrapper_class = 'vvm-villa-gallery-carousel' . ( $is_card_interactive ? '' : ' vvm-villa-gallery-carousel--noninteractive' );
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
@@ -198,7 +201,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 												'attachment_id' => $image_id,
 												'class'         => 'vvm-villa-gallery-carousel__slide-image',
 												'fallback_url'  => $image_url,
-												'size'          => 'gutenberg-lab-card-landscape',
+												'size'          => $gallery_image_size,
 												'sizes'         => $gallery_card_sizes,
 											)
 										); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
