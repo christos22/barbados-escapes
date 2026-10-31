@@ -108,3 +108,20 @@
 	.vvm-villa-gallery-carousel__detail:focus {
 	outline: none;
 }
+
+// Keep the media tools above the photo while editing the bedroom rail.
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive {
+	--vvm-villa-gallery-carousel-thumb-width: 18rem;
+
+	.vvm-villa-gallery-carousel__slide {
+		flex-direction: column;
+	}
+
+	.vvm-villa-gallery-carousel__editor-viewport {
+		display: grid;
+	}
+
+	.vvm-villa-gallery-carousel__copy .vvm-villa-gallery-carousel__eyebrow {
+		color: var(--wp--custom--brand--accessible-gold, #8a631d);
+	}
+}

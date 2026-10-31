@@ -123,3 +123,7 @@ Checkout shading is separate from date validation. Render the opposite diagonal 
 PHP renders one accessible X outside the slide markup; JavaScript shows it only for later framed photos. X and gallery-focused Escape reuse the existing fade navigation to return to the opening view without scrolling. The opening video retains its position and prior play/pause state; confirmed playback restarts the existing five-second title/CTA fade timer.
 
 Gallery Escape listens at document level while a photo is visible, because clicking an image leaves keyboard focus on the page. The capture listener checks open menus and dialogs before their own Escape handlers run, and ignores editable fields and an off-screen hero.
+
+### Bedroom gallery labels below photos
+
+The existing `isCardInteractive: false` variant identifies bedroom preview rails. Keep its image and copy in normal flow, using a 4:3 media frame and theme typography/colour tokens for the labels below it. The image no longer needs a contrast overlay. This presentation change reuses saved child-block attributes and needs no content migration. PHP selects the uncropped `large` image family; editor-only CSS keeps the media toolbar above each card.

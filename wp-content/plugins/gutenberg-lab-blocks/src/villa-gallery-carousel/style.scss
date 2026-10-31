@@ -140,8 +140,10 @@
 	.vvm-villa-gallery-carousel__card,
 .vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
 	.vvm-villa-gallery-carousel__card {
-	display: grid;
+	// Bedroom photos and their labels occupy separate rows.
+	display: block;
 	aspect-ratio: auto;
+	background: transparent;
 	cursor: default;
 }
 
@@ -149,32 +151,83 @@
 	.vvm-villa-gallery-carousel__card::before,
 .vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
 	.vvm-villa-gallery-carousel__card::before {
-	// An in-flow ratio spacer and the caption share one grid cell; the taller wins.
+	content: none;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__card::after,
+.vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__card::after {
+	// Text sits below the photo, so it no longer needs a dark contrast overlay.
+	content: none;
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__slide-media,
+.vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
+	.vvm-villa-gallery-carousel__slide-media {
 	position: relative;
-	grid-area: 1 / 1;
-	aspect-ratio: var(--vvm-villa-gallery-carousel-thumb-aspect-ratio);
+	inset: auto;
+	aspect-ratio: 4 / 3;
+	overflow: hidden;
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
 	.vvm-villa-gallery-carousel__copy,
 .vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
 	.vvm-villa-gallery-carousel__copy {
-	// Let longer captions establish the card's minimum height instead of clipping.
-	position: relative;
-	grid-area: 1 / 1;
-	align-self: end;
+	position: static;
+	gap: var(--wp--preset--spacing--2xs, 0.375rem);
+	padding: var(--wp--preset--spacing--sm, 1rem) 0 0;
+	color: var(--wp--preset--color--dark-green, #1e3d2f);
+	overflow-wrap: anywhere;
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive,
 .vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive {
-	// Keep four desktop cards, but scroll readable cards in narrower containers.
+	// Match the reference's generous photo cards, with a swipe hint on mobile.
+	--vvm-villa-gallery-carousel-rail-gap: clamp(1rem, 1.6vw, 1.5rem);
 	--vvm-villa-gallery-carousel-thumb-width: min(
-		100%,
+		86%,
 		max(
-			16rem,
-			calc((100% - (var(--vvm-villa-gallery-carousel-rail-gap) * 3)) / 4)
+			17rem,
+			calc((100% - (var(--vvm-villa-gallery-carousel-rail-gap) * 2)) / 3)
 		)
 	);
+}
+
+.wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive,
+.vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive {
+	.vvm-villa-gallery-carousel__eyebrow {
+		color: var(--wp--custom--brand--accessible-gold, #8a631d);
+		font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
+		font-size: 11px;
+		letter-spacing: 0.12em;
+	}
+
+	.vvm-villa-gallery-carousel__title {
+		margin: 0;
+		color: var(--wp--preset--color--dark-green, #1e3d2f);
+		font-size: var(--wp--preset--font-size--xl, 1.375rem);
+		text-wrap: pretty;
+	}
+
+	.vvm-villa-gallery-carousel__detail {
+		margin: 0;
+		color: var(--wp--preset--color--dark-green, #1e3d2f);
+		font-family: var(--wp--preset--font-family--refined-sans, sans-serif);
+		font-size: var(--wp--preset--font-size--md, 0.875rem);
+		letter-spacing: normal;
+		text-transform: none;
+	}
+
+	.splide__track {
+		scroll-snap-type: x proximity;
+	}
+
+	.vvm-villa-gallery-carousel__slide {
+		scroll-snap-align: start;
+	}
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
