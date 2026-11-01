@@ -123,3 +123,7 @@ Checkout shading is separate from date validation. Render the opposite diagonal 
 PHP renders one accessible X outside the slide markup; JavaScript shows it only for later framed photos. X and gallery-focused Escape reuse the existing fade navigation to return to the opening view without scrolling. The opening video retains its position and prior play/pause state; confirmed playback restarts the existing five-second title/CTA fade timer.
 
 Gallery Escape listens at document level while a photo is visible, because clicking an image leaves keyboard focus on the page. The capture listener checks open menus and dialogs before their own Escape handlers run, and ignores editable fields and an off-screen hero.
+
+### Bedroom gallery labels below photos
+
+The existing `isCardInteractive: false` variant identifies bedroom preview rails. Keep its image and copy in normal flow, with theme typography/colour tokens for the labels below it. Match Young Estates with a 230px photo height (220px up to 500px), 20px gaps, and approximately 300-356px desktop cards. Phone cards use YE's 87% of a 90vw content area, capped to fit BE's inner padding. `object-fit: cover` crops without stretching, and the image no longer needs a contrast overlay. This presentation change reuses saved child-block attributes and needs no content migration. PHP selects the uncropped `large` image family and advertises the narrower card widths through `sizes`; editor-only CSS keeps the media toolbar above each card.
