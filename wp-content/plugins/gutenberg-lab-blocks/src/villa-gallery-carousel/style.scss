@@ -168,8 +168,14 @@
 	.vvm-villa-gallery-carousel__slide-media {
 	position: relative;
 	inset: auto;
-	aspect-ratio: 4 / 3;
+	// YE keeps room photos the same height as the rail grows wider.
+	height: 230px;
+	aspect-ratio: auto;
 	overflow: hidden;
+
+	@media (max-width: 500px) {
+		height: 220px;
+	}
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive
@@ -185,15 +191,14 @@
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive,
 .vvm-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive {
-	// Match the reference's generous photo cards, with a swipe hint on mobile.
-	--vvm-villa-gallery-carousel-rail-gap: clamp(1rem, 1.6vw, 1.5rem);
-	--vvm-villa-gallery-carousel-thumb-width: min(
-		86%,
-		max(
-			17rem,
-			calc((100% - (var(--vvm-villa-gallery-carousel-rail-gap) * 2)) / 3)
-		)
-	);
+	// Approximate YE's 300-356px desktop cards inside BE's wider content area.
+	--vvm-villa-gallery-carousel-rail-gap: 20px;
+	--vvm-villa-gallery-carousel-thumb-width: min(100%, clamp(300px, 24vw, 356px));
+
+	@media (max-width: 560px) {
+		// YE uses 87% of its 90vw content width. Respect BE's inner padding too.
+		--vvm-villa-gallery-carousel-thumb-width: min(100%, calc(90vw * 0.87));
+	}
 }
 
 .wp-block-gutenberg-lab-blocks-villa-gallery-carousel.vvm-villa-gallery-carousel--noninteractive,
