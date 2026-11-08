@@ -2642,6 +2642,34 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	}
 }
 
+/* Match paired photo heights to the full portrait instead of cropping it to the copy. */
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective--full-portrait.wp-block-columns > .wp-block-column:has(> .wp-block-image) {
+	align-self: start;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective--full-portrait.wp-block-columns > .wp-block-column:has(> .wp-block-image) > .wp-block-image {
+	position: static;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective--full-portrait.wp-block-columns > .wp-block-column:has(> .wp-block-image) > .wp-block-image img {
+	block-size: auto;
+}
+
+:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective--full-portrait.wp-block-columns {
+	--vvm-perspective-image-max: 376px;
+}
+
+@media (min-width: 960px) and (max-width: 1279px) {
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective--full-portrait.wp-block-columns {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	:where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-perspective--full-portrait.wp-block-columns > .wp-block-column:first-child {
+		grid-column: 1 / -1;
+	}
+}
+
+
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-staff.wp-block-columns {
 	align-items: stretch;
 	display: grid;
