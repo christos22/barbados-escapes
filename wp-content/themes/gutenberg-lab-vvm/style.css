@@ -2437,6 +2437,13 @@ body .wp-site-blocks .wp-block-gutenberg-lab-blocks-split-content.split-content-
 	display: none;
 }
 
+@media (max-width: 389px) {
+	/* Turnstile's 300px minimum must fit inside the narrow enquiry card. */
+	.vvm-villa-contact-form .cf-turnstile {
+		zoom: 0.75;
+	}
+}
+
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form > .vvm-villa-contact-form__submit,
 :where(.wp-site-blocks, .editor-styles-wrapper) .vvm-villa-contact-form__actions .vvm-villa-contact-form__submit {
 	grid-area: submit;
