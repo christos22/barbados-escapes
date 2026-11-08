@@ -152,40 +152,76 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_get_featured_im
 	}
 }
 
-if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_get_default_content_markup' ) ) {
+if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_get_intro_markup' ) ) {
 	/**
-	 * Builds a minimal title/excerpt overlay when the nested content is blank.
+	 * Renders the shared title/location layout from native content blocks.
 	 *
-	 * The template-level hero defaults to native post title/excerpt blocks, but
-	 * content-authored heroes may keep empty placeholders until editors add copy.
-	 * This fallback keeps single-villa pages presentable while still allowing the
-	 * nested content area to fully override the default output later.
+	 * Older villas store an H4 location, excerpt and buttons. Read their location
+	 * without rewriting saved content, and omit the retired hero-only copy/CTAs.
+	 * Nested groups are supported so existing editor layouts remain compatible.
 	 *
+	 * @param array         $inner_blocks Parsed native content blocks.
 	 * @param WP_Block|null $block Current block instance.
 	 * @return string
 	 */
-	function gutenberg_lab_blocks_villa_gallery_hero_get_default_content_markup( $block ) {
+	function gutenberg_lab_blocks_villa_gallery_hero_get_intro_markup( $inner_blocks, $block ) {
 		$current_post_id = gutenberg_lab_blocks_villa_gallery_hero_get_current_post_id( $block );
+		// Use the authored name without WordPress's protected/private title prefix.
+		$title           = '';
+		$location        = '';
+		$walk            = static function ( $blocks ) use ( &$walk, &$title, &$location, $current_post_id ) {
+			foreach ( $blocks as $item ) {
+				$name    = $item['blockName'] ?? '';
+				$attrs   = $item['attrs'] ?? array();
+				$classes = preg_split( '/\s+/', trim( $attrs['className'] ?? '' ) );
+				$text    = trim( wp_strip_all_tags( $item['innerHTML'] ?? '' ) );
+				$is_location = in_array( 'vvm-villa-gallery-hero__location', $classes, true ) ||
+					in_array( 'eyebrow', $classes, true ) ||
+					( 'core/heading' === $name && 4 === (int) ( $attrs['level'] ?? 2 ) );
 
-		if ( ! $current_post_id ) {
-			return '';
+				if ( $is_location && '' === $location ) {
+					$location = $text;
+				} elseif ( 'core/post-title' === $name && '' === $title && $current_post_id ) {
+					$title = get_post_field( 'post_title', $current_post_id );
+				} elseif ( 'core/heading' === $name && ! $is_location && '' === $title ) {
+					$title = $text;
+				}
+
+				// Only structural wrappers may contain intro copy, never button labels.
+				if ( 'core/group' === $name ) {
+					$walk( $item['innerBlocks'] ?? array() );
+				}
+			}
+		};
+		$walk( $inner_blocks );
+
+		if ( '' === $title && $current_post_id ) {
+			$title = get_post_field( 'post_title', $current_post_id );
+		}
+		if ( '' === $location && $current_post_id ) {
+			$terms = get_the_terms( $current_post_id, 'villa_location' );
+			if ( $terms && ! is_wp_error( $terms ) ) {
+				$location = implode( ', ', wp_list_pluck( $terms, 'name' ) );
+			}
 		}
 
-		$title   = trim( (string) get_the_title( $current_post_id ) );
-		$excerpt = trim( wp_strip_all_tags( (string) get_the_excerpt( $current_post_id ) ) );
-		$markup  = '';
+		// Decode saved entities once before escaping the final plain-text labels.
+		$charset = get_bloginfo( 'charset' ) ?: 'UTF-8';
+		$title = html_entity_decode( wp_strip_all_tags( $title ), ENT_QUOTES | ENT_HTML5, $charset );
+		$location = html_entity_decode( $location, ENT_QUOTES | ENT_HTML5, $charset );
+		$markup = '';
 
 		if ( '' !== $title ) {
 			$markup .= sprintf(
-				'<h1 class="wp-block-post-title">%s</h1>',
+				'<h1 class="wp-block-post-title vvm-villa-gallery-hero__title">%s</h1>',
 				esc_html( $title )
 			);
 		}
 
-		if ( '' !== $excerpt ) {
+		if ( '' !== $location ) {
 			$markup .= sprintf(
-				'<div class="wp-block-post-excerpt"><p class="wp-block-post-excerpt__excerpt">%s</p></div>',
-				esc_html( $excerpt )
+				'<p class="vvm-villa-gallery-hero__location">%s</p>',
+				esc_html( $location )
 			);
 		}
 
@@ -538,8 +574,9 @@ if ( ! function_exists( 'gutenberg_lab_blocks_villa_gallery_hero_get_regions' ) 
 			$block_name = $inner_block['blockName'] ?? '';
 
 			if ( 'gutenberg-lab-blocks/villa-gallery-hero-content' === $block_name ) {
-				$regions['content_markup'] = gutenberg_lab_blocks_villa_gallery_hero_render_nested_blocks(
-					$inner_block['innerBlocks'] ?? array()
+				$regions['content_markup'] = gutenberg_lab_blocks_villa_gallery_hero_get_intro_markup(
+					$inner_block['innerBlocks'] ?? array(),
+					$block
 				);
 				continue;
 			}
@@ -624,10 +661,9 @@ $gallery_anchor_id   = $has_thumb_navigation ? $hero_id_base . '-gallery' : '';
 $content_markup      = $hero_regions['content_markup'];
 
 if ( '' === trim( wp_strip_all_tags( $content_markup ) ) ) {
-	$content_markup = gutenberg_lab_blocks_villa_gallery_hero_get_default_content_markup( $block ?? null );
+	$content_markup = gutenberg_lab_blocks_villa_gallery_hero_get_intro_markup( array(), $block ?? null );
 }
 
-$content_markup      = gutenberg_lab_blocks_villa_gallery_hero_link_gallery_cta( $content_markup, $gallery_anchor_id );
 $classes             = array(
 	'vvm-villa-gallery-hero',
 	'vvm-villa-gallery-hero--height-' . sanitize_html_class( $hero_height ),

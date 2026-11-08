@@ -24,6 +24,11 @@
 			"header": {
 				"height": "96px"
 			},
+			"villaHero": {
+				"titleSize": "clamp(1.875rem, 1.2rem + 2.85vw, 3.75rem)",
+				"locationSize": "clamp(0.9375rem, 0.88rem + 0.2vw, 1.0625rem)",
+				"copyWidth": "56rem"
+			},
 			"layout": {
 				"gutterSm": "20px",
 				"gutterLg": "40px",
