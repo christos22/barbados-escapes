@@ -6,10 +6,9 @@ import './editor.scss';
 
 const ALLOWED_BLOCKS = [
 	'core/post-title',
-	'core/post-excerpt',
+	'core/post-terms',
 	'core/heading',
 	'core/paragraph',
-	'core/buttons',
 	'core/group',
 	'core/spacer',
 ];
@@ -24,10 +23,10 @@ const TEMPLATE = [
 	[
 		'core/paragraph',
 		{
-			placeholder: __( 'Add short supporting copy…', 'gutenberg-lab-blocks' ),
+			className: 'vvm-villa-gallery-hero__location',
+			placeholder: __( 'Add villa location', 'gutenberg-lab-blocks' ),
 		},
 	],
-	[ 'core/buttons', {} ],
 ];
 
 function blockTreeHasTitleBlock( innerBlocks = [] ) {
