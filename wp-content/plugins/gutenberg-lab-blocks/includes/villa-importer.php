@@ -1300,31 +1300,14 @@ function gutenberg_lab_blocks_villa_importer_build_hero_content( $data ) {
 	$overview = $data['overview'];
 
 	return
-		gutenberg_lab_blocks_villa_importer_heading(
-			$overview['hero_location_line'],
-			4,
-			array_merge(
-				gutenberg_lab_blocks_villa_importer_gold_heading_attrs(),
-				array( 'className' => 'eyebrow' )
-			)
-		) .
 		gutenberg_lab_blocks_villa_importer_self_closing_block(
 			'post-title',
 			array( 'level' => 1 )
 		) .
-		gutenberg_lab_blocks_villa_importer_paragraph( $overview['hero_statement'] ) .
-		gutenberg_lab_blocks_villa_importer_buttons(
-			array(
-				array(
-					'label' => 'Request Availability',
-					'url'   => '#request-availability',
-				),
-				array(
-					'label' => 'Explore Gallery',
-					'url'   => '#villa-gallery',
-					'class' => 'is-style-vvm-secondary',
-				),
-			)
+		// Location remains a native editable paragraph below the dynamic title.
+		gutenberg_lab_blocks_villa_importer_paragraph(
+			$overview['hero_location_line'],
+			array( 'className' => 'vvm-villa-gallery-hero__location' )
 		);
 }
 

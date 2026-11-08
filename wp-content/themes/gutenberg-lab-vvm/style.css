@@ -28,18 +28,12 @@ body {
 	background: #ffffff;
 }
 
-/* Page-opening heroes use text contrast instead of tinting the photography.
+/* Other page-opening heroes use text contrast instead of tinting photography.
  * The PHP marker identifies the hero, keeping supporting media panels separate.
  * The front-page guard also protects the homepage when blocks are reused there.
- * Thumbnail navigation retains the gallery block's original shading and labels.
+ * Villa Gallery Hero owns its short edge gradients and lighter text shadows.
  */
-body:not(.home) .wp-site-blocks .vvm-page-hero {
-	--vvm-villa-gallery-hero-overlay-background: none;
-}
-
 body:not(.home) .wp-site-blocks .vvm-page-hero .media-panel__overlay::before,
-body:not(.home) .wp-site-blocks .vvm-page-hero .vvm-villa-gallery-hero__stage-slide::before,
-body:not(.home) .wp-site-blocks .vvm-page-hero .vvm-villa-gallery-hero__stage-static-media::before,
 body:not(.home) .wp-site-blocks .vvm-page-hero.vvm-atmosphere-edge::before,
 body:not(.home) .wp-site-blocks .vvm-page-hero.vvm-atmosphere-edge::after,
 body:not(.home) .wp-site-blocks .vvm-page-hero.wp-block-cover::before,
@@ -47,12 +41,12 @@ body:not(.home) .wp-site-blocks .vvm-page-hero.wp-block-cover > .wp-block-cover_
 	display: none;
 }
 
-body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .vvm-villa-gallery-hero__content-inner, .wp-block-cover__inner-container),
-body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .vvm-villa-gallery-hero__content-inner, .wp-block-cover__inner-container) :is(p, li, .wp-block-post-terms) {
+body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .wp-block-cover__inner-container),
+body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .wp-block-cover__inner-container) :is(p, li, .wp-block-post-terms) {
 	text-shadow: var(--wp--custom--hero--text-shadow);
 }
 
-body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .vvm-villa-gallery-hero__content-inner, .wp-block-cover__inner-container) :is(h1, h2, h3, h4, h5, h6) {
+body:not(.home) .wp-site-blocks .vvm-page-hero :is(.media-panel__overlay-content, .wp-block-cover__inner-container) :is(h1, h2, h3, h4, h5, h6) {
 	text-shadow: var(--wp--custom--hero--heading-shadow);
 }
 
@@ -3047,7 +3041,8 @@ body.post-type-archive-packages
 	--vvm-header-fg: var(--wp--preset--color--light-gold, #f5ecd7);
 	--vvm-header-hover: var(--wp--preset--color--gold, #c4922a);
 	--vvm-header-shadow: none;
-	--vvm-header-logo-width: 150px;
+	/* The approved compact mark keeps one size at the top and after scrolling. */
+	--vvm-header-logo-width: var(--vvm-header-compact-logo-width);
 	--vvm-header-compact-logo-width: 110px;
 	position: relative;
 	z-index: 40;
@@ -4003,7 +3998,7 @@ body.vvm-has-hero-header:has(.vvm-villa-gallery-hero__stage .is-active > .vvm-vi
 	}
 
 	.vvm-header {
-		--vvm-header-logo-width: 176px;
+		--vvm-header-logo-width: var(--vvm-header-compact-logo-width);
 		--vvm-header-compact-logo-width: 88px;
 	}
 

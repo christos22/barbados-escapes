@@ -153,7 +153,7 @@ export default function Edit( { attributes, clientId, setAttributes } ) {
 					<SelectControl
 						label={ __( 'Overlay treatment', 'gutenberg-lab-blocks' ) }
 						help={ __(
-							'The overlay and introductory content appear only on the first slide.',
+							'Edge shading keeps the villa name and location readable on the opening slide, with a clear photograph between them.',
 							'gutenberg-lab-blocks'
 						) }
 						value={ overlayStyle }

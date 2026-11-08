@@ -5,12 +5,9 @@
 	 * makes nested blocks much easier to author.
 	 */
 	--vvm-villa-gallery-hero-stage-min-height: min(70vh, 52rem);
-	--vvm-villa-gallery-hero-preview-surface: linear-gradient(
-		180deg,
-		rgba(13, 42, 34, 0.42) 0%,
-		rgba(13, 42, 34, 0.28) 42%,
-		rgba(13, 42, 34, 0.7) 100%
-	);
+	--vvm-villa-gallery-hero-preview-surface:
+		linear-gradient(to bottom, rgba(0, 0, 0, 0.65), transparent 7.5rem),
+		linear-gradient(to top, rgba(0, 0, 0, 0.65), transparent 11rem);
 
 	position: relative;
 	margin: 0;
@@ -30,38 +27,6 @@
 		--vvm-villa-gallery-hero-stage-min-height: min(78vh, 56rem);
 	}
 
-	&::before {
-		content: "";
-		position: absolute;
-		inset: 0;
-		pointer-events: none;
-		background:
-			linear-gradient(
-				180deg,
-				rgba(7, 17, 14, 0.16) 0%,
-				rgba(7, 17, 14, 0) 24%,
-				rgba(7, 17, 14, 0.12) 58%,
-				rgba(7, 17, 14, 0.46) 100%
-			),
-			linear-gradient(
-				180deg,
-				rgba(30, 61, 47, 0.18) 0%,
-				rgba(30, 61, 47, 0.08) 46%,
-				rgba(30, 61, 47, 0.3) 100%
-			);
-		z-index: 1;
-	}
-
-	&.vvm-villa-gallery-hero--overlay-dark-vignette::before {
-		background:
-			linear-gradient(
-				180deg,
-				rgba(0, 0, 0, 0.32) 0%,
-				rgba(0, 0, 0, 0.08) 42%,
-				rgba(0, 0, 0, 0.54) 100%
-			);
-	}
-
 	.block-editor-inner-blocks,
 	.block-editor-inner-blocks > .block-editor-block-list__layout,
 	.vvm-villa-gallery-hero__layout-editor {
@@ -76,6 +41,8 @@
 		position: relative;
 		z-index: 2;
 		display: grid;
+		/* Thumbnail intrinsic widths must not push the editable copy off canvas. */
+		grid-template-columns: minmax(0, 1fr);
 		grid-template-areas:
 			"content"
 			"media";
