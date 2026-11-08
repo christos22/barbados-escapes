@@ -2987,7 +2987,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 				<?php if ( ! empty( $collections ) ) : ?>
 					<div class="vvm-villa-hero-search__field">
 						<label class="<?php echo esc_attr( $field_label_class ); ?>" for="<?php echo esc_attr( $collection_field_id ); ?>">
-							<?php esc_html_e( 'Collection', 'gutenberg-lab-blocks' ); ?>
+							<?php esc_html_e( 'Collections', 'gutenberg-lab-blocks' ); ?>
 						</label>
 						<select
 							id="<?php echo esc_attr( $collection_field_id ); ?>"
@@ -2995,7 +2995,7 @@ function gutenberg_lab_blocks_render_villa_hero_search_markup( $attributes = arr
 							class="vvm-villa-hero-search__control vvm-villa-hero-search__select"
 						>
 							<option value="">
-								<?php echo esc_html( $show_field_labels ? $empty_filter_prompt : __( 'Collection', 'gutenberg-lab-blocks' ) ); ?>
+								<?php echo esc_html( $show_field_labels ? $empty_filter_prompt : __( 'Collections', 'gutenberg-lab-blocks' ) ); ?>
 							</option>
 							<?php foreach ( $collections as $collection ) : ?>
 								<option
