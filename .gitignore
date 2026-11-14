@@ -4,6 +4,7 @@
 # Keep Git metadata and repo docs.
 !.gitignore
 !AGENTS.md
+!CLAUDE.md
 !.ddev/
 !.github/
 !.github/**
