@@ -20,7 +20,7 @@ Custom WordPress/Gutenberg villa marketing site. The client (Natalie) supplies d
 
 ## Code versus content
 
-- Code deploys by Git: push to `main` runs `deploy-backend.yml` (production); `git push origin HEAD:staging` runs `deploy-staging.yml`. Only the custom theme and plugin are deployed.
+- Code deploys by Git. Production: a push to `main` runs `deploy-backend.yml`. Staging: push the feature branch, then start `deploy-staging.yml` ("Deploy Selected Branch to Staging") manually in GitHub Actions with that branch selected. Do not push to the legacy `staging` branch. Only the custom theme and plugin are deployed.
 - Pages, villas, navigation, and template parts are database content. A code deploy does not move them. Say which kind of change a task is.
 - After block changes run `npm run build` in `wp-content/plugins/gutenberg-lab-blocks`. The build rewrites unrelated asset metadata, so stage only the intended files. Use a clean worktree if the checkout is dirty.
 - Header navigation behavior comes from the saved `wp_navigation` entity. Check it before patching CSS.
