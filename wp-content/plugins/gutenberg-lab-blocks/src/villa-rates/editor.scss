@@ -1,0 +1,79 @@
+// Editor-only layout for the Villa Rates Table. The live table is real
+// <table> markup styled by the theme; here rows are blocks, so a CSS grid
+// lines the heading row and every rate row up into the same columns.
+
+.vvm-villa-rates-editor {
+	border: 1px solid var(--vvm-villa-amenities-rule, rgb(23 53 40 / 0.16));
+	font-family: var(--wp--preset--font-family--refined-sans, inherit);
+
+	> .components-notice {
+		margin: 0;
+	}
+}
+
+.vvm-villa-rates-editor__head,
+.vvm-villa-rate-row {
+	display: grid;
+	grid-template-columns: var(--vvm-villa-rates-columns);
+	align-items: center;
+}
+
+// Mirrors the live table's dark heading bar.
+.vvm-villa-rates-editor__head {
+	background: var(--vvm-villa-amenities-ink, #173528);
+	color: #f7f1e7;
+}
+
+.vvm-villa-rates-editor__heading {
+	padding: 1rem 1.35rem;
+	font-size: 0.62rem;
+	letter-spacing: 0.24em;
+	text-transform: uppercase;
+}
+
+.vvm-villa-rates-editor__rows {
+	// Inner block wrappers add their own margin; rows should sit flush.
+	> .block-editor-block-list__block {
+		margin-block: 0;
+	}
+}
+
+.vvm-villa-rate-row {
+	&:nth-child(odd) {
+		background: #fbf8f2;
+	}
+
+	&:nth-child(even) {
+		background: #ffffff;
+	}
+
+	// A row linked to a removed option is hidden from guests; flag it.
+	&.is-unlinked {
+		box-shadow: inset 4px 0 0 #cc1818;
+	}
+}
+
+.vvm-villa-rate-row__option {
+	padding: 0.35rem 0.75rem;
+}
+
+.vvm-villa-rate-row__warning {
+	margin: 0.25rem 0 0;
+	color: #cc1818;
+	font-size: 0.75rem;
+}
+
+.vvm-villa-rate-row__cell {
+	padding: 1rem 1.35rem;
+	color: var(--vvm-villa-amenities-muted, rgb(23 53 40 / 0.72));
+	font-size: 0.94rem;
+
+	// Same emphasis as the live table's rate column.
+	&:nth-child(3) {
+		font-weight: 700;
+	}
+}
+
+.vvm-villa-rates-editor__add {
+	margin: 0.75rem 1.35rem;
+}

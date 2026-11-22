@@ -864,6 +864,11 @@ function gutenberg_lab_blocks_get_villa_meta_schema() {
 								'type'      => 'string',
 								'maxLength' => 120,
 							),
+							// Stable link between an option and its rate rows.
+							'key'   => array(
+								'type'      => 'string',
+								'maxLength' => 80,
+							),
 						),
 					),
 				),

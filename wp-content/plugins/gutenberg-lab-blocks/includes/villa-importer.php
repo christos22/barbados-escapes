@@ -2756,6 +2756,37 @@ function gutenberg_lab_blocks_villa_importer_bedroom_selector_choices( $rows ) {
 }
 
 /**
+ * Builds the Villa Rates Table block for an imported villa.
+ *
+ * Each row stores its own bedroom option key, so the team can later add,
+ * remove and reorder rows in the editor without breaking the links. Keys come
+ * from each rate's label ("3 Bedrooms, Winter" links to the 3 bedroom option);
+ * rows without one show under every option.
+ *
+ * @param array<int, mixed> $rate_rows Heading row followed by ['cells' => ...] rows.
+ * @param array<int, array> $rates     Normalized workbook rates, same order.
+ * @param array<int, array> $choices   Bedroom options, or empty when the villa has no dropdown.
+ * @return string
+ */
+function gutenberg_lab_blocks_villa_importer_rates_block( $rate_rows, $rates, $choices ) {
+	$headers = array_map( 'esc_html', (array) array_shift( $rate_rows ) );
+	$keys    = $choices
+		? gutenberg_lab_blocks_villa_importer_pricing_row_keys( $rates, $choices )
+		: array();
+	$rows    = array();
+
+	foreach ( array_values( $rate_rows ) as $index => $row ) {
+		$rows[] = array(
+			// Workbook text is plain; escape it before it becomes cell HTML.
+			'cells' => array_map( 'esc_html', array_map( 'strval', (array) ( $row['cells'] ?? $row ) ) ),
+			'key'   => (string) ( $keys[ $index ] ?? '' ),
+		);
+	}
+
+	return gutenberg_lab_blocks_villa_rates_serialize( $headers, $rows );
+}
+
+/**
  * Builds the visitor-facing season label for a pricing table row.
  *
  * Bedroom labels are used by the selector/filter only. Showing them again in
@@ -2898,10 +2929,10 @@ function gutenberg_lab_blocks_villa_importer_build_pricing_contact_location( $da
 
 	$pricing =
 		$pricing_header .
-		gutenberg_lab_blocks_villa_importer_table(
+		gutenberg_lab_blocks_villa_importer_rates_block(
 			$rate_rows,
-			'vvm-villa-pricing__table',
-			true
+			$data['rates'],
+			$bedroom_selector_enabled ? $bedroom_selector_choices : array()
 		) .
 		gutenberg_lab_blocks_villa_importer_paragraph(
 			$extras['tax_note'],
@@ -4488,10 +4519,6 @@ function gutenberg_lab_blocks_villa_importer_meta( $data ) {
 	$bedroom_selector_choices = gutenberg_lab_blocks_villa_importer_bedroom_selector_choices(
 		$overview['bedroom_selector_choices'] ?? array()
 	);
-	$pricing_row_keys = gutenberg_lab_blocks_villa_importer_pricing_row_keys(
-		$data['rates'] ?? array(),
-		$bedroom_selector_choices
-	);
 
 	$meta = array(
 		'villa_search_bedrooms'        => absint( $overview['bedrooms'] ),
@@ -4513,8 +4540,11 @@ function gutenberg_lab_blocks_villa_importer_meta( $data ) {
 			$overview['bedroom_selector_enabled'] ?? false,
 			false
 		) ? '1' : '0',
-		'villa_bedroom_selector_choices' => $bedroom_selector_choices,
-		'villa_pricing_row_bedroom_keys' => $pricing_row_keys,
+		// Options carry stable keys; the rate rows in the content link to them.
+		'villa_bedroom_selector_choices' => gutenberg_lab_blocks_villa_rates_key_choices( $bedroom_selector_choices ),
+		// Row links now live on each rate row. Clear the old position-based
+		// list so a re-imported villa doesn't keep a stale copy.
+		'villa_pricing_row_bedroom_keys' => array(),
 		'_gutenberg_lab_villa_import_managed' => '1',
 		'_gutenberg_lab_villa_import_schema_version' => $data['schema_version'],
 		'_gutenberg_lab_villa_import_source_file' => $data['source_file'] ?? '',
