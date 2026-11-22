@@ -1102,7 +1102,20 @@ function gutenberg_lab_vvm_seo_get_villa_schema_images( $post, $image ) {
 		$image_ids[] = (int) get_post_thumbnail_id( $post );
 	}
 
-	gutenberg_lab_vvm_seo_collect_block_image_ids( parse_blocks( $post->post_content ), $image_ids );
+	$blocks = parse_blocks( $post->post_content );
+	$gallery_image_ids = array();
+	foreach ( $blocks as $block ) {
+		if ( 'gutenberg-lab-blocks/villa-gallery-hero' === ( $block['blockName'] ?? '' ) ) {
+			gutenberg_lab_vvm_seo_collect_block_image_ids( array( $block ), $gallery_image_ids );
+		}
+	}
+	// Prefer the curated property gallery, excluding editorial portraits.
+	// Keep the existing fallback for older layouts or incomplete galleries.
+	if ( count( array_unique( $gallery_image_ids ) ) >= 8 ) {
+		$image_ids = array_merge( $image_ids, $gallery_image_ids );
+	} else {
+		gutenberg_lab_vvm_seo_collect_block_image_ids( $blocks, $image_ids );
+	}
 
 	if ( count( array_unique( $image_ids ) ) < 8 ) {
 		$attached_image_ids = get_posts(
