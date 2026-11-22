@@ -19,103 +19,24 @@ import './style.scss';
 
 import metadata from './block.json';
 
-const BEDROOM_SELECTOR_META_KEY = 'villa_bedroom_selector_enabled';
-const BEDROOM_CHOICES_META_KEY = 'villa_bedroom_selector_choices';
+import {
+	BEDROOM_CHOICES_META_KEY,
+	BEDROOM_SELECTOR_META_KEY,
+	MAX_CHOICES,
+	createChoiceKey,
+	getChoiceDedupeKey,
+	getFilledChoiceRows,
+	normalizeChoiceLabel,
+	normalizeChoiceRows,
+	useAutomaticBedroomChoices,
+	useBedroomSelectorEnabled,
+	useVillaBedroomChoices,
+	withChoiceKeys,
+} from '../shared/villa-bedroom-options';
+
 const BEDROOM_SELECTOR_LOCK_KEY =
 	'gutenberg-lab-villa-bedroom-selector-choices';
-const MAX_CHOICES = 30;
 const MAX_LABEL_LENGTH = 120;
-
-const toInteger = ( value, maximum ) => {
-	const number = Number.parseInt( value, 10 );
-
-	if ( ! Number.isFinite( number ) || number < 1 ) {
-		return 0;
-	}
-
-	return Math.min( maximum, number );
-};
-
-const normalizeChoiceLabel = ( value ) =>
-	String( value ?? '' )
-		.replace( /\s+/g, ' ' )
-		.trim();
-
-const getChoiceDedupeKey = ( value ) =>
-	normalizeChoiceLabel( value ).toLowerCase();
-
-const formatBedroomChoice = ( choice ) => {
-	const bedrooms = toInteger( choice.bedrooms, MAX_CHOICES );
-	const sleeps = toInteger( choice.sleeps, 100 );
-	const bedroomLabel =
-		bedrooms === 1
-			? __( '1 Bedroom', 'gutenberg-lab-blocks' )
-			: sprintf(
-					/* translators: %d is the number of bedrooms. */
-					__( '%d Bedrooms', 'gutenberg-lab-blocks' ),
-					bedrooms
-			  );
-
-	return sleeps
-		? sprintf(
-				/* translators: 1: Bedroom label. 2: Number of guests. */
-				__( '%1$s (sleeps %2$d)', 'gutenberg-lab-blocks' ),
-				bedroomLabel,
-				sleeps
-		  )
-		: bedroomLabel;
-};
-
-const getChoiceLabel = ( choice ) => {
-	if ( typeof choice === 'string' || typeof choice === 'number' ) {
-		return normalizeChoiceLabel( choice );
-	}
-
-	if ( ! choice || typeof choice !== 'object' ) {
-		return '';
-	}
-
-	const label = normalizeChoiceLabel( choice.label );
-
-	if ( label ) {
-		return label;
-	}
-
-	if ( toInteger( choice.bedrooms, MAX_CHOICES ) < 1 ) {
-		return '';
-	}
-
-	return formatBedroomChoice( choice );
-};
-
-const normalizeChoiceRows = ( choices ) =>
-	( Array.isArray( choices ) ? choices : [] ).map( ( choice ) => ( {
-		label: getChoiceLabel( choice ),
-	} ) );
-
-const getFilledChoiceRows = ( choices ) =>
-	normalizeChoiceRows( choices ).filter(
-		( choice ) => normalizeChoiceLabel( choice.label ) !== ''
-	);
-
-const collectVillaSpecs = ( blocks, data ) => {
-	blocks.forEach( ( block ) => {
-		if ( block.name === 'gutenberg-lab-blocks/villa-spec-item' ) {
-			const label = String( block.attributes.label || '' )
-				.trim()
-				.toLowerCase();
-			const value = toInteger( block.attributes.value, 100 );
-
-			if ( /^bedrooms?$/.test( label ) ) {
-				data.bedrooms = Math.min( MAX_CHOICES, value );
-			}
-		}
-
-		if ( block.innerBlocks?.length ) {
-			collectVillaSpecs( block.innerBlocks, data );
-		}
-	} );
-};
 
 const getOptionLabelHelp = ( invalid, duplicate, tooLong ) => {
 	if ( invalid ) {
@@ -192,66 +113,6 @@ const getChoiceState = ( customChoices, fallbackChoices, isEnabled ) => {
 	};
 };
 
-const useBedroomSelectorEnabled = () =>
-	useSelect( ( select ) => {
-		const editor = select( 'core/editor' );
-
-		if ( editor.getCurrentPostType() !== 'villa' ) {
-			return true;
-		}
-
-		const meta = editor.getEditedPostAttribute( 'meta' ) || {};
-
-		return meta[ BEDROOM_SELECTOR_META_KEY ] ?? false;
-	}, [] );
-
-const useVillaBedroomChoices = () =>
-	useSelect( ( select ) => {
-		const editor = select( 'core/editor' );
-
-		if ( editor.getCurrentPostType() !== 'villa' ) {
-			return [];
-		}
-
-		const meta = editor.getEditedPostAttribute( 'meta' ) || {};
-
-		return normalizeChoiceRows( meta[ BEDROOM_CHOICES_META_KEY ] );
-	}, [] );
-
-const useAutomaticBedroomChoices = ( minimumBedrooms ) =>
-	useSelect(
-		( select ) => {
-			const data = { bedrooms: 0 };
-			collectVillaSpecs(
-				select( 'core/block-editor' ).getBlocks(),
-				data
-			);
-
-			if ( data.bedrooms < 1 ) {
-				return [];
-			}
-
-			const minimum = Math.min(
-				data.bedrooms,
-				Math.max( 1, toInteger( minimumBedrooms, MAX_CHOICES ) )
-			);
-			const choices = [];
-
-			for (
-				let bedrooms = data.bedrooms;
-				bedrooms >= minimum;
-				bedrooms--
-			) {
-				choices.push( {
-					label: formatBedroomChoice( { bedrooms } ),
-				} );
-			}
-
-			return choices;
-		},
-		[ minimumBedrooms ]
-	);
-
 const BedroomSelectorToggleControl = () => {
 	const isEnabled = useBedroomSelectorEnabled();
 	const { editPost } = useDispatch( 'core/editor' );
@@ -297,20 +158,36 @@ const BedroomChoicesEditor = ( {
 		isCustom,
 	} = getChoiceState( choices, fallbackChoices, isEnabled );
 
+	// Every edit first fixes each option's key from its CURRENT text, so the
+	// rate rows linked to an option stay with it whatever it is renamed to.
 	const updateChoice = ( index, value ) => {
-		const nextChoices = displayedChoices.map( ( choice ) => ( {
-			...choice,
-		} ) );
-		nextChoices[ index ] = { label: value };
+		const nextChoices = withChoiceKeys( displayedChoices );
+		nextChoices[ index ] = { ...nextChoices[ index ], label: value };
 		onChange( nextChoices );
 	};
 
 	const removeChoice = ( index ) => {
 		onChange(
-			displayedChoices.filter(
+			withChoiceKeys( displayedChoices ).filter(
 				( _, choiceIndex ) => choiceIndex !== index
 			)
 		);
+	};
+
+	// Swaps an option with its neighbour; keys travel with the options.
+	const moveChoice = ( index, offset ) => {
+		const nextChoices = withChoiceKeys( displayedChoices );
+		const target = index + offset;
+
+		if ( target < 0 || target >= nextChoices.length ) {
+			return;
+		}
+
+		[ nextChoices[ index ], nextChoices[ target ] ] = [
+			nextChoices[ target ],
+			nextChoices[ index ],
+		];
+		onChange( nextChoices );
 	};
 
 	const addChoice = () => {
@@ -318,7 +195,11 @@ const BedroomChoicesEditor = ( {
 			return;
 		}
 
-		onChange( [ ...displayedChoices, { label: '' } ] );
+		// A new option gets its own key straight away, independent of its text.
+		onChange( [
+			...withChoiceKeys( displayedChoices ),
+			{ label: '', key: createChoiceKey() },
+		] );
 	};
 
 	return (
@@ -374,6 +255,22 @@ const BedroomChoicesEditor = ( {
 							}
 							__nextHasNoMarginBottom
 						/>
+						<Button
+							variant="link"
+							disabled={ index === 0 }
+							accessibleWhenDisabled
+							onClick={ () => moveChoice( index, -1 ) }
+						>
+							{ __( 'Move up', 'gutenberg-lab-blocks' ) }
+						</Button>{ ' ' }
+						<Button
+							variant="link"
+							disabled={ index === displayedChoices.length - 1 }
+							accessibleWhenDisabled
+							onClick={ () => moveChoice( index, 1 ) }
+						>
+							{ __( 'Move down', 'gutenberg-lab-blocks' ) }
+						</Button>{ ' ' }
 						<Button
 							variant="link"
 							isDestructive

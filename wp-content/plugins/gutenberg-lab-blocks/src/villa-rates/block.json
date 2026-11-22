@@ -1,0 +1,36 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gutenberg-lab-blocks/villa-rates",
+	"version": "0.1.0",
+	"title": "Villa Rates Table",
+	"category": "widgets",
+	"icon": "money-alt",
+	"description": "Seasonal rates. Each row can belong to one of the villa's bedroom options.",
+	"keywords": [ "rates", "prices", "pricing", "season" ],
+	"attributes": {
+		"headers": {
+			"type": "array",
+			"default": [ "Season", "Rate per night", "Minimum stay" ]
+		}
+	},
+	"providesContext": {
+		"gutenberg-lab-blocks/villaRatesHeaders": "headers"
+	},
+	"allowedBlocks": [ "gutenberg-lab-blocks/villa-rate-row" ],
+	"usesContext": [ "postId", "postType" ],
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"color": {
+			"text": true,
+			"link": true,
+			"background": false
+		}
+	},
+	"textdomain": "gutenberg-lab-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}

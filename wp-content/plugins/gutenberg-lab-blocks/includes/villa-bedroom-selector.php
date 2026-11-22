@@ -70,12 +70,17 @@ function gutenberg_lab_blocks_sanitize_villa_bedroom_choice_label( $label ) {
  * New choices are custom text labels. Legacy numeric bedroom/sleeps rows are
  * still accepted so existing block content keeps rendering.
  *
+ * Each choice may carry a stable `key`. Rate rows link to that key, so editors
+ * can rename an option ("4 Bedrooms" to "1 Bedroom") without its rates moving.
+ * Choices saved before keys existed fall back to a key derived from the label.
+ *
  * @param mixed $rows Raw block attribute value.
- * @return array<int, array{label:string}>
+ * @return array<int, array{label:string, key?:string}>
  */
 function gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows( $rows ) {
-	$choices = array();
-	$seen    = array();
+	$choices   = array();
+	$seen      = array();
+	$seen_keys = array();
 
 	if ( ! is_array( $rows ) ) {
 		return $choices;
@@ -113,7 +118,20 @@ function gutenberg_lab_blocks_sanitize_villa_bedroom_choice_rows( $rows ) {
 			continue;
 		}
 
-		$choices[]           = array( 'label' => $label );
+		$choice = array( 'label' => $label );
+
+		// Keep a stored key only when it is valid and not already taken, so two
+		// options can never claim the same rate rows.
+		$key = is_array( $row )
+			? gutenberg_lab_blocks_sanitize_villa_bedroom_pricing_key( $row['key'] ?? '' )
+			: '';
+
+		if ( '' !== $key && ! isset( $seen_keys[ $key ] ) ) {
+			$choice['key']     = $key;
+			$seen_keys[ $key ] = true;
+		}
+
+		$choices[]           = $choice;
 		$seen[ $dedupe_key ] = true;
 	}
 
@@ -259,7 +277,10 @@ function gutenberg_lab_blocks_get_villa_bedroom_choice_data( $villa_id, $minimum
 
 			$choices[] = array(
 				'label'      => $label,
-				'pricingKey' => gutenberg_lab_blocks_get_villa_bedroom_pricing_key_from_label( $label ),
+				// A stored key wins; older choices derive one from the label.
+				'pricingKey' => '' !== (string) ( $choice['key'] ?? '' )
+					? (string) $choice['key']
+					: gutenberg_lab_blocks_get_villa_bedroom_pricing_key_from_label( $label ),
 			);
 		}
 

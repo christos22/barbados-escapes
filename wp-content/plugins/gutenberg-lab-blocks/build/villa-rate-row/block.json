@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "gutenberg-lab-blocks/villa-rate-row",
+  "version": "0.1.0",
+  "title": "Rate Row",
+  "category": "widgets",
+  "icon": "editor-table",
+  "description": "One row of the Villa Rates Table.",
+  "parent": [
+    "gutenberg-lab-blocks/villa-rates"
+  ],
+  "attributes": {
+    "cells": {
+      "type": "array",
+      "default": []
+    },
+    "bedroomOption": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "usesContext": [
+    "gutenberg-lab-blocks/villaRatesHeaders"
+  ],
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "textdomain": "gutenberg-lab-blocks",
+  "editorScript": "file:./index.js"
+}
